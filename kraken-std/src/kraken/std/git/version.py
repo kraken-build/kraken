@@ -25,7 +25,9 @@ def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> st
     try:
         return sp.check_output(command, cwd=path).decode().strip()
     except sp.CalledProcessError:
-        raise ValueError("could not describe Git repository")
+        count = int(sp.check_output(["git", "rev-list", "HEAD", "--count"], cwd=path).decode().strip())
+        short_rev = sp.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=path).decode().strip()
+        return f"0.0.0-{count}-g{short_rev}"
 
 
 @dataclasses.dataclass

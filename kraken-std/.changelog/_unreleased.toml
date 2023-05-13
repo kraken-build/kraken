@@ -25,3 +25,9 @@ type = "fix"
 description = "fix `mypy_stubtest` function name (was: `mypy_subtest`)"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-std/pull/153"
+
+[[entries]]
+id = "cee10c20-3138-4fec-819b-94827f67ae4f"
+type = "improvement"
+description = "When `git describe` fails, we fall back to `0.0.0-N-gSHA` where `N` is the number of commits on `HEAD`."
+author = "@NiklasRosenstein"
