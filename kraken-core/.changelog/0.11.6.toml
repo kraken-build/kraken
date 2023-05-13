@@ -1,0 +1,34 @@
+release-date = "2023-02-22"
+
+[[entries]]
+id = "57eb49a7-53d2-4049-8ddc-c7cf5a423212"
+type = "feature"
+description = "Add `update` default group to `Project`"
+author = "@rbyshko"
+issues = [
+    "https://github.com/rbyshko/kraken-core/issues/18",
+]
+
+[[entries]]
+id = "bf7c1156-f25c-4a75-9759-719789c7612e"
+type = "improvement"
+description = "Update dependencies of default groups in a `Project` (publish now strictly depends on build)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d737d859-146a-441a-ac11-6ab374f3edf5"
+type = "improvement"
+description = "Add `gen` default group to `Project` (which `lint`, `test`, `integrationTest` and `build` depend on)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c188dcb4-7884-4ce1-8270-4ff8a560599f"
+type = "improvement"
+description = "`TaskGraph.ready()` no longer returns group tasks, but instead immediately marks them as `SKIPPED`. In a future version of Kraken, we will represent groups not as tasks and this special handling will be obsolete."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e1f3ab03-aac5-4f46-a61c-41d859a96f6e"
+type = "hygiene"
+description = "use past tense in `RenderFileTask` status"
+author = "@srstevenson"

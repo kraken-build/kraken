@@ -1,0 +1,7 @@
+release-date = "2022-09-27"
+
+[[entries]]
+id = "029cd164-2fdb-4307-8382-af7d28682571"
+type = "fix"
+description = "Allow extra keys when parsing the `[package]` section of a Cargo manifest."
+author = "@Nairu"

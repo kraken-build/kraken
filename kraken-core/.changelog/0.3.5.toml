@@ -1,0 +1,7 @@
+release-date = "2022-07-20"
+
+[[entries]]
+id = "48307425-8322-47be-bc50-5804e81c87bf"
+type = "feature"
+description = "add `kraken.core.utils.is_relative_to()` function"
+author = "@NiklasRosenstein"

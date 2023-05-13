@@ -1,0 +1,7 @@
+release-date = "2022-10-11"
+
+[[entries]]
+id = "9ed10625-2e7f-454b-98c5-c66de23ed247"
+type = "fix"
+description = "non-member dependencies of a group are now always propagated to all of its group members unless they are also member of the same group"
+author = "@NiklasRosenstein"

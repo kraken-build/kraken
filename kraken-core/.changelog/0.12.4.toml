@@ -1,0 +1,8 @@
+release-date = "2023-05-13"
+
+[[entries]]
+id = "c8266205-f957-4940-8c3a-3c0b660b215f"
+type = "fix"
+description = "Fix `Property()` constructor deriving the accepted root data types from `typeapi.TypeHint` to correctly treat and support `Tuple[...]` type hints"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-core/pull/51"

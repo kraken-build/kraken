@@ -1,0 +1,8 @@
+release-date = "2023-04-03"
+
+[[entries]]
+id = "27e538f2-d6de-4e8a-bf57-557cc4bf6cd1"
+type = "hygiene"
+description = "Removed backup to .gitignore.old file"
+author = "luke.baxter"
+pr = "https://github.com/kraken-build/kraken-std/pull/124"

@@ -1,0 +1,7 @@
+release-date = "2022-08-23"
+
+[[entries]]
+id = "1354b9bb-6eaf-4c79-9428-49e9a0709b0a"
+type = "improvement"
+description = "The tasks for Black, Flake8 and Isort now read the source directory from the project `PythonSettings`"
+author = "@NiklasRosenstein"

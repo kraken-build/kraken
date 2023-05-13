@@ -1,0 +1,16 @@
+release-date = "2022-08-21"
+
+[[entries]]
+id = "4e2cc2dc-696c-4028-8992-fbd2a36bf395"
+type = "improvement"
+description = "add default interpreter constraints to requriements (`>=3.7`), and add note that the Pip venv installer still needs to respect that option"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d6ec391c-6b5f-40a7-9148-9b52cd0f7cae"
+type = "fix"
+description = "fall back to importing from `kraken.cli` instead of `kraken.core.cli` in case the kraken-core version in the build environment is < 0.9.0 (close #6)"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-wrapper/issues/6",
+]

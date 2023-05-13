@@ -1,0 +1,31 @@
+release-date = "2022-07-08"
+
+[[entries]]
+id = "916848f3-df05-471c-ad48-fd4b89b4f5ff"
+type = "feature"
+description = "add `BuildGraph.tasks(required_only)` parameter"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "9ae08a02-5db1-450f-93ec-c280e3f8894e"
+type = "breaking change"
+description = "rename `BuildScriptLoader` to `ProjectLoader`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "850ac1ad-7553-4d50-8185-7d061eb67100"
+type = "feature"
+description = "Support `collections.abc.Callable` as a valid property type"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "06fbdfc3-9504-4b45-a4b9-a8423e42093e"
+type = "feature"
+description = "Add `Task.logger`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c122782f-3761-4bdb-abe3-66755d28783e"
+type = "breaking change"
+description = "`Task.is_skippable()` and `Task.is_up_to_date()` now raise `NotImplementedError by default which is part of the API now"
+author = "@NiklasRosenstein"

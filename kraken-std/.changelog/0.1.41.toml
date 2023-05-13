@@ -1,0 +1,7 @@
+release-date = "2022-08-02"
+
+[[entries]]
+id = "361de9cd-0de7-4515-a5f3-a5ce74b6fee6"
+type = "fix"
+description = "remove debug print from Docker `prepend_secret_mounts_to_file()`"
+author = "@NiklasRosenstein"

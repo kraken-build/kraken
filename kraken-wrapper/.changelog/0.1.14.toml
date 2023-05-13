@@ -1,0 +1,10 @@
+release-date = "2022-08-16"
+
+[[entries]]
+id = "33e416a0-5c98-420e-867d-c7be861248d6"
+type = "feature"
+description = "Add `krakenw auth` command which can be used to configure credentials for PyPI indexes in the system keychain while the username is stored in `~/.config/krakenw/config.toml`."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-wrapper/issues/1",
+]

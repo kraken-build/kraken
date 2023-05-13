@@ -1,0 +1,7 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "f0ce41b6-cafb-4d3d-8806-f16a703e554f"
+type = "feature"
+description = "add `kraken.std.python` package which provides tasks and factories for black, flake8, isort, mypy and pytest"
+author = "@NiklasRosenstein"

@@ -1,0 +1,8 @@
+release-date = "2023-04-21"
+
+[[entries]]
+id = "5ddaac36-f82b-4f35-a907-45a4263ab270"
+type = "feature"
+description = "Support python mono repositories by updating local dependencies with release version"
+author = "fabio.baravalle@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/138"

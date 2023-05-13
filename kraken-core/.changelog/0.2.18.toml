@@ -1,0 +1,7 @@
+release-date = "2022-07-18"
+
+[[entries]]
+id = "a1411b5a-5525-40da-9403-279c42d2b14d"
+type = "feature"
+description = "add `kraken.core.executor` module, moved here from `kraken-cli`; add `BuildContext.get_build_graph()` and `BuildContext.execute()`"
+author = "@NiklasRosenstein"

@@ -1,0 +1,8 @@
+release-date = "2023-04-28"
+
+[[entries]]
+id = "5d678e26-4a11-4e7a-b4d2-7a6700370e59"
+type = "feature"
+description = "Split `cargo_sqlx_migrate` into `cargo_publish_task` and `cargo_sqlx_prepare`"
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/141"

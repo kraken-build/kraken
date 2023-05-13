@@ -1,0 +1,7 @@
+release-date = "2022-08-01"
+
+[[entries]]
+id = "5ef2b441-8f79-4ab7-beec-02a84f0ea64f"
+type = "improvement"
+description = "Depending on a group now behaves like directly dependending on the groups members; this change is particularly relevant for the successors that background tasks are active for."
+author = "@NiklasRosenstein"

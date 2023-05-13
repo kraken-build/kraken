@@ -1,0 +1,7 @@
+release-date = "2022-07-24"
+
+[[entries]]
+id = "4ef3dde1-5f7a-4d4c-b2c8-03f0f3ff1c4d"
+type = "fix"
+description = "Fix derivation of inactive tasks in `TaskGraph`"
+author = "@NiklasRosenstein"

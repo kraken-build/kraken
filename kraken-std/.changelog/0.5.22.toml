@@ -1,0 +1,8 @@
+release-date = "2023-02-17"
+
+[[entries]]
+id = "c15c0549-6f16-4585-a9c9-c65376b29f7e"
+type = "fix"
+description = "fixes pyupgrade evaluation when there is no file"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/93"

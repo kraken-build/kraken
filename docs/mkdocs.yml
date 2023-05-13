@@ -1,0 +1,25 @@
+nav:
+  - Home: index.md
+  - kraken-core:
+    - core/changelog.md
+    - Documentation:
+      - core/docs/api.md
+      - core/docs/tasks.md
+      - core/docs/project.md
+    - Synopsis:
+      - core/synopsis/index.md
+      - core/synopsis/run.md
+      - kraken query:
+        - core/synopsis/query/index.md
+        - core/synopsis/query/ls.md
+        - core/synopsis/query/describe.md
+        - core/synopsis/query/env.md
+        - core/synopsis/query/visualize.md
+  - kraken-std:
+    - std/index.md
+    - std/changelog.md
+    - std/cargo.md
+    - std/docker.md
+    - std/helm.md
+    - std/protobuf.md
+    - std/python.md

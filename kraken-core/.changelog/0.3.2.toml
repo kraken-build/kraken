@@ -1,0 +1,7 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "2517f76b-fac2-4b37-91f5-0a2637db8d1e"
+type = "feature"
+description = "add `Property.config()` static method that allows setting default values for the property on the class level"
+author = "@NiklasRosenstein"

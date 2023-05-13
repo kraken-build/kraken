@@ -1,0 +1,29 @@
+release-date = "2023-05-09"
+
+[[entries]]
+id = "796e0584-b400-475d-a8cf-bd0eb4637dc9"
+type = "feature"
+description = "Make descriptions less verbose"
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/143"
+
+[[entries]]
+id = "2e71f17e-50ef-4c49-9130-09ee7a3db66f"
+type = "improvement"
+description = "Always reinstall Maturin build on python.install"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/140"
+
+[[entries]]
+id = "046c599e-ae05-45b4-9f6b-2899a4e8e927"
+type = "feature"
+description = "Rust: adds a task to install Rustup targets"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/144"
+
+[[entries]]
+id = "53221f14-bf40-4ce8-b657-4b522d45c725"
+type = "feature"
+description = "Maturin: adds tooling for cross-compilation using zig"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/145"

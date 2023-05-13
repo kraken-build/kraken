@@ -1,0 +1,7 @@
+release-date = "2022-07-20"
+
+[[entries]]
+id = "659c9bc6-075f-4c2c-9fa7-ce0707ff1e2e"
+type = "fix"
+description = "fix `:blackFormat` actually formatting instead of checking and `:blackCheck` actually to just check instead of formatting"
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-09-26"
+
+[[entries]]
+id = "4651fa11-9f14-4579-9532-981dc170f930"
+type = "fix"
+description = "fix a new instance of using a new-style type annotation in a task property causing failure in 3.8 and 3.7 (`DistributionTask.resources`)"
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "f88eb46d-3a8d-4743-9030-c97ec9c3b3ee"
+type = "improvement"
+description = "just `krakenw lock` without arguments will not look to ensure build environment consistency (which could cause a reinstall before locking because the lockfile is outdated)"
+author = "@NiklasRosenstein"

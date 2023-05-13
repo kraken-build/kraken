@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "3b12f4c8-b9fa-4aa0-847c-6d70153fcc2a"
+type = "fix"
+description = "fix `kraken.test`"
+author = "@NiklasRosenstein"

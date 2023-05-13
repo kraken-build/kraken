@@ -1,0 +1,7 @@
+release-date = "2022-12-15"
+
+[[entries]]
+id = "c8a0319a-4030-4f77-96d5-6ce5ac749217"
+type = "breaking change"
+description = "rename `ProjectInfo.path` to `ProjectInfo.script` but we have no consumers of 0.5.0 so we keep this as a patch bump"
+author = "@NiklasRosenstein"

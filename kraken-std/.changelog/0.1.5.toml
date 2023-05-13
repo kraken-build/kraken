@@ -1,0 +1,19 @@
+release-date = "2022-07-08"
+
+[[entries]]
+id = "d5ca660f-9cd8-47d2-84e7-daf4fd38c9c3"
+type = "feature"
+description = "Add `DockerBuildTask.platform` property"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "979afe3a-8f89-4e87-859a-b1555543265b"
+type = "improvement"
+description = "use new `Task.logger` in kraken-core 0.2.4 in `KanikoBuildTask`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "19f7f374-f3c0-4007-810a-af2f0d279e93"
+type = "feature"
+description = "add `kraken.std.cargo` package with a `cargo_build()` task that can setup an MITM to inject credentials for requests to a host configured with `cargo_settings()`"
+author = "@NiklasRosenstein"

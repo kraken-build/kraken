@@ -1,0 +1,13 @@
+release-date = "2022-09-08"
+
+[[entries]]
+id = "fedc7a5c-60e6-4bcd-ad2f-56b865217c54"
+type = "feature"
+description = "add `DockerFileTask.create_preprocessor_task(group)` parameter, and set it to `None` by default"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "88471075-bac1-494b-ad58-a6e0e1e78b48"
+type = "feature"
+description = "add `KanikoBuildTask.kaniko_secrets_from_env` property"
+author = "@NiklasRosenstein"

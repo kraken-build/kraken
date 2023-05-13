@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "version-project"
+version = "0.0.0"
+description = "Project for version upgrade check within Kraken-std integration tests"
+authors = [
+    "Szymon Gula <szymon.gula@helsing.ai>",
+]
+packages = [
+    { include = "version_project", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[build-system]
+requires = [
+    "poetry-core>=1.0.0",
+]
+build-backend = "poetry.core.masonry.api"

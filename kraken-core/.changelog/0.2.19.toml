@@ -1,0 +1,7 @@
+release-date = "2022-07-18"
+
+[[entries]]
+id = "66c7bb55-7e30-4e7a-a36f-c6f543fe04ef"
+type = "fix"
+description = "fix `NameError` in `BuildContext.execute()` that is unfortunately not caught my Mypy or Flake8"
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-09-12"
+
+[[entries]]
+id = "8e95791d-d7bc-4899-a2ea-68a480e0164c"
+type = "feature"
+description = "using the new `TaskSet.partition()` API, we can now re-associate options that are specified per task selector to task outputs. The `dist()` factory now uses this to allow configuring the `arcname` for resources per selector."
+author = "@NiklasRosenstein"

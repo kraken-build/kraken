@@ -1,0 +1,13 @@
+release-date = "2022-07-29"
+
+[[entries]]
+id = "53ad34d4-f56b-4740-9a9a-5c0c5e3764e7"
+type = "improvement"
+description = "no longer hide output of `proxy.py`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d7c82ccd-ad5c-4460-b005-994329f3ff7c"
+type = "improvement"
+description = "handle `PROXY_PY_TIMEOUT` flag in Cargo MITM code"
+author = "@NiklasRosenstein"

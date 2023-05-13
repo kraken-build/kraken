@@ -1,0 +1,10 @@
+/.vscode
+/dist
+/build
+.venvs
+*.egg-info/
+__pycache__/
+poetry.lock
+.dmypy.json
+.build/
+.idea/

@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "8410406d-b6b7-48ba-b68e-3c2bbedaa5d6"
+type = "breaking change"
+description = "remove `RenderFileTask` and use it from `kraken-core` instead"
+author = "@NiklasRosenstein"

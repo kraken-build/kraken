@@ -1,0 +1,7 @@
+release-date = "2022-12-14"
+
+[[entries]]
+id = "fd8e74d9-cc80-471c-ac73-c7793806fb05"
+type = "feature"
+description = "add propagate_argparse_formatter_to_subparser"
+author = "@NiklasRosenstein"

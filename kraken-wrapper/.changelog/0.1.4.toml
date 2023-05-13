@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "027dfddf-5e0b-4770-8f80-dc912fd29c58"
+type = "fix"
+description = "uninitialize logger before dispatching to PEX build environment such the kraken-core can re-initialize it"
+author = "@NiklasRosenstein"

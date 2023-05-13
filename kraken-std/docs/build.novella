@@ -1,0 +1,12 @@
+template "mkdocs"
+
+action "mkdocs-update-config" {
+  site_name = "kraken-std"
+  update '$.theme.palette' add: {'scheme': 'default', 'primary': 'teal', 'accent': 'indigo'}
+}
+
+action "preprocess-markdown" {
+  use "pydoc" {
+    loader().packages = ["kraken.std"]
+  }
+}

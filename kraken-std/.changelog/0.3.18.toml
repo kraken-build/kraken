@@ -1,0 +1,7 @@
+release-date = "2022-09-13"
+
+[[entries]]
+id = "1520ee9e-1640-433a-b16d-952494651b5b"
+type = "fix"
+description = "fix shlex in treating cargo build flags option added in the previous version"
+author = "@NiklasRosenstein"

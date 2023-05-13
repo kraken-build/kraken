@@ -1,0 +1,13 @@
+release-date = "2022-09-11"
+
+[[entries]]
+id = "539fbce1-d4e1-4cd0-8b85-4701a43b3918"
+type = "feature"
+description = "Add features to support what we call \"descriptors\", which are usually the outputs of a `Task` made available through a property marked with `Property.output()` or in the `Task.metadata`."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "04df2b0e-2d83-442a-a74f-35e88168dce2"
+type = "improvement"
+description = "Allow passing `None` to `project.do()` for a propert that does not accept a `None` value, which will skip setting the property value alltogether."
+author = "@NiklasRosenstein"

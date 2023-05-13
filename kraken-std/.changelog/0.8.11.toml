@@ -1,0 +1,22 @@
+release-date = "2023-05-10"
+
+[[entries]]
+id = "29a1ace5-d12c-4094-83da-965078257c39"
+type = "improvement"
+description = "Add linting + inplace formatting for protobuf projects"
+author = "mohamed.shire@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/148"
+
+[[entries]]
+id = "20a1bcd1-46e0-4818-96b5-05de8a131a64"
+type = "feature"
+description = "Maturin now supports RUSTFLAGS, non-manylinux wheels"
+author = "james.baker@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/150"
+
+[[entries]]
+id = "d54734fc-e876-482f-b664-29abf6dee83a"
+type = "fix"
+description = "Maturin cross-compilation: use poetry run"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/147"

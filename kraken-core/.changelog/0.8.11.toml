@@ -1,0 +1,7 @@
+release-date = "2022-08-13"
+
+[[entries]]
+id = "3fe0ffbe-5748-4d7a-be49-153a84118501"
+type = "fix"
+description = "Fix resuming from a build state when it contains objects from a module in the `# :: pythonpath` specified in the build script, and fix resuming from multiple build states."
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-08-01"
+
+[[entries]]
+id = "42b642b7-d38d-4362-b197-91583d6e23a4"
+type = "improvement"
+description = "add `cargo_clippy(allow)` parameter and make it return the task"
+author = "@NiklasRosenstein"

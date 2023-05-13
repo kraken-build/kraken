@@ -1,0 +1,13 @@
+release-date = "2022-07-24"
+
+[[entries]]
+id = "2b6ebf85-85c3-4d16-b0e1-22ae5506c80b"
+type = "improvement"
+description = "add `kraken-core ^0.4.0` compatibility"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "dcaf36e9-0419-479f-b003-adb809969d7e"
+type = "feature"
+description = "add `pytest(group)` keyword argument"
+author = "@NiklasRosenstein"

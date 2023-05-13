@@ -1,0 +1,7 @@
+release-date = "2022-10-25"
+
+[[entries]]
+id = "a65bd8dc-ee59-4ff5-98b7-ab7df918db04"
+type = "fix"
+description = "Fix backwards incompatible type hint for annotations that are introspected at runtime in `kraken.std.dist` module."
+author = "@NiklasRosenstein"

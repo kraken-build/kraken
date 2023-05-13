@@ -1,0 +1,7 @@
+release-date = "2022-11-07"
+
+[[entries]]
+id = "f257878d-f0d6-412f-9d75-c376e7046306"
+type = "feature"
+description = "add `PytestTask.marker` property"
+author = "@NiklasRosenstein"

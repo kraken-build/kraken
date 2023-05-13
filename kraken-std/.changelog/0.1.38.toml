@@ -1,0 +1,7 @@
+release-date = "2022-08-01"
+
+[[entries]]
+id = "8f9a6215-62a1-471c-b462-93479e53bc64"
+type = "fix"
+description = "GitignoreTask now takes care not to put the same path twice in the same section"
+author = "@NiklasRosenstein"

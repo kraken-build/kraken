@@ -1,0 +1,4 @@
+[run]
+"docs:install" = "slap venv -ac docs && slap run --use-venv docs -- pip install -r docs/requirements.txt"
+"docs:build"   = "slap run --use-venv docs -- bash -c 'cd docs && novella --base-url kraken-build/'"
+"docs:dev"     = "slap run --use-venv docs -- bash -c 'cd docs && novella --base-url kraken-build/ --serve'"

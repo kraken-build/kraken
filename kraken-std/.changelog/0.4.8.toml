@@ -1,0 +1,7 @@
+release-date = "2022-10-18"
+
+[[entries]]
+id = "8b15daf8-387c-45f2-9789-57522bacd8db"
+type = "feature"
+description = "Allow configuring `exclude` and `include` glob patterns alongside the `arcname` options for targets in `dist()`"
+author = "@NiklasRosenstein"

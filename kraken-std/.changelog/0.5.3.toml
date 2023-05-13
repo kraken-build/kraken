@@ -1,0 +1,7 @@
+release-date = "2022-12-15"
+
+[[entries]]
+id = "41b01c97-4896-43d0-a8a1-31319625e86d"
+type = "fix"
+description = "Fix: only fallback on failed metadata call"
+author = "@tetigi"

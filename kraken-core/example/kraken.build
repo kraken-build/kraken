@@ -1,0 +1,16 @@
+
+buildscript {
+    additional_sys_path "."
+}
+
+from my_tasks import WriteDockerfileTask, DockerBuildTask
+
+project.do "writeDockerfile" WriteDockerfileTask {
+    content.set("FROM ubuntu:latest\nRUN echo Hello World")
+}
+
+project.do "dockerBuild" DockerBuildTask {
+    dockerfile.set(project.task("writeDockerfile").dockerfile)
+}
+
+project.subproject "sub"

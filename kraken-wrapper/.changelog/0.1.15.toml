@@ -1,0 +1,7 @@
+release-date = "2022-08-16"
+
+[[entries]]
+id = "f5001ad6-560d-42d0-b5ce-eeb3d8e89ad0"
+type = "fix"
+description = "the `krakenw auth` command can now be used globally and does not require the presence of a `.kraken.py` file"
+author = "@NiklasRosenstein"

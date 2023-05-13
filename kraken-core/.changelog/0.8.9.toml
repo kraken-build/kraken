@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "ca29a41d-d7ba-4f2c-bbd1-7e86bdb10ca5"
+type = "improvement"
+description = "include message in successful CheckFileContentsTask execution"
+author = "@NiklasRosenstein"

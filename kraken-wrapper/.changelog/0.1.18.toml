@@ -1,0 +1,7 @@
+release-date = "2022-08-16"
+
+[[entries]]
+id = "865cae3d-5021-4705-b981-6a23c2477341"
+type = "fix"
+description = "create parent directories when saving config"
+author = "@NiklasRosenstein"

@@ -1,0 +1,43 @@
+release-date = "2023-03-06"
+
+[[entries]]
+id = "8906b2ba-d643-4e7c-8cb3-0a9fd993e912"
+type = "fix"
+description = "Compatibility of pyproject.toml with Poetry."
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/100"
+
+[[entries]]
+id = "394bde18-7149-4e77-bfda-aa44569a0dcb"
+type = "improvement"
+description = "Enable `pytest --doctest-modules` flag (controlled by `PytestTask.doctest_modules`, enabled by default)."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-std/pull/101"
+
+[[entries]]
+id = "57c61a58-46f4-48d9-b111-f7f44bbfa142"
+type = "breaking change"
+description = "Move task to check a valid readme exists from kraken-hs, and refactoring"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/103"
+
+[[entries]]
+id = "2eec93ae-e407-4cfa-9de6-d9841a3d103b"
+type = "improvement"
+description = "Allows alpha, beta and RC pre-releases in version identifiers."
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/102"
+
+[[entries]]
+id = "1a9d1e92-007b-444e-9c7f-5a1124d66c7e"
+type = "improvement"
+description = "Pyupgrade: allows to ignore files and directories"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/99"
+
+[[entries]]
+id = "734110fd-b00c-4db8-92d2-e0fe02e0252c'"
+type = "feature"
+description = "automatically set version for Maturin builds"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/92"

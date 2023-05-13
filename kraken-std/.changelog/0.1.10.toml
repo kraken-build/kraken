@@ -1,0 +1,7 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "b8054627-4bdb-4d47-b228-8406cf492844"
+type = "breaking change"
+description = "upgrade to be compatible with `kraken-core ^0.3.0`, add Novella docs and publish to Github actions"
+author = "@NiklasRosenstein"

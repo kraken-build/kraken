@@ -1,0 +1,12 @@
+[flake8]
+max-line-length = 120
+# Black can yield formatted code that triggers these Flake8 warnings.
+ignore=
+    # line break before binary operator
+    W503,
+    # line break after binary operator
+    W504,
+    # whitespace before ':' https://github.com/psf/black/issues/1437
+    E203,
+exclude =
+    src/kraken/core/_vendor

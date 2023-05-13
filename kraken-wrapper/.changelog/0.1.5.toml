@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "2dc92f6b-956c-49fc-8002-89b646c6f15b"
+type = "improvement"
+description = "Improve output on build environment operation"
+author = "@NiklasRosenstein"

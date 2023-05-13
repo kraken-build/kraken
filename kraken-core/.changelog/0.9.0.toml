@@ -1,0 +1,13 @@
+release-date = "2022-08-17"
+
+[[entries]]
+id = "d6916781-811c-4947-bb1e-60740d2c322e"
+type = "fix"
+description = "fix error when running `krakenw q` because we do not configure the `q` command with these options (close #5)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bc083e60-c645-4a77-85ea-72ef7c24a097"
+type = "breaking change"
+description = "remove vendored libraries again, consolidate packages under `kraken.core`"
+author = "@NiklasRosenstein"

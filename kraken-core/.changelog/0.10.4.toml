@@ -1,0 +1,19 @@
+release-date = "2022-09-13"
+
+[[entries]]
+id = "f84793a2-2738-438f-b8c2-6003c32fce8b"
+type = "feature"
+description = "Introduce `Task.selected` attribute which is set to True when a task was explicitly selected in the CLI"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "9d29e87a-f6d6-4d2e-bc22-1840e6a6334c"
+type = "improvement"
+description = "print task status before execute (usually PENDING, but the status may contain a message)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1d6cdec2-6af7-4764-a073-06d9912eb284"
+type = "improvement"
+description = "CheckFileContentsTask now inherits the prepare() result from RenderFileTask"
+author = "@NiklasRosenstein"

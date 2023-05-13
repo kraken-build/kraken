@@ -1,0 +1,7 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "97a75ab7-16da-4780-ae65-190f10e04bed"
+type = "breaking change"
+description = "Build script can only be called `.kraken.py`, all other alternative names are no longer supported"
+author = "@NiklasRosenstein"

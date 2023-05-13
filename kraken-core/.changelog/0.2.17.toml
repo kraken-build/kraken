@@ -1,0 +1,13 @@
+release-date = "2022-07-15"
+
+[[entries]]
+id = "cd01a258-3bb1-43b2-8ed1-a272daa4a4b0"
+type = "improvement"
+description = "`Task.execute()` default implementation now raises a `NotImplementedError`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "42296fdb-3e74-472b-a316-e5952d025f7f"
+type = "breaking change"
+description = "remove installation of project requirements via Pip and enabling it with localimport; kraken-cli will manage a build environment instead"
+author = "@NiklasRosenstein"

@@ -1,0 +1,22 @@
+release-date = "2023-04-19"
+
+[[entries]]
+id = "3eb35092-4cf3-4a0c-9a67-bb5635d64928"
+type = "improvement"
+description = "Added linter to ensure our own http module is used"
+author = "daladim@users.noreply.github.com"
+pr = "https://github.com/kraken-build/kraken-std/pull/135"
+
+[[entries]]
+id = "f4803a58-a98c-4d94-aa25-4e33917e28f6"
+type = "fix"
+description = "Fixed a bug where the preprocessed Dockerfile for Kaniko would attempt to establish the `/run/secrets` symlink for every `RUN` command, even if that command was not run by the root user. In this case, the `RUN` command would fail as the permission to create the symlink are missing. We now employ a heuristic to determine if a `RUN` command would be run as the `root` user, and if that is not the case we do not add the setup and teardown suffix around the `RUN` command. Note that this means `RUN` commands that do not run as root can not read secrets from `/run/secrets` (the standard Docker secrets interface) but only from `/kaniko/secrets`."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-std/pull/137"
+
+[[entries]]
+id = "c66b5644-054e-4385-8b7f-b020e1a49be8"
+type = "improvement"
+description = "Add Python info task"
+author = "cecile.allano@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/136"

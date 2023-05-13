@@ -1,0 +1,8 @@
+release-date = "2022-10-13"
+
+[[entries]]
+id = "5165a40c-8714-4cd8-bf4f-7bfbb3e3ac54"
+type = "improvement"
+description = "Add Cargo workspace support in the Cargo manifest parser and Cargo sync config task"
+author = "@tetigi"
+pr = "https://github.com/kraken-build/kraken-std/pull/23"

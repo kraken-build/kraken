@@ -1,0 +1,7 @@
+release-date = "2023-01-03"
+
+[[entries]]
+id = "d9c1c9e7-46b3-4869-8cb3-cd45b9fe6c3f"
+type = "fix"
+description = "Fix: Make cargo metadata failed return an error with a workaround message"
+author = "@tetigi"

@@ -1,0 +1,13 @@
+release-date = "2022-07-06"
+
+[[entries]]
+id = "57c34d0e-290a-4663-a421-84e5270854b2"
+type = "feature"
+description = "introduce Property concept and make Action and Task a subclass for HasProperties, Task.action is a property and Action.task was added which is also a property"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2eaa2c11-4e09-492a-ba81-20f3d34de412"
+type = "breaking change"
+description = "redesign API, remove Action"
+author = "@NiklasRosenstein"

@@ -1,0 +1,13 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "9ab7842b-3b90-44c6-89ba-a59f5db9cca7"
+type = "improvement"
+description = "use Pip `--use-feature=in-tree-build` flag, this greatly improves the installation time for packages from local requirements"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1a3531f1-0f68-4993-bddb-c78a1715190b"
+type = "improvement"
+description = "no longer remove environment before install (allows VENV to upgrade an existing environment)"
+author = "@NiklasRosenstein"

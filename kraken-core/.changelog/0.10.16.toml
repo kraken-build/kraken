@@ -1,0 +1,7 @@
+release-date = "2022-12-12"
+
+[[entries]]
+id = "51f58713-2b09-4d2a-9298-6c2d81f5918c"
+type = "fix"
+description = "0.10.14 somehow got published as 0.10.15 to PyPI, so it got yanked and now we release 0.10.16 for consistency"
+author = "@NiklasRosenstein"

@@ -1,0 +1,13 @@
+release-date = "2022-07-14"
+
+[[entries]]
+id = "e6c3641a-5fe5-42ca-9a8f-3df4b85a175d"
+type = "feature"
+description = "add \"native\" docker build backend"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "37451d4c-b06f-441e-9a18-0b258730e3a3"
+type = "feature"
+description = "add `manifest_tool_push` task"
+author = "@NiklasRosenstein"

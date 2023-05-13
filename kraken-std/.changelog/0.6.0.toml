@@ -1,0 +1,8 @@
+release-date = "2023-03-07"
+
+[[entries]]
+id = "990593e2-b3ba-4721-8c74-e5e9aa5d66f7"
+type = "improvement"
+description = "Add test fixture components, add test for util task and refactor"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/104"

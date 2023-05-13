@@ -1,0 +1,8 @@
+release-date = "2023-03-07"
+
+[[entries]]
+id = "f3efbfaa-cdd4-40e7-af42-7db4da3e5449"
+type = "fix"
+description = "Fix formatting"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/106"

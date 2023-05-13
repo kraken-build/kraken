@@ -1,0 +1,13 @@
+template "mkdocs"
+
+action "mkdocs-update-config" {
+  site_name = "kraken-core"
+  update '$.theme.palette' add: {'scheme': 'default', 'primary': 'teal', 'accent': 'indigo'}
+  update '$.theme.features' add: [ 'navigation.expand' ]
+}
+
+action "preprocess-markdown" {
+  use "pydoc" {
+    loader().packages = ["kraken.core", "kraken.std"]
+  }
+}

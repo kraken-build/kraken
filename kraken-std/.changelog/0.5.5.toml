@@ -1,0 +1,13 @@
+release-date = "2022-12-19"
+
+[[entries]]
+id = "197716a8-888d-49e6-a022-6e3637963a87"
+type = "improvement"
+description = "Cargo: improve error message when the `proxy` command cannot be found and make sure verbose logs include the full path to the `proxy` command being invoked"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5e643ca4-a9b8-4f64-b978-710de2d11997"
+type = "improvement"
+description = "bump kraken-common to `^0.5.2`"
+author = "@NiklasRosenstein"

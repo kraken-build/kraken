@@ -1,0 +1,7 @@
+release-date = "2022-08-25"
+
+[[entries]]
+id = "2aead0fe-8184-4ff0-b143-575d61309045"
+type = "fix"
+description = "Fix output filename for preprocessed Dockerfile (was previously placed into the project directory instead of the build directory)"
+author = "@NiklasRosenstein"

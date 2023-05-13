@@ -1,0 +1,8 @@
+release-date = "2023-02-12"
+
+[[entries]]
+id = "652f1332-b1f7-474f-bbe2-3ce6565f138c"
+type = "fix"
+description = "Don't try to pyupgrade None"
+author = "@tetigi"
+pr = "https://github.com/kraken-build/kraken-std/pull/91"

@@ -1,0 +1,8 @@
+release-date = "2023-02-17"
+
+[[entries]]
+id = "e0fe1fb7-86d4-42f5-80c5-cae29278a144"
+type = "fix"
+description = "Fix validation for Rust libs, in which hyphens are replaced with underscores"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/96"

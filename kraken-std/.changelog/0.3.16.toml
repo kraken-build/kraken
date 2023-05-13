@@ -1,0 +1,7 @@
+release-date = "2022-09-12"
+
+[[entries]]
+id = "67cd17d7-117b-4574-85d7-461e1861347f"
+type = "fix"
+description = "Fix `CargoBuildTask` to check if its `target` property is `debug` or `release`, only in that case do we want to export a `CargoBinaryArtifact` as the output"
+author = "@NiklasRosenstein"

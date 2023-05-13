@@ -1,0 +1,7 @@
+release-date = "2022-08-16"
+
+[[entries]]
+id = "5bc09df8-ab0e-4cb4-8282-bab9fa172b1c"
+type = "fix"
+description = "Update handling of `--password-stdin` flag, if this and `--password` is not specified, we will use `getpass()`"
+author = "@NiklasRosenstein"

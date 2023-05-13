@@ -1,0 +1,15 @@
+release-date = "2023-02-16"
+
+[[entries]]
+id = "fe19eb53-9dfc-482f-aa1c-5160e12fdf06"
+type = "fix"
+description = "properly rollback the Poetry project version after build"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/90"
+
+[[entries]]
+id = "1b02e55d-8c2f-4073-80e5-7a301f5adf26"
+type = "fix"
+description = "Fix verification of cargo build artefacts"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/95"

@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "poetry-project-consumer"
+version = "0.1.0"
+description = ""
+authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+poetry-project = { version = "0.1.0", source = "local" }
+
+[tool.poetry.dev-dependencies]
+mypy = "^0.971"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

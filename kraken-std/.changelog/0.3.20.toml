@@ -1,0 +1,13 @@
+release-date = "2022-09-14"
+
+[[entries]]
+id = "deff70ac-ff1d-4943-95cd-fcbe90267ff0"
+type = "feature"
+description = "add `login()` task for python"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "26a8a926-8f16-4468-ba36-d70ca13bc137"
+type = "improvement"
+description = "update task names for Python workflows, `EnvironmentAwareDispatchTask` now detects the Python install task by task type instead of task name"
+author = "@NiklasRosenstein"

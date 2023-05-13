@@ -1,0 +1,40 @@
+[features]
+# Meta-features:
+default = ["std", "std_rng"]
+nightly = [] # some additions requiring nightly Rust
+serde1 = ["serde", "rand_core/serde1"]
+
+# Option (enabled by default): without "std" rand uses libcore; this option
+# enables functionality expected to be available on a standard platform.
+std = ["rand_core/std", "rand_chacha/std", "alloc", "getrandom", "libc"]
+
+# Option: "alloc" enables support for Vec and Box when not using "std"
+alloc = ["rand_core/alloc"]
+
+# Option: use getrandom package for seeding
+getrandom = ["rand_core/getrandom"]
+
+# Option (requires nightly Rust): experimental SIMD support
+simd_support = []
+
+# Option (enabled by default): enable StdRng
+std_rng = ["rand_chacha"]
+
+# Option: enable SmallRng
+small_rng = []
+
+[dependencies]
+rand_core = { path = "rand_core", version = "0.6.0" }
+log = { version = "0.4.4", optional = true }
+serde = { version = "1.0.103", features = ["derive"], optional = true }
+rand_chacha = { path = "rand_chacha", version = "0.3.0", default-features = false, optional = true }
+
+[target.'cfg(unix)'.dependencies]
+# Used for fork protection (reseeding.rs)
+libc = { version = "0.2.22", optional = true, default-features = false }
+
+[dev-dependencies]
+rand_pcg = { path = "rand_pcg", version = "0.3.0" }
+# Only to test serde1
+bincode = "1.2.1"
+rayon = "1.5.3"

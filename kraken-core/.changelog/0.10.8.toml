@@ -1,0 +1,13 @@
+release-date = "2022-10-06"
+
+[[entries]]
+id = "390cd4a0-3916-4a4a-a873-dd003a233a50"
+type = "fix"
+description = "Fixed a bug where propagated group-to-group dependencies would result in an improperly initialized entry for a task in the build graph, causing sub-sequent reads of the task to fail."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "25614b39-a486-4083-aa3c-8e30270407e0"
+type = "improvement"
+description = "Raise an RuntimeError if the TaskGraph state is invalid on accessing a task node from the graph."
+author = "@NiklasRosenstein"

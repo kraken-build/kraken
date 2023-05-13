@@ -1,0 +1,7 @@
+release-date = "2022-07-20"
+
+[[entries]]
+id = "f9618f8f-ac6f-4354-bc0e-d9a81446886e"
+type = "fix"
+description = "fix publishing"
+author = "@NiklasRosenstein"

@@ -1,0 +1,13 @@
+release-date = "2022-07-27"
+
+[[entries]]
+id = "750a2334-0968-40f2-a071-5ec688c143b1"
+type = "improvement"
+description = "`CargoBumpVersionTask` now includes a status message with the version number"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "8fe72789-54de-4ab2-9032-5f8b4dd52dbd"
+type = "feature"
+description = "add `git_version_to_cargo_version()` function"
+author = "@NiklasRosenstein"

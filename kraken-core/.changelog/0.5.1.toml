@@ -1,0 +1,7 @@
+release-date = "2022-07-24"
+
+[[entries]]
+id = "95044b67-64d9-4712-96db-142cf12ccf1a"
+type = "fix"
+description = "Python 3.7 and 3.8 compatibility (removed use of | operator for types)"
+author = "@NiklasRosenstein"

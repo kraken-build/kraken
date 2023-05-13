@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "cab3bb7b-cfca-4f93-b262-7d49be6067d0"
+type = "breaking change"
+description = "large refactor of the `kraken-core` module, now comes with the cli and utils and a task library, remove `kraken.api` and vendor most dependencies"
+author = "@NiklasRosenstein"

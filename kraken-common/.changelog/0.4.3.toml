@@ -1,0 +1,13 @@
+release-date = "2022-12-14"
+
+[[entries]]
+id = "6e0771a0-a340-48f8-a058-5ac5c1035b58"
+type = "fix"
+description = "add bad but backwards compatible ISO8601 format for parsing timestamps"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1ca97e00-ee57-4619-878e-1206fba2c4a2"
+type = "fix"
+description = "fix newlines in buildscript call recommendation for Python build scripts"
+author = "@NiklasRosenstein"

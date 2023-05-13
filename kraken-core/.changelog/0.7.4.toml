@@ -1,0 +1,19 @@
+release-date = "2022-08-06"
+
+[[entries]]
+id = "a7b5441c-3048-43c7-b547-a2cda371fccf"
+type = "improvement"
+description = "Add `Project.group(default)` parameter and mark the groups `lint` and `test` as default."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "38db4964-3fec-42ca-a331-66461b7476a3"
+type = "breaking change"
+description = "`Task.default` is now disabled by default"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "138393e7-f504-4e62-b80b-dcaddac58b18"
+type = "feature"
+description = "Add `Task.get_description()`"
+author = "@NiklasRosenstein"

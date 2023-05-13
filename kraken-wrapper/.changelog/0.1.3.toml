@@ -1,0 +1,7 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "aa6e4421-1109-4c53-b832-1fc2d364b011"
+type = "improvement"
+description = "pass down whether transitive install is needed or not based on whether installing from a lock file or from requirement spec"
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-10-25"
+
+[[entries]]
+id = "bf25514f-ad6d-4fd0-921b-c14bdc2c2514"
+type = "feature"
+description = "Add `cargo_bump_version(registry)` parameter which overwrites the the version and registry of path dependencies."
+author = "@tetigi"

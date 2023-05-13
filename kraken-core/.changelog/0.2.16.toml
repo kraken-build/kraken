@@ -1,0 +1,13 @@
+release-date = "2022-07-13"
+
+[[entries]]
+id = "14d81259-6a70-4b91-88fa-5d397e5a0dad"
+type = "improvement"
+description = "`Project.do()` no longer overrides `Task.default` and `Task.capture` by default if no explicit value is specified"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6f5af445-e3f8-43f5-85ae-3fc81285cbe2"
+type = "feature"
+description = "add `GroupTask` class and `Project.group()`"
+author = "@NiklasRosenstein"

@@ -1,0 +1,7 @@
+release-date = "2022-10-24"
+
+[[entries]]
+id = "8fe38dd8-3ef0-4322-baa1-3edc98cbcace"
+type = "fix"
+description = "Pin `dill <0.3.6` to avoid an issue with serializing abstract base classes (see https://github.com/uqfoundation/dill/issues/332#issuecomment-1289537575)"
+author = "@NiklasRosenstein"
