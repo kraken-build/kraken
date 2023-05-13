@@ -1,5 +1,7 @@
 [requirements]
 requirements = [
+    "kraken-common@../kraken-common",
+    "kraken-core@../kraken-core",
     "kraken-std@.",
 ]
 pythonpath = [
@@ -26,9 +28,9 @@ importlib-metadata = "6.6.0"
 iniconfig = "2.0.0"
 jaraco-classes = "3.2.3"
 keyring = "23.13.1"
-kraken-common = "0.5.4"
-kraken-core = "0.12.4"
-kraken-std = "0.8.11"
+kraken-common = "0.20.0"
+kraken-core = "0.20.0"
+kraken-std = "0.20.0"
 markdown-it-py = "2.2.0"
 mdurl = "0.1.2"
 more-itertools = "9.1.0"

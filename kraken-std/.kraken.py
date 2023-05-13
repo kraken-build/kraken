@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-std@."])
+buildscript(requirements=["kraken-common@../kraken-common", "kraken-core@../kraken-core", "kraken-std@."])
 
 import os
 
