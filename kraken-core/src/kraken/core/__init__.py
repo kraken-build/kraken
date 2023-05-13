@@ -1,4 +1,4 @@
-__version__ = "0.12.4"
+__version__ = "0.20.0"
 
 # For backwards compatibility
 from nr.stream import Supplier  # noqa: F401

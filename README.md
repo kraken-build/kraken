@@ -41,8 +41,9 @@ python.flake8()
 
 ## Development
 
-Kraken uses [Slap][] as the Python build backend. If you need a fresh installation of all Kraken components, without
-relying on Kraken, you can run the Slap CLI:
+Kraken uses [Slap][] as the Python build backend. Currently, the repository is not configured to fully be fully
+managed by Kraken itself (only `kraken-std` is). If you need a fresh installation of all Kraken components, you can
+run the Slap CLI:
 
     $ slap venv -ac
     $ slap install --link
