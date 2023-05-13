@@ -60,13 +60,13 @@ pydoc-markdown = "4.6.0"
 typed = true
 
 [tool.slap.test]
-black = "black --check src/ tests/ example/"
+black = "black --check src/"
 check = "slap check"
-flake8 = "flake8 src/ tests/ example/"
-isort = "isort --check-only src/ tests/ example/"
-pycln = "pycln src/ tests/ example/ --check"
-mypy = "dmypy run src/ tests/ example/"
-pytest = "pytest src/ tests/ -vv"
+flake8 = "flake8 src/"
+isort = "isort --check-only src/"
+pycln = "pycln src/ --check"
+mypy = "mypy src/ --exclude 'src/tests/integration/.*/data/.*'"
+pytest = "pytest src/ -vv --ignore src/tests/integration"
 
 [tool.slap.run]
 "docs:build" = "cd docs && novella --base-url kraken-std/"

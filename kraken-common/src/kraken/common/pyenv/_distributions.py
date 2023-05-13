@@ -34,7 +34,7 @@ class Distribution:
         return Distribution(
             name=dist.project_name,
             location=dist.location,
-            version=data.get("Version"),
+            version=data["Version"],
             license_name=data.get("License"),
             platform=data.get("Platform"),
             requires_python=data.get("Requires-Python"),

@@ -4,6 +4,7 @@ release-date = "2022-12-12"
 id = "d3def3bf-1e0b-45d4-999e-cb02fdf0b6d6"
 type = "feature"
 description = "Add `cargo_build(workspace)` parameter"
+author = "unknown"
 
 [[entries]]
 id = "74349729-bbf6-43b4-bc55-26aea7ba79bc"
