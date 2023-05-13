@@ -69,6 +69,10 @@ jobs:
     - run: slap install --no-venv-check --only-extras docs
     - run: slap run --no-venv-check docs:install
     - run: slap run --no-venv-check docs:build
-    - uses: JamesIves/github-pages-deploy-action@4.1.4
-      if: github.ref == 'refs/heads/develop'
-      with: { branch: gh-pages, folder: docs/_site, ssh-key: "${{ secrets.DEPLOY_KEY }}" }
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: docs/_site
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
