@@ -35,7 +35,7 @@ jobs:
     - uses: python-slap/slap.cli@gha/install/v1
     - uses: actions/setup-python@v2
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install ./kraken-wrapper
+    - run: pip install pipx && pipx install kraken-wrapper
 
     # Need Poetry for integration tests.
     - run: pipx install poetry
