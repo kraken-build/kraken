@@ -15,9 +15,10 @@ from .tasks.pytest_task import PytestTask, pytest
 from .tasks.pyupgrade_task import PyUpgradeCheckTask, PyUpgradeTask, pyupgrade
 from .tasks.update_lockfile_task import update_lockfile_task
 from .tasks.update_pyproject_task import update_pyproject_task
+from .version import git_version_to_python_version
 
 # Backwards compatibilty
-from .version import git_version_to_python_version, git_version_to_python_version as git_version_to_python
+git_version_to_python = git_version_to_python_version
 
 __all__ = [
     "black",

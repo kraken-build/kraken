@@ -65,7 +65,7 @@ check = "slap check"
 flake8 = "flake8 src/"
 isort = "isort --check-only src/"
 pycln = "pycln src/ --check"
-mypy = "mypy src/ --exclude 'src/tests/integration/.*/data/.*'"
+mypy = "mypy src/"
 pytest = "pytest src/ -vv --ignore src/tests/integration"
 
 [tool.slap.run]
