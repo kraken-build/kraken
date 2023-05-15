@@ -8,7 +8,7 @@ __Quickstart__
 
 ```py
 # .kraken.py
-from kraken.core.api import Project
+from kraken.core import Project
 from kraken.std.protobuf import BufFormatTask, BufLintTask
 
 

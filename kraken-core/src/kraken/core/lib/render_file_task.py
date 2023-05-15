@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Union
 
 from kraken.common.path import try_relative_to
-from nr.stream import Supplier
+from kraken.common.supplier import Supplier
 
-from kraken.core.api import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 
 from .check_file_contents_task import CheckFileContentsTask, as_bytes
 

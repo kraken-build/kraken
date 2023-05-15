@@ -17,10 +17,9 @@ import dataclasses
 import sys
 import weakref
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, Type, TypeVar, cast
+from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
 
-from kraken.common import not_none
-from nr.stream import Empty, NotSet, Supplier  # noqa: F401
+from kraken.common import NotSet, Supplier, not_none
 from typeapi import AnnotatedTypeHint, ClassTypeHint, TupleTypeHint, TypeHint, UnionTypeHint, get_annotations
 
 T = TypeVar("T")
@@ -67,9 +66,6 @@ class PropertyDescriptor:
 
 class Property(Supplier[T]):
     """A property represents an input or output parameter of an :class:`Object`."""
-
-    # A convenience alias for the :class:`Supplier.Empty` exception type.
-    Empty: ClassVar[Type[Empty]] = Empty  # noqa: F811
 
     class Deferred(Exception):
         """

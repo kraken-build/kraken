@@ -29,7 +29,7 @@ from typing import (
     overload,
 )
 
-from nr.stream import Supplier
+from kraken.common import Supplier
 
 from kraken.core.address import Address
 from kraken.core.system.property import Property, PropertyContainer

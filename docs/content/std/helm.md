@@ -8,7 +8,7 @@ __Quickstart__
 
 ```py
 # .kraken.py
-from kraken.core.api import Project
+from kraken.core import Project
 from kraken.std.helm import HelmPushTask, HelmPackageTask, helm_settings
 
 helm_settings().add_auth("example.jfrog.io", "me@example.org", "api_token")

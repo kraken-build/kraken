@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Iterable
 
-from nr.stream import Supplier
+from kraken.common import Supplier
 
 __all__ = ["TaskSupplier"]
 
