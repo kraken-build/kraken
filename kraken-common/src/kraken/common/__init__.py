@@ -1,3 +1,5 @@
+__version__ = "0.20.0"
+
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
 from ._asciitable import AsciiTable
@@ -29,6 +31,7 @@ from ._runner import (
 from ._terminal import get_terminal_width
 from ._text import inline_text, lazy_str, pluralize
 from ._tomlconfig import TomlConfigFile
+from .supplier import Supplier
 
 __all__ = [
     # _argparse
@@ -82,5 +85,6 @@ __all__ = [
     "TomlConfigFile",
     # global
     "path",
+    # supplier
+    "Supplier",
 ]
-__version__ = "0.20.0"

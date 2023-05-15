@@ -1,0 +1,5 @@
+[[entries]]
+id = "e38c1817-b7f4-430e-962b-bcd826200cb9"
+type = "improvement"
+description = "Move code for `Supplier` from `nr-stream` package to `kraken-common`"
+author = "niklas.rosenstein@helsing.ai"
