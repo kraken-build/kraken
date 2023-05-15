@@ -48,6 +48,11 @@ run the Slap CLI:
     $ slap venv -ac
     $ slap install --link
 
+In CI, we currently use a combination of `krakenw` and Slap to test the repository. The `krakenw` CLI is used only
+for `kraken-std` at the moment as it is the only one with a build script. However, we _always_ lag behind in the
+version of Kraken we can use to self-manage the repository (i.e. the latest feature that you added to `kraken-std`
+cannot be used in the same version of it to build itself).
+
 ## Releases
 
 All packages in this repository are released under the same version number simultaneously. Regardless, we still

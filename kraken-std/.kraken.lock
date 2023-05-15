@@ -1,6 +1,6 @@
 [requirements]
 requirements = [
-    "kraken-std@.",
+    "kraken-std",
 ]
 pythonpath = [
     "build-support",
