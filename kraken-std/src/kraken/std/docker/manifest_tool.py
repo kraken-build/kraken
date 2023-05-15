@@ -3,7 +3,7 @@ from __future__ import annotations
 import subprocess as sp
 from typing import List, Sequence
 
-from kraken.core.api import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 
 RELEASE_URL = (
     "https://github.com/estesp/manifest-tool/releases/download/v{VERSION}/binaries-manifest-tool-{VERSION}.tar.gz"

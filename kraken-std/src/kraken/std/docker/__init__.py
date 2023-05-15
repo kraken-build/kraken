@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from kraken.common import import_class
-from kraken.core.api import Project, Property, Task
+from kraken.core import Project, Property, Task
 from kraken.core.lib.render_file_task import RenderFileTask, render_file
-from nr.stream import Supplier
+from kraken.common import Supplier
 
 from .util import render_docker_auth
 

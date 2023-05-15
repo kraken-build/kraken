@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Sequence
 
 from kraken.core import Task, TaskStatus
-from kraken.core.api import Property
+from kraken.core import Property
 
 
 class CargoDenyTask(Task):

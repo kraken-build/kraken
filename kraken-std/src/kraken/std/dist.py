@@ -13,7 +13,7 @@ from typing import Any, List, Mapping, Optional, Sequence, Union, cast
 
 import databind.json
 from kraken.common import flatten
-from kraken.core.api import Project, Property, Task
+from kraken.core import Project, Property, Task
 from termcolor import colored
 from typing_extensions import Literal
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from kraken.common import not_none
-from kraken.core.api import Project, Property
+from kraken.core import Project, Property
 
 from ..config import CargoRegistry
 from .cargo_build_task import CargoBuildTask

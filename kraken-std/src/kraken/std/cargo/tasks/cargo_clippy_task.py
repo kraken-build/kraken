@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
-from kraken.core.api import Property
+from kraken.core import Property
 
 from .cargo_build_task import CargoBuildTask
 

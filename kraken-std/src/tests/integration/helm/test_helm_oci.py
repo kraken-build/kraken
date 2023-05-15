@@ -6,7 +6,7 @@ from typing import Iterator
 
 import pytest
 from kraken.common import not_none
-from kraken.core.api import Project
+from kraken.core import Project
 
 from kraken.std import http
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings

@@ -4,7 +4,7 @@ import dataclasses
 import logging
 from pathlib import Path
 
-from kraken.core.api import Project
+from kraken.core import Project
 
 from .buildsystem import PythonBuildSystem, detect_build_system
 

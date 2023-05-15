@@ -8,7 +8,7 @@ from typing import Sequence
 
 import deprecated
 from kraken.common import flatten
-from kraken.core.api import Project, Property
+from kraken.core import Project, Property
 
 from . import DockerBuildTask
 from .dockerapi import docker_load, docker_run

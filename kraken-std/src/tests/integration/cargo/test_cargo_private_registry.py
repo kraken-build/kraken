@@ -33,7 +33,7 @@ import unittest.mock
 from pathlib import Path
 
 import pytest
-from kraken.core.api import BuildError
+from kraken.core import BuildError
 from kraken.core.testing import kraken_ctx, kraken_project
 
 from kraken.std.cargo import (

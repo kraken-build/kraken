@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from deprecated import deprecated
-from kraken.core.api import Project, Property
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 

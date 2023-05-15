@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
 
-from kraken.core.api import Project
+from kraken.core import Project
 
 from kraken.std.util.check_file_exists_and_is_committed_task import (
     CheckFileExistsAndIsCommittedError,

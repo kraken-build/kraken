@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Sequence
 
 from kraken.common.path import try_relative_to
-from kraken.core.api import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 from termcolor import colored
 
 from ..gitignore import GitignoreException, GitignoreFile

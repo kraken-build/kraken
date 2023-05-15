@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from kraken.core.api import Project, Property, TaskStatus
+from kraken.core import Project, Property, TaskStatus
 from kraken.core.lib.render_file_task import RenderFileTask
 
 from kraken.std.python.buildsystem import PythonBuildSystem

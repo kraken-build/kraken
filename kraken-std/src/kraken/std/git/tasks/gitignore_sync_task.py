@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Sequence
 
-from kraken.core.api import Property, Task, TaskStatus
+from kraken.core import Property, Task, TaskStatus
 from kraken.core.lib.check_file_contents_task import as_bytes
 
 from ..gitignore import GitignoreException, GitignoreFile

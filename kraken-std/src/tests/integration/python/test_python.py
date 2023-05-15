@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 import tomli
 from kraken.common import not_none
-from kraken.core.api import Context
+from kraken.core import Context
 from kraken.core.testing import kraken_project
 
 from kraken.std import python

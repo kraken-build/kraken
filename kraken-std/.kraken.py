@@ -6,7 +6,7 @@ buildscript(requirements=["kraken-std"])
 
 import os
 
-from kraken.core.api import Project
+from kraken.core import Project
 
 from kraken.std import python
 from kraken.std.git import git_describe

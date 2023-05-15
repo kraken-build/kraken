@@ -1,4 +1,4 @@
-from kraken.core.api import Project
+from kraken.core import Project
 
 from kraken.std.docker import build_docker_image
 from kraken.std.generic.render_file import RenderFileTask

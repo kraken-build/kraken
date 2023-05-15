@@ -4,7 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Any, List
 
-from kraken.core.api import Project, Property
+from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import subprocess as sp
 
-from kraken.core.api import Property, Task, TaskStatus
+from kraken.core import Property, Task, TaskStatus
 
 
 class CargoFmtTask(Task):

@@ -9,7 +9,7 @@ import subprocess as sp
 from pathlib import Path
 from typing import Any
 
-from kraken.core.api import BackgroundTask, Project, Property, TaskStatus
+from kraken.core import BackgroundTask, Project, Property, TaskStatus
 
 
 @dataclasses.dataclass

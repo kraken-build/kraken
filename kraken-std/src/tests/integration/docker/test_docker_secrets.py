@@ -7,7 +7,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from kraken.core.api import Project
+from kraken.core import Project
 from kraken.core.lib.render_file_task import RenderFileTask
 
 from kraken.std.docker import BUILD_BACKENDS, build_docker_image

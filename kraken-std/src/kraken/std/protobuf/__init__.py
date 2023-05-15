@@ -4,7 +4,7 @@ import subprocess as sp
 from typing import Any
 
 from kraken.core import Task, TaskStatus
-from kraken.core.api import Project
+from kraken.core import Project
 
 
 class BufFormatTask(Task):

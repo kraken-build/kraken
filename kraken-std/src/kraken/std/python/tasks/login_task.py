@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kraken.core.api import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 
 from ..settings import PythonSettings, python_settings
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
-from kraken.core.api import Project, Property, Task, TaskRelationship
+from kraken.core import Project, Property, Task, TaskRelationship
 from twine.commands.upload import upload as twine_upload
 from twine.settings import Settings as TwineSettings
 

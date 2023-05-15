@@ -6,7 +6,7 @@ import subprocess as sp
 from pathlib import Path
 
 from kraken.common import flatten, not_none
-from kraken.core.api import Project, TaskStatus
+from kraken.core import Project, TaskStatus
 
 from kraken.std.docker.util import update_run_commands
 

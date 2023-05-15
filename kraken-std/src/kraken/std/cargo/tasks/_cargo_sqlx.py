@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 from kraken.core import Task, TaskStatus
-from kraken.core.api import Property
+from kraken.core import Property
 
 
 class CargoBaseSqlxTask(Task):

@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from kraken.core.api import Project
+from kraken.core import Project
 
 from kraken.std.util.copyright_task import check_and_format_copyright
 

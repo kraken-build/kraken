@@ -4,7 +4,7 @@ import enum
 import subprocess
 from pathlib import Path
 
-from kraken.core.api import Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 
 
 class CheckFileExistsAndIsCommittedError(enum.Enum):

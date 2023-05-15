@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from kraken.core.api import Project, VoidTask
+from kraken.core import Project, VoidTask
 
 
 @dataclass

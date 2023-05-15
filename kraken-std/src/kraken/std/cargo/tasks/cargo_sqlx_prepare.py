@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from kraken.core import TaskStatus
-from kraken.core.api import Property
+from kraken.core import Property
 
 from ._cargo_sqlx import CargoBaseSqlxTask
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional, Sequence, cast
 
-from kraken.core.api import Project
+from kraken.core import Project
 
 from .tasks.const import (
     DEFAULT_GITIGNORE_TOKENS,
