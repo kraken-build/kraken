@@ -2,8 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import Sequence
 
-from kraken.core import Task, TaskStatus
-from kraken.core import Property
+from kraken.core import Property, Task, TaskStatus
 
 
 class CargoDenyTask(Task):

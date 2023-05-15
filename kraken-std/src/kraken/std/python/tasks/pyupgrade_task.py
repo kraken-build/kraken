@@ -7,8 +7,7 @@ from sys import stdout
 from tempfile import TemporaryDirectory
 from typing import Any, Collection, Iterable, List
 
-from kraken.core import TaskStatus
-from kraken.core import Project, Property
+from kraken.core import Project, Property, TaskStatus
 
 from .. import python_settings
 from .base_task import EnvironmentAwareDispatchTask

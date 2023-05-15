@@ -3,8 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Optional
 
-from kraken.core import Project, Property, Task, TaskStatus
 from kraken.common import Supplier
+from kraken.core import Project, Property, Task, TaskStatus
 
 from ..buildsystem import PythonBuildSystem
 from ..pyproject import Pyproject

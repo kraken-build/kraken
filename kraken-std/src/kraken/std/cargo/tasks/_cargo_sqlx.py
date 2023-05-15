@@ -5,8 +5,7 @@ import subprocess as sp
 from pathlib import Path
 from typing import List
 
-from kraken.core import Task, TaskStatus
-from kraken.core import Property
+from kraken.core import Property, Task, TaskStatus
 
 
 class CargoBaseSqlxTask(Task):

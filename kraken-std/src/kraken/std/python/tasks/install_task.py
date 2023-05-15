@@ -4,9 +4,9 @@ import logging
 import os
 from typing import Optional, Union, cast
 
+from kraken.common import Supplier
 from kraken.common.pyenv import get_current_venv
 from kraken.core import Project, Property, Task, TaskStatus
-from kraken.common import Supplier
 
 from ..buildsystem import PythonBuildSystem
 from ..settings import python_settings
