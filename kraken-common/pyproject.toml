@@ -14,10 +14,10 @@ classifiers = []
 keywords = []
 
 [tool.poetry.urls]
-# "Bug Tracker" = ""
-# Documentation = ""
-# Homepage = ""
-# Repository = ""
+"Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
+Documentation = "https://kraken-build.github.io/kraken-build/"
+Homepage = "https://kraken-build.github.io/kraken-build/"
+Repository = "https://github.com/kraken-build/kraken-build"
 
 [tool.poetry.dependencies]
 python = "^3.6"
