@@ -50,7 +50,7 @@ run the Slap CLI:
     $ slap venv -ac
     $ slap install --link
 
-> You need at least Slap 1.9.0.
+> You need at least Slap 1.9.1.
 
 In CI, we currently use a combination of `krakenw` and Slap to test the repository. The `krakenw` CLI is used only
 for `kraken-std` at the moment as it is the only one with a build script. However, we _always_ lag behind in the
