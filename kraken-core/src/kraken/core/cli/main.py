@@ -422,7 +422,11 @@ def tree(graph: TaskGraph) -> None:
 
 
 def describe(graph: TaskGraph) -> None:
-    tasks = list(graph.tasks())
+    """
+    Describes the selected tasks.
+    """
+
+    tasks = [t for t in graph.tasks() if t.selected]
     print("selected", len(tasks), "task(s)")
     print()
 
