@@ -144,6 +144,6 @@ def test__resolve_address__does_not_fail_on_optional_element() -> None:
     # on missing1, since missing1 doesn't exist in the first place.
     assert list(resolve_address(space, tree.root, Address(":a:missing1?:missing2")).matches()) == []
 
-    # However, trying to lookup a non-optional element on an optional but existing element fails.
+    # However, trying to lookup a non-optional missing element on an optional but existing element fails.
     with raises(AddressResolutionError):
         list(resolve_address(space, tree.root, Address(":a:b?:dontexist")).matches())
