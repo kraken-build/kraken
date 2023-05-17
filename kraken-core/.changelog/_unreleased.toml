@@ -3,3 +3,9 @@ id = "0a485b7f-846f-405c-94d9-37e3717b559f"
 type = "improvement"
 description = "The `kraken query describe` command no longer outputs a description of _all_ tasks in the graph, but only tasks that were explicitly selected on the command-line."
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "22d5ce94-360b-4825-b71a-9e02598dbe6a"
+type = "tests"
+description = "Add unit test for clarifying the behavior of optional elements in address resolution"
+author = "niklas.rosenstein@helsing.ai"

@@ -118,3 +118,32 @@ def test__resolve_address__can_resolve_recursive_wildcards() -> None:
     ]
     assert list(resolve_address(space, tree.root, Address(":a:b:**")).matches()) == [tree.aba, tree.abb, tree.abc]
     assert list(resolve_address(space, tree.root, Address(":**:a")).matches()) == [tree.a, tree.aa, tree.aba]
+
+
+def test__resolve_address__does_not_fail_on_optional_element() -> None:
+    tree = ExampleNodeTree()
+    space = NodeAddressSpace(tree.root)
+
+    # We can sucessfully resolve :a:b? to :a:b.
+    assert list(resolve_address(space, tree.root, Address(":a:b?")).matches()) == [tree.ab]
+
+    # We can sucessfully resolve :a:dontexist? to nothing, as the address does not exist.
+    assert list(resolve_address(space, tree.root, Address(":a:dontexist?")).matches()) == []
+
+    # Try to resolve :a:dontexist without an optional element fails.
+    with raises(AddressResolutionError):
+        list(resolve_address(space, tree.root, Address(":a:dontexist")).matches())
+
+    # We can sucessfully resolve :a:b?:a to :a:b:a.
+    assert list(resolve_address(space, tree.root, Address(":a:b?:a")).matches()) == [tree.aba]
+
+    # We can sucessfully resolve :a:b?:dontexist to nothing, as the element that does not exist is optional.
+    assert list(resolve_address(space, tree.root, Address(":a:b:dontexist?")).matches()) == []
+
+    # It is also okay to resolve :a::missing1?:missing to nothing, because we won't try to look up the missing2
+    # on missing1, since missing1 doesn't exist in the first place.
+    assert list(resolve_address(space, tree.root, Address(":a:missing1?:missing2")).matches()) == []
+
+    # However, trying to lookup a non-optional element on an optional but existing element fails.
+    with raises(AddressResolutionError):
+        list(resolve_address(space, tree.root, Address(":a:b?:dontexist")).matches())
