@@ -130,7 +130,7 @@ class TaskGraph(Graph):
     def _get_required_tasks(self, goals: Iterable[Task]) -> set[str]:
         """Internal. Return the set of tasks that are required transitively from the goal tasks."""
 
-        def _is_empty_group_subtree(task_path: str) -> None:
+        def _is_empty_group_subtree(task_path: str) -> bool:
             """
             Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty or only depends on
             other empty groups.
