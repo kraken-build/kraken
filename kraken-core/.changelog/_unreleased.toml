@@ -21,3 +21,9 @@ id = "4f38a015-55a2-4faf-9dc0-bc35b61f955a"
 type = "improvement"
 description = "`TaskGraph.trim()` will now exclude groups from the returned graph if they are empty and if they have no dependencies or all transitive dependencies are also empty groups"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "4ad60b94-d60e-40ae-8077-6c6e16243993"
+type = "tests"
+description = "Add a unit test to validate the behaviour of `Context.resolve_tasks()` and the contents of the `TaskGraph` returned by `Context.get_build_graph()`"
+author = "niklas.rosenstein@helsing.ai"
