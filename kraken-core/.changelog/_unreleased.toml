@@ -33,3 +33,12 @@ id = "981e55d6-131e-4e14-9811-b53c6be82af0"
 type = "fix"
 description = "Fixed the address selectors that we fall back to if no selectors are specified on the command-line: They were `[\":\", \":**:\"]`, referencing the root projects and all it's sub-projects, when it should really be `[\".\", \"**:\"]`, which references the current project and all of it's sub-projects."
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "d7c49e7b-5bf1-4c25-b520-7928384a3cd9"
+type = "improvement"
+description = "Single-path elements passed as Kraken task-address selectors are now prefixed with `**:` (recursive wildcard) even if the element contains a glob pattern, such as `lint`, `python.*` or `publish?`, making them semantically equivalent to `**:lint`, `**:python.*` and `**:publish?`, respectively."
+author = "niklas.rosenstein@helsing.ai"
+issues = [
+    "https://github.com/kraken-build/kraken-build/issues/27",
+]

@@ -278,12 +278,22 @@ class Context(MetadataContainer, Currentable["Context"]):
         space: KrakenAddressSpace,
         set_selected: bool,
     ) -> list[Task]:
+        """
+        Resolve a single address in the context.
+
+        Any address that contains only a single path element (such as `lint` or `test`) will be prefixed
+        with `**:`, such that they are semantically equivalent to `**:lint` and `**:test`, respectively.
+        """
+
         if address.is_empty():
             raise TaskResolutionException("Impossible to resolve the empty address.")
-        if not address.is_absolute() and len(address) == 1 and address[0].is_concrete():
+
+        # Prefix single-element addresses with `**:`, unless the last element already is `**`.
+        if not address.is_absolute() and len(address) == 1 and not address.elements[0].is_recursive_wildcard():
             address = Address.RECURSIVE_WILDCARD.concat(address)
         if not address.is_absolute():
             address = relative_to.concat(address)
+
         matches = list(resolve_address(space, self.root_project, address).matches())
         tasks = Stream(matches).of_type(Task).collect()  # type: ignore[type-abstract]
         if set_selected:
