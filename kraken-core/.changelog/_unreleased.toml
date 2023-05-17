@@ -9,3 +9,9 @@ id = "22d5ce94-360b-4825-b71a-9e02598dbe6a"
 type = "tests"
 description = "Add unit test for clarifying the behavior of optional elements in address resolution"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "b3d542cc-f858-4ad2-a4c0-b65a545618a4"
+type = "improvement"
+description = "Deprecate the `Project.subproject(load)` &ndash; Instead, a new `Project.subproject(mode)` parameter was added that can be set to `\"empty\"`, `\"execute\"` or `\"if-exists\"`, The `\"if-exists\"` mode behaves exactly like the `Project.subproject(load=False)` option. A new semantic is introduced with the `\"empty\"` mode, which creates a sub-project but does not care if the directory associated with the project exists or if a build script exists as the script will not be executed."
+author = "niklas.rosenstein@helsing.ai"

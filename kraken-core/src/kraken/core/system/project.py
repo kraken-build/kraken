@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Iterable, Mapping, Optional, Type, TypeVa
 
 import builddsl
 from deprecated import deprecated
+from typing_extensions import Literal
 
 from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
@@ -128,38 +129,80 @@ class Project(MetadataContainer, Currentable["Project"]):
         return {p.name: p for p in self._members.values() if isinstance(p, Project)}
 
     @overload
-    def subproject(self, name: str) -> Project:
-        ...
+    def subproject(self, name: str, mode: Literal["empty", "execute"] = "execute") -> Project:
+        """
+        Mount a sub-project of this project with the specified *name*.
+
+        :param name: The name of the sub-project. The address of the returned project will be the current project's
+            address appended by the given *name*. The name must not contain special characters reserved to the Address
+            syntax. The sub-project will be bound to the directory with the same *name* in the directory of the current
+            project.
+        :param mode: Specifies how the project should be created. If set to "empty", the project will be created
+            without loading any build scripts. If set to "execute" (default), the project will be created and its
+            build scripts will be executed.
+        """
 
     @overload
-    def subproject(self, name: str, load: bool) -> Project | None:
-        ...
+    def subproject(self, name: str, mode: Literal["if-exists"]) -> Project | None:
+        """
+        Mount a sub-project of this project with the specified *name* and execute it if the directory matching the
+        *name* exists. If such a directory does not exist, no project is created and `None` is returned. If you want
+        to create a project in any case, you can use this method, and if you get `None` back you can call
+        #subproject() again with the *mode* set to "empty".
+        """
 
-    def subproject(self, name: str, load: bool = True) -> Project | None:
+    @overload
+    @deprecated(reason="use the Project.subproject(mode) parameter instead")
+    def subproject(self, name: str, mode: bool) -> Project | None:
         """
-        Returns the subproject of this project that has the specified *name*. If no such subproject exists yet,
-        it will be created and loaded, however a folder of that *name* must exist. If the folder contains a Kraken
-        build script, that script will also be loaded.
+        This is a deprecated version that is semantically equivalent to calling #subproject() with the *mode*
+        parameter set to "if-exists".
         """
+
+    @overload
+    @deprecated(reason="use the Project.subproject(mode) parameter instead")
+    def subproject(self, name: str, *, load: bool) -> Project | None:
+        """
+        This is a deprecated version that is semantically equivalent to calling #subproject() with the *mode*
+        parameter set to "if-exists".
+        """
+
+    def subproject(
+        self,
+        name: str,
+        mode: bool | Literal["empty", "execute", "if-exists"] = "execute",
+        *,
+        load: bool | None = None,
+    ) -> Project | None:
+        if load is not None:
+            warnings.warn("the `load` parameter is deprecated, use `mode` instead", DeprecationWarning)
+        if isinstance(mode, bool):
+            warnings.warn("the `load` parameter is deprecated, use `mode` instead", DeprecationWarning)
+            mode = "execute" if mode else "if-exists"
+        del load
 
         obj = self._members.get(name)
+        if obj is None and mode == "if-exists":
+            return None
         if obj is not None:
             if not isinstance(obj, Project):
                 raise ValueError(f"{self.path}:{name} does not refer to a project (got {type(obj).__name__} instead)")
             return obj
 
-        if not load:
-            return None
-
         directory = self.directory / name
-        if not directory.is_dir():
-            raise FileNotFoundError(
-                f"{self.path}:{name} cannot be loaded because the directory {directory} does not exist"
-            )
-
-        project = self.context.load_project(directory, self, require_buildscript=False)
-        assert name in self._members
-        assert self._members[name] is project
+        if mode == "empty":
+            project = Project(name, directory, self, self.context)
+            self._members[name] = project
+        elif mode == "execute":
+            if not directory.is_dir():
+                raise FileNotFoundError(
+                    f"{self.path}:{name} cannot be loaded because the directory {directory} does not exist"
+                )
+            project = self.context.load_project(directory, self, require_buildscript=False)
+            assert name in self._members
+            assert self._members[name] is project
+        else:
+            raise ValueError(f"invalid mode {mode!r}")
 
         return project
 
