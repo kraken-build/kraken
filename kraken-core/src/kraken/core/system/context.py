@@ -253,8 +253,8 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         if addresses is None:
             addresses = [
-                ":",  # The current project (will be "expanded" to its default tasks)
-                ":**:",  # All sub-projects (will be "expanded" to their default tasks)
+                ".",  # The current project (will be "expanded" to its default tasks)
+                "**:",  # All sub-projects (will be "expanded" to their default tasks)
             ]
 
         results: list[Task] = []
@@ -263,7 +263,7 @@ class Context(MetadataContainer, Currentable["Context"]):
             try:
                 results += self._resolve_single_address(Address(address), relative_to, space, set_selected)
             except TaskResolutionException:
-                if address == ":**:":
+                if address == "**:":
                     # In case the project has no sub-projects, it is expected not to find any tasks there
                     pass
                 else:
