@@ -15,3 +15,9 @@ id = "b3d542cc-f858-4ad2-a4c0-b65a545618a4"
 type = "improvement"
 description = "Deprecate the `Project.subproject(load)` &ndash; Instead, a new `Project.subproject(mode)` parameter was added that can be set to `\"empty\"`, `\"execute\"` or `\"if-exists\"`, The `\"if-exists\"` mode behaves exactly like the `Project.subproject(load=False)` option. A new semantic is introduced with the `\"empty\"` mode, which creates a sub-project but does not care if the directory associated with the project exists or if a build script exists as the script will not be executed."
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "4f38a015-55a2-4faf-9dc0-bc35b61f955a"
+type = "improvement"
+description = "`TaskGraph.trim()` will now exclude groups from the returned graph if they are empty and if they have no dependencies or all transitive dependencies are also empty groups"
+author = "niklas.rosenstein@helsing.ai"

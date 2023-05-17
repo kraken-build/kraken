@@ -130,12 +130,47 @@ class TaskGraph(Graph):
     def _get_required_tasks(self, goals: Iterable[Task]) -> set[str]:
         """Internal. Return the set of tasks that are required transitively from the goal tasks."""
 
+        def _is_empty_group_subtree(task_path: str) -> None:
+            """
+            Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty or only depends on
+            other empty groups.
+            """
+
+            def _is_empty_group(task_path: str) -> bool:
+                """Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty."""
+
+                task = self._get_task(task_path)
+                if not isinstance(task, GroupTask):
+                    return False
+                return len(task.tasks) == 0
+
+            def _is_empty_group_or_subtree(task_path: str) -> bool:
+                """Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty or only depends
+                on other empty groups."""
+
+                task = self._get_task(task_path)
+                if not isinstance(task, GroupTask):
+                    return False
+                for pred in self._digraph.predecessors(task_path):
+                    if not _is_empty_group_or_subtree(pred):
+                        return False
+                return True
+
+            return _is_empty_group(task_path) or _is_empty_group_or_subtree(task_path)
+
         def _recurse_task(task_path: str, visited: set[str], path: list[str]) -> None:
             if task_path in path:
                 raise RuntimeError(f"encountered a dependency cycle: {' → '.join(path)}")
             visited.add(task_path)
             for pred in self._digraph.predecessors(task_path):
                 if not_none(self._get_edge(pred, task_path)).strict:
+                    # If the thing we want to pick up is a GroupTask and it doesn't have any members or other
+                    # dependencies that are not also empty groups, we can skip it. It really doesn't need to be in the
+                    # build graph.
+                    if isinstance(self._get_task(pred), GroupTask):
+                        # Check if the group is empty or only depends on other empty groups.
+                        if _is_empty_group_subtree(pred):
+                            continue
                     _recurse_task(pred, visited, path + [task_path])
 
         active_tasks: set[str] = set()
