@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
 import databind.json
-from kraken.common import flatten
 from kraken.core import Project, Property, Task, TaskSet
 from termcolor import colored
 from typing_extensions import Literal
@@ -74,6 +73,8 @@ class DistributionTask(Task):
         with wopen_archive(output_file, archive_type) as archive:
             for resource in self.resources.get():
                 arcname = resource.options.arcname
+                if arcname is None:
+                    arcname = str(resource.path.relative_to(self.project.directory))
                 print(
                     "  +",
                     colored(arcname or ".", "green"),
@@ -267,10 +268,7 @@ def get_configured_resources(
             task_options = dependencies_map[next(iter(dependencies_set.partitions()[task]))]
             options = IndividualDistOptions(**vars(task_options))
 
-            if options.arcname is None:
-                if isinstance(resource, (BinaryArtifact, LibraryArtifact)):
-                    options.arcname = resource.name
-                else:
-                    options.arcname = str(resource.path)
+            if options.arcname is None and isinstance(resource, (BinaryArtifact, LibraryArtifact)):
+                options.arcname = resource.name
             configured_resources.append(ConfiguredResource(**vars(resource), options=options))
     return configured_resources
