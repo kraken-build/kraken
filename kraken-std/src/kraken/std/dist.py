@@ -272,8 +272,5 @@ def get_configured_resources(
                     options.arcname = resource.name
                 else:
                     options.arcname = str(resource.path)
-            configured_resources.append(
-                ConfiguredResource(**vars(resource), options=options)
-            )
-
+            configured_resources.append(ConfiguredResource(**vars(resource), options=options))
     return configured_resources
