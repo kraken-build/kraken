@@ -64,7 +64,7 @@ follow to indicate the severity of changes, and packages in this repository are 
 one another according to semantic versioning.
 
 A release must be created by a maintainer that has write access to the `develop` branch. The release process
-is automated usnig Slap.
+is automated using Slap.
 
     $ slap release -tp <patch|minor|major|x.y.z>
     $ slap publish
