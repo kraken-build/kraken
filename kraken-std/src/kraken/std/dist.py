@@ -264,9 +264,7 @@ def get_configured_resources(
 
     for task, task_resources in resources.items():
         for resource in task_resources:
-            task_options = dependencies_map[
-                next(iter(dependencies_set.partitions()[task]))
-            ]
+            task_options = dependencies_map[next(iter(dependencies_set.partitions()[task]))]
             options = IndividualDistOptions(**vars(task_options))
 
             if options.arcname is None:
