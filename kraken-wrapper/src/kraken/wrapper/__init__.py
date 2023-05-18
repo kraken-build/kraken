@@ -4,4 +4,4 @@ __all__ = [
     "DEFAULT_CONFIG_PATH",
     "AuthModel",
 ]
-__version__ = "0.20.3"
+__version__ = "0.20.4"
