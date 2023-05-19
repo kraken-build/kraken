@@ -57,9 +57,7 @@ def helm_package(
     assert False
 
 
-def helm_registry_login(
-    registry: str, username: str, password: str, insecure: bool = False
-) -> tuple[list[str], int]:
+def helm_registry_login(registry: str, username: str, password: str, insecure: bool = False) -> tuple[list[str], int]:
     """Log into a Helm registry."""
 
     command = [
