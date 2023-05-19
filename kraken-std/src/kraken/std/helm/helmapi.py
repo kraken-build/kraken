@@ -16,6 +16,7 @@ def helm_package(
     output_directory: Path | None = None,
     app_version: str | None = None,
     version: str | None = None,
+    update_chart_dependencies: bool = True
 ) -> tuple[int, Path | None]:
     """Package a Helm chart."""
 
@@ -23,7 +24,10 @@ def helm_package(
         raise ValueError("output_file and output_directory cannot both be set")
 
     with contextlib.ExitStack() as exit_stack:
-        command = ["helm", "package", str(chart_path), "--dependency-update"]
+        command = ["helm", "package", str(chart_path)]
+
+        if update_chart_dependencies:
+            command.append("--dependency-update")
 
         # We build into a temporary directory first.
         tempdir = Path(exit_stack.enter_context(tempfile.TemporaryDirectory()))
