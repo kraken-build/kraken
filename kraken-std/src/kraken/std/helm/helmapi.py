@@ -16,6 +16,7 @@ def helm_package(
     output_directory: Path | None = None,
     app_version: str | None = None,
     version: str | None = None,
+    update_chart_dependencies: bool = True,
 ) -> tuple[int, Path | None]:
     """Package a Helm chart."""
 
@@ -24,6 +25,9 @@ def helm_package(
 
     with contextlib.ExitStack() as exit_stack:
         command = ["helm", "package", str(chart_path)]
+
+        if update_chart_dependencies:
+            command.append("--dependency-update")
 
         # We build into a temporary directory first.
         tempdir = Path(exit_stack.enter_context(tempfile.TemporaryDirectory()))
@@ -56,7 +60,15 @@ def helm_package(
 def helm_registry_login(registry: str, username: str, password: str, insecure: bool = False) -> tuple[list[str], int]:
     """Log into a Helm registry."""
 
-    command = ["helm", "registry", "login", registry, "-u", username, "--password-stdin"]
+    command = [
+        "helm",
+        "registry",
+        "login",
+        registry,
+        "-u",
+        username,
+        "--password-stdin",
+    ]
     if insecure:
         command += ["--insecure"]
     return command, sp.run(command, input=f"{password}\n".encode()).returncode
