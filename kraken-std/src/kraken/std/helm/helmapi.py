@@ -16,7 +16,7 @@ def helm_package(
     output_directory: Path | None = None,
     app_version: str | None = None,
     version: str | None = None,
-    update_chart_dependencies: bool = True
+    update_chart_dependencies: bool = True,
 ) -> tuple[int, Path | None]:
     """Package a Helm chart."""
 
@@ -57,10 +57,20 @@ def helm_package(
     assert False
 
 
-def helm_registry_login(registry: str, username: str, password: str, insecure: bool = False) -> tuple[list[str], int]:
+def helm_registry_login(
+    registry: str, username: str, password: str, insecure: bool = False
+) -> tuple[list[str], int]:
     """Log into a Helm registry."""
 
-    command = ["helm", "registry", "login", registry, "-u", username, "--password-stdin"]
+    command = [
+        "helm",
+        "registry",
+        "login",
+        registry,
+        "-u",
+        username,
+        "--password-stdin",
+    ]
     if insecure:
         command += ["--insecure"]
     return command, sp.run(command, input=f"{password}\n".encode()).returncode
