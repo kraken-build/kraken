@@ -17,7 +17,7 @@ version = "0.20.4"
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
 Documentation = "https://kraken-build.github.io/kraken-build/"
 Homepage = "https://kraken-build.github.io/kraken-build/"
-Repository = "https://github.com/kraken-build/kraken-build"
+Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"  # Dill serialization doesn't work in 3.11
