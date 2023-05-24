@@ -1,6 +1,6 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterator, MutableMapping
@@ -69,7 +69,7 @@ class Pyproject(MutableMapping[str, Any]):
 
     def _tool_section(self, name: str) -> Dict[str, Any]:
         return self.setdefault("tool", {}).setdefault(name, {})  # type: ignore[no-any-return]
-    
+
     def _get_pyproj_sources(self, sources_conf: Dict[str, Any]) -> list[dict[str, Any]]:
         return list(sources_conf.setdefault("source", []))
 
@@ -79,7 +79,14 @@ class Pyproject(MutableMapping[str, Any]):
             raise KeyError(source_name)
         del sources_conf[index]
 
-    def _upsert_pyproj_source(self, sources_conf: list[dict[str, Any]], source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+    def _upsert_pyproj_source(
+        self,
+        sources_conf: list[dict[str, Any]],
+        source_name: str,
+        url: str,
+        default: bool = False,
+        secondary: bool = False,
+    ) -> None:
         source_config: dict[str, Any] = {"name": source_name, "url": url}
         if default:
             source_config["default"] = True
@@ -126,7 +133,7 @@ class Pyproject(MutableMapping[str, Any]):
             else:
                 if type(value) is dict:
                     self._find_dependencies_definitions(value, version)
-    
+
     def _update_dependencies_version(self, obj: Dict[str, Any], version: str) -> None:
         for _key, value in obj.items():
             if type(value) == dict:
@@ -135,11 +142,13 @@ class Pyproject(MutableMapping[str, Any]):
                     del value["develop"]
                     value["version"] = version
 
+
 class PyprojectBase(ABC):
     """Builder specific operations"""
+
     def __init__(self, pyproj: Pyproject) -> None:
         self._pyproj = pyproj
-        
+
     def set_version(self, version: str | None) -> str | None:
         """Updates the poetry version field and returns the previous value"""
         return self._pyproj._set_version(self._get_section(), version)
@@ -153,33 +162,37 @@ class PyprojectBase(ABC):
 
     def delete_source(self, source_name: str) -> None:
         return self._pyproj._delete_pyproj_source(self._get_section(), source_name)
-    
+
     def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
         sources = self._pyproj._get_pyproj_sources(self._get_section())
         return self._pyproj._upsert_pyproj_source(sources, source_name, url, default, secondary)
 
     def update_relative_packages(self, version: str) -> None:
         self._pyproj._find_dependencies_definitions(self._get_section(), version)
-        
+
     def get_packages(self, fallback: bool = True) -> list[PoetryPackageInfo]:
         return self._pyproj._get_packages(self._get_section(), fallback)
-    
+
     def save(self, path: Path | None = None) -> None:
         self._pyproj.save(path)
 
+
 class PdmPyproject(PyprojectBase):
     """PDM specific operations"""
+
     def __init__(self, pyproj: Pyproject) -> None:
-        super(PdmPyproject, self).__init__(pyproj)
-        
+        super().__init__(pyproj)
+
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("pdm")
 
+
 class PoetryPyproject(PyprojectBase):
     """Poetry specific operations"""
+
     def __init__(self, pyproj: Pyproject) -> None:
-        super(PoetryPyproject, self).__init__(pyproj)
-        
+        super().__init__(pyproj)
+
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("poetry")
 
@@ -196,9 +209,8 @@ class PoetryPyproject(PyprojectBase):
             else:
                 project_section[field_name] = poetry_value
 
+
 @dataclass
 class PoetryPackageInfo:
     include: str
     from_: str | None = None
-
-

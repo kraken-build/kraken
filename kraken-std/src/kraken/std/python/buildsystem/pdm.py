@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 import subprocess as sp
 from concurrent.futures import ThreadPoolExecutor
@@ -15,7 +14,7 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import Pyproject, PdmPyproject
+from kraken.std.python.pyproject import PdmPyproject, Pyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -59,7 +58,7 @@ class PdmPythonBuildSystem(PythonBuildSystem):
                 safe_password_command = username_command[:-1] + ["MASKED"]
                 logger.info("$ %s", username_command)
                 logger.info("$ %s", safe_password_command)
-                
+
                 code = sp.call(username_command)
                 if code != 0:
                     raise RuntimeError(f"command {username_command!r} failed with exit code {code}")
@@ -123,9 +122,13 @@ class PdmManagedEnvironment(ManagedEnvironment):
         self._env_path: Path | None | NotSet = NotSet.Value
 
     def _get_pdm_environment_path(self) -> list[Path]:
-        """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments. """
+        """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments."""
 
-        create_command = ["pdm", "venv", "create",]
+        create_command = [
+            "pdm",
+            "venv",
+            "create",
+        ]
         command = ["pdm", "venv", "--path", "in-project"]
         try:
             response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
@@ -135,17 +138,16 @@ class PdmManagedEnvironment(ManagedEnvironment):
                 response = sp.check_output(create_command, cwd=self.project_directory).decode().strip().splitlines()
             except sp.CalledProcessError as exc:
                 if exc.returncode != 1:
-                    raise 
+                    raise
                 return []
-                
-            # Retry to get the env path    
+
+            # Retry to get the env path
             try:
                 response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
             except sp.CalledProcessError as exc:
                 if exc.returncode != 1:
-                    raise 
+                    raise
                 return []
-
 
         else:
             return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]

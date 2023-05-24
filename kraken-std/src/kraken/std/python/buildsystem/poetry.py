@@ -15,7 +15,7 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import Pyproject, PoetryPyproject
+from kraken.std.python.pyproject import PoetryPyproject, Pyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem

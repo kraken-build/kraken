@@ -13,7 +13,7 @@ from typing import Collection, List, Optional
 from kraken.common.path import is_relative_to
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import Pyproject, PoetryPyproject
+from ..pyproject import PoetryPyproject, Pyproject
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .poetry import PoetryManagedEnvironment, PoetryPythonBuildSystem
