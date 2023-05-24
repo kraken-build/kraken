@@ -549,22 +549,27 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         graph_options = GraphOptions.collect(args)
 
         with contextlib.ExitStack() as exit_stack:
-            _context, graph = _load_build_state(
-                exit_stack=exit_stack,
-                build_options=build_options,
-                graph_options=graph_options,
-            )
+            _context, graph = None, None
+            try:
+                _context, graph = _load_build_state(
+                    exit_stack=exit_stack,
+                    build_options=build_options,
+                    graph_options=graph_options,
+                )
+            except ValueError as err:
+                print(colored(("> "), "magenta") + colored(str(err), "yellow", attrs=["bold"]))
 
-            if args.query_cmd == "ls":
-                ls(graph)
-            elif args.query_cmd in ("describe", "d"):
-                describe(graph)
-            elif args.query_cmd in ("visualize", "viz", "v"):
-                visualize(graph, VizOptions.collect(args))
-            elif args.query_cmd in ("t", "tree"):
-                tree(graph)
-            else:
-                assert False, args.query_cmd
+            if None not in (_context, graph):
+                if args.query_cmd == "ls":
+                    ls(graph)
+                elif args.query_cmd in ("describe", "d"):
+                    describe(graph)
+                elif args.query_cmd in ("visualize", "viz", "v"):
+                    visualize(graph, VizOptions.collect(args))
+                elif args.query_cmd in ("t", "tree"):
+                    tree(graph)
+                else:
+                    assert False, args.query_cmd
 
     else:
         parser.print_usage()
