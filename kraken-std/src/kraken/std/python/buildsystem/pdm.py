@@ -122,13 +122,28 @@ class PdmManagedEnvironment(ManagedEnvironment):
     def _get_pdm_environment_path(self) -> list[Path]:
         """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments. """
 
+        create_command = ["pdm", "venv", "create",]
         command = ["pdm", "venv", "--path", "in-project"]
         try:
             response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
         except sp.CalledProcessError as exc:
-            if exc.returncode != 1:
-                raise
-            return []
+            # If there is no environment, create one and retrye
+            try:
+                response = sp.check_output(create_command, cwd=self.project_directory).decode().strip().splitlines()
+            except sp.CalledProcessError as exc:
+                if exc.returncode != 1:
+                    raise 
+                return []
+                
+            # Retry to get the env path    
+            try:
+                response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
+            except sp.CalledProcessError as exc:
+                if exc.returncode != 1:
+                    raise 
+                return []
+
+
         else:
             return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
 
@@ -146,9 +161,10 @@ class PdmManagedEnvironment(ManagedEnvironment):
             self._env_path = self._get_pdm_environment_path()
         if self._env_path is None:
             raise RuntimeError("managed environment does not exist")
+        print("TEST", self._env_path)
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        command = ["pdm", "install", "--no-interaction"]
+        command = ["pdm", "install"]
         logger.info("%s", command)
         sp.check_call(command, cwd=self.project_directory)
