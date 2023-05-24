@@ -77,8 +77,8 @@ class PdmPythonBuildSystem(PythonBuildSystem):
             pdm_pyproj = PdmPyproject(pyproject)
             pdm_pyproj.update_relative_packages(as_version)
             previous_version = pdm_pyproj.set_version(as_version)
-            pyproject.save()
-            for package in pyproject.get_packages(fallback=True):
+            pdm_pyproj.save()
+            for package in pdm_pyproj.get_packages(fallback=True):
                 package_dir = self.project_directory / (package.from_ or "") / package.include
                 n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
                 if n_replaced > 0:
@@ -108,8 +108,9 @@ class PdmPythonBuildSystem(PythonBuildSystem):
 
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
-            pyproject.set_pdm_version(previous_version)
-            pyproject.save()
+            pdm_pyproj = PdmPyproject(pyproject)
+            pdm_pyproj.set_version(previous_version)
+            pdm_pyproj.save()
             for package_dir in revert_version_paths:
                 update_python_version_str_in_source_files(previous_version, package_dir)
 

@@ -70,7 +70,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             poetry_pyproj = PoetryPyproject(pyproject)
             poetry_pyproj.update_relative_packages(as_version)
             previous_version = poetry_pyproj.set_version(as_version)
-            pyproject.save()
+            poetry_pyproj.save()
             for package in poetry_pyproj.get_packages(fallback=True):
                 package_dir = self.project_directory / (package.from_ or "") / package.include
                 n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
@@ -102,7 +102,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
             poetry_pyproj.set_version(previous_version)
-            pyproject.save()
+            poetry_pyproj.save()
             for package_dir in revert_version_paths:
                 update_python_version_str_in_source_files(previous_version, package_dir)
 

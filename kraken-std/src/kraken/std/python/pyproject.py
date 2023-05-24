@@ -136,6 +136,7 @@ class Pyproject(MutableMapping[str, Any]):
                     value["version"] = version
 
 class PyprojectBase(ABC):
+    """Builder specific operations"""
     def __init__(self, pyproj: Pyproject) -> None:
         self._pyproj = pyproj
         
@@ -162,9 +163,12 @@ class PyprojectBase(ABC):
         
     def get_packages(self, fallback: bool = True) -> list[PoetryPackageInfo]:
         return self._pyproj._get_packages(self._get_section(), fallback)
-        
+    
+    def save(self, path: Path | None = None) -> None:
+        self._pyproj.save(path)
 
 class PdmPyproject(PyprojectBase):
+    """PDM specific operations"""
     def __init__(self, pyproj: Pyproject) -> None:
         super(PdmPyproject, self).__init__(pyproj)
         
@@ -172,6 +176,7 @@ class PdmPyproject(PyprojectBase):
         return self._pyproj._tool_section("pdm")
 
 class PoetryPyproject(PyprojectBase):
+    """Poetry specific operations"""
     def __init__(self, pyproj: Pyproject) -> None:
         super(PoetryPyproject, self).__init__(pyproj)
         
