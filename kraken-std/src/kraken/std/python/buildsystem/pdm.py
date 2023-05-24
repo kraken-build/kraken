@@ -15,7 +15,7 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import Pyproject, PdmPyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -36,11 +36,12 @@ class PdmPythonBuildSystem(PythonBuildSystem):
         return PdmManagedEnvironment(self.project_directory)
 
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        for source in pyproject.get_pdm_sources():
-            pyproject.delete_pdm_source(source["name"])
+        pdm_pyproj = PdmPyproject(pyproject)
+        for source in pdm_pyproj.get_sources():
+            pdm_pyproj.delete_source(source["name"])
         for index in settings.package_indexes.values():
             if index.is_package_source:
-                pyproject.upsert_pdm_source(index.alias, index.index_url, index.default, not index.default)
+                pdm_pyproj.upsert_source(index.alias, index.index_url, index.default, not index.default)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["pdm", "update"]
@@ -73,10 +74,11 @@ class PdmPythonBuildSystem(PythonBuildSystem):
         if as_version is not None:
             # Bump the in-source version number.
             pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
-            pyproject.update_relative_packages(as_version)
-            previous_version = pyproject.set_pdm_version(as_version)
+            pdm_pyproj = PdmPyproject(pyproject)
+            pdm_pyproj.update_relative_packages(as_version)
+            previous_version = pdm_pyproj.set_version(as_version)
             pyproject.save()
-            for package in pyproject.get_pdm_packages(fallback=True):
+            for package in pyproject.get_packages(fallback=True):
                 package_dir = self.project_directory / (package.from_ or "") / package.include
                 n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
                 if n_replaced > 0:
@@ -161,8 +163,7 @@ class PdmManagedEnvironment(ManagedEnvironment):
             self._env_path = self._get_pdm_environment_path()
         if self._env_path is None:
             raise RuntimeError("managed environment does not exist")
-        print("TEST", self._env_path)
-        return self._env_path
+        return self._env_path[0]
 
     def install(self, settings: PythonSettings) -> None:
         command = ["pdm", "install"]

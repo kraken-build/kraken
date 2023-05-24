@@ -23,9 +23,6 @@ license = {text = "MIT"}
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
-[tool.rye]
-managed = true
-
 [tool.hatch.metadata]
 allow-direct-references = true
 

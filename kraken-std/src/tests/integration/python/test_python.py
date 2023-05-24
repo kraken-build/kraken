@@ -66,6 +66,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
             ),
         ),
         "slap-project",
+        "pdm-project",
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})

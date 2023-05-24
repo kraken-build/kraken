@@ -107,4 +107,9 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
 
         return MaturinPythonBuildSystem(project_directory)
 
+    if "pdm" in pyproject_content:
+        from .pdm import PdmPythonBuildSystem
+
+        return PdmPythonBuildSystem(project_directory)
+
     return None
