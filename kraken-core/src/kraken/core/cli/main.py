@@ -55,7 +55,7 @@ pretty_errors.configure(
     display_arrow        = True,
     display_trace_locals = False,
     display_timestamp    = False,
-    prefix               = pretty_errors.BRIGHT_MAGENTA + '\nLet no joyful voice be heard! Let no man look up at the sky with hope! And let this day be cursed by we who ready to wake... the Kraken!' + pretty_errors.default_config.line_color + '\nAlas sailor, there is nought you can do. Please check your Kraken build script, and then report this stacktrace to the Kraken repository:\n' + pretty_errors.CYAN + 'https://github.com/kraken-build/kraken-core/issues\n\n' + pretty_errors.MAGENTA + '> ' + pretty_errors.default_config.line_color + 'Kraken Version: ' + pretty_errors.BRIGHT_MAGENTA + __version__ + pretty_errors.MAGENTA + '\n>',
+    prefix               = pretty_errors.BRIGHT_MAGENTA + '\nLet no joyful voice be heard! Let no man look up at the sky with hope! And let this day be cursed by we who ready to wake... the Kraken!' + pretty_errors.default_config.line_color + '\nAlas sailor, there is nought you can do. Please check your Kraken build script, and then report this stacktrace to the Kraken repository:\n' + pretty_errors.CYAN + 'https://github.com/kraken-build/kraken-build/issues\n\n' + pretty_errors.MAGENTA + '> ' + pretty_errors.default_config.line_color + 'Kraken Version: ' + pretty_errors.BRIGHT_MAGENTA + __version__ + pretty_errors.MAGENTA + '\n>',
     infix                = pretty_errors.MAGENTA + '> ',
     arrow_head_character = '»',
     arrow_tail_character = '«',
