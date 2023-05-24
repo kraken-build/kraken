@@ -73,7 +73,7 @@ class Pyproject(MutableMapping[str, Any]):
     def _get_pyproj_sources(self, sources_conf: Dict[str, Any]) -> list[dict[str, Any]]:
         return list(sources_conf.setdefault("source", []))
 
-    def _delete_pyproj_source(self, sources_conf: Dict[str, Any], source_name: str) -> None:
+    def _delete_pyproj_source(self, sources_conf: list[dict[str, Any]], source_name: str) -> None:
         index = next((i for i, v in enumerate(sources_conf) if v["name"] == source_name), None)
         if index is None:
             raise KeyError(source_name)
@@ -161,10 +161,10 @@ class PyprojectBase(ABC):
         return list(self._get_section().setdefault("source", []))
 
     def delete_source(self, source_name: str) -> None:
-        return self._pyproj._delete_pyproj_source(self._get_section(), source_name)
+        return self._pyproj._delete_pyproj_source(self.get_sources(), source_name)
 
     def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
-        sources = self._pyproj._get_pyproj_sources(self._get_section())
+        sources = self.get_sources()
         return self._pyproj._upsert_pyproj_source(sources, source_name, url, default, secondary)
 
     def update_relative_packages(self, version: str) -> None:
