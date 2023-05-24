@@ -5,12 +5,10 @@ from __future__ import annotations
 import logging
 import shutil
 import subprocess as sp
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
-from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
@@ -121,7 +119,7 @@ class PdmManagedEnvironment(ManagedEnvironment):
         self.project_directory = project_directory
         self._env_path: Path | None | NotSet = NotSet.Value
 
-    def _get_pdm_environment_path(self) -> list[Path]:
+    def _get_pdm_environment_path(self) -> None | Path:
         """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments."""
 
         create_command = [
@@ -132,14 +130,14 @@ class PdmManagedEnvironment(ManagedEnvironment):
         command = ["pdm", "venv", "--path", "in-project"]
         try:
             response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
-        except sp.CalledProcessError as exc:
+        except sp.CalledProcessError:
             # If there is no environment, create one and retrye
             try:
                 response = sp.check_output(create_command, cwd=self.project_directory).decode().strip().splitlines()
             except sp.CalledProcessError as exc:
                 if exc.returncode != 1:
                     raise
-                return []
+                return None
 
             # Retry to get the env path
             try:
@@ -147,10 +145,10 @@ class PdmManagedEnvironment(ManagedEnvironment):
             except sp.CalledProcessError as exc:
                 if exc.returncode != 1:
                     raise
-                return []
-
+                return None
+            return None
         else:
-            return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
+            return [Path(line.replace(" (Activated)", "").strip()) for line in response if line][0]
 
     # ManagedEnvironment
 
@@ -166,7 +164,7 @@ class PdmManagedEnvironment(ManagedEnvironment):
             self._env_path = self._get_pdm_environment_path()
         if self._env_path is None:
             raise RuntimeError("managed environment does not exist")
-        return self._env_path[0]
+        return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
         command = ["pdm", "install"]
