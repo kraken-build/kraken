@@ -12,7 +12,7 @@ import sys
 import textwrap
 from functools import partial
 from pathlib import Path
-from typing import Any, NoReturn, Optional, cast
+from typing import Any, NoReturn, Optional
 
 from kraken.common import (
     BuildscriptMetadata,
@@ -561,7 +561,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
                 print(colored(("> "), "magenta") + colored(str(err), "yellow", attrs=["bold"]))
 
             if _graph is not None:
-                graph = cast(TaskGraph, _graph)
+                graph: TaskGraph = _graph
 
                 if args.query_cmd == "ls":
                     ls(graph)
