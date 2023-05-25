@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, NoReturn
 
 import pretty_errors  # type: ignore
-
 from kraken.common import (
     BuildscriptMetadata,
     CurrentDirectoryProjectFinder,
