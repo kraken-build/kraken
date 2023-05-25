@@ -71,8 +71,8 @@ pretty_errors.configure(
     + pretty_errors.MAGENTA
     + "\n>",
     infix=pretty_errors.MAGENTA + "> ",
-    arrow_head_character="»",
-    arrow_tail_character="«",
+    arrow_head_character="  ↑",
+    arrow_tail_character=" ",
     trace_lines_before=0,
     trace_lines_after=0,
     header_color=pretty_errors.default_config.line_color,
@@ -89,9 +89,14 @@ pretty_errors.configure(
     local_value_color=pretty_errors.YELLOW,
     inner_exception_message=pretty_errors.MAGENTA
     + "\n> "
+    + pretty_errors.YELLOW
+    + "WARNING: "
     + pretty_errors.default_config.line_color
-    + "During handling of the above exception, another exception occurred:\n",
+    + "The above exception was the direct cause of the following exception:\n",
     syntax_error_color=pretty_errors.MAGENTA,
+    arrow_head_color=pretty_errors.CYAN,
+    inner_exception_separator=True,
+    show_suppressed=True,
 )
 
 if not pretty_errors.terminal_is_interactive:
