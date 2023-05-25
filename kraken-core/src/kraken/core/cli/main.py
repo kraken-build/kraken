@@ -549,10 +549,9 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         graph_options = GraphOptions.collect(args)
 
         with contextlib.ExitStack() as exit_stack:
-            _context: Optional[Context] = None
-            _graph: Optional[TaskGraph] = None
+            optional_graph: Optional[TaskGraph] = None
             try:
-                _context, _graph = _load_build_state(
+                _, optional_graph = _load_build_state(
                     exit_stack=exit_stack,
                     build_options=build_options,
                     graph_options=graph_options,
@@ -560,8 +559,8 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
             except ValueError as err:
                 print(colored(("> "), "magenta") + colored(str(err), "yellow", attrs=["bold"]))
 
-            if _graph is not None:
-                graph: TaskGraph = _graph
+            if optional_graph is not None:
+                graph: TaskGraph = optional_graph
 
                 if args.query_cmd == "ls":
                     ls(graph)
