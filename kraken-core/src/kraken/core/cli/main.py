@@ -13,7 +13,8 @@ import textwrap
 from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
-import pretty_errors
+
+import pretty_errors # type: ignore
 
 from kraken.common import (
     BuildscriptMetadata,
@@ -43,39 +44,56 @@ from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import GroupTask, Task
 
-
 pretty_errors.configure(
-    separator_character  = pretty_errors.CYAN + '≈',
-    filename_display     = pretty_errors.FILENAME_COMPACT,
-    line_number_first    = False,
-    lines_before         = 2,
-    lines_after          = 2,
-    display_link         = True,
-    display_locals       = False,
-    display_arrow        = True,
-    display_trace_locals = False,
-    display_timestamp    = False,
-    prefix               = pretty_errors.MAGENTA + '\nLet no joyful voice be heard! Let no man look up at the sky with hope! And let this day be cursed by we who ready to wake... the Kraken!' + pretty_errors.default_config.line_color + '\nAlas sailor, there is nought you can do. Please check your Kraken build script, and then report this stacktrace to the Kraken repository:\n' + pretty_errors.CYAN + 'https://github.com/kraken-build/kraken-build/issues\n\n' + pretty_errors.MAGENTA + '> ' + pretty_errors.default_config.line_color + 'Kraken Version: ' + pretty_errors.BRIGHT_MAGENTA + __version__ + pretty_errors.MAGENTA + '\n>',
-    infix                = pretty_errors.MAGENTA + '> ',
-    arrow_head_character = '»',
-    arrow_tail_character = '«',
-    trace_lines_before   = 0,
-    trace_lines_after    = 0,
-    header_color         = pretty_errors.default_config.line_color,
-    line_color           = pretty_errors.MAGENTA + '> ' + pretty_errors.default_config.line_color,
-    link_color           = pretty_errors.CYAN + '> ' + pretty_errors.default_config.line_color,
-    code_color           = pretty_errors.CYAN + '> ' + pretty_errors.default_config.line_color,
-    line_number_color    = pretty_errors.MAGENTA + '#' + pretty_errors.default_config.line_color,
-    filename_color       = pretty_errors.MAGENTA + '> ' + pretty_errors.default_config.line_color,
-    exception_color      = pretty_errors.CYAN + '> ' + pretty_errors.YELLOW,
-    exception_arg_color  = pretty_errors.MAGENTA + '> ' + pretty_errors.YELLOW,
-    exception_file_color = pretty_errors.MAGENTA + '> ' + pretty_errors.YELLOW,
-    function_color       = pretty_errors.CYAN,
-    local_name_color     = pretty_errors.CYAN + '> ' + pretty_errors.default_config.line_color,
-    local_value_color    = pretty_errors.YELLOW,
-    inner_exception_message = pretty_errors.MAGENTA + '\n> ' + pretty_errors.default_config.line_color + "During handling of the above exception, another exception occurred:\n",
-    syntax_error_color = pretty_errors.MAGENTA,
-    )
+    separator_character=pretty_errors.CYAN + "≈",
+    filename_display=pretty_errors.FILENAME_COMPACT,
+    line_number_first=False,
+    lines_before=2,
+    lines_after=2,
+    display_link=True,
+    display_locals=False,
+    display_arrow=True,
+    display_trace_locals=False,
+    display_timestamp=False,
+    prefix=pretty_errors.MAGENTA
+    + "\nLet no joyful voice be heard! Let no man look up at the sky with hope!"
+    + " And let this day be cursed by we who ready to wake... the Kraken!"
+    + pretty_errors.default_config.line_color
+    + "\nAlas sailor, there is nought you can do. Please check your Kraken build"
+    + " script, and then report this stacktrace to the Kraken repository:\n"
+    + pretty_errors.CYAN
+    + "https://github.com/kraken-build/kraken-build/issues\n\n"
+    + pretty_errors.MAGENTA
+    + "> "
+    + pretty_errors.default_config.line_color
+    + "Kraken Version: "
+    + pretty_errors.BRIGHT_MAGENTA
+    + __version__
+    + pretty_errors.MAGENTA
+    + "\n>",
+    infix=pretty_errors.MAGENTA + "> ",
+    arrow_head_character="»",
+    arrow_tail_character="«",
+    trace_lines_before=0,
+    trace_lines_after=0,
+    header_color=pretty_errors.default_config.line_color,
+    line_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
+    link_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    code_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    line_number_color=pretty_errors.MAGENTA + "#" + pretty_errors.default_config.line_color,
+    filename_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
+    exception_color=pretty_errors.CYAN + "> " + pretty_errors.YELLOW,
+    exception_arg_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
+    exception_file_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
+    function_color=pretty_errors.CYAN,
+    local_name_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    local_value_color=pretty_errors.YELLOW,
+    inner_exception_message=pretty_errors.MAGENTA
+    + "\n> "
+    + pretty_errors.default_config.line_color
+    + "During handling of the above exception, another exception occurred:\n",
+    syntax_error_color=pretty_errors.MAGENTA,
+)
 
 if not pretty_errors.terminal_is_interactive:
     pretty_errors.mono()
