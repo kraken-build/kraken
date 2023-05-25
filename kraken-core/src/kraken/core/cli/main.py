@@ -14,7 +14,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
-import pretty_errors # type: ignore
+import pretty_errors  # type: ignore
 
 from kraken.common import (
     BuildscriptMetadata,
