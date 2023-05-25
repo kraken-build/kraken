@@ -12,7 +12,7 @@ import sys
 import textwrap
 from functools import partial
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import Any, NoReturn, Optional, cast
 
 from kraken.common import (
     BuildscriptMetadata,
@@ -549,9 +549,10 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         graph_options = GraphOptions.collect(args)
 
         with contextlib.ExitStack() as exit_stack:
-            _context, graph = None, None
+            _context: Optional[Context] = None
+            _graph: Optional[TaskGraph] = None
             try:
-                _context, graph = _load_build_state(
+                _context, _graph = _load_build_state(
                     exit_stack=exit_stack,
                     build_options=build_options,
                     graph_options=graph_options,
@@ -559,7 +560,9 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
             except ValueError as err:
                 print(colored(("> "), "magenta") + colored(str(err), "yellow", attrs=["bold"]))
 
-            if None not in (_context, graph):
+            if _graph is not None:
+                graph = cast(TaskGraph, _graph)
+
                 if args.query_cmd == "ls":
                     ls(graph)
                 elif args.query_cmd in ("describe", "d"):
