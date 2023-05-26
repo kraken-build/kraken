@@ -559,12 +559,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
             except ValueError as err:
                 print(
                     colored(("> "), "magenta")
-                    + colored("Kraken has detected a local error: " + str(err), "yellow", attrs=["bold"])
-                )
-            except RuntimeError as err:
-                print(
-                    colored(("> "), "magenta")
-                    + colored("Kraken has detected a scripting error: " + str(err), "yellow", attrs=["bold"])
+                    + colored("Kraken has detected an error: " + str(err), "yellow", attrs=["bold"])
                 )
                 if err.__cause__ is not None:
                     sys.excepthook(type(err.__cause__), err.__cause__, err.__cause__.__traceback__)
