@@ -109,8 +109,15 @@ class PythonScriptRunner(ScriptPicker):
         module = types.ModuleType(str(script.parent))
         module.__file__ = str(script)
 
-        code = compile(script.read_text(), script, "exec")
-        exec(code, vars(module))
+        try:
+            code = compile(script.read_text(), script, "exec")
+        except BaseException as err:
+            raise RuntimeError("Script Failed to compile") from err
+
+        try:
+            exec(code, vars(module))
+        except BaseException as err:
+            raise RuntimeError("Script Runtime error") from err
 
     def has_buildscript_call(self, script: Path) -> bool:
         code = script.read_text()
