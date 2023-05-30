@@ -37,9 +37,10 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install kraken-wrapper
 
-    # Need Poetry for integration tests.
+    # Need Poetry and PDM for integration tests.
     - run: pipx install poetry 
     - run: curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -
+    - run: pdm venv create ${{ matrix.python-version }}
 
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
