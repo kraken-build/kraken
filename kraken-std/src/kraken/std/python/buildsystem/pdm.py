@@ -1,4 +1,4 @@
-""" Implements Pdm as a build system for kraken-std. """
+""" Implements PDM as a build system for kraken-std. """
 
 from __future__ import annotations
 
@@ -11,8 +11,7 @@ from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.core import TaskStatus
 
-from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import PdmPyproject, Pyproject
+from kraken.std.python.pyproject import PDMPyproject, Pyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -20,8 +19,8 @@ from . import ManagedEnvironment, PythonBuildSystem
 logger = logging.getLogger(__name__)
 
 
-class PdmPythonBuildSystem(PythonBuildSystem):
-    name = "Pdm"
+class PDMPythonBuildSystem(PythonBuildSystem):
+    name = "PDM"
 
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
@@ -30,10 +29,10 @@ class PdmPythonBuildSystem(PythonBuildSystem):
         return True
 
     def get_managed_environment(self) -> ManagedEnvironment:
-        return PdmManagedEnvironment(self.project_directory)
+        return PDMManagedEnvironment(self.project_directory)
 
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        pdm_pyproj = PdmPyproject(pyproject)
+        pdm_pyproj = PDMPyproject(pyproject)
         for source in pdm_pyproj.get_sources():
             pdm_pyproj.delete_source(source["name"])
         for index in settings.package_indexes.values():
@@ -51,8 +50,8 @@ class PdmPythonBuildSystem(PythonBuildSystem):
     def login(self, settings: PythonSettings) -> None:
         for index in settings.package_indexes.values():
             if index.is_package_source and index.credentials:
-                username_command = ["pdm", "config", "pypi." + index.alias + ".username", index.credentials[0]]
-                password_command = ["pdm", "config", "pypi." + index.alias + ".password", index.credentials[1]]
+                username_command = ["pdm", "config", f"pypi.{index.alias}.username", index.credentials[0]]
+                password_command = ["pdm", "config", f"pypi.{index.alias}.password", index.credentials[1]]
                 safe_password_command = username_command[:-1] + ["MASKED"]
                 logger.info("$ %s", username_command)
                 logger.info("$ %s", safe_password_command)
@@ -71,21 +70,12 @@ class PdmPythonBuildSystem(PythonBuildSystem):
         if as_version is not None:
             # Bump the in-source version number.
             pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
-            pdm_pyproj = PdmPyproject(pyproject)
+            pdm_pyproj = PDMPyproject(pyproject)
             pdm_pyproj.update_relative_packages(as_version)
             previous_version = pdm_pyproj.set_version(as_version)
             pdm_pyproj.save()
-            for package in pdm_pyproj.get_packages(fallback=True):
-                package_dir = self.project_directory / (package.from_ or "") / package.include
-                n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
-                if n_replaced > 0:
-                    revert_version_paths.append(package_dir)
-                    print(
-                        f"Bumped {n_replaced} version reference(s) in "
-                        f"{package_dir.relative_to(self.project_directory)} to {as_version}"
-                    )
 
-        # Pdm does not allow configuring the output folder, so it's always going to be "dist/".
+        # PDM does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
         dist_dir = self.project_directory / "dist"
         if dist_dir.exists():
@@ -105,16 +95,14 @@ class PdmPythonBuildSystem(PythonBuildSystem):
 
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
-            pdm_pyproj = PdmPyproject(pyproject)
+            pdm_pyproj = PDMPyproject(pyproject)
             pdm_pyproj.set_version(previous_version)
             pdm_pyproj.save()
-            for package_dir in revert_version_paths:
-                update_python_version_str_in_source_files(previous_version, package_dir)
 
         return dst_files
 
 
-class PdmManagedEnvironment(ManagedEnvironment):
+class PDMManagedEnvironment(ManagedEnvironment):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
         self._env_path: Path | None | NotSet = NotSet.Value

@@ -74,9 +74,7 @@ class Pyproject(MutableMapping[str, Any]):
         return list(sources_conf.setdefault("source", []))
 
     def _delete_pyproj_source(self, sources_conf: list[dict[str, Any]], source_name: str) -> None:
-        index = next((i for i, v in enumerate(sources_conf) if v["name"] == source_name), None)
-        if index is None:
-            raise KeyError(source_name)
+        index = [conf["name"] for conf in sources_conf].index(source_name)
         del sources_conf[index]
 
     def _upsert_pyproj_source(
@@ -99,19 +97,6 @@ class Pyproject(MutableMapping[str, Any]):
             sources_conf.append(source_config)
         else:
             source.update(source_config)
-
-    def _get_packages(self, sources_conf: Dict[str, Any], fallback: bool = False) -> list[PoetryPackageInfo]:
-        """
-        Returns the information stored in `[tool.poetry.packages]` configuration. If that configuration does not
-        exist and *fallback* is set to True, the default that Poetry will assume is returned.
-        """
-
-        packages: list[dict[str, Any]] | None = sources_conf.get("packages")
-        if packages is None and fallback:
-            package_name = sources_conf["name"]
-            return [PoetryPackageInfo(include=package_name.replace("-", "_").replace(".", "_"))]
-        else:
-            return [PoetryPackageInfo(include=x["include"], from_=x.get("from")) for x in packages or ()]
 
     def _find_dependencies_definitions(self, pyproject_section: Dict[str, Any], version: str) -> None:
         """
@@ -143,7 +128,7 @@ class Pyproject(MutableMapping[str, Any]):
                     value["version"] = version
 
 
-class PyprojectBase(ABC):
+class SpecializedPyproject(ABC):
     """Builder specific operations"""
 
     def __init__(self, pyproj: Pyproject) -> None:
@@ -170,14 +155,11 @@ class PyprojectBase(ABC):
     def update_relative_packages(self, version: str) -> None:
         self._pyproj._find_dependencies_definitions(self._get_section(), version)
 
-    def get_packages(self, fallback: bool = True) -> list[PoetryPackageInfo]:
-        return self._pyproj._get_packages(self._get_section(), fallback)
-
     def save(self, path: Path | None = None) -> None:
         self._pyproj.save(path)
 
 
-class PdmPyproject(PyprojectBase):
+class PDMPyproject(SpecializedPyproject):
     """PDM specific operations"""
 
     def __init__(self, pyproj: Pyproject) -> None:
@@ -187,7 +169,7 @@ class PdmPyproject(PyprojectBase):
         return self._pyproj._tool_section("pdm")
 
 
-class PoetryPyproject(PyprojectBase):
+class PoetryPyproject(SpecializedPyproject):
     """Poetry specific operations"""
 
     def __init__(self, pyproj: Pyproject) -> None:
@@ -195,6 +177,19 @@ class PoetryPyproject(PyprojectBase):
 
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("poetry")
+
+    def get_packages(self, fallback: bool = True) -> list[PoetryPackageInfo]:
+        """
+        Returns the information stored in `[tool.poetry.packages]` configuration. If that configuration does not
+        exist and *fallback* is set to True, the default that Poetry will assume is returned.
+        """
+
+        packages: list[dict[str, Any]] | None = self.get_sources().get("packages")
+        if packages is None and fallback:
+            package_name = self.get_sources()["name"]
+            return [PoetryPackageInfo(include=package_name.replace("-", "_").replace(".", "_"))]
+        else:
+            return [PoetryPackageInfo(include=x["include"], from_=x.get("from")) for x in packages or ()]
 
     def synchronize_project_section_to_poetry_state(self) -> None:
         poetry_section = self._get_section()
