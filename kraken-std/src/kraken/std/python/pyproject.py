@@ -184,9 +184,9 @@ class PoetryPyproject(SpecializedPyproject):
         exist and *fallback* is set to True, the default that Poetry will assume is returned.
         """
 
-        packages: list[dict[str, Any]] | None = self.get_sources().get("packages")
+        packages: list[dict[str, Any]] | None = self._get_section().get("packages")
         if packages is None and fallback:
-            package_name = self.get_sources()["name"]
+            package_name = self._get_section()["name"]
             return [PoetryPackageInfo(include=package_name.replace("-", "_").replace(".", "_"))]
         else:
             return [PoetryPackageInfo(include=x["include"], from_=x.get("from")) for x in packages or ()]

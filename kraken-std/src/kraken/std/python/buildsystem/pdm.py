@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import subprocess as sp
 from pathlib import Path
@@ -49,7 +50,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def login(self, settings: PythonSettings) -> None:
         for index in settings.package_indexes.values():
+            print("DEBUG   ", index)
             if index.is_package_source and index.credentials:
+                print("DEBUG2   ", index)
                 username_command = ["pdm", "config", f"pypi.{index.alias}.username", index.credentials[0]]
                 password_command = ["pdm", "config", f"pypi.{index.alias}.password", index.credentials[1]]
                 safe_password_command = username_command[:-1] + ["MASKED"]
@@ -66,7 +69,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         previous_version: str | None = None
-        revert_version_paths: list[Path] = []
+
         if as_version is not None:
             # Bump the in-source version number.
             pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
@@ -82,10 +85,12 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["pdm", "build"]
+        
         logger.info("%s", command)
         sp.check_call(command, cwd=self.project_directory)
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
+        os.makedirs(output_directory, exist_ok=True)
         for src, dst in zip(src_files, dst_files):
             shutil.move(str(src), dst)
 
