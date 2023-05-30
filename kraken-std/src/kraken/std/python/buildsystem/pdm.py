@@ -50,9 +50,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def login(self, settings: PythonSettings) -> None:
         for index in settings.package_indexes.values():
-            print("DEBUG   ", index)
             if index.is_package_source and index.credentials:
-                print("DEBUG2   ", index)
                 username_command = ["pdm", "config", f"pypi.{index.alias}.username", index.credentials[0]]
                 password_command = ["pdm", "config", f"pypi.{index.alias}.password", index.credentials[1]]
                 safe_password_command = username_command[:-1] + ["MASKED"]
@@ -85,7 +83,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["pdm", "build"]
-        
+
         logger.info("%s", command)
         sp.check_call(command, cwd=self.project_directory)
         src_files = list(dist_dir.iterdir())
@@ -119,6 +117,7 @@ class PDMManagedEnvironment(ManagedEnvironment):
             "pdm",
             "venv",
             "create",
+            "3.10"
         ]
         command = ["pdm", "venv", "--path", "in-project"]
         try:
