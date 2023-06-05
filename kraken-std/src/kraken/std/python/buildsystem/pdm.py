@@ -72,16 +72,12 @@ class PDMPythonBuildSystem(PythonBuildSystem):
                 ]
                 for command in commands:
                     safe_command = command[:-1] + ["MASKED"]
-                    logger.info("$ %s", command)
                     logger.info("$ %s", safe_command)
 
                     code = sp.call(command)
                     if code != 0:
                         raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-                    code = sp.call(command)
-                    if code != 0:
-                        raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         previous_version: str | None = None
