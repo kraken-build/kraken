@@ -77,27 +77,6 @@ class Pyproject(MutableMapping[str, Any]):
         index = [conf["name"] for conf in sources_conf].index(source_name)
         del sources_conf[index]
 
-    def _upsert_pyproj_source(
-        self,
-        sources_conf: list[dict[str, Any]],
-        source_name: str,
-        url: str,
-        default: bool = False,
-        secondary: bool = False,
-    ) -> None:
-        source_config: dict[str, Any] = {"name": source_name, "url": url}
-        if default:
-            source_config["default"] = True
-        if secondary:
-            source_config["secondary"] = True
-
-        # Find the source with the same name and update it, or create a new one.
-        source = next((x for x in sources_conf if x["name"] == source_name), None)
-        if source is None:
-            sources_conf.append(source_config)
-        else:
-            source.update(source_config)
-
     def _find_dependencies_definitions(self, pyproject_section: Dict[str, Any], version: str) -> None:
         """
         Finds and updates the version of local dependencies listed in the
@@ -148,10 +127,6 @@ class SpecializedPyproject(ABC):
     def delete_source(self, source_name: str) -> None:
         return self._pyproj._delete_pyproj_source(self.get_sources(), source_name)
 
-    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
-        sources = self.get_sources()
-        return self._pyproj._upsert_pyproj_source(sources, source_name, url, default, secondary)
-
     def update_relative_packages(self, version: str) -> None:
         self._pyproj._find_dependencies_definitions(self._get_section(), version)
 
@@ -164,6 +139,10 @@ class SpecializedPyproject(ABC):
 
     @abstractmethod
     def get_version(self) -> str | None:
+        pass
+
+    @abstractmethod
+    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
         pass
 
 
@@ -181,6 +160,17 @@ class PDMPyproject(SpecializedPyproject):
 
     def get_version(self) -> str | None:
         return cast(str, self._pyproj["project"].get("requires-python", None))
+
+    def upsert_source(self, source_name: str, url: str, _default: bool = False, _secondary: bool = False) -> None:
+        sources_conf = self.get_sources()
+        source_config: dict[str, Any] = {"name": source_name, "url": url}
+
+        # Find the source with the same name and update it, or create a new one.
+        source = next((x for x in sources_conf if x["name"] == source_name), None)
+        if source is None:
+            sources_conf.append(source_config)
+        else:
+            source.update(source_config)
 
 
 class PoetryPyproject(SpecializedPyproject):
@@ -223,6 +213,21 @@ class PoetryPyproject(SpecializedPyproject):
                 poetry_section[field_name] = project_value
             else:
                 project_section[field_name] = poetry_value
+
+    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+        sources_conf = self.get_sources()
+        source_config: dict[str, Any] = {"name": source_name, "url": url}
+        if default:
+            source_config["default"] = True
+        if secondary:
+            source_config["secondary"] = True
+
+        # Find the source with the same name and update it, or create a new one.
+        source = next((x for x in sources_conf if x["name"] == source_name), None)
+        if source is None:
+            sources_conf.append(source_config)
+        else:
+            source.update(source_config)
 
 
 @dataclass
