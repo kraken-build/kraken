@@ -98,7 +98,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         command = ["pdm", "build"]
 
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
+        sp.check_call(command, cwd=self.project_directory, env={"PDM_BUILD_NO_CLEAN": 1})
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         os.makedirs(output_directory, exist_ok=True)
@@ -173,4 +173,4 @@ class PDMManagedEnvironment(ManagedEnvironment):
     def install(self, settings: PythonSettings) -> None:
         command = ["pdm", "install", "--no-lock"]
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
+        sp.check_call(command, cwd=self.project_directory, env={"PDM_BUILD_NO_CLEAN": 1})
