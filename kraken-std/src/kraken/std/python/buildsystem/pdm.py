@@ -171,6 +171,6 @@ class PDMManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        command = ["pdm", "install"]
+        command = ["pdm", "install", "--no-lock"]
         logger.info("%s", command)
         sp.check_call(command, cwd=self.project_directory)
