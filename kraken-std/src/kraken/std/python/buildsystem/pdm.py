@@ -56,7 +56,6 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             if index.is_package_source and index.credentials:
                 commands = [
                     ["pdm", "config", f"pypi.{index.alias}.url", index.index_url],
-                    ["pdm", "config", f"pypi.{index.alias}.name", index.alias],
                     [
                         "pdm",
                         "config",
