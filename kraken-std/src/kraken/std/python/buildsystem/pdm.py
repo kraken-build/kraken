@@ -54,19 +54,34 @@ class PDMPythonBuildSystem(PythonBuildSystem):
     def login(self, settings: PythonSettings) -> None:
         for index in settings.package_indexes.values():
             if index.is_package_source and index.credentials:
-                username_command = ["pdm", "config", f"pypi.{index.alias}.username", index.credentials[0]]
-                password_command = ["pdm", "config", f"pypi.{index.alias}.password", index.credentials[1]]
-                safe_password_command = username_command[:-1] + ["MASKED"]
-                logger.info("$ %s", username_command)
-                logger.info("$ %s", safe_password_command)
+                commands = [
+                    ["pdm", "config", f"pypi.{index.alias}.url", index.index_url],
+                    ["pdm", "config", f"pypi.{index.alias}.name", index.alias],
+                    [
+                        "pdm",
+                        "config",
+                        f"pypi.{index.alias}.username",
+                        index.credentials[0],
+                    ],
+                    [
+                        "pdm",
+                        "config",
+                        f"pypi.{index.alias}.password",
+                        index.credentials[1],
+                    ],
+                ]
+                for command in commands:
+                    safe_command = command[:-1] + ["MASKED"]
+                    logger.info("$ %s", command)
+                    logger.info("$ %s", safe_command)
 
-                code = sp.call(username_command)
-                if code != 0:
-                    raise RuntimeError(f"command {username_command!r} failed with exit code {code}")
+                    code = sp.call(command)
+                    if code != 0:
+                        raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-                code = sp.call(password_command)
-                if code != 0:
-                    raise RuntimeError(f"command {password_command!r} failed with exit code {code}")
+                    code = sp.call(command)
+                    if code != 0:
+                        raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         previous_version: str | None = None
