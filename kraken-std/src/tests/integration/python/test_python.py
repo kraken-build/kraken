@@ -3,8 +3,13 @@ import logging
 import os
 import shutil
 import tarfile
+from typing import Type, TypeVar
 import unittest.mock
 from pathlib import Path
+
+from kraken.std.python.pyproject import Pyproject
+
+from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject
 
 import pytest
 import tomli
@@ -136,3 +141,33 @@ def test__python_project_upgrade_python_version_string(
         conf_file = tar.extractfile(f"version_project-{build_as_version}/pyproject.toml")
         assert conf_file is not None, ".tar.gz file does not contain an 'pyproject.toml'"
         assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
+
+M = TypeVar('M', PDMPyproject, PoetryPyproject)
+
+@pytest.mark.parametrize(
+    "project_dir, reader",
+    [
+        ("poetry-project", PoetryPyproject),
+        ("slap-project", PoetryPyproject),
+        ("pdm-project", PDMPyproject),
+    ],
+)
+@unittest.mock.patch.dict(os.environ, {})
+def test__python_pyproject_reads_correct_data(
+    project_dir: str,
+    reader: Type[M],
+    tempdir: Path,
+) -> None:
+    consumer_dir = project_dir + "-consumer"
+
+    # Copy the projects to the temporary directory.
+    shutil.copytree(Path(__file__).parent / "data" / project_dir, tempdir / project_dir)
+    shutil.copytree(Path(__file__).parent / "data" / consumer_dir, tempdir / consumer_dir)
+
+    logger.info("Loading and executing Kraken project (%s)", tempdir)
+    pyproject = Pyproject.read(tempdir / project_dir / "pyproject.toml")
+    
+    spec = reader(pyproject)
+    
+    assert spec.get_name() == project_dir
+    

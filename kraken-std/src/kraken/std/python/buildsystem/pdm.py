@@ -50,9 +50,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def login(self, settings: PythonSettings) -> None:
         for index in settings.package_indexes.values():
-            print("DEBUG   ", index)
             if index.is_package_source and index.credentials:
-                print("DEBUG2   ", index)
                 username_command = ["pdm", "config", f"pypi.{index.alias}.username", index.credentials[0]]
                 password_command = ["pdm", "config", f"pypi.{index.alias}.password", index.credentials[1]]
                 safe_password_command = username_command[:-1] + ["MASKED"]

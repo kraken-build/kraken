@@ -167,6 +167,9 @@ class PDMPyproject(SpecializedPyproject):
 
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("pdm")
+    
+    def get_name(self) -> str:
+        return self._pyproj['project']['name']
 
 
 class PoetryPyproject(SpecializedPyproject):
@@ -174,6 +177,9 @@ class PoetryPyproject(SpecializedPyproject):
 
     def __init__(self, pyproj: Pyproject) -> None:
         super().__init__(pyproj)
+
+    def get_name(self) -> str:
+        return self._pyproj["tool"]["poetry"]["name"]
 
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("poetry")
