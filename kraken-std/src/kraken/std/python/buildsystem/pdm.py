@@ -171,6 +171,15 @@ class PDMManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
+        # NOTE: This is an issue with PDM that modifies the build directory and there is no workaround
+        # TODO(simone.zandara): Open PR in PDM
+        shutil.move(self.project_directory / "build", self.project_directory / "build_kraken")
         command = ["pdm", "install", "--no-lock"]
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory, env={"PDM_BUILD_NO_CLEAN": 1})
+        try:
+            sp.check_call(command, cwd=self.project_directory)
+            shutil.copytree(self.project_directory / "build", self.project_directory / "build_kraken")
+            shutil.move(self.project_directory / "build_kraken", self.project_directory / "build")
+        except Exception as e:
+            shutil.move(self.project_directory / "build_kraken", self.project_directory / "build")
+            raise e
