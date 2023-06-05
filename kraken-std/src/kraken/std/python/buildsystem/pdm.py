@@ -12,7 +12,7 @@ from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.core import TaskStatus
 
-from kraken.std.python.pyproject import PDMPyproject, Pyproject
+from kraken.std.python.pyproject import PDMPyproject, Pyproject, SpecializedPyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -25,6 +25,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        return PDMPyproject(pyproject)
 
     def supports_managed_environments(self) -> bool:
         return True

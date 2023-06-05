@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterator, MutableMapping
+from typing import Any, Dict, Iterator, MutableMapping, cast
 
 import tomli
 import tomli_w
@@ -158,6 +158,14 @@ class SpecializedPyproject(ABC):
     def save(self, path: Path | None = None) -> None:
         self._pyproj.save(path)
 
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_version(self) -> str | None:
+        pass
+
 
 class PDMPyproject(SpecializedPyproject):
     """PDM specific operations"""
@@ -167,9 +175,12 @@ class PDMPyproject(SpecializedPyproject):
 
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("pdm")
-    
+
     def get_name(self) -> str:
-        return self._pyproj['project']['name']
+        return cast(str, self._pyproj["project"]["name"])
+
+    def get_version(self) -> str | None:
+        return cast(str, self._pyproj["project"].get("requires-python", None))
 
 
 class PoetryPyproject(SpecializedPyproject):
@@ -179,7 +190,10 @@ class PoetryPyproject(SpecializedPyproject):
         super().__init__(pyproj)
 
     def get_name(self) -> str:
-        return self._pyproj["tool"]["poetry"]["name"]
+        return cast(str, self._pyproj["tool"]["poetry"]["name"])
+
+    def get_version(self) -> str | None:
+        return cast(str, self._pyproj.get("tool", {}).get("poetry", {}).get("dependencies", {}).get("python"))
 
     def _get_section(self) -> Dict[str, Any]:
         return self._pyproj._tool_section("poetry")

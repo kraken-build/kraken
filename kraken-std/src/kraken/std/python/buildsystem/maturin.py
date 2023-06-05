@@ -13,7 +13,7 @@ from typing import Collection, List, Optional
 from kraken.common.path import is_relative_to
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import PoetryPyproject, Pyproject
+from ..pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .poetry import PoetryManagedEnvironment, PoetryPythonBuildSystem
@@ -66,6 +66,9 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         super().__init__(project_directory)
         self._default_build = True
         self._zig_targets: List[MaturinZigTarget] = []
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        return PoetryPyproject(pyproject)
 
     def disable_default_build(self) -> None:
         self._default_build = False

@@ -15,7 +15,7 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import PoetryPyproject, Pyproject
+from kraken.std.python.pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -28,6 +28,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        return PoetryPyproject(pyproject)
 
     def supports_managed_environments(self) -> bool:
         return True
