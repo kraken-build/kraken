@@ -1,0 +1,5 @@
+[[entries]]
+id = "11a29721-dfbc-4875-bdc6-7baffa9390d8"
+type = "fix"
+description = "Re-allow specfiying one or more tasks while also passing the `--all` flag."
+author = "@NiklasRosenstein"

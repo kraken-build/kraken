@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import argparse
-    from argparse import _ArgumentGroup, _MutuallyExclusiveGroup
 
 DEFAULT_BUILD_DIR = Path("build")
 BUILD_STATE_DIR = ".kraken/buildenv"
@@ -99,18 +98,12 @@ class GraphOptions:
             help="load previous build state, but discard existing results (requires --resume)",
         )
 
-        tasks_target: _ArgumentGroup | _MutuallyExclusiveGroup
-        if include_all_option:
-            # The user can either specify a list of tasks, xor --all
-            tasks_target = group.add_mutually_exclusive_group()
-            tasks_target.add_argument("--all", action="store_true", help="include all tasks in the build graph")
-        else:
-            tasks_target = group
+        group.add_argument("--all", action="store_true", help="include all tasks in the build graph")
 
         # --all may make no sense
         # e.g. we don't want `kraken run --all` to be possible.
         # See https://github.com/kraken-build/kraken-core/pull/37#discussion_r1171300400
-        tasks_target.add_argument(
+        group.add_argument(
             "tasks",
             metavar="task",
             nargs="*",
