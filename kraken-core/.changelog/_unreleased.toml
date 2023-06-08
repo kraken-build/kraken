@@ -9,3 +9,9 @@ id = "177f1e06-db56-4b25-890f-420b7bbbb66e"
 type = "improvement"
 description = "Add `-x` and `-X` options to the `krakenw q tree` command"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "8db05748-81ea-45a1-92f8-fa693026122d"
+type = "improvement"
+description = "The `krakenw q tree` command now includes the task status, if any (only relevant with the `--resume` flag or the `-x` or `-X` options, otherwise tasks have no status when the tree is printed)"
+author = "@NiklasRosenstein"

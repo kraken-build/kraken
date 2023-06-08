@@ -405,6 +405,10 @@ def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
             if obj.selected:
                 result += colored(" (selected)", "magenta")
 
+            status = graph.get_status(obj)
+            if status is not None:
+                result += colored(f" [{status_to_text(status)}]", "cyan")
+
         return result
 
     def _recurse(obj: Project | Task, prefix: str, is_last: bool) -> None:
