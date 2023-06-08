@@ -11,7 +11,7 @@ license = "MIT"
 name = "kraken-core"
 packages = [{include = "kraken/core", from = "src"}]
 readme = "README.md"
-version = "0.23.5"
+version = "0.23.6"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
@@ -23,7 +23,7 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 python = ">=3.7,<3.11"  # Dill serialization doesn't work in 3.11
 deprecated = "^1.2.13"
 dill = ">=0.3.5,<0.3.6"  # https://github.com/uqfoundation/dill/issues/332#issuecomment-1289537575
-kraken-common = "^0.23.5"
+kraken-common = "^0.23.6"
 networkx = "~2.6.3"  # Last version compatible with Python 3.7
 nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
