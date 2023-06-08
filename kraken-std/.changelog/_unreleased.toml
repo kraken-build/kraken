@@ -1,0 +1,5 @@
+[[entries]]
+id = "70d6a010-0261-4656-8979-62a984fe611d"
+type = "fix"
+description = "disable default requirement of Rust nightly"
+author = "james.baker@helsing.ai"
