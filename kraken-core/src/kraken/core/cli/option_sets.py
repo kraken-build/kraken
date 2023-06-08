@@ -127,17 +127,15 @@ class GraphOptions:
 
 
 @dataclasses.dataclass(frozen=True)
-class RunOptions:
-    allow_no_tasks: bool
-    skip_build: bool
+class ExcludeOptions:
     exclude_tasks: list[str] | None
     exclude_tasks_subgraph: list[str] | None
 
-    @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser) -> None:
-        group = parser.add_argument_group("run options")
-        group.add_argument("-s", "--skip-build", action="store_true", help="just load the project, do not build")
-        group.add_argument("-0", "--allow-no-tasks", action="store_true", help="don't error if no tasks got selected")
+    _group_name = "exclude options"
+
+    @classmethod
+    def add_to_parser(cls, parser: argparse.ArgumentParser) -> argparse._ArgumentGroup:
+        group = parser.add_argument_group(cls._group_name)
         group.add_argument("-x", "--exclude", metavar="TASK", action="append", help="exclude one or more tasks")
         group.add_argument(
             "-X",
@@ -146,14 +144,37 @@ class RunOptions:
             metavar="TASK",
             help="exclude the entire subgraphs of one or more tasks",
         )
+        return group
+
+    @classmethod
+    def collect(cls, args: argparse.Namespace) -> RunOptions:
+        return cls(
+            exclude_tasks=args.exclude or [],
+            exclude_tasks_subgraph=args.exclude_subgraph or [],
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class RunOptions(ExcludeOptions):
+    allow_no_tasks: bool
+    skip_build: bool
+
+    _group_name = "run options"
+
+    @classmethod
+    def add_to_parser(cls, parser: argparse.ArgumentParser) -> argparse._ArgumentGroup:
+        group = super().add_to_parser(parser)
+        group.add_argument("-s", "--skip-build", action="store_true", help="just load the project, do not build")
+        group.add_argument("-0", "--allow-no-tasks", action="store_true", help="don't error if no tasks got selected")
+        return group
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> RunOptions:
         return cls(
             skip_build=args.skip_build,
             allow_no_tasks=args.allow_no_tasks,
-            exclude_tasks=args.exclude,
-            exclude_tasks_subgraph=args.exclude_subgraph,
+            exclude_tasks=args.exclude or [],
+            exclude_tasks_subgraph=args.exclude_subgraph or [],
         )
 
 

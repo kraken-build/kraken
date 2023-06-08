@@ -3,3 +3,9 @@ id = "11a29721-dfbc-4875-bdc6-7baffa9390d8"
 type = "fix"
 description = "Re-allow specfiying one or more tasks while also passing the `--all` flag."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "177f1e06-db56-4b25-890f-420b7bbbb66e"
+type = "improvement"
+description = "Add `-x` and `-X` options to the `krakenw q tree` command"
+author = "@NiklasRosenstein"
