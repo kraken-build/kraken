@@ -11,6 +11,7 @@ import pdb
 import sys
 import textwrap
 from functools import partial
+from itertools import chain
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -33,13 +34,13 @@ from termcolor import colored
 from kraken.core.address import Address
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
-from kraken.core.cli.option_sets import BuildOptions, GraphOptions, RunOptions, VizOptions
+from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
 from kraken.core.system.context import Context
 from kraken.core.system.errors import BuildError, ProjectNotFoundError
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task
+from kraken.core.system.task import GroupTask, Task, TaskStatus
 
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
@@ -101,6 +102,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     LoggingOptions.add_to_parser(tree)
     BuildOptions.add_to_parser(tree)
     GraphOptions.add_to_parser(tree)
+    ExcludeOptions.add_to_parser(tree)
 
     # This command is used by kraken-wrapper to produce a lock file.
     env = query_subparsers.add_parser("env", description="produce a JSON file of the Python environment distributions")
@@ -258,9 +260,11 @@ def run(
         graph_options=graph_options,
     )
 
+    # TODO(@NiklasRosenstein): Having the observer mark the excluded tasks as skipped is a hack.
+    #       Can we just mark these tasks as skipped after the graph is loaded (e.g. right here?).
     context.observer = ColoredDefaultPrintingExecutorObserver(
-        context.resolve_tasks(run_options.exclude_tasks or []),
-        context.resolve_tasks(run_options.exclude_tasks_subgraph or []),
+        context.resolve_tasks(run_options.exclude_tasks),
+        context.resolve_tasks(run_options.exclude_tasks_subgraph),
     )
 
     if run_options.skip_build:
@@ -344,7 +348,16 @@ def ls(graph: TaskGraph) -> None:
     print()
 
 
-def tree(graph: TaskGraph) -> None:
+def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
+    if exclude_options.exclude_tasks or exclude_options.exclude_tasks_subgraph:
+        # Mark tasks that are excluded as skipped.
+        for task in chain(
+            graph.context.resolve_tasks(exclude_options.exclude_tasks),
+            graph.context.resolve_tasks(exclude_options.exclude_tasks_subgraph),
+        ):
+            if not graph.get_status(task):
+                graph.set_status(task, TaskStatus.skipped("excluded by -x/-X"))
+
     tasks = set(graph.tasks())
 
     # Filter out empty group tasks.
@@ -391,6 +404,10 @@ def tree(graph: TaskGraph) -> None:
         if isinstance(obj, Task):
             if obj.selected:
                 result += colored(" (selected)", "magenta")
+
+            status = graph.get_status(obj)
+            if status is not None:
+                result += colored(f" [{status_to_text(status)}]", "cyan")
 
         return result
 
@@ -562,7 +579,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
             elif args.query_cmd in ("visualize", "viz", "v"):
                 visualize(graph, VizOptions.collect(args))
             elif args.query_cmd in ("t", "tree"):
-                tree(graph)
+                tree(graph, ExcludeOptions.collect(args))
             else:
                 assert False, args.query_cmd
 
