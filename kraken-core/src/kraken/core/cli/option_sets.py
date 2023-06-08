@@ -147,7 +147,7 @@ class ExcludeOptions:
         return group
 
     @classmethod
-    def collect(cls, args: argparse.Namespace) -> RunOptions:
+    def collect(cls, args: argparse.Namespace) -> ExcludeOptions:
         return cls(
             exclude_tasks=args.exclude or [],
             exclude_tasks_subgraph=args.exclude_subgraph or [],
