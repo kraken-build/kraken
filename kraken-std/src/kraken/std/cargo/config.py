@@ -57,3 +57,8 @@ class CargoProject:
     def get_or_create(project: Project | None) -> CargoProject:
         project = project or Project.current()
         return project.find_metadata(CargoProject, CargoProject)
+
+
+@dataclasses.dataclass
+class CargoConfig:
+    nightly: bool
