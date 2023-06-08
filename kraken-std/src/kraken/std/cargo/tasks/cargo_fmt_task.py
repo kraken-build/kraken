@@ -1,6 +1,6 @@
 from __future__ import annotations
-import shutil
 
+import shutil
 import subprocess as sp
 from typing import List
 
@@ -23,9 +23,7 @@ class CargoFmtTask(Task):
 
         command = self.get_command()
 
-        return TaskStatus.from_exit_code(
-            command, sp.call(command, cwd=self.project.directory)
-        )
+        return TaskStatus.from_exit_code(command, sp.call(command, cwd=self.project.directory))
 
     def get_command(self) -> List[str]:
         command = ["cargo"]
@@ -49,9 +47,7 @@ class CargoFmtTask(Task):
         if rustup is None:
             return TaskStatus.succeeded()
 
-        result = sp.run(
-            [rustup, "show", "active-toolchain"], stdout=sp.PIPE, stderr=sp.DEVNULL
-        )
+        result = sp.run([rustup, "show", "active-toolchain"], stdout=sp.PIPE, stderr=sp.DEVNULL)
         if result.returncode != 0:
             return TaskStatus.failed("could not determine the active rust toolchain")
 
