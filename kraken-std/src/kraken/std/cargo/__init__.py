@@ -65,7 +65,7 @@ CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 CARGO_PUBLISH_SUPPORT_GROUP_NAME = "cargoPublishSupport"
 
 
-def cargo_config(*, project: Project | None = None, nightly: bool = True) -> CargoConfig:
+def cargo_config(*, project: Project | None = None, nightly: bool = False) -> CargoConfig:
     project = project or Project.current()
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
