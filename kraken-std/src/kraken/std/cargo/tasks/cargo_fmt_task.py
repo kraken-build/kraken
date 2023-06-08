@@ -1,4 +1,5 @@
 from __future__ import annotations
+import shutil
 
 import subprocess as sp
 from typing import List
@@ -22,7 +23,9 @@ class CargoFmtTask(Task):
 
         command = self.get_command()
 
-        return TaskStatus.from_exit_code(command, sp.call(command, cwd=self.project.directory))
+        return TaskStatus.from_exit_code(
+            command, sp.call(command, cwd=self.project.directory)
+        )
 
     def get_command(self) -> List[str]:
         command = ["cargo"]
@@ -40,7 +43,15 @@ class CargoFmtTask(Task):
         return command
 
     def check_nightly_toolchain(self) -> TaskStatus:
-        result = sp.run(["rustup", "show", "active-toolchain"], stdout=sp.PIPE, stderr=sp.DEVNULL)
+        # best effort to return a helpful error message by checking if the active toolchain is on the nightly channel
+        # (although we can only do this if rustup is installed)
+        rustup = shutil.which("rustup")
+        if rustup is None:
+            return TaskStatus.succeeded()
+
+        result = sp.run(
+            [rustup, "show", "active-toolchain"], stdout=sp.PIPE, stderr=sp.DEVNULL
+        )
         if result.returncode != 0:
             return TaskStatus.failed("could not determine the active rust toolchain")
 

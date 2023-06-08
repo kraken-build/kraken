@@ -1,0 +1,5 @@
+[[entries]]
+id = "70d6a010-f261-4656-8979-62a984fe611d"
+type = "improvement"
+description = "Only check the active toolchain if rustup is installed"
+author = "nicolas.vizzari@helsing.ai"
