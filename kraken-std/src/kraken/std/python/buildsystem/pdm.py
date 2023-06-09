@@ -20,6 +20,11 @@ from . import ManagedEnvironment, PythonBuildSystem
 logger = logging.getLogger(__name__)
 
 
+def get_env_no_build_delete() -> dict[str, str]:
+    env = os.environ.copy()
+    env["PDM_BUILD_NO_CLEAN"] = 1
+    return env
+
 class PDMPythonBuildSystem(PythonBuildSystem):
     name = "PDM"
 
@@ -98,7 +103,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         command = ["pdm", "build"]
 
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory, env={"PDM_BUILD_NO_CLEAN": 1})
+        sp.check_call(command, cwd=self.project_directory, env=get_env_no_build_delete())
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         os.makedirs(output_directory, exist_ok=True)
@@ -171,15 +176,6 @@ class PDMManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        # NOTE: This is an issue with PDM that modifies the build directory and there is no workaround
-        # TODO(simone.zandara): Open PR in PDM
-        shutil.move(self.project_directory / "build", self.project_directory / "build_kraken")
-        command = ["pdm", "install", "--no-lock"]
+        command = ["pdm", "install"]
         logger.info("%s", command)
-        try:
-            sp.check_call(command, cwd=self.project_directory)
-            shutil.copytree(self.project_directory / "build", self.project_directory / "build_kraken")
-            shutil.move(self.project_directory / "build_kraken", self.project_directory / "build")
-        except Exception as e:
-            shutil.move(self.project_directory / "build_kraken", self.project_directory / "build")
-            raise e
+        sp.check_call(command, cwd=self.project_directory, env=get_env_no_build_delete())
