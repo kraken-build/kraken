@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def get_env_no_build_delete() -> dict[str, str]:
     env = os.environ.copy()
-    env["PDM_BUILD_NO_CLEAN"] = 1
+    env["PDM_BUILD_NO_CLEAN"] = "true"
     return env
 
 class PDMPythonBuildSystem(PythonBuildSystem):
