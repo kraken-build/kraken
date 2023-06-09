@@ -32,6 +32,7 @@ setuptools = ">=33.1.0"
 termcolor = "^1.1.0"
 typeapi = "^1.4.3"
 typing-extensions = ">=3.10.0.2"
+pretty-errors = ">=1.2.25"
 
 [tool.poetry.dev-dependencies]
 black = "*"

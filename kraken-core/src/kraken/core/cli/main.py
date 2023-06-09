@@ -15,6 +15,7 @@ from itertools import chain
 from pathlib import Path
 from typing import Any, NoReturn, Optional
 
+import pretty_errors  # type: ignore
 from kraken.common import (
     BuildscriptMetadata,
     CurrentDirectoryProjectFinder,
@@ -31,6 +32,7 @@ from nr.io.graphviz.render import render_to_browser
 from nr.io.graphviz.writer import GraphvizWriter
 from termcolor import colored
 
+from kraken.core import __version__
 from kraken.core.address import Address
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
@@ -41,6 +43,66 @@ from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import GroupTask, Task, TaskStatus
+
+pretty_errors.configure(
+    separator_character=pretty_errors.CYAN + "≈",
+    filename_display=pretty_errors.FILENAME_COMPACT,
+    line_number_first=False,
+    lines_before=2,
+    lines_after=2,
+    display_link=True,
+    display_locals=False,
+    display_arrow=True,
+    display_trace_locals=False,
+    display_timestamp=False,
+    prefix=pretty_errors.MAGENTA
+    + "\nLet no joyful voice be heard! Let no man look up at the sky with hope!"
+    + " And let this day be cursed by we who ready to wake... the Kraken!"
+    + pretty_errors.default_config.line_color
+    + "\nAlas sailor, there is nought you can do. Please check your Kraken build"
+    + " script, and then report this stacktrace to the Kraken repository:\n"
+    + pretty_errors.CYAN
+    + "https://github.com/kraken-build/kraken-build/issues\n\n"
+    + pretty_errors.MAGENTA
+    + "> "
+    + pretty_errors.default_config.line_color
+    + "Kraken Version: "
+    + pretty_errors.BRIGHT_MAGENTA
+    + __version__
+    + pretty_errors.MAGENTA
+    + "\n>",
+    infix=pretty_errors.MAGENTA + "> ",
+    arrow_head_character="  ↑",
+    arrow_tail_character=" ",
+    trace_lines_before=0,
+    trace_lines_after=0,
+    header_color=pretty_errors.default_config.line_color,
+    line_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
+    link_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    code_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    line_number_color=pretty_errors.MAGENTA + "#" + pretty_errors.default_config.line_color,
+    filename_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
+    exception_color=pretty_errors.CYAN + "> " + pretty_errors.YELLOW,
+    exception_arg_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
+    exception_file_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
+    function_color=pretty_errors.CYAN,
+    local_name_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
+    local_value_color=pretty_errors.YELLOW,
+    inner_exception_message=pretty_errors.MAGENTA
+    + "\n> "
+    + pretty_errors.YELLOW
+    + "WARNING: "
+    + pretty_errors.default_config.line_color
+    + "The above exception was the direct cause of the following exception:\n",
+    syntax_error_color=pretty_errors.MAGENTA,
+    arrow_head_color=pretty_errors.CYAN,
+    inner_exception_separator=True,
+    show_suppressed=True,
+)
+
+if not pretty_errors.terminal_is_interactive:
+    pretty_errors.mono()
+
 
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
