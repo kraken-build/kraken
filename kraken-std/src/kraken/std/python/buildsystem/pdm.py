@@ -25,6 +25,7 @@ def get_env_no_build_delete() -> dict[str, str]:
     env["PDM_BUILD_NO_CLEAN"] = "true"
     return env
 
+
 class PDMPythonBuildSystem(PythonBuildSystem):
     name = "PDM"
 
@@ -81,7 +82,6 @@ class PDMPythonBuildSystem(PythonBuildSystem):
                     code = sp.call(command)
                     if code != 0:
                         raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
-
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         previous_version: str | None = None
