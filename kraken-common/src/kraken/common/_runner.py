@@ -112,7 +112,7 @@ class PythonScriptRunner(ScriptPicker):
         try:
             code = compile(script.read_text(), script, "exec")
         except BaseException as err:
-            raise ValueError("Script Failed to compile") from err
+            raise ValueError("Script failed to compile the build script") from err
         exec(code, vars(module))
 
     def has_buildscript_call(self, script: Path) -> bool:
