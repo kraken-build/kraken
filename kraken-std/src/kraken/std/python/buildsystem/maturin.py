@@ -38,10 +38,14 @@ class MaturinZigTarget:
         Only required when cross compiling from Linux to MacOS.
     :param rustflags: RUSTFLAGS environment variable will be set at compilation time. This can be
         used to add e.g. native libraries to link against.
+    :param ld_library_path: LD_LIBRARY_PATH environment variable will be set at compilation time. This can be
+        used to add any native libraries that might be required by pypa fixups so to produce manylinux wheels.
+        Likely the same content as RUSTFLAGS, but in the LD_LIBRARY_PATH format.
     """
 
     target: str
     rustflags: Optional[str] = None
+    ld_library_path: Optional[str] = None
     macos_sdk_root: Optional[Path] = None
     manylinux: bool = True
     zig_features: Collection[str] = ()
@@ -144,6 +148,8 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
                     logger.error(f"No macOS SDKROOT set for the target {target}")
             if target.rustflags is not None:
                 env["RUSTFLAGS"] = target.rustflags
+            if target.ld_library_path is not None:
+                env["LD_LIBRARY_PATH"] = target.ld_library_path
             sp.check_call(command, cwd=self.project_directory, env=env)
 
         # We get the output files
