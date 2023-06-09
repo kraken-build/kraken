@@ -1,0 +1,8 @@
+release-date = "2023-06-09"
+
+[[entries]]
+id = "02bdca64-90b7-4456-b8fd-2ec12c571924"
+type = "improvement"
+description = "Add PDM python build system support"
+author = "simone.zandara@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/33"

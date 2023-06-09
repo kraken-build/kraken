@@ -1,0 +1,8 @@
+release-date = "2023-05-17"
+
+[[entries]]
+id = "189a8712-d7d2-48a9-b4ef-ebcbe3885a7f"
+type = "improvement"
+description = "Fix `Property.provides(X)` which should return `True` when a property is typed as `Property[List[X]]`, but did not because of a change in `typeapi` between `0.2.x` and `1.x`. This bug was introduced by https://github.com/kraken-build/kraken-core/pull/11 in version `0.12.0`."
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/28"

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "kraken-build"
+version = "0.23.7"
+description = ""
+authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "kraken/build", from = "src" }]
+classifiers = []
+keywords = []
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
+Documentation = "https://kraken-build.github.io/kraken-build/"
+Homepage = "https://kraken-build.github.io/kraken-build/"
+Repository = "https://github.com/kraken-build/kraken-build/"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.slap.test]
+check  = "slap check"

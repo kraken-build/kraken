@@ -9,7 +9,7 @@ from kraken.common import Supplier
 from kraken.core import Project
 from typing_extensions import Literal
 
-from .config import CargoProject, CargoRegistry
+from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
 from .tasks.cargo_bump_version_task import CargoBumpVersionTask
@@ -63,6 +63,13 @@ CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 #: This is the name of a group in every project that are pre-requisites for publishing crates within a Cargo workspace.
 #: This includes ensuring that all path dependencies have up to date version numbers.
 CARGO_PUBLISH_SUPPORT_GROUP_NAME = "cargoPublishSupport"
+
+
+def cargo_config(*, project: Project | None = None, nightly: bool = False) -> CargoConfig:
+    project = project or Project.current()
+    config = CargoConfig(nightly=nightly)
+    project.metadata.append(config)
+    return config
 
 
 def cargo_sqlx_migrate(
@@ -197,8 +204,22 @@ def cargo_deny(*, project: Project | None = None, **kwargs: Any) -> CargoDenyTas
 
 def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> None:
     project = project or Project.current()
-    project.do("cargoFmt", CargoFmtTask, all_packages=all_packages, group="fmt")
-    project.do("cargoFmtCheck", CargoFmtTask, all_packages=all_packages, group="lint", check=True)
+    config = project.find_metadata(CargoConfig) or cargo_config(project=project)
+    project.do(
+        "cargoFmt",
+        CargoFmtTask,
+        all_packages=all_packages,
+        config=config,
+        group="fmt",
+    )
+    project.do(
+        "cargoFmtCheck",
+        CargoFmtTask,
+        all_packages=all_packages,
+        config=config,
+        group="lint",
+        check=True,
+    )
 
 
 def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:

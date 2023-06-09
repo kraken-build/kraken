@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import argparse
-    from argparse import _ArgumentGroup, _MutuallyExclusiveGroup
 
 DEFAULT_BUILD_DIR = Path("build")
 BUILD_STATE_DIR = ".kraken/buildenv"
@@ -99,18 +98,12 @@ class GraphOptions:
             help="load previous build state, but discard existing results (requires --resume)",
         )
 
-        tasks_target: _ArgumentGroup | _MutuallyExclusiveGroup
-        if include_all_option:
-            # The user can either specify a list of tasks, xor --all
-            tasks_target = group.add_mutually_exclusive_group()
-            tasks_target.add_argument("--all", action="store_true", help="include all tasks in the build graph")
-        else:
-            tasks_target = group
+        group.add_argument("--all", action="store_true", help="include all tasks in the build graph")
 
         # --all may make no sense
         # e.g. we don't want `kraken run --all` to be possible.
         # See https://github.com/kraken-build/kraken-core/pull/37#discussion_r1171300400
-        tasks_target.add_argument(
+        group.add_argument(
             "tasks",
             metavar="task",
             nargs="*",
@@ -134,17 +127,15 @@ class GraphOptions:
 
 
 @dataclasses.dataclass(frozen=True)
-class RunOptions:
-    allow_no_tasks: bool
-    skip_build: bool
+class ExcludeOptions:
     exclude_tasks: list[str] | None
     exclude_tasks_subgraph: list[str] | None
 
-    @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser) -> None:
-        group = parser.add_argument_group("run options")
-        group.add_argument("-s", "--skip-build", action="store_true", help="just load the project, do not build")
-        group.add_argument("-0", "--allow-no-tasks", action="store_true", help="don't error if no tasks got selected")
+    _group_name = "exclude options"
+
+    @classmethod
+    def add_to_parser(cls, parser: argparse.ArgumentParser) -> argparse._ArgumentGroup:
+        group = parser.add_argument_group(cls._group_name)
         group.add_argument("-x", "--exclude", metavar="TASK", action="append", help="exclude one or more tasks")
         group.add_argument(
             "-X",
@@ -153,14 +144,37 @@ class RunOptions:
             metavar="TASK",
             help="exclude the entire subgraphs of one or more tasks",
         )
+        return group
+
+    @classmethod
+    def collect(cls, args: argparse.Namespace) -> ExcludeOptions:
+        return cls(
+            exclude_tasks=args.exclude or [],
+            exclude_tasks_subgraph=args.exclude_subgraph or [],
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class RunOptions(ExcludeOptions):
+    allow_no_tasks: bool
+    skip_build: bool
+
+    _group_name = "run options"
+
+    @classmethod
+    def add_to_parser(cls, parser: argparse.ArgumentParser) -> argparse._ArgumentGroup:
+        group = super().add_to_parser(parser)
+        group.add_argument("-s", "--skip-build", action="store_true", help="just load the project, do not build")
+        group.add_argument("-0", "--allow-no-tasks", action="store_true", help="don't error if no tasks got selected")
+        return group
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> RunOptions:
         return cls(
             skip_build=args.skip_build,
             allow_no_tasks=args.allow_no_tasks,
-            exclude_tasks=args.exclude,
-            exclude_tasks_subgraph=args.exclude_subgraph,
+            exclude_tasks=args.exclude or [],
+            exclude_tasks_subgraph=args.exclude_subgraph or [],
         )
 
 

@@ -287,7 +287,7 @@ class Property(Supplier[T]):
                 return True
             if issubclass(provided.type, Sequence) and provided.args and len(provided.args) == 1:
                 inner = provided.args[0]
-                if isinstance(inner, ClassTypeHint) and issubclass(inner.type, type_):
+                if issubclass(inner, type_):
                     return True
 
         return False

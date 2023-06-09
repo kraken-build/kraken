@@ -1,0 +1,8 @@
+release-date = "2023-05-18"
+
+[[entries]]
+id = "eab3c063-c674-4a1b-b5ec-60c83d786b0d"
+type = "fix"
+description = "Fix the `dist` function which should use the artifact names when copying them to a distribution."
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/29"

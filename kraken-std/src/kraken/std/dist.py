@@ -9,15 +9,14 @@ import zipfile
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Any, List, Mapping, Optional, Sequence, Union, cast
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
 
 import databind.json
-from kraken.common import flatten
-from kraken.core import Project, Property, Task
+from kraken.core import Project, Property, Task, TaskSet
 from termcolor import colored
 from typing_extensions import Literal
 
-from .descriptors.resource import BinaryArtifact, Resource
+from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +72,9 @@ class DistributionTask(Task):
         output_file.parent.mkdir(parents=True, exist_ok=True)
         with wopen_archive(output_file, archive_type) as archive:
             for resource in self.resources.get():
-                if resource.options.arcname is not None:
-                    arcname = resource.options.arcname
-                elif isinstance(resource, BinaryArtifact):
-                    arcname = resource.path.name
-                else:
-                    arcname = str(resource.path)
+                arcname = resource.options.arcname
+                if arcname is None:
+                    arcname = str(resource.path.relative_to(self.project.directory))
                 print(
                     "  +",
                     colored(arcname or ".", "green"),
@@ -236,22 +232,16 @@ def dist(
     }
     dependencies_set = project.resolve_tasks(dependencies_map)
 
+    # This associates the IndividualDistOptions specified in *dependencies* to the Resource(s)
+    # provided by the task(s).
     resources = (
-        dependencies_set.select(Resource).dict_supplier()
-        # This monster is used to re-assoicated the IndividualDistOptions specified in *dependencies* back to
-        # with the Resource (s)provided by the task(s) that match the selector.
+        dependencies_set.select(Resource)
+        .dict_supplier()
         .map(
-            lambda resources: list(
-                flatten(
-                    [
-                        ConfiguredResource(
-                            **vars(single_resource),
-                            options=dependencies_map[next(iter(dependencies_set.partitions()[task]))],
-                        )
-                        for single_resource in task_resources
-                    ]
-                    for task, task_resources in resources.items()
-                )
+            lambda resources: get_configured_resources(
+                resources,
+                dependencies_map,
+                dependencies_set,
             )
         )
     )
@@ -264,3 +254,21 @@ def dist(
         archive_type=archive_type,
         prefix=prefix,
     )
+
+
+def get_configured_resources(
+    resources: Dict[Task, list[Resource]],
+    dependencies_map: dict[str, IndividualDistOptions],
+    dependencies_set: TaskSet,
+) -> list[ConfiguredResource]:
+    configured_resources = []
+
+    for task, task_resources in resources.items():
+        for resource in task_resources:
+            task_options = dependencies_map[next(iter(dependencies_set.partitions()[task]))]
+            options = IndividualDistOptions(**vars(task_options))
+
+            if options.arcname is None and isinstance(resource, (BinaryArtifact, LibraryArtifact)):
+                options.arcname = resource.name
+            configured_resources.append(ConfiguredResource(**vars(resource), options=options))
+    return configured_resources
