@@ -653,7 +653,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
                 elif args.query_cmd in ("visualize", "viz", "v"):
                     visualize(graph, VizOptions.collect(args))
                 elif args.query_cmd in ("t", "tree"):
-                    tree(graph)
+                    tree(graph, ExcludeOptions.collect(args))
                 else:
                     assert False, args.query_cmd
 
