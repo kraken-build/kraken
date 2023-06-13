@@ -5,6 +5,7 @@ import shutil
 import tarfile
 import unittest.mock
 from pathlib import Path
+from typing import Type, TypeVar
 
 import pytest
 import tomli
@@ -13,6 +14,7 @@ from kraken.core import Context
 from kraken.core.testing import kraken_project
 
 from kraken.std import python
+from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject
 from tests.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
@@ -66,6 +68,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
             ),
         ),
         "slap-project",
+        "pdm-project",
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -116,7 +119,11 @@ def test__python_project_upgrade_python_version_string(
     logger.info("Loading and executing Kraken project (%s)", tempdir)
     Context.__init__(kraken_ctx, tempdir / "build")
     with kraken_project(kraken_ctx, tempdir) as loc_project:
+        pyproject = Pyproject.read(original_dir / "pyproject.toml")
         local_build_system = python.buildsystem.detect_build_system(tempdir)
+        assert local_build_system is not None
+        assert local_build_system.get_pyproject_reader(pyproject) is not None
+        assert local_build_system.get_pyproject_reader(pyproject).get_name() == "version-project"
         python.settings.python_settings(project=loc_project, build_system=local_build_system)
         python.build(as_version=build_as_version, project=loc_project)
     kraken_ctx.execute([":build"])
@@ -135,3 +142,43 @@ def test__python_project_upgrade_python_version_string(
         conf_file = tar.extractfile(f"version_project-{build_as_version}/pyproject.toml")
         assert conf_file is not None, ".tar.gz file does not contain an 'pyproject.toml'"
         assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
+
+
+M = TypeVar("M", PDMPyproject, PoetryPyproject)
+
+
+@pytest.mark.parametrize(
+    "project_dir, reader, expected_python_version",
+    [
+        ("poetry-project", PoetryPyproject, "^3.7"),
+        ("slap-project", PoetryPyproject, "^3.6"),
+        ("pdm-project", PDMPyproject, ">=3.9,<3.10"),
+    ],
+)
+@unittest.mock.patch.dict(os.environ, {})
+def test__python_pyproject_reads_correct_data(
+    project_dir: str,
+    reader: Type[M],
+    tempdir: Path,
+    expected_python_version: str,
+    kraken_ctx: Context,
+) -> None:
+    # Copy the projects to the temporary directory.
+    new_dir = tempdir / project_dir
+    shutil.copytree(Path(__file__).parent / "data" / project_dir, new_dir)
+
+    pyproject = Pyproject.read(new_dir / "pyproject.toml")
+
+    Context.__init__(kraken_ctx, new_dir / "build")
+    with kraken_project(kraken_ctx, new_dir) as _:
+        pyproject = Pyproject.read(new_dir / "pyproject.toml")
+        local_build_system = python.buildsystem.detect_build_system(new_dir)
+        assert local_build_system is not None
+        assert local_build_system.get_pyproject_reader(pyproject) is not None
+        assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
+        assert local_build_system.get_pyproject_reader(pyproject).get_version() == expected_python_version
+
+    spec = reader(pyproject)
+
+    assert spec.get_name() == project_dir
+    assert spec.get_version() == expected_python_version

@@ -13,7 +13,7 @@ from typing import Collection, List, Optional
 from kraken.common.path import is_relative_to
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import Pyproject
+from ..pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .poetry import PoetryManagedEnvironment, PoetryPythonBuildSystem
@@ -71,6 +71,9 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         self._default_build = True
         self._zig_targets: List[MaturinZigTarget] = []
 
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        return PoetryPyproject(pyproject)
+
     def disable_default_build(self) -> None:
         self._default_build = False
 
@@ -99,7 +102,8 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
 
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
         super().update_pyproject(settings, pyproject)
-        pyproject.synchronize_project_section_to_poetry_state()
+        poetry_pyproj = PoetryPyproject(pyproject)
+        poetry_pyproj.synchronize_project_section_to_poetry_state()
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         # We set the version
@@ -108,7 +112,8 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         pyproject_path = self.project_directory / "pyproject.toml"
         if as_version is not None:
             pyproject = Pyproject.read(pyproject_path)
-            old_poetry_version = pyproject.set_poetry_version(as_version)
+            poetry_pyproj = PoetryPyproject(pyproject)
+            old_poetry_version = poetry_pyproj.set_version(as_version)
             old_project_version = pyproject.set_core_metadata_version(as_version)
             pyproject.save()
 
@@ -165,7 +170,8 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         if as_version is not None:
             # We roll back the version
             pyproject = Pyproject.read(pyproject_path)
-            pyproject.set_poetry_version(old_poetry_version)
+            poetry_pyproj = PoetryPyproject(pyproject)
+            poetry_pyproj.set_version(old_poetry_version)
             pyproject.set_core_metadata_version(old_project_version)
             pyproject.save()
 

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from kraken.core import TaskStatus
 
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import Pyproject, SpecializedPyproject
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
@@ -57,6 +57,10 @@ class PythonBuildSystem(abc.ABC):
         :param output_directory: The directory where the distributions should be placed.
         :param as_version: A version number for the built distributions.
         """
+
+    @abc.abstractmethod
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        """Return an object able to read the pyproject file depending on the build system."""
 
 
 class ManagedEnvironment(abc.ABC):
@@ -106,5 +110,10 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         from .maturin import MaturinPythonBuildSystem
 
         return MaturinPythonBuildSystem(project_directory)
+
+    if "pdm" in pyproject_content:
+        from .pdm import PDMPythonBuildSystem
+
+        return PDMPythonBuildSystem(project_directory)
 
     return None

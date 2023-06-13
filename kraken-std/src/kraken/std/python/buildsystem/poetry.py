@@ -15,7 +15,7 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -29,6 +29,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        return PoetryPyproject(pyproject)
+
     def supports_managed_environments(self) -> bool:
         return True
 
@@ -36,11 +39,12 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         return PoetryManagedEnvironment(self.project_directory)
 
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        for source in pyproject.get_poetry_sources():
-            pyproject.delete_poetry_source(source["name"])
+        poetry_pyproj = PoetryPyproject(pyproject)
+        for source in poetry_pyproj.get_sources():
+            poetry_pyproj.delete_source(source["name"])
         for index in settings.package_indexes.values():
             if index.is_package_source:
-                pyproject.upsert_poetry_source(index.alias, index.index_url, index.default, not index.default)
+                poetry_pyproj.upsert_source(index.alias, index.index_url, index.default, not index.default)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["poetry", "update"]
@@ -66,10 +70,11 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         if as_version is not None:
             # Bump the in-source version number.
             pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
-            pyproject.update_relative_packages(as_version)
-            previous_version = pyproject.set_poetry_version(as_version)
-            pyproject.save()
-            for package in pyproject.get_poetry_packages(fallback=True):
+            poetry_pyproj = PoetryPyproject(pyproject)
+            poetry_pyproj.update_relative_packages(as_version)
+            previous_version = poetry_pyproj.set_version(as_version)
+            poetry_pyproj.save()
+            for package in poetry_pyproj.get_packages(fallback=True):
                 package_dir = self.project_directory / (package.from_ or "") / package.include
                 n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
                 if n_replaced > 0:
@@ -99,8 +104,8 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
-            pyproject.set_poetry_version(previous_version)
-            pyproject.save()
+            poetry_pyproj.set_version(previous_version)
+            poetry_pyproj.save()
             for package_dir in revert_version_paths:
                 update_python_version_str_in_source_files(previous_version, package_dir)
 

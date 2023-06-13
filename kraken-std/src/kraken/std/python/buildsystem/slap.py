@@ -16,7 +16,7 @@ from kraken.common import NotSet
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.poetry import PoetryPythonBuildSystem
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject, SpecializedPyproject
 
 from . import ManagedEnvironment, PythonBuildSystem
 
@@ -31,6 +31,13 @@ class SlapPythonBuildSystem(PythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
+        if "poetry" in pyproject.get("tool", {}):
+            return PoetryPyproject(pyproject)
+        if "pdm" in pyproject.get("build-backend", {}):
+            return PDMPyproject(pyproject)
+        raise NotImplementedError("Don't know this build system")
 
     def supports_managed_environments(self) -> bool:
         return True
