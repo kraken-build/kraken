@@ -11,3 +11,9 @@ type = "improvement"
 description = "Add PDM python build system support"
 author = "simone.zandara@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/33"
+
+[[entries]]
+id = "195159c4-4314-483e-9b11-c3fd32fe0fe7"
+type = "tests"
+description = "Force transitive `markdown-it-py` dependency to `<3.0.0` due to Mypy complaining about the newer syntax in Python 3.10 when a newer version of it would otherwise get installed (see https://github.com/python/mypy/issues/12162)"
+author = "@NiklasRosenstein"
