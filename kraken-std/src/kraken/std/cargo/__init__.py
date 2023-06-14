@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 from typing import Any, Collection, Sequence
 
@@ -202,17 +203,23 @@ def cargo_deny(*, project: Project | None = None, **kwargs: Any) -> CargoDenyTas
     return project.do("cargoDeny", CargoDenyTask, **kwargs)
 
 
-def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> None:
+@dataclasses.dataclass
+class CargoFmtTasks:
+    check: CargoFmtTask
+    format: CargoFmtTask
+
+
+def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> CargoFmtTasks:
     project = project or Project.current()
     config = project.find_metadata(CargoConfig) or cargo_config(project=project)
-    project.do(
+    format = project.do(
         "cargoFmt",
         CargoFmtTask,
         all_packages=all_packages,
         config=config,
         group="fmt",
     )
-    project.do(
+    check = project.do(
         "cargoFmtCheck",
         CargoFmtTask,
         all_packages=all_packages,
@@ -220,6 +227,7 @@ def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> 
         group="lint",
         check=True,
     )
+    return CargoFmtTasks(check=check, format=format)
 
 
 def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:

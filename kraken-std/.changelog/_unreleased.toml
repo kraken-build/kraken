@@ -1,0 +1,5 @@
+[[entries]]
+id = "473ca617-3d6b-4d2b-9fca-1e570af59811"
+type = "improvement"
+description = "Return the tasks created by `cargo_fmt`"
+author = "nicolas.vizzari@helsing.ai"
