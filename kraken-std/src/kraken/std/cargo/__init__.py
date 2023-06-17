@@ -181,7 +181,16 @@ def cargo_clippy(
     project = project or Project.current()
     name = "cargoClippyFix" if fix else "cargoClippy"
     group = ("fmt" if fix else "lint") if group == "_auto_" else group
-    task = project.do(name, CargoClippyTask, False, group=group, fix=fix, allow=allow)
+    cargo = CargoProject.get_or_create(project)
+    task = project.do(
+        name,
+        CargoClippyTask,
+        False,
+        group=group,
+        fix=fix,
+        allow=allow,
+        env=Supplier.of_callable(lambda: cargo.build_env),
+    )
 
     # Clippy builds your code.
     task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
