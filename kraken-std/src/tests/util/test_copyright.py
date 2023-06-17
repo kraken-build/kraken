@@ -24,12 +24,12 @@ def test__copyright__execute_contains_holder(kraken_project: Project) -> None:
 
     check_execute_list = tasks.check.get_execute_command()
     assert "-o" in check_execute_list
-    assert f"'{_TEST_HOLDER}'" in check_execute_list
+    assert f"{_TEST_HOLDER}" in check_execute_list
     assert len(check_execute_list) == 4
 
     format_execute_list = tasks.format.get_execute_command()
     assert "-o" in format_execute_list
-    assert f"'{_TEST_HOLDER}'" in format_execute_list
+    assert f"{_TEST_HOLDER}" in format_execute_list
     assert len(format_execute_list) == 3
 
 
@@ -60,12 +60,12 @@ def test__copyright__execute_contains_license_when_given(kraken_project: Project
 
     check_execute_list = tasks.check.get_execute_command()
     assert "-l" in check_execute_list
-    assert f"'{license_str}'" in check_execute_list
+    assert f"{license_str}" in check_execute_list
     assert len(check_execute_list) == 6
 
     format_execute_list = tasks.format.get_execute_command()
     assert "-l" in check_execute_list
-    assert f"'{license_str}'" in format_execute_list
+    assert f"{license_str}" in format_execute_list
     assert len(format_execute_list) == 5
 
 
