@@ -21,3 +21,21 @@ id = "02f2d93b-232f-4471-8d9e-dfe05bc92ee5"
 type = "deprecation"
 description = "Deprecate `Project.path` and `Project.resolve_tasks()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "8ab2ec4c-9776-47f1-a234-0ba0832a7e09"
+type = "deprecation"
+description = "Deprecated `Task.outputs`, `Task.path` and `Task.add_relationship()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "f31e8357-54c5-4904-b62a-6786be13dc22"
+type = "breaking change"
+description = "Remove `Task.capture`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a56aa4ad-e789-41ca-b42d-0f404337f88b"
+type = "feature"
+description = "Add `Task.depends_on()` and `Task.required_by()`"
+author = "@NiklasRosenstein"
