@@ -39,3 +39,9 @@ id = "a56aa4ad-e789-41ca-b42d-0f404337f88b"
 type = "feature"
 description = "Add `Task.depends_on()` and `Task.required_by()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1c72b74e-6188-4e95-b02a-b92612278d2c"
+type = "fix"
+description = "Move `Address.Element` class definition to the global scope, as otherwise we run into an issue with Dill deserialization where the type of `Address.elements` items is not actually the `Address.Element` type that we can access at runtime. (See https://github.com/uqfoundation/dill/issues/600)."
+author = "@NiklasRosenstein"
