@@ -3,3 +3,9 @@ id = "c74b81bf-e59a-4b7a-9dbc-be571bb8cb88"
 type = "breaking change"
 description = "Remove deprecated `Project.children()` method and deprecated `Project.subproject()` overloads."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "65c94c4b-1dd5-43b8-ae97-d911b860113d"
+type = "breaking change"
+description = "Change `Addressable.address` into a read-only property"
+author = "@NiklasRosenstein"
