@@ -10,15 +10,15 @@ jobs:
     strategy:
       matrix:
         include:
-          - python-version: 3.7
+          - python-version: "3.7"
             only: --only=kraken-common,kraken-wrapper
-          - python-version: 3.8
+          - python-version: "3.8"
             only: --only=kraken-common,kraken-wrapper
-          - python-version: 3.9
+          - python-version: "3.9"
             only: --only=kraken-common,kraken-wrapper
-          - python-version: 3.10
+          - python-version: "3.10"
             only: ''
-          - python-version: 3.11
+          - python-version: "3.11"
             only: --only=kraken-common,kraken-wrapper
     steps:
     - uses: actions/checkout@v2
