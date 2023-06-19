@@ -1,0 +1,5 @@
+[[entries]]
+id = "c74b81bf-e59a-4b7a-9dbc-be571bb8cb88"
+type = "breaking change"
+description = "Remove deprecated `Project.children()` method and deprecated `Project.subproject()` overloads."
+author = "@NiklasRosenstein"

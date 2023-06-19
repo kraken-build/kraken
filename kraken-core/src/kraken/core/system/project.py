@@ -121,10 +121,6 @@ class Project(MetadataContainer, Currentable["Project"]):
     def tasks(self) -> Mapping[str, Task]:
         return {t.name: t for t in self._members.values() if isinstance(t, Task)}
 
-    @deprecated(reason="use Project.subprojects() or Project.subproject() instead")
-    def children(self) -> Mapping[str, Project]:
-        return self.subprojects()
-
     def subprojects(self) -> Mapping[str, Project]:
         return {p.name: p for p in self._members.values() if isinstance(p, Project)}
 
@@ -151,35 +147,12 @@ class Project(MetadataContainer, Currentable["Project"]):
         #subproject() again with the *mode* set to "empty".
         """
 
-    @overload
-    @deprecated(reason="use the Project.subproject(mode) parameter instead")
-    def subproject(self, name: str, mode: bool) -> Project | None:
-        """
-        This is a deprecated version that is semantically equivalent to calling #subproject() with the *mode*
-        parameter set to "if-exists".
-        """
-
-    @overload
-    @deprecated(reason="use the Project.subproject(mode) parameter instead")
-    def subproject(self, name: str, *, load: bool) -> Project | None:
-        """
-        This is a deprecated version that is semantically equivalent to calling #subproject() with the *mode*
-        parameter set to "if-exists".
-        """
-
     def subproject(
         self,
         name: str,
-        mode: bool | Literal["empty", "execute", "if-exists"] = "execute",
-        *,
-        load: bool | None = None,
+        mode: Literal["empty", "execute", "if-exists"] = "execute",
     ) -> Project | None:
-        if load is not None:
-            warnings.warn("the `load` parameter is deprecated, use `mode` instead", DeprecationWarning)
-        if isinstance(mode, bool):
-            warnings.warn("the `load` parameter is deprecated, use `mode` instead", DeprecationWarning)
-            mode = "execute" if mode else "if-exists"
-        del load
+        assert isinstance(mode, str), f"mode must be a string, got {type(mode).__name__}"
 
         obj = self._members.get(name)
         if obj is None and mode == "if-exists":
