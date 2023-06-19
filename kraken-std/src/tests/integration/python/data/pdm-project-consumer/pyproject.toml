@@ -25,5 +25,3 @@ verify_ssl = false
 name = "local"
 username = "integration-test-user"
 password = "password-for-integration-test"
-
-
