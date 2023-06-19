@@ -226,6 +226,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         A convenient alias for :attr:`parent` which is a lot easier to understand when reading the code.
         """
 
+        from kraken.core.system.project import Project
         assert isinstance(self._parent, Project), "Task.parent must be a Project"
         return self._parent
 

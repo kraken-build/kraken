@@ -16,7 +16,7 @@ class KrakenObject(Addressable):
 
     def __init__(self, name: str, parent: KrakenObject | None = None):
         assert isinstance(name, str), type(name)
-        assert isinstance(parent, KrakenObject), type(parent)
+        assert isinstance(parent, KrakenObject) or parent is None, type(parent)
         self._name = name
         self._parent = parent
 

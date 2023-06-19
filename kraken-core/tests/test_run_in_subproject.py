@@ -106,8 +106,8 @@ def test__main__run_in_plain_project_from_subdirectory(tempdir: Path, task_selec
         assert (tempdir / "root.txt").is_file()
     else:
         assert str(excinfo.value) == (
-            "Could not resolve address ':sub:**:task' in context ':'. The failure occurred at address ':sub' "
-            "trying to resolve the remainder '**:task'. The address ':sub:**:task' does not exist."
+            "Could not resolve address ':sub:**:task' in context ':'. The failure occurred at address ':' "
+            "trying to resolve the remainder 'sub:**:task'. The address ':sub' does not exist."
         )
 
 
