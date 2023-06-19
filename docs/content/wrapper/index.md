@@ -34,8 +34,24 @@ Python virtual environment for your build script.
 Note that the `buildscript()` function is completely ignored when running your build script directly with the `kraken`
 CLI and all dependencies required for your build must already be installed in your Python environment.
 
-Older Kraken build scripts might still use Python comments at the file header to carry the same information to the
-wrapper. This method is deprecated and will trigger a warning log with a recommendation to use `buildscript()` instead.
+```py
+from kraken.common import buildscript
+
+buildscript(
+    requirements=["kraken-std"]
+)
+
+from kraken.std import python
+
+python.mypy()
+# ...
+```
+
+The way this works is that when Kraken-Wrapper is executed, it will detect the build script and execute it in a way
+such that the `buildscript()` function raises a specific exception that contains the information you passed to it. The
+wrapper catches this exception and uses the information to build a virtual environment in which your build is then
+actually executed. Subsequently, Kraken-Wrapper will invoke the `kraken` CLI in the virtual environment to execute
+the build script again, only this time the `buildscript()` function call does nothing.
 
 
 ## Credentials management

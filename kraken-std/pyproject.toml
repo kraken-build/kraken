@@ -61,12 +61,12 @@ typed = true
 
 [tool.slap.test]
 check = "slap check"
-kraken-lint = "krakenw -vv run lint"
-kraken-test = "krakenw -vv run test"
+kraken-lint = "krakenw -v run lint"
+kraken-test = "krakenw -v run test"
 # kraken-integrationTest = "kraken run integrationTest"
 
 [tool.slap.run]
-fmt = "krakenw -vv run fmt"
+fmt = "krakenw -v run fmt"
 
 [tool.mypy]
 python_version = "3.10"

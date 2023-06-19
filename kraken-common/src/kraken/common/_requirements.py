@@ -4,9 +4,8 @@ import dataclasses
 import hashlib
 import logging
 import re
-import shlex
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, TextIO, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
@@ -215,56 +214,3 @@ class RequirementSpec:
             requirements=[str(x) for x in self.requirements],
             additional_sys_paths=[x for x in self.pythonpath if x != DEFAULT_BUILD_SUPPORT_FOLDER],
         )
-
-
-def deprecated_get_requirement_spec_from_file_header(file: "TextIO | Path") -> "RequirementSpec | None":
-    """
-    Parses the requirements defined in a Python script.
-
-    The Pip install arguments are extracted from all lines in the first single-line comment block, which has to start
-    at the beginning of the file, which start with the text `# ::requirements` (whitespace optional). Additionally,
-    paths to ass to `sys.path` can be specified with `# ::pythonpath`.
-
-    Example:
-
-    ```py
-    #!/usr/bin/env python
-    # :: requirements PyYAML
-    # :: pythonpath path/to/folder
-    ```
-
-    The resulting :class:`RequirementSpec` will contain `["PyYAML"]` as requirement and `"./build-support"` ain
-    the Python path.
-
-    !!! note
-
-        This function is deprecated and is only kept for backwards compatibility, allowing Kraken wrapper to
-        continue to support Kraken build scripts using the old requirements schema.
-    """
-
-    if isinstance(file, Path):
-        with file.open("r") as fp:
-            return deprecated_get_requirement_spec_from_file_header(fp)
-
-    requirements = []
-    pythonpath = []
-    for line in map(str.rstrip, file):
-        if not line.startswith("#"):
-            break
-        match = re.match(r"#\s*::\s*(requirements|pythonpath)(.+)", line)
-        if not match:
-            break
-        args = shlex.split(match.group(2))
-        if match.group(1) == "requirements":
-            requirements += args
-        else:
-            pythonpath += args
-
-    if requirements or pythonpath:
-        return (
-            RequirementSpec.from_args(requirements)
-            .with_pythonpath(pythonpath)
-            .with_pythonpath([DEFAULT_BUILD_SUPPORT_FOLDER])
-        )
-
-    return None

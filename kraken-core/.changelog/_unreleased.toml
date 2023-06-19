@@ -60,3 +60,10 @@ type = "breaking change"
 description = "`TaskGraph` implementation now stores `Address` keys instead of strings"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/44"
+
+[[entries]]
+id = "c8b06c6d-1163-462d-a264-76441bbe6571"
+type = "breaking change"
+description = "Remove support for hash-comment style build requirements when resuming builds from an existing state."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/45"
