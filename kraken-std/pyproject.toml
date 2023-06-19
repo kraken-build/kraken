@@ -20,8 +20,8 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
+python = "3.10"
 pyaddlicense = "^0.2.1"
-python = "^3.7"
 databind-json = "^4.2.5"
 deprecated = "^1.2.13"
 httpx = "^0.23.0"

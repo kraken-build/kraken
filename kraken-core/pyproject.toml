@@ -20,11 +20,11 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"  # Dill serialization doesn't work in 3.11
+python = "3.10"
 deprecated = "^1.2.13"
-dill = ">=0.3.5,<0.3.6"  # https://github.com/uqfoundation/dill/issues/332#issuecomment-1289537575
+dill = ">=0.3.5,<0.3.6"  # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
 kraken-common = "^0.24.2"
-networkx = "~2.6.3"  # Last version compatible with Python 3.7
+networkx = "^3.1"
 nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
 pytest = { version = ">=6.0.0", optional = true }  # For the testing fixture provided by kraken.core
