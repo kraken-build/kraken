@@ -11,6 +11,7 @@ from typing_extensions import Literal
 
 from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
+from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
 from kraken.core.system.task import GroupTask, Task, TaskSet
 
@@ -21,19 +22,22 @@ T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
 
 
-class Project(MetadataContainer, Currentable["Project"]):
+class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     """A project consolidates tasks related to a directory on the filesystem."""
 
-    address: Address
     directory: Path
-    parent: Optional[Project]
     context: Context
     metadata: list[Any]  #: A list of arbitrary objects that are usually looked up by type.
 
     def __init__(self, name: str, directory: Path, parent: Optional[Project], context: Context) -> None:
-        self.address = parent.address.append(name) if parent else Address.ROOT
+        assert isinstance(name, str), type(name)
+        assert isinstance(directory, Path), type(directory)
+        assert isinstance(parent, Project) or parent is None, type(parent)
+        KrakenObject.__init__(self, name, parent)
+        MetadataContainer.__init__(self)
+        Currentable.__init__(self)
+
         self.directory = directory
-        self.parent = parent
         self.context = context
         self.metadata = []
 
@@ -84,6 +88,13 @@ class Project(MetadataContainer, Currentable["Project"]):
         return f"Project({self.path})"
 
     @property
+    def parent(self) -> Project | None:
+        if self._parent is None:
+            return None
+        assert isinstance(self._parent, Project), "Project.parent must be a Project"
+        return self._parent
+
+    @property
     def name(self) -> str:
         if self.address.is_root():
             warnings.warn(
@@ -95,13 +106,6 @@ class Project(MetadataContainer, Currentable["Project"]):
             )
             return self.directory.name
         return self.address.name
-
-    # TODO(NiklasRosenstein): To be deprecated in v0.13.0
-    @property
-    def path(self) -> str:
-        """Returns the path that uniquely identifies the project in the current build context."""
-
-        return str(self.address)
 
     @property
     def build_directory(self) -> Path:
@@ -185,21 +189,6 @@ class Project(MetadataContainer, Currentable["Project"]):
         """
 
         return isinstance(self._members.get(name), Project)
-
-    def resolve_tasks(self, tasks: str | Task | Iterable[str | Task]) -> TaskSet:
-        """Resolve tasks relative to the current project."""
-
-        if isinstance(tasks, (str, Task)):
-            tasks = [tasks]
-
-        result = TaskSet()
-        for item in tasks:
-            if isinstance(item, str):
-                result.add(self.context.resolve_tasks([item], self), partition=item)
-            else:
-                result.add([item])
-
-        return result
 
     def add_task(self, task: Task) -> None:
         """Adds a task to the project.
@@ -320,3 +309,30 @@ class Project(MetadataContainer, Currentable["Project"]):
             task.default = default
 
         return task
+
+    ##
+    # Begin: Deprecated APIs
+    ##
+
+    @property
+    @deprecated(reason="Project.path is deprecated, use str(Project.address) instead")
+    def path(self) -> str:
+        """Returns the path that uniquely identifies the project in the current build context."""
+
+        return str(self.address)
+
+    @deprecated(reason="Project.resolve_tasks() is deprecated, use Project.context.resolve_tasks() instead.")
+    def resolve_tasks(self, tasks: str | Task | Iterable[str | Task]) -> TaskSet:
+        """Resolve tasks relative to the current project."""
+
+        if isinstance(tasks, (str, Task)):
+            tasks = [tasks]
+
+        result = TaskSet()
+        for item in tasks:
+            if isinstance(item, str):
+                result.add(self.context.resolve_tasks([item], self), partition=item)
+            else:
+                result.add([item])
+
+        return result

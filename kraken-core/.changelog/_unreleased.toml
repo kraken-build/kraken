@@ -9,3 +9,15 @@ id = "65c94c4b-1dd5-43b8-ae97-d911b860113d"
 type = "breaking change"
 description = "Change `Addressable.address` into a read-only property"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "400b123c-093c-486a-8c1c-c70889bf6eac"
+type = "improvement"
+description = "Make `Project` a subclass of the new `KrakenObject` class"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "02f2d93b-232f-4471-8d9e-dfe05bc92ee5"
+type = "deprecation"
+description = "Deprecate `Project.path` and `Project.resolve_tasks()`"
+author = "@NiklasRosenstein"
