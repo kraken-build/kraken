@@ -36,7 +36,6 @@ from ._option_sets import AuthOptions, EnvOptions
 BUILDENV_PATH = Path("build/.kraken/venv")
 BUILDSCRIPT_FILENAME = ".kraken.py"
 BUILD_SUPPORT_DIRECTORY = "build-support"
-DEFAULT_INTERPRETER_CONSTRAINT = ">=3.7"
 LOCK_FILENAME = ".kraken.lock"
 _FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: 731
 logger = logging.getLogger(__name__)
@@ -75,7 +74,7 @@ def _get_argument_parser() -> argparse.ArgumentParser:
     # NOTE (@NiklasRosenstein): If we combine "+" with remainder, we get options passed after the `cmd`
     #       passed directly into `args` without argparse treating it like an option. This is not the case
     #       when using `nargs=1` for `cmd`.
-    parser.add_argument("cmd", nargs="*", metavar="cmd", help="{a,auth,lock,l} or a kraken command")
+    parser.add_argument("cmd", nargs="*", metavar="cmd", help="{auth,list-pythons,lock} or a kraken command")
     parser.add_argument("args", nargs=argparse.REMAINDER, help="additional arguments")
     return parser
 
@@ -177,6 +176,20 @@ def auth(prog: str, argv: list[str]) -> NoReturn:
         parser.print_usage()
         sys.exit(1)
 
+    sys.exit(0)
+
+
+def list_pythons(prog: str, argv: list[str]) -> NoReturn:
+    import rich
+    from kraken.common import findpython
+
+    if argv:
+        eprint(f"{prog}: error: unexpected arguments")
+        sys.exit(1)
+
+    interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
+    table = findpython.build_rich_table(interpreters)
+    rich.print(table)
     sys.exit(0)
 
 
@@ -371,6 +384,9 @@ def main() -> NoReturn:
     if cmd in ("a", "auth"):
         # The `auth` comand does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv)
+
+    if cmd in ("list-pythons",):
+        list_pythons(f"{parser.prog} list-pythons", argv)
 
     # The project details and build environment manager are relevant for any command that we are delegating.
     # This includes the built-in `lock` command.

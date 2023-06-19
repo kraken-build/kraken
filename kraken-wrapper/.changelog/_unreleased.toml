@@ -1,0 +1,5 @@
+[[entries]]
+id = "16512958-0027-4b16-a5dd-de37e40ce231"
+type = "feature"
+description = "Add `list-pythons` command and support for finding an appropriate Python interpreter on the current system for creating the Python build environment in the `VenvBuildEnv` manager."
+author = "@NiklasRosenstein"
