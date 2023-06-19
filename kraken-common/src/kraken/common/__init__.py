@@ -58,7 +58,6 @@ __all__ = [
     "LocalRequirement",
     "PipRequirement",
     "RequirementSpec",
-    "deprecated_get_requirement_spec_from_file_header",
     # _runner
     "BuildDslScriptRunner",
     "CurrentDirectoryProjectFinder",

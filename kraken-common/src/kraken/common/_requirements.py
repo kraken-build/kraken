@@ -4,9 +4,8 @@ import dataclasses
 import hashlib
 import logging
 import re
-import shlex
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, TextIO, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten

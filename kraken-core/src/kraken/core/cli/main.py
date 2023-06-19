@@ -22,7 +22,6 @@ from kraken.common import (
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
-    deprecated_get_requirement_spec_from_file_header,
     get_terminal_width,
     not_none,
     propagate_argparse_formatter_to_subparser,
@@ -218,24 +217,14 @@ def _load_build_state(
     # we can rely on the buildscript() call in the script to update `sys.path`; but if the deprecated file header
     # is used to define the pythonpath we still need to parse it explicitly.
 
-    if project_info:
-        # Attempt to read the requirement spec in the deprecated format first.
-        requirements = deprecated_get_requirement_spec_from_file_header(project_info.script)
-
-        # If the file does not have the deprecated requirement spec file header as comments, we instead want
-        # to capture the buildscript() call by tenatively executing the script. However, we only need to do
-        # this if we want to resume from a serialized build state. When we need to execute the full script
-        # anyway, we can rely on a callback that we register for when buildscript() is called to update
-        # the `sys.path`, which avoids that we execute the script twice.
-        if not requirements and graph_options.resume and project_info.runner.has_buildscript_call(project_info.script):
-            with BuildscriptMetadata.capture() as future:
-                project_info.runner.execute_script(project_info.script, {})
-            assert future.done()
-            requirements = RequirementSpec.from_metadata(future.result())
-
-        # Update `sys.path` with the python path from the requirement spec, if any.
-        if requirements:
-            exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
+    # When we resume a build from serialized state files, we do not execute the build script. Thus, in order
+    # to ensure we add the correct paths to `sys.path`, we need to parse the extract the build metadata again.
+    if project_info and graph_options.resume and project_info.runner.has_buildscript_call(project_info.script):
+        with BuildscriptMetadata.capture() as future:
+            project_info.runner.execute_script(project_info.script, {})
+        assert future.done()
+        requirements = RequirementSpec.from_metadata(future.result())
+        exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
 
     context: Context | None = None
 
