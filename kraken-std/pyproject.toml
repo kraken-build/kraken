@@ -32,12 +32,6 @@ tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
 
-# NOTE(@NiklasRosenstein): Need to pin transitive dependency markdown-it under 3.0 because it dropped Python 3.9
-#       support after that version. Technically this shouldn't be a big issue for runtime, but Mypy checks site
-#       packages and complains about the walrus operator used in it when it checks site-packages.
-#       See also https://github.com/python/mypy/issues/12162
-markdown-it-py = "<3.0.0"
-
 [tool.poetry.dev-dependencies]
 black = "*"
 flake8 = "*"
