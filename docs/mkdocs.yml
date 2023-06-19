@@ -23,3 +23,5 @@ nav:
     - std/helm.md
     - std/protobuf.md
     - std/python.md
+  - kraken-wrapper:
+    - std/wrapper.md
