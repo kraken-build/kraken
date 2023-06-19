@@ -2,11 +2,11 @@ import logging
 from contextlib import ExitStack
 from pathlib import Path
 from textwrap import dedent
-from typing import List
 
 from kraken.common import not_none, safe_rmpath
 from pytest import mark
 
+from kraken.core.address import Address
 from kraken.core.cli.main import _load_build_state
 from kraken.core.cli.option_sets import BuildOptions, GraphOptions
 from kraken.core.system.executor.colored import ColoredDefaultPrintingExecutorObserver
@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 class RecordingExecutorObserver(ColoredDefaultPrintingExecutorObserver):
     def __init__(self) -> None:
         super().__init__()
-        self.executed_tasks: List[str] = []
+        self.executed_tasks: list[Address] = []
 
     def after_execute_task(self, task: Task, status: TaskStatus) -> None:
-        self.executed_tasks.append(task.path)
+        self.executed_tasks.append(task.address)
         return super().after_execute_task(task, status)
 
 
@@ -51,8 +51,8 @@ def test_resume_build_state(tempdir: Path) -> None:
         render_file(name="b", file=project.build_directory / "b.txt", content="This is file b.txt")
         render_file(name="c", file=project.build_directory / "c.txt", content="This is file b.txt")
 
-        project.task("c").add_relationship("a")
-        project.task("c").add_relationship("b")
+        project.task("c").depends_on("a")
+        project.task("c").depends_on("b")
         """
     )
     build_script.write_text(build_script_code)
@@ -75,7 +75,7 @@ def test_resume_build_state(tempdir: Path) -> None:
         observer = RecordingExecutorObserver()
         context.executor.execute_graph(graph, observer)
 
-        assert observer.executed_tasks == [":a"]
+        assert observer.executed_tasks == [Address(":a")]
 
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert graph.get_status(graph.get_task(":b")) is None
@@ -88,6 +88,8 @@ def test_resume_build_state(tempdir: Path) -> None:
         graph_options = GraphOptions(["b"], resume=True, restart=False, no_save=False, all=False)
         context, graph = _load_build_state(exit_stack, build_options, graph_options)
 
+        # import code; code.interact(local=locals())  #
+        # breakpoint()
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert graph.get_status(graph.get_task(":b")) is None
         assert graph.get_status(graph.get_task(":c")) is None
@@ -96,7 +98,7 @@ def test_resume_build_state(tempdir: Path) -> None:
         observer = RecordingExecutorObserver()
         context.executor.execute_graph(graph, observer)
 
-        assert observer.executed_tasks == [":b"]
+        assert observer.executed_tasks == [Address(":b")]
 
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert not_none(graph.get_status(graph.get_task(":b"))).type == TaskStatusType.SUCCEEDED
@@ -108,7 +110,7 @@ def test_resume_build_state(tempdir: Path) -> None:
         context, graph = _load_build_state(exit_stack, build_options, graph_options)
 
         assert list(graph.tasks()) == [graph.get_task(":a"), graph.get_task(":b"), graph.get_task(":c")]
-        assert graph._ok_tasks == {":a", ":b"}
+        assert graph._ok_tasks == {Address(":a"), Address(":b")}
         assert not graph.is_complete()
         assert graph.ready() == [graph.get_task(":c")]
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
@@ -119,7 +121,7 @@ def test_resume_build_state(tempdir: Path) -> None:
         observer = RecordingExecutorObserver()
         context.executor.execute_graph(graph, observer)
 
-        assert observer.executed_tasks == [":c"]
+        assert observer.executed_tasks == [Address(":c")]
 
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert not_none(graph.get_status(graph.get_task(":b"))).type == TaskStatusType.SUCCEEDED
@@ -135,7 +137,7 @@ def test_resume_build_state(tempdir: Path) -> None:
         observer = RecordingExecutorObserver()
         context.executor.execute_graph(graph, observer)
 
-        assert observer.executed_tasks == [":a", ":b", ":c"]
+        assert observer.executed_tasks == [Address(":a"), Address(":b"), Address(":c")]
 
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert not_none(graph.get_status(graph.get_task(":b"))).type == TaskStatusType.SUCCEEDED

@@ -65,8 +65,8 @@ def test__TaskGraph__ready_on_successful_completion(kraken_project: Project) -> 
     task_b = kraken_project.do("b", VoidTask)
     task_c = kraken_project.do("c", VoidTask)
 
-    task_c.add_relationship(task_b)
-    task_b.add_relationship(task_a)
+    task_c.depends_on(task_b)
+    task_b.depends_on(task_a)
 
     graph = TaskGraph(kraken_project.context).trim([task_c])
 
@@ -104,9 +104,9 @@ def test__TaskGraph__ready_on_failure(kraken_project: Project) -> None:
     task_c = kraken_project.do("c", VoidTask)
     task_d = kraken_project.do("d", VoidTask)
 
-    task_d.add_relationship(task_b)
-    task_d.add_relationship(task_c)
-    task_c.add_relationship(task_a)
+    task_d.depends_on(task_b)
+    task_d.depends_on(task_c)
+    task_c.depends_on(task_a)
 
     graph = TaskGraph(kraken_project.context).trim([task_d])
     assert set(graph.tasks()) == {task_d, task_b, task_c, task_a}
@@ -137,7 +137,7 @@ def test__TaskGraph__ready_2(kraken_project: Project) -> None:
 
     pythonBuild = kraken_project.do("pythonBuild", VoidTask, group="build")
     pythonPublish = kraken_project.do("pythonPublish", VoidTask, group="publish")
-    pythonPublish.add_relationship(pythonBuild)
+    pythonPublish.depends_on(pythonBuild)
 
     publish = kraken_project.group("publish")
     graph = TaskGraph(kraken_project.context).trim([publish])
@@ -170,10 +170,10 @@ def test__TaskGraph__correct_execution_order_on_optional_intermediate_task(krake
     build = kraken_project.group("build")
     pytest = kraken_project.do("pytest", VoidTask)
 
-    pytest.add_relationship(python_install)
-    pytest.add_relationship(build, strict=False)
-    build.add_relationship(gen)
-    jtd_python.add_relationship(python_install)
+    pytest.depends_on(python_install)
+    pytest.depends_on(build, mode="order-only")
+    build.depends_on(gen)
+    jtd_python.depends_on(python_install)
 
     graph = TaskGraph(kraken_project.context)
 
@@ -204,9 +204,9 @@ def test__TaskGraph__test_inverse_group_relationship(kraken_project: Project, in
     tb1 = kraken_project.do("tb1", VoidTask, group=b)
 
     if inverse:
-        a.add_relationship(b, inverse=True)
+        a.required_by(b)
     else:
-        b.add_relationship(a)
+        b.depends_on(a)
 
     graph = TaskGraph(kraken_project.context)
     assert graph.get_edge(ta1, a) == _Edge(True, False)
@@ -236,7 +236,7 @@ def test__TaskGraph__allow_subsequent_group_execution_on_non_strict_failed_tasks
     ta2 = kraken_project.do("ta2", VoidTask, group=a)
     tb1 = kraken_project.do("tb1", VoidTask, group=b)
 
-    b.add_relationship(a, strict=False)
+    b.depends_on(a, mode="order-only")
     graph = TaskGraph(kraken_project.context)
     assert list(graph.ready()) == [ta1, ta2]
 
@@ -262,7 +262,7 @@ def test__TaskGraph__allow_subsequent_task_execution_on_non_strict_failed_tasks(
     ta1 = kraken_project.do("ta1", VoidTask, group=a)
     ta2 = kraken_project.do("ta2", VoidTask, group=a)
 
-    ta2.add_relationship(ta1, strict=False)
+    ta2.depends_on(ta1, mode="order-only")
     graph = TaskGraph(kraken_project.context)
     assert list(graph.ready()) == [ta1]
 
@@ -285,7 +285,7 @@ def test__TaskGraph__wait_for_group_finish_before_removing_non_strict_dependenci
     ta2 = kraken_project.do("ta2", VoidTask, group=a)
     tb1 = kraken_project.do("tb1", VoidTask, group=b)
 
-    b.add_relationship(a, strict=False)
+    b.depends_on(a, mode="order-only")
     graph = TaskGraph(kraken_project.context)
     assert list(graph.ready()) == [ta1, ta2]
 

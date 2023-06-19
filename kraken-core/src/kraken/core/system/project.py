@@ -49,38 +49,38 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             "apply", description="Tasks that perform automatic updates to the project consistency."
         )
         fmt_group = self.group("fmt", description="Tasks that that perform code formatting operations.")
-        fmt_group.add_relationship(apply_group, strict=True)
+        fmt_group.depends_on(apply_group, mode="strict")
 
         check_group = self.group("check", description="Tasks that perform project consistency checks.", default=True)
 
         gen_group = self.group("gen", description="Tasks that perform code generation.", default=True)
 
         lint_group = self.group("lint", description="Tasks that perform code linting.", default=True)
-        lint_group.add_relationship(check_group, strict=True)
-        lint_group.add_relationship(gen_group, strict=True)
+        lint_group.depends_on(check_group, mode="strict")
+        lint_group.depends_on(gen_group, mode="strict")
 
         build_group = self.group("build", description="Tasks that produce build artefacts.")
-        build_group.add_relationship(lint_group, strict=False)
-        build_group.add_relationship(gen_group, strict=True)
+        build_group.depends_on(lint_group, mode="order-only")
+        build_group.depends_on(gen_group, mode="strict")
 
         audit_group = self.group("audit", description="Tasks that perform auditing on built artefacts and code")
-        audit_group.add_relationship(build_group, strict=True)
-        audit_group.add_relationship(gen_group, strict=True)
+        audit_group.depends_on(build_group, mode="strict")
+        audit_group.depends_on(gen_group, mode="strict")
 
         test_group = self.group("test", description="Tasks that perform unit tests.", default=True)
-        test_group.add_relationship(build_group, strict=False)
-        test_group.add_relationship(gen_group, strict=True)
+        test_group.depends_on(build_group, mode="order-only")
+        test_group.depends_on(gen_group, mode="strict")
 
         integration_test_group = self.group("integrationTest", description="Tasks that perform integration tests.")
-        integration_test_group.add_relationship(test_group, strict=False)
-        integration_test_group.add_relationship(gen_group, strict=True)
+        integration_test_group.depends_on(test_group, mode="order-only")
+        integration_test_group.depends_on(gen_group, mode="strict")
 
         publish_group = self.group("publish", description="Tasks that publish build artefacts.")
-        publish_group.add_relationship(integration_test_group, strict=False)
-        publish_group.add_relationship(build_group, strict=True)
+        publish_group.depends_on(integration_test_group, mode="order-only")
+        publish_group.depends_on(build_group, mode="strict")
 
         deploy_group = self.group("deploy", description="Tasks that deploy applications.")
-        deploy_group.add_relationship(publish_group, strict=False)
+        deploy_group.depends_on(publish_group, mode="order-only")
 
         self.group("update", description="Tasks that update dependencies of the project.")
 
@@ -112,7 +112,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         """Returns the recommended build directory for the project; this is a directory inside the context
         build directory ammended by the project name."""
 
-        return self.context.build_directory / self.path.replace(":", "/").lstrip("/")
+        return self.context.build_directory / str(self.address).replace(":", "/").lstrip("/")
 
     def task(self, name: str) -> Task:
         """Return a task in the project by name."""

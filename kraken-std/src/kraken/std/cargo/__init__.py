@@ -92,7 +92,7 @@ def cargo_sqlx_prepare(
     # Preparing or checking sqlx metadata calls `cargo metadata`, which can require the auth proxy
     # Without the auth proxy, cargo sqlx commands would fail with a cryptic error
     # See https://github.com/launchbadge/sqlx/pull/2222 for details
-    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
 
     return task
 
@@ -143,7 +143,7 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     # The auth proxy injects values into the cargo config, the cargoSyncConfig.check ensures that it reflects
     # the temporary changes that should be made to the config. The check has to run before the auth proxy,
     # otheerwise it is garuanteed to fail.
-    task.add_relationship(":cargoSyncConfig.check?", strict=False)
+    task.depends_on(":cargoSyncConfig.check?", mode="order-only")
     return task
 
 
@@ -193,7 +193,7 @@ def cargo_clippy(
     )
 
     # Clippy builds your code.
-    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
 
     return task
 
@@ -242,7 +242,7 @@ def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> 
 def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:
     project = project or Project.current()
     task = project.do("cargoUpdate", CargoUpdateTask, group="update")
-    task.add_relationship(":cargoBuildSupport", strict=True)
+    task.depends_on(":cargoBuildSupport")
 
     return task
 
@@ -277,7 +277,7 @@ def cargo_bump_version(
         cargo_toml_file=cargo_toml_file,
     )
 
-    task.add_relationship(":test?")
+    task.depends_on(":test?")
 
     return task
 
@@ -327,7 +327,7 @@ def cargo_build(
         additional_args=additional_args,
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
-    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
 
 
@@ -355,7 +355,7 @@ def cargo_test(
         incremental=incremental,
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
-    task.add_relationship(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
 
 
@@ -401,7 +401,7 @@ def cargo_publish(
         env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
     )
 
-    task.add_relationship(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
+    task.depends_on(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
 
     return task
 

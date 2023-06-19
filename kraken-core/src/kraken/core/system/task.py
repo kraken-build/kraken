@@ -218,7 +218,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         self.__relationships: list[_Relationship[Address | Task]] = []
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}({self.path})"
+        return f"{type(self).__name__}({self.address})"
 
     @property
     def project(self) -> Project:
@@ -227,6 +227,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         from kraken.core.system.project import Project
+
         assert isinstance(self._parent, Project), "Task.parent must be a Project"
         return self._parent
 

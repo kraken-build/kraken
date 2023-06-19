@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from kraken.common import NotSet
-
 from kraken.core.address import Address, Addressable
-from kraken.core.system.property import PropertyContainer
 
 
 class KrakenObject(Addressable):
@@ -28,7 +25,7 @@ class KrakenObject(Addressable):
         return self._name
 
     @property
-    def address(self) -> Address:  # type: ignore[override]
+    def address(self) -> Address:
         """
         Returns the full address of the object.
         """
