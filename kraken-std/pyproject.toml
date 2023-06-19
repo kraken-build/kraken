@@ -69,7 +69,7 @@ kraken-test = "krakenw -vv run test"
 fmt = "krakenw -vv run fmt"
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.10"
 exclude = ["src/tests/integration/.*/data/.*"]
 explicit_package_bases = true
 mypy_path = ["src"]
