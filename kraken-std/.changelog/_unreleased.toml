@@ -1,0 +1,5 @@
+[[entries]]
+id = "849d68fb-bf60-4609-9d71-3e84b98ba0d7"
+type = "feature"
+description = "Add manifest_path to artifact metadata for Cargo"
+author = "luke.tomlin@helsing.ai"
