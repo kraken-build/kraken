@@ -95,6 +95,12 @@ class BuildEnvMetadataStore:
         self._metadata = metadata
 
 
+class BuildEnvError(Exception):
+    """
+    An error occurred while building the environment.
+    """
+
+
 def general_get_installed_distributions(kraken_command_prefix: Sequence[str]) -> list[Distribution]:
     command = [*kraken_command_prefix, "query", "env"]
     output = subprocess.check_output(command).decode()

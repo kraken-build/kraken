@@ -1,0 +1,5 @@
+[[entries]]
+id = "8f52da53-4be9-41f9-b2d6-3ac9b8af1d12"
+type = "improvement"
+description = "Make better use of logging and hide the logs of creating a virtual environment, upgrading Pip and installing dependencies unless the operations fail."
+author = "@NiklasRosenstein"

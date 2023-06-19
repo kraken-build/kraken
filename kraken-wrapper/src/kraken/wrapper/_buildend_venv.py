@@ -1,14 +1,17 @@
 import logging
 import os
+import shlex
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import List, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
+from typing_extensions import Literal
 
-from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, general_get_installed_distributions
+from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, BuildEnvError, general_get_installed_distributions
 from ._lockfile import Distribution
 
 logger = logging.getLogger(__name__)
@@ -38,6 +41,28 @@ class VenvBuildEnv(BuildEnv):
         self._venv = VirtualEnvInfo(self._path)
         self._incremental = incremental
 
+    def _run_command(
+        self, command: List[str], operation_name: str, log_file: Path, mode: Literal["a", "w"] = "w"
+    ) -> None:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        with log_file.open(mode) as fp:
+            offset = fp.tell()
+            try:
+                subprocess.check_call(command, stdout=fp, stderr=fp)
+                return
+            except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                exc = e
+        with log_file.open() as fp:
+            fp.seek(offset)
+            logger.error(
+                "'%s' failed (exit code: %d, command: %s). Output:\n\n%s",
+                operation_name,
+                exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
+                "$ " + " ".join(map(shlex.quote, command)),
+                fp.read(),
+            )
+            raise BuildEnvError(f"The command {command} failed.") from exc
+
     # BuildEnv
 
     def get_path(self) -> Path:
@@ -51,6 +76,9 @@ class VenvBuildEnv(BuildEnv):
         return general_get_installed_distributions([str(python), "-c", f"{KRAKEN_MAIN_IMPORT_SNIPPET}\nmain()"])
 
     def build(self, requirements: RequirementSpec, transitive: bool) -> None:
+        create_log = self._path.with_name(self._path.name + ".log") / "create.txt"
+        install_log = self._path.with_name(self._path.name + ".log") / "install.txt"
+
         if not self._incremental and self._path.exists():
             logger.debug("Removing existing virtual environment at %s", self._path)
             safe_rmpath(self._path)
@@ -91,16 +119,16 @@ class VenvBuildEnv(BuildEnv):
                 python_origin_bin = sys.executable
 
             command = [python_origin_bin, "-m", "venv", str(self._path)]
-            logger.debug("Creating virtual environment at %s: %s", self._path, " ".join(command))
-            subprocess.check_call(command)
+            logger.info("Creating virtual environment at %s", os.path.relpath(self._path))
+            self._run_command(command, operation_name="Create virtual environment", log_file=create_log)
 
             # Upgrade Pip.
             command = [python_bin, "-m", "pip", "install", "--upgrade", "pip"]
-            logger.debug("Upgrading Pip: %s", command)
-            subprocess.check_call(command)
+            logger.info("Upgrading Pip in virtual environment.")
+            self._run_command(command, operation_name="Upgrade Pip", log_file=create_log, mode="a")
 
         else:
-            logger.debug("Reusing virtual environment at %s", self._path)
+            logger.info("Reusing virtual environment at %s", self._path)
 
         # Install requirements.
         command = [
@@ -117,8 +145,9 @@ class VenvBuildEnv(BuildEnv):
         #     command += ["--no-deps"]
         # TODO (@NiklasRosenstein): Handle requirements interpreter constraint (see kraken-wrapper#5).
         command += requirements.to_args()
+        logger.info("Installing dependencies.")
         logger.debug("Installing into build environment with Pip: %s", " ".join(command))
-        subprocess.check_call(command)
+        self._run_command(command, operation_name="Install dependencies", log_file=install_log)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.
         command = [python_bin, "-c", "from sysconfig import get_path; print(get_path('purelib'))"]
