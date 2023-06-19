@@ -24,13 +24,13 @@ class CopyrightTask(EnvironmentAwareDispatchTask):
         command = ["pyaddlicense"]
 
         if self.holder.get() != "":
-            command += ["-o", f"'{self.holder.get()}'"]
+            command += ["-o", f"{self.holder.get()}"]
 
         if self.check_only.get():
             command += ["-c"]
 
         if self.custom_license.is_filled():
-            command += ["-l", f"'{str(self.custom_license.get())}'"]
+            command += ["-l", f"{str(self.custom_license.get())}"]
 
         if self.custom_license_file.is_filled():
             command += ["-f", str(self.custom_license_file.get().absolute())]
