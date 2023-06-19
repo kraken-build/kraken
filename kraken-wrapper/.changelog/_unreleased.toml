@@ -4,3 +4,9 @@ type = "feature"
 description = "Add `list-pythons` command and support for finding an appropriate Python interpreter on the current system for creating the Python build environment in the `VenvBuildEnv` manager."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/42"
+
+[[entries]]
+id = "be71a375-d09b-4522-ba5a-06491ad03a11"
+type = "improvement"
+description = "Add support for `KRAKENW_NO_KEYRING` environment varibale"
+author = "@NiklasRosenstein"

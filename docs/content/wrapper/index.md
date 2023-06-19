@@ -67,3 +67,4 @@ Kraken wrapper supports the following environment variables:
 | `KRAKENW_USE` | If set, it will behave as if the `--use` flag was specified (although the `--use` flag if given will still take precedence over the environment variable). Can be used to enforce a certain type of build environment to use. Available values are `PEX_ZIPAPP`, `PEX_PACKED`, `PEX_LOOSE` and `VENV` (default). |
 | `KRAKENW_REINSTALL` | If set to `1`, behaves as if `--reinstall` was specified. |
 | `KRAKENW_INCREMENTAL` |  If set to `1`, virtual environment build environments are "incremental", i.e. they will be reused if they already exist and their installed distributions will be upgraded. |
+| `KRAKENW_NO_KEYRING` | If set to `1`, disable the use of the keyring package for storing credentials. |

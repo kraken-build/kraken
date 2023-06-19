@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any, MutableMapping, NamedTuple
 
@@ -27,7 +28,9 @@ class AuthModel:
     def __init__(self, config: MutableMapping[str, Any], path: Path) -> None:
         self._config = config
         self._path = path
-        self._has_keyring = not isinstance(keyring.get_keyring(), keyring.backends.fail.Keyring)
+        self._has_keyring = os.getenv("KRAKENW_NO_KEYRING") != "1" and not isinstance(
+            keyring.get_keyring(), keyring.backends.fail.Keyring
+        )
 
     def get_credentials(self, host: str) -> Credentials | None:
         auth = self._config.get("auth", {})
