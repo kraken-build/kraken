@@ -13,7 +13,7 @@ from ._generic import NotSet, flatten
 
 logger = logging.getLogger(__name__)
 DEFAULT_BUILD_SUPPORT_FOLDER = "build-support"
-DEFAULT_INTERPRETER_CONSTRAINT = ">=3.7"
+DEFAULT_INTERPRETER_CONSTRAINT = ">=3.10"
 
 
 def parse_requirement(value: str) -> "PipRequirement | LocalRequirement":
