@@ -52,7 +52,7 @@ jobs:
     # Make sure we have Docker available for the ete-tests.
     - uses: docker/setup-buildx-action@v2
 
-    - run: cd kraken-std && krakenw -vv run ${{ matrix.test-type }} -vv
+    - run: cd kraken-std && krakenw -v run ${{ matrix.test-type }} -v
       env:
         ARTIFACTORY_CARGO_REPOSITORY: ${{ vars.ARTIFACTORY_CARGO_REPOSITORY }}
         CLOUDSMITH_CARGO_REPOSITORY: ${{ vars.CLOUDSMITH_CARGO_REPOSITORY }}

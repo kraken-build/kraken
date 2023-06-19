@@ -4,3 +4,9 @@ type = "improvement"
 description = "Use `rich`'s logging handler, add `kraken.common.exceptions` module"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/45"
+
+[[entries]]
+id = "8b21f89e-a679-4333-aa85-b7d897c47927"
+type = "breaking change"
+description = "Remove `deprecated_get_requirement_spec_from_file_header()` function"
+author = "@NiklasRosenstein"

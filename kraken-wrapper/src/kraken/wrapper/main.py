@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import builtins
 import getpass
 import logging
 import os
 import shlex
 import sys
 import time
-from functools import partial
 from pathlib import Path
 from textwrap import indent
 from typing import NamedTuple, NoReturn
@@ -22,7 +20,6 @@ from kraken.common import (
     RequirementSpec,
     TomlConfigFile,
     datetime_to_iso8601,
-    deprecated_get_requirement_spec_from_file_header,
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
@@ -322,38 +319,25 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     script, runner = project_info
 
     # Load requirement spec from build script.
-    logger.debug('loading requirements from "%s" (runner: %s)', script, runner)
+    logger.debug('Loading requirements from "%s" (runner: %s)', script, runner)
 
-    # For backwards compatibility, support loading the requirements from the comment header.
-    requirements = deprecated_get_requirement_spec_from_file_header(script)
-    if requirements is not None:
+    # Extract the metadata provided by the buildscript() function call at the top of the build script.
+    if not runner.has_buildscript_call(script):
+        metadata = BuildscriptMetadata(requirements=["kraken-core"])
         logger.error(
-            "error: The # ::requirements header is deprecated and support for it will be removed in a future version "
-            "of kraken-wrapper. Please use the `buildscript()` function from the `kraken.common` package "
-            "from now on.\n\n%s\n"
-            % indent(runner.get_buildscript_call_recommendation(requirements.to_metadata()), "    "),
+            "Kraken build scripts must call the `buildscript()` function to be compatible with Kraken wrapper. "
+            "Please add something like this at the top of your build script:\n\n%s\n"
+            % indent(runner.get_buildscript_call_recommendation(metadata), "    "),
         )
+        sys.exit(1)
 
-    # Otherwise, extract the relevant data from the buildscript() call instead.
-    else:
-        if not runner.has_buildscript_call(script):
-            metadata = BuildscriptMetadata(requirements=["kraken-core"])
-            logger.error(
-                "Kraken build scripts must call the `buildscript()` function to be compatible with Kraken wrapper. "
-                "Please add something like this at the top of your build script:\n\n%s\n"
-                % indent(runner.get_buildscript_call_recommendation(metadata), "    "),
-            )
-            sys.exit(1)
-
-        with BuildscriptMetadata.capture() as future:
-            runner.execute_script(script, {})
-        assert future.done()
-        requirements = RequirementSpec.from_metadata(future.result())
-
-    # Derive the lockfile path.
-    lockfile_path = script.with_suffix(".lock")
+    with BuildscriptMetadata.capture() as future:
+        runner.execute_script(script, {})
+    assert future.done()
+    requirements = RequirementSpec.from_metadata(future.result())
 
     # Load lockfile if it exists.
+    lockfile_path = script.with_suffix(".lock")
     if lockfile_path.is_file():
         logger.debug('loading lockfile from "%s"', lockfile_path)
         lockfile = Lockfile.from_path(lockfile_path)
