@@ -27,7 +27,7 @@ def test__Task__new_style_type_hints_can_be_runtime_introspected_in_all_Python_v
     """This is a feature of `typeapi ^1.3.0`."""
 
     class MyTask(Task):
-        a: Property["list[str]"]  # type: ignore[misc]  # Mypy will complain in older Python versions even if this is not a runtime error  # noqa: E501
+        a: Property["list[str]"]
         b: Property["int | str"]
 
         def execute(self) -> None:

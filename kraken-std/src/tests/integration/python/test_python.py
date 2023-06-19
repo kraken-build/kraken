@@ -152,7 +152,7 @@ M = TypeVar("M", PDMPyproject, PoetryPyproject)
     [
         ("poetry-project", PoetryPyproject, "^3.7"),
         ("slap-project", PoetryPyproject, "^3.6"),
-        ("pdm-project", PDMPyproject, ">=3.9,<3.10"),
+        ("pdm-project", PDMPyproject, ">=3.9"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})

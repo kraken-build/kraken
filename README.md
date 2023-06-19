@@ -16,10 +16,23 @@ Kraken is currently primarily used and developed at [Helsing](https://helsing.ai
 ## Getting started
 
 Kraken is best invoked in your project using the Kraken wrapper CLI `krakenw`. It takes care of installing the same
-version of Kraken for your project in any environment. The recommended way to install the wrapper is with Pipx.
-You need to use Python 3.7 - 3.10 (3.11+ is currently not supported due to an upstream issue in Dill).
+version of Kraken for your project in any environment. The recommended way to install the wrapper is with Pipx. The
+wrapper is compatible with Python 3.7 and newer, however the Kraken core requires Python 3.10. <sup>(1)</sup>
+The wrapper is clever enough to find an appropriate Python 3.10 installation on your system.
+
+| Package | Python Version |
+| ------- | -------------- |
+| kraken-common | 3.7+ |
+| kraken-core | 3.10 |
+| kraken-std | 3.10 |
+| kraken-wrapper | 3.7+ |
+
+To install kraken-wrapper with Pipx:
 
     $ pipx install kraken-wrapper
+
+<sup>(1) Due to an <a href="https://github.com/uqfoundation/dill/issues/595">issue in Dill</a>, Python 3.11 is
+not currently supported.</sup>
 
 Kraken's build scripts are called `.kraken.py` and are written in Python. For `krakenw` to know what to install for
 your project, you need to begin your script with a call to the `buildscript()` function. The `kraken-std` package

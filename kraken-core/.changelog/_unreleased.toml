@@ -1,0 +1,6 @@
+[[entries]]
+id = "6c0f7dd8-367b-402b-a4f9-5c7bb8ab7f53"
+type = "improvement"
+description = "Now requires explicitly Python 3.10. We can enable Python 3.11 when Dill 0.3.7 is enabled. (See https://github.com/uqfoundation/dill/issues/595)"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/42"

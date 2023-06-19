@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "pdm-project"
 ]
-requires-python = ">=3.9,<3.10"
+requires-python = ">=3.9"
 readme = "README.md"
 license = {text = "MIT"}
 
@@ -25,5 +25,3 @@ verify_ssl = false
 name = "local"
 username = "integration-test-user"
 password = "password-for-integration-test"
-
-

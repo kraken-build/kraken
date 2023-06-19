@@ -26,6 +26,13 @@ kraken-common = "^0.24.3"
 pex = "^2.1.103"
 setuptools = ">=33.0.0"  # For pkg_resources
 termcolor = "^1.1.0"
+rich = "^13.4.2"
+
+# NOTE(@NiklasRosenstein): Need to pin transitive dependency markdown-it under 3.0 because it dropped Python 3.9
+#       support after that version. Technically this shouldn't be a big issue for runtime, but Mypy checks site
+#       packages and complains about the walrus operator used in it when it checks site-packages.
+#       See also https://github.com/python/mypy/issues/12162
+markdown-it-py = "<3.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "*"
