@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, ClassVar, Sequence, Tuple
+from typing import Any, ClassVar, Sequence, Tuple, TypeAlias
 
 
 class AddressMeta(type):
@@ -16,6 +16,94 @@ class AddressMeta(type):
         obj = object.__new__(Address)
         obj.__init__(value)  # type: ignore[misc]
         return obj
+
+
+@dataclass(frozen=True)
+class Element:
+    """Represents an element in the address, which is the text between colon separators (`:`)."""
+
+    VALID_CHARACTERS: ClassVar[str] = r"a-zA-Z0-9/_\-\.\*"
+    VALIDATION_REGEX: ClassVar[str] = rf"^[{VALID_CHARACTERS}]+$"
+    CURRENT: ClassVar[str] = "."
+    PARENT: ClassVar[str] = ".."
+    RECURSIVE_WILDCARD: ClassVar[str] = "**"
+
+    # The value of the element. This may contain asterisks for globbing.
+    value: str
+
+    #: Whether the element is followed by a question mark to permit resolution failure.
+    fallible: bool = False
+
+    __qualname__ = "Address.Element"
+
+    def __post_init__(self) -> None:
+        if not re.match(self.VALIDATION_REGEX, self.value):
+            raise ValueError(f"invalid address element: {str(self)!r}")
+
+    def __str__(self) -> str:
+        if self.fallible:
+            return f"{self.value}?"
+        return self.value
+
+    def is_current(self) -> bool:
+        """
+        Returns `True` if the element represents the current project (`.`).
+
+        >>> Address.Element('.').is_current()
+        True
+        """
+
+        return self.value == self.CURRENT
+
+    def is_parent(self) -> bool:
+        """
+        Returns `True` if the element represents the parent project (`..`).
+
+        >>> Address.Element('..').is_parent()
+        True
+        """
+
+        return self.value == self.PARENT
+
+    def is_concrete(self) -> bool:
+        """
+        Returns `True` if the element is a concrete element that can only have exactly one match. Elements that
+        are not concrete have zero or more matches by asterisk (wildcards) in the #value or if #fallible is
+        enabled.
+
+        >>> Address.Element("test").is_concrete()
+        True
+        >>> Address.Element("test*").is_concrete()
+        False
+        >>> Address.Element("test", fallible=True).is_concrete()
+        False
+        """
+
+        return not (self.fallible or "*" in self.value)
+
+    def is_recursive_wildcard(self) -> bool:
+        return self.value == self.RECURSIVE_WILDCARD
+
+    @classmethod
+    def of(cls, value: str) -> Address.Element:
+        """
+        Creates an element from a string. #fallible is set depending on whether *value* is trailed by a
+        question mark.
+
+        >>> Address.Element.of("test")
+        Address.Element(value='test', fallible=False)
+        >>> Address.Element.of("test?")
+        Address.Element(value='test', fallible=True)
+        >>> Address.Element.of("test??")
+        Traceback (most recent call last):
+        ValueError: invalid address element: 'test??'
+        """
+
+        fallible = False
+        if value.endswith("?"):
+            fallible = True
+            value = value[:-1]
+        return cls(value, fallible)
 
 
 class Address(metaclass=AddressMeta):
@@ -44,91 +132,6 @@ class Address(metaclass=AddressMeta):
     EMPTY: ClassVar[Address]
     WILDCARD: ClassVar[Address]
     RECURSIVE_WILDCARD: ClassVar[Address]
-
-    @dataclass(frozen=True)
-    class Element:
-        """Represents an element in the address, which is the text between colon separators (`:`)."""
-
-        VALID_CHARACTERS: ClassVar[str] = r"a-zA-Z0-9/_\-\.\*"
-        VALIDATION_REGEX: ClassVar[str] = rf"^[{VALID_CHARACTERS}]+$"
-        CURRENT: ClassVar[str] = "."
-        PARENT: ClassVar[str] = ".."
-        RECURSIVE_WILDCARD: ClassVar[str] = "**"
-
-        # The value of the element. This may contain asterisks for globbing.
-        value: str
-
-        #: Whether the element is followed by a question mark to permit resolution failure.
-        fallible: bool = False
-
-        def __post_init__(self) -> None:
-            if not re.match(self.VALIDATION_REGEX, self.value):
-                raise ValueError(f"invalid address element: {str(self)!r}")
-
-        def __str__(self) -> str:
-            if self.fallible:
-                return f"{self.value}?"
-            return self.value
-
-        def is_current(self) -> bool:
-            """
-            Returns `True` if the element represents the current project (`.`).
-
-            >>> Address.Element('.').is_current()
-            True
-            """
-
-            return self.value == self.CURRENT
-
-        def is_parent(self) -> bool:
-            """
-            Returns `True` if the element represents the parent project (`..`).
-
-            >>> Address.Element('..').is_parent()
-            True
-            """
-
-            return self.value == self.PARENT
-
-        def is_concrete(self) -> bool:
-            """
-            Returns `True` if the element is a concrete element that can only have exactly one match. Elements that
-            are not concrete have zero or more matches by asterisk (wildcards) in the #value or if #fallible is
-            enabled.
-
-            >>> Address.Element("test").is_concrete()
-            True
-            >>> Address.Element("test*").is_concrete()
-            False
-            >>> Address.Element("test", fallible=True).is_concrete()
-            False
-            """
-
-            return not (self.fallible or "*" in self.value)
-
-        def is_recursive_wildcard(self) -> bool:
-            return self.value == self.RECURSIVE_WILDCARD
-
-        @classmethod
-        def of(cls, value: str) -> Address.Element:
-            """
-            Creates an element from a string. #fallible is set depending on whether *value* is trailed by a
-            question mark.
-
-            >>> Address.Element.of("test")
-            Address.Element(value='test', fallible=False)
-            >>> Address.Element.of("test?")
-            Address.Element(value='test', fallible=True)
-            >>> Address.Element.of("test??")
-            Traceback (most recent call last):
-            ValueError: invalid address element: 'test??'
-            """
-
-            fallible = False
-            if value.endswith("?"):
-                fallible = True
-                value = value[:-1]
-            return cls(value, fallible)
 
     _is_absolute: bool
     _is_container: bool
@@ -581,6 +584,8 @@ class Address(metaclass=AddressMeta):
         # Strip the last element.
         assert self._elements, self
         return Address.create(self._is_absolute, self._is_container, self._elements[:-1])
+
+    Element: ClassVar[TypeAlias] = Element
 
 
 Address.ROOT = Address(":")

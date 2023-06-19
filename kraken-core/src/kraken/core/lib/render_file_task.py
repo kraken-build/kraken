@@ -46,7 +46,7 @@ class RenderFileTask(Task):
             encoding=self.encoding.value,
             render_prepare=Supplier.of_callable(self.prepare),
         )
-        task.add_relationship(self, strict=False)
+        task.depends_on(self, mode="order-only")
         return task
 
     # Task

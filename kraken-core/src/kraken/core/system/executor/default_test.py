@@ -77,9 +77,9 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
     task_c = kraken_project.do("fake_task_c", MyTask)
     task_d = kraken_project.do("fake_task_d", MyTask)
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_d.add_relationship(task_c)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_d.depends_on(task_c)
 
     graph = TaskGraph(kraken_project.context).trim([task_d])
     assert set(graph.tasks()) == {task_a, task_b, task_c, task_d}
@@ -140,9 +140,9 @@ def test__DefaultExecutor__print_correct_failures_inside_group_with_dependency(
 
     group = kraken_project.group("group")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_d.add_relationship(task_b)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_d.depends_on(task_b)
 
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
@@ -180,10 +180,10 @@ def test__DefaultExecutor__print_correct_failures_with_independent_groups(
     g1 = kraken_project.group("g1")
     g2 = kraken_project.group("g2")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_e.add_relationship(task_d)
-    task_f.add_relationship(task_e)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_e.depends_on(task_d)
+    task_f.depends_on(task_e)
 
     graph = TaskGraph(kraken_project.context).trim([g1, g2])
     execute_print_test(graph)
@@ -224,12 +224,12 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
     g1 = kraken_project.group("g1")
     g2 = kraken_project.group("g2")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_e.add_relationship(task_d)
-    task_f.add_relationship(task_e)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_e.depends_on(task_d)
+    task_f.depends_on(task_e)
 
-    g2.add_relationship(g1)
+    g2.depends_on(g1)
 
     graph = TaskGraph(kraken_project.context).trim([g2])
     execute_print_test(graph)

@@ -60,5 +60,5 @@ def manifest_tool(
 ) -> ManifestToolPushTask:
     project = Project.current()
     task = project.do(name, ManifestToolPushTask, group=group, template=template, target=target, platforms=platforms)
-    task.add_relationship(inputs)
+    task.depends_on(*inputs)
     return task
