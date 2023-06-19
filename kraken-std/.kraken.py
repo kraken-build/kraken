@@ -18,12 +18,13 @@ python.black(additional_files=[__file__, project.directory / "examples"])
 python.flake8()
 python.isort(additional_files=[__file__, project.directory / "examples"])
 python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"])
-python.pytest(ignore_dirs=["src/tests/integration"])
+python.pytest(ignore_dirs=["src/tests/integration"], numprocesses="auto")
 python.pytest(
     name="pytestIntegration",
     tests_dir="src/tests/integration",
     ignore_dirs=["src/tests/integration/python/data"],
     group="integrationTest",
+    numprocesses="auto",
 )
 python.install()
 

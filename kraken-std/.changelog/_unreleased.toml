@@ -1,0 +1,5 @@
+[[entries]]
+id = "9ad9328c-97ca-4b86-8bcd-cd0bf0c34efc"
+type = "improvement"
+description = "Support running tests in parallel"
+author = "nicolas.vizzari@helsing.ai"

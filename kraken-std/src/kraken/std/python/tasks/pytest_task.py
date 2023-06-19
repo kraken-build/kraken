@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Literal
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -21,6 +21,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     ignore_dirs: Property[List[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)
     doctest_modules: Property[bool] = Property.config(default=True)
+    numprocesses: Property[int | Literal["auto"]]
     marker: Property[str]
 
     # EnvironmentAwareDispatchTask
@@ -46,6 +47,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
             command += ["-m", self.marker.get()]
         if self.doctest_modules.get():
             command += ["--doctest-modules"]
+        if self.numprocesses.is_filled():
+            command += ["--numprocesses", self.numprocesses.get()]
         command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
         return command
 

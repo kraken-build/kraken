@@ -24,6 +24,7 @@ python = "^3.6"
 slap-project = { version = "0.1.0", source = "local" }
 
 [tool.poetry.dev-dependencies]
+"pytest-xdist[psutil]" = "*"
 black = "*"
 flake8 = "*"
 isort = "*"

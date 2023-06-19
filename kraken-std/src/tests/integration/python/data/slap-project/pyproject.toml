@@ -23,6 +23,7 @@ keywords = []
 python = "^3.6"
 
 [tool.poetry.dev-dependencies]
+"pytest-xdist[psutil]" = "*"
 black = "*"
 flake8 = "*"
 isort = "*"
