@@ -204,7 +204,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert project is not None
 
         for element in address.elements:
-            project = project.subproject(element.value, load=False)
+            project = project.subproject(element.value, "if-exists")
             if not project:
                 raise ProjectNotFoundError(address)
 
