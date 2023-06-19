@@ -67,3 +67,9 @@ type = "breaking change"
 description = "Remove support for hash-comment style build requirements when resuming builds from an existing state."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/45"
+
+[[entries]]
+id = "ded2ad58-3eb2-4001-80d2-a5d38147da16"
+type = "improvement"
+description = "Move `pytest` dependency into a Poetry dependency group"
+author = "@NiklasRosenstein"
