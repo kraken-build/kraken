@@ -142,7 +142,7 @@ class SpecializedPyproject(ABC):
         pass
 
     @abstractmethod
-    def upsert_source(self, source_name: str, url: str, priority: str = "") -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str) -> None:
         pass
 
 

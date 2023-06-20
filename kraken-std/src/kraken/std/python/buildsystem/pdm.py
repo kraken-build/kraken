@@ -47,7 +47,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             pdm_pyproj.delete_source(source["name"])
         for index in settings.package_indexes.values():
             if index.is_package_source:
-                pdm_pyproj.upsert_source(index.alias, index.index_url, index.default, not index.default)
+                pdm_pyproj.upsert_source(index.alias, index.index_url, index.priority)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["pdm", "update"]
