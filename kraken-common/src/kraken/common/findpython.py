@@ -104,7 +104,10 @@ def get_candidates(
         if not path.is_dir():
             continue
         for item in path.iterdir():
-            if not item.is_file():
+            try:
+                if not item.is_file() or not os.access(item, os.X_OK):
+                    continue
+            except PermissionError:
                 continue
             if item.name.startswith("python") or item.name == "py":
                 commands.add(item)
