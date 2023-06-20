@@ -213,7 +213,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(project, Project), type(project)
         KrakenObject.__init__(self, name, project)
         PropertyContainer.__init__(self)
-        self.logger = logging.getLogger(f"{self.path} [{type(self).__module__}.{type(self).__qualname__}]")
+        self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
         self._outputs: list[Any] = []
         self.__relationships: list[_Relationship[Address | Task]] = []
 
