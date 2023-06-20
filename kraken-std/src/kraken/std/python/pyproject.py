@@ -214,13 +214,9 @@ class PoetryPyproject(SpecializedPyproject):
             else:
                 project_section[field_name] = poetry_value
 
-    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str) -> None:
         sources_conf = self.get_sources()
-        source_config: dict[str, Any] = {"name": source_name, "url": url}
-        if default:
-            source_config["default"] = True
-        if secondary:
-            source_config["secondary"] = True
+        source_config: dict[str, Any] = {"name": source_name, "url": url, "priority": priority}
 
         # Find the source with the same name and update it, or create a new one.
         source = next((x for x in sources_conf if x["name"] == source_name), None)
