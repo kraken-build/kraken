@@ -5,7 +5,7 @@ from pathlib import Path
 from adjudicator import collect_rules, rule
 from kraken.common import findpython
 
-from kraken.targets.rulerunner import RuleRunner
+from kraken.targets.core.rulerunner import RuleRunner
 
 
 @dataclass(frozen=True)
@@ -51,11 +51,11 @@ def get_python_binary(request: PythonBinaryRequest) -> PythonBinary:
                 x
                 for x in candidates
                 if x.get("exact_version")
-                and findpython.match_version_constraint(request.interpreter_constraint, x["exact_version"])  # type: ignore[arg-type]
+                and findpython.match_version_constraint(request.interpreter_constraint, x["exact_version"])  # type: ignore[arg-type]  # noqa: E501
             ),
             None,
         ):
-            python_bin = {"path": candidate["path"], "version": candidate["exact_version"]}  # type: ignore[typeddict-item]
+            python_bin = {"path": candidate["path"], "version": candidate["exact_version"]}  # type: ignore[typeddict-item]  # noqa: E501
         else:
             evaluated = findpython.evaluate_candidates(candidates, cache)
             python_bin = next(

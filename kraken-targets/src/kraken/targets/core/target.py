@@ -1,7 +1,7 @@
 import inspect
-from pathlib import Path
 import types
 from dataclasses import Field, dataclass, fields
+from pathlib import Path
 from typing import Any, ClassVar, Generic, Protocol, Sequence, TypeVar, overload
 
 from kraken.core.address import Address
@@ -84,7 +84,9 @@ def get_target(project: Project, target_name: str, target_type: type[T] | None =
     return target
 
 
-def create_target(name: str, project: Project, data: T, source: SourceInfo | inspect.FrameInfo | types.FrameType | None) -> Target[T]:
+def create_target(
+    name: str, project: Project, data: T, source: SourceInfo | inspect.FrameInfo | types.FrameType | None
+) -> Target[T]:
     if isinstance(source, inspect.FrameInfo):
         source = source.frame
     if isinstance(source, types.FrameType):
@@ -115,7 +117,9 @@ class TargetFactoryProtocol(Protocol, Generic[T]):
         ...
 
 
-def make_target_factory(func_name: str, default_name: str | None, dataclass_type: type[T_DataclassInstance]) -> TargetFactoryProtocol[T_DataclassInstance]:
+def make_target_factory(
+    func_name: str, default_name: str | None, dataclass_type: type[T_DataclassInstance]
+) -> TargetFactoryProtocol[T_DataclassInstance]:
     """
     Creates a factory for creating targets of the given *dataclass_type*.
 

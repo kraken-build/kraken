@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 from kraken.common import findpython
 
+from kraken.targets.core.rulerunner import RuleRunner
 from kraken.targets.python.venv import CreateVenvRequest, CreateVenvResponse
-from kraken.targets.rulerunner import RuleRunner
 
 
 @pytest.fixture

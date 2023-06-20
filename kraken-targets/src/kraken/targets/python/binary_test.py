@@ -2,8 +2,8 @@ import copy
 
 import pytest
 
+from kraken.targets.core.rulerunner import RuleRunner
 from kraken.targets.python.binary import PythonBinary, PythonBinaryRequest
-from kraken.targets.rulerunner import RuleRunner
 
 
 @pytest.fixture

@@ -1,4 +1,4 @@
-from kraken.targets.goal import Goal, GoalSubsystem
+from kraken.targets.core.goal import Goal, GoalSubsystem
 
 
 class InstallGoalSubsystem(GoalSubsystem):

@@ -3,8 +3,8 @@ from typing import Any, Callable, Iterable
 
 from adjudicator import Params, RulesEngine
 
-from kraken.targets.goal import Goal
-from kraken.targets.subtypes import SubtypesRegistry
+from kraken.targets.core.goal import Goal
+from kraken.targets.core.subtypes import SubtypesRegistry
 
 
 class RuleRunner:

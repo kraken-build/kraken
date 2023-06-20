@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from kraken.targets.target import make_target_factory
+from kraken.targets.core.target import make_target_factory
 
 
 @dataclass(frozen=True)

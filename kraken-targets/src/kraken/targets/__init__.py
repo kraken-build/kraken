@@ -1,4 +1,4 @@
-__version__ = "0.1.0"
+__version__ = "0.26.1"
 
 # Exports
 from .black import black_config  # noqa: F401

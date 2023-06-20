@@ -5,8 +5,8 @@ from kraken.core import Context, Project
 from kraken.core.address import Address
 
 from kraken.targets.core.resolve_targets import ResolvedTargets, ResolveTargetsRequest
-from kraken.targets.rulerunner import RuleRunner
-from kraken.targets.target import create_target
+from kraken.targets.core.rulerunner import RuleRunner
+from kraken.targets.core.target import create_target
 
 
 @pytest.fixture

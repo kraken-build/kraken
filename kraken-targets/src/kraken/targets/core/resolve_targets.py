@@ -6,8 +6,8 @@ from kraken.core import Context
 from kraken.core.address import Address
 from kraken.core.system.errors import ProjectNotFoundError
 
-from kraken.targets.rulerunner import RuleRunner
-from kraken.targets.target import Target, TargetNotFoundError, get_target
+from kraken.targets.core.rulerunner import RuleRunner
+from kraken.targets.core.target import Target, TargetNotFoundError, get_target
 
 
 @dataclass(frozen=True)

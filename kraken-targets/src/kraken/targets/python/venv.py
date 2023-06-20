@@ -8,10 +8,10 @@ from pathlib import Path
 import databind.json
 from adjudicator import collect_rules, get, rule
 
+from kraken.targets.core.rulerunner import RuleRunner
+from kraken.targets.core.target import make_target_factory
 from kraken.targets.goals import InstallGoal
 from kraken.targets.python.binary import PythonBinary, PythonBinaryRequest
-from kraken.targets.rulerunner import RuleRunner
-from kraken.targets.target import make_target_factory
 
 logger = logging.getLogger(__name__)
 
