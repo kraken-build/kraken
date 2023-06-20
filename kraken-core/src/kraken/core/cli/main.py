@@ -344,7 +344,7 @@ def ls(graph: TaskGraph) -> None:
     if not all_tasks:
         print("no tasks")
         sys.exit(1)
-    longest_name = max(map(len, (t.path for t in all_tasks))) + 1
+    longest_name = max(map(len, (str(t.address) for t in all_tasks))) + 1
 
     print()
     print(colored("Tasks", "blue", attrs=["bold", "underline"]))
@@ -353,7 +353,7 @@ def ls(graph: TaskGraph) -> None:
     width = get_terminal_width(120)
 
     def _print_task(task: Task) -> None:
-        line = [task.path.ljust(longest_name)]
+        line = [str(task.address).ljust(longest_name)]
         remaining_width = width - len(line[0])
         if task in goal_tasks:
             line[0] = colored(line[0], "green")
@@ -380,7 +380,7 @@ def ls(graph: TaskGraph) -> None:
         print("  " + " ".join(line))
 
     def sort_key(task: Task) -> str:
-        return task.path
+        return str(task.address)
 
     for task in sorted(graph.tasks(), key=sort_key):
         if isinstance(task, GroupTask):
@@ -499,7 +499,9 @@ def describe(graph: TaskGraph) -> None:
     print()
 
     for task in tasks:
-        print("Group" if isinstance(task, GroupTask) else "Task", colored(task.path, attrs=["bold", "underline"]))
+        print(
+            "Group" if isinstance(task, GroupTask) else "Task", colored(str(task.address), attrs=["bold", "underline"])
+        )
         print("  Type:", type(task).__module__ + "." + type(task).__name__)
         print("  Type defined in:", colored(sys.modules[type(task).__module__].__file__ or "???", "cyan"))
         print("  Default:", task.default)
@@ -509,7 +511,7 @@ def describe(graph: TaskGraph) -> None:
         for rel in rels:
             print(
                 "".ljust(4),
-                colored(rel.other_task.path, "blue"),
+                colored(str(rel.other_task.address), "blue"),
                 f"before={rel.inverse}, strict={rel.strict}",
             )
         print("  " + colored("Properties", attrs=["bold"]) + f" ({len(type(task).__schema__)})")
@@ -563,11 +565,11 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
         style.update(style_select if task in selected_tasks else {})
         style.update(style_goal if task in goal_tasks else {})
 
-        writer.node(task.path, **style)
+        writer.node(str(task.address), **style)
         for predecessor in main.get_predecessors(task, ignore_groups=False):
             writer.edge(
-                predecessor.path,
-                task.path,
+                str(predecessor.address),
+                str(task.address),
                 **({} if main.get_edge(predecessor, task).strict else style_edge_non_strict),
                 **(style_edge_implicit if main.get_edge(predecessor, task).implicit else {}),
             )

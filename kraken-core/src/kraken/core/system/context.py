@@ -373,9 +373,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         if not graph.is_complete():
             failed_tasks = list(graph.tasks(failed=True))
             if len(failed_tasks) == 1:
-                message = f'task "{failed_tasks[0].path}" failed'
+                message = f'task "{failed_tasks[0].address}" failed'
             else:
-                message = "tasks " + ", ".join(f'"{task.path}"' for task in failed_tasks) + " failed"
+                message = "tasks " + ", ".join(f'"{task.address}"' for task in failed_tasks) + " failed"
             raise BuildError(message)
 
     @overload

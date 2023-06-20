@@ -85,7 +85,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         self.group("update", description="Tasks that update dependencies of the project.")
 
     def __repr__(self) -> str:
-        return f"Project({self.path})"
+        return f"Project({self.address})"
 
     @property
     def parent(self) -> Project | None:
@@ -163,7 +163,9 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             return None
         if obj is not None:
             if not isinstance(obj, Project):
-                raise ValueError(f"{self.path}:{name} does not refer to a project (got {type(obj).__name__} instead)")
+                raise ValueError(
+                    f"{self.address}:{name} does not refer to a project (got {type(obj).__name__} instead)"
+                )
             return obj
 
         directory = self.directory / name
@@ -173,7 +175,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         elif mode == "execute":
             if not directory.is_dir():
                 raise FileNotFoundError(
-                    f"{self.path}:{name} cannot be loaded because the directory {directory} does not exist"
+                    f"{self.address}:{name} cannot be loaded because the directory {directory} does not exist"
                 )
             project = self.context.load_project(directory, self, require_buildscript=False)
             assert name in self._members
@@ -278,7 +280,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
                 invalid_keys.add(key)
         if invalid_keys:
             task.logger.warning(
-                "properties %s cannot be set because they don't exist (task %s)", invalid_keys, task.path
+                "properties %s cannot be set because they don't exist (task %s)", invalid_keys, task.address
             )
 
         if isinstance(default, builddsl.UnboundClosure):
@@ -302,7 +304,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         if task is None:
             task = self.do(name, GroupTask)
         elif not isinstance(task, GroupTask):
-            raise RuntimeError(f"{task.path!r} must be a GroupTask, but got {type(task).__name__}")
+            raise RuntimeError(f"{task.address!r} must be a GroupTask, but got {type(task).__name__}")
         if description is not None:
             task.description = description
         if default is not None:

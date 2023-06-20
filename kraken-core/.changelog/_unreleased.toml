@@ -1,0 +1,5 @@
+[[entries]]
+id = "e16431de-a6a4-4a4d-a85f-286de5fc2ab8"
+type = "improvement"
+description = "Replace more references to deprecated `Task.path` and `Project.path` with the new `.address` attribute"
+author = "@NiklasRosenstein"
