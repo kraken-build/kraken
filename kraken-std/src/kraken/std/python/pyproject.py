@@ -142,7 +142,7 @@ class SpecializedPyproject(ABC):
         pass
 
     @abstractmethod
-    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str = "") -> None:
         pass
 
 
@@ -161,7 +161,7 @@ class PDMPyproject(SpecializedPyproject):
     def get_version(self) -> str | None:
         return cast(str, self._pyproj["project"].get("requires-python", None))
 
-    def upsert_source(self, source_name: str, url: str, _default: bool = False, _secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str = "") -> None:
         sources_conf = self.get_sources()
         source_config: dict[str, Any] = {"name": source_name, "url": url}
 
