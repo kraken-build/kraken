@@ -23,6 +23,7 @@ Repository = "https://github.com/kraken-build/kraken-targets/"
 python = "^3.10"
 kraken-core = "~0.26.1"
 kraken-std = "~0.26.1"
+python-adjudicator = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "*"
