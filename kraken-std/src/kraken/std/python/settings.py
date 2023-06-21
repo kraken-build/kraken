@@ -64,7 +64,10 @@ class PythonSettings:
         return [] if test_dir is None else [str(test_dir)]
 
     def get_default_package_index(self) -> PythonIndex | None:
-        return next((index for index in self.package_indexes.values() if index.priority == IndexPriority.default), None)
+        return next(
+            (index for index in self.package_indexes.values() if index.priority.value == IndexPriority.default.value),
+            None,
+        )
 
     def add_package_index(
         self,
