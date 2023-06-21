@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterator, MutableMapping, cast
-from kraken.std.python.settings import IndexPriority
 
 import tomli
 import tomli_w
@@ -143,7 +142,7 @@ class SpecializedPyproject(ABC):
         pass
 
     @abstractmethod
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str) -> None:
         pass
 
 
@@ -162,7 +161,7 @@ class PDMPyproject(SpecializedPyproject):
     def get_version(self) -> str | None:
         return cast(str, self._pyproj["project"].get("requires-python", None))
 
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority = IndexPriority.supplemental) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str = "") -> None:
         sources_conf = self.get_sources()
         source_config: dict[str, Any] = {"name": source_name, "url": url}
 
@@ -215,9 +214,9 @@ class PoetryPyproject(SpecializedPyproject):
             else:
                 project_section[field_name] = poetry_value
 
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: str) -> None:
         sources_conf = self.get_sources()
-        source_config: dict[str, Any] = {"name": source_name, "url": url, "priority": priority.value}
+        source_config: dict[str, Any] = {"name": source_name, "url": url, "priority": priority}
 
         # Find the source with the same name and update it, or create a new one.
         source = next((x for x in sources_conf if x["name"] == source_name), None)
