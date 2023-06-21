@@ -6,31 +6,11 @@ from enum import Enum
 from pathlib import Path
 
 from kraken.core import Project
+from kraken.std.python.indexes import IndexPriority, PythonIndex
 
 from .buildsystem import PythonBuildSystem, detect_build_system
 
 logger = logging.getLogger(__name__)
-
-
-@dataclasses.dataclass
-class IndexPriority(str, Enum):
-    """See https://python-poetry.org/docs/repositories/#project-configuration"""
-
-    default = "default"
-    primary = "primary"
-    secondary = "secondary"
-    supplemental = "supplemental"
-
-
-@dataclasses.dataclass
-class PythonIndex:
-    alias: str
-    index_url: str
-    upload_url: str | None
-    credentials: tuple[str, str] | None
-    is_package_source: bool
-    priority: IndexPriority
-    publish: bool
 
 
 @dataclasses.dataclass
