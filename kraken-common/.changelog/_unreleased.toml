@@ -1,0 +1,5 @@
+[[entries]]
+id = "c31a7f01-67e8-43d9-8e17-3e1aac8e10e8"
+type = "feature"
+description = "add `one()` and `exactly_one()` function"
+author = "@NiklasRosenstein"
