@@ -47,7 +47,7 @@ class CheckValidReadmeExistsError(Enum):
             )
 
         # This should be an impossible state
-        return "Unknown `readme` error."
+        return "Unknown `readme` error." # type: ignore[unreachable]
 
 
 class CheckValidReadmeExistsTask(Task):
