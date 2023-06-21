@@ -117,7 +117,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
                 if index.credentials:
                     spec += f",username={quote(index.credentials[0])},password={quote(index.credentials[1])}"
                 safe_spec = spec.replace(quote(index.credentials[1]), "[MASKED]") if index.credentials else spec
-                option = "--index" if index.priority == IndexPriority.default else "--extra-index"
+                option = "--index" if index.priority.value == IndexPriority.default.value else "--extra-index"
                 command += [option, spec]
                 safe_command += [option, safe_spec]
 
