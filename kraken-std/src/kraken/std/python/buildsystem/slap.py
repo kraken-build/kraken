@@ -16,8 +16,8 @@ from kraken.common import NotSet
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.poetry import PoetryPythonBuildSystem
+from kraken.std.python.indexes import IndexPriority
 from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject, SpecializedPyproject
-from kraken.std.python.settings import IndexPriority
 
 from . import ManagedEnvironment, PythonBuildSystem
 
