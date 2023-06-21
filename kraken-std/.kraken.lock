@@ -5,7 +5,7 @@ requirements = [
 pythonpath = [
     "build-support",
 ]
-interpreter_constraint = ">=3.7"
+interpreter_constraint = ">=3.10,<3.11"
 
 [pinned]
 anyio = "3.7.0"
