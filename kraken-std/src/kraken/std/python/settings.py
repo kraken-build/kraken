@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from enum import Enum
 from pathlib import Path
 
 from kraken.core import Project
+
 from kraken.std.python.indexes import IndexPriority, PythonIndex
 
 from .buildsystem import PythonBuildSystem, detect_build_system

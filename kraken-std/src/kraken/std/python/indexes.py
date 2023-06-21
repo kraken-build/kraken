@@ -1,6 +1,6 @@
 import dataclasses
-
 from enum import Enum
+
 
 @dataclasses.dataclass
 class IndexPriority(str, Enum):
@@ -21,4 +21,3 @@ class PythonIndex:
     is_package_source: bool
     priority: IndexPriority
     publish: bool
-

@@ -4,10 +4,11 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterator, MutableMapping, cast
-from kraken.std.python.indexes import IndexPriority
 
 import tomli
 import tomli_w
+
+from kraken.std.python.indexes import IndexPriority
 
 
 @dataclass
