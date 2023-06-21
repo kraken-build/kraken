@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from kraken.targets.core.target import make_target_factory
+from kraken.targets.core.target import Target, make_target_factory
 
 
 @dataclass
-class BlackConfig:
+class BlackConfig(Target.Data):
     """
     Represents a configuration for the Black linter.
     """
@@ -12,4 +12,4 @@ class BlackConfig:
     line_length: int | None = None
 
 
-black_config = make_target_factory("black_config", "black_config", BlackConfig)
+black_config = make_target_factory("black_config", BlackConfig)

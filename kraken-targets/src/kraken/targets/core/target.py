@@ -1,5 +1,6 @@
 import inspect
 import types
+import weakref
 from dataclasses import Field, dataclass, fields
 from pathlib import Path
 from typing import Any, ClassVar, Generic, Protocol, Sequence, TypeVar, overload
@@ -7,8 +8,8 @@ from typing import Any, ClassVar, Generic, Protocol, Sequence, TypeVar, overload
 from kraken.core.address import Address
 from kraken.core.system.project import Project
 from typeapi import ClassTypeHint, TypeHint
+from typing_extensions import Self
 
-T = TypeVar("T")
 T_DataclassInstance = TypeVar("T_DataclassInstance", bound="DataclassInstance")
 
 
@@ -26,18 +27,47 @@ class SourceInfo:
     lineno: int
 
 
-class Target(Generic[T]):
+_T_TargetData = TypeVar("_T_TargetData", bound="Target.Data")
+
+
+class Target(Generic[_T_TargetData]):
     """
     Base class for targets.
     """
 
-    def __init__(self, name: str, project: Project, data: T, source: SourceInfo) -> None:
+    T_Data = TypeVar("T_Data", bound="Target.Data")
+
+    class Data(DataclassInstance):
+        """
+        Base class for data entries stored in targets.
+        """
+
+        __dataclass_fields__ = {}
+        _target: weakref.ReferenceType["Target[Self]"] | None = None
+
+        @property
+        def target(self) -> "Target[Self]":
+            """
+            Returns the target that the data is attached to.
+            """
+
+            if self._target is None:
+                raise RuntimeError("Target data not attached to a target")
+            target = self._target()
+            assert target is not None, "Target data attached to a target that has been garbage collected"
+            return target
+
+    def __init__(self, name: str, project: Project, data: _T_TargetData, source: SourceInfo) -> None:
         self.name = name
         self.project = project
         self.address = project.address.append(name)
         self.data = data
         self.source = source
         self.dependencies: list[Address] = []
+        object.__setattr__(data, "_target", weakref.ref(self))
+
+    def __repr__(self) -> str:
+        return f"Target(address='{self.address}', data={self.data})"
 
 
 class TargetNotFoundError(Exception):
@@ -70,11 +100,13 @@ def get_target(project: Project, target_name: str) -> Target[Any]:
 
 
 @overload
-def get_target(project: Project, target_name: str, target_type: type[T]) -> Target[T]:
+def get_target(project: Project, target_name: str, target_type: type[Target.T_Data]) -> Target[Target.T_Data]:
     ...
 
 
-def get_target(project: Project, target_name: str, target_type: type[T] | None = None) -> Target[Any] | Target[T]:
+def get_target(
+    project: Project, target_name: str, target_type: type[Target.T_Data] | None = None
+) -> Target[Any] | Target[Target.T_Data]:
     targets = get_targets(project)
     if target_name not in targets:
         raise TargetNotFoundError(target_name, project)
@@ -85,8 +117,8 @@ def get_target(project: Project, target_name: str, target_type: type[T] | None =
 
 
 def create_target(
-    name: str, project: Project, data: T, source: SourceInfo | inspect.FrameInfo | types.FrameType | None
-) -> Target[T]:
+    name: str, project: Project, data: Target.T_Data, source: SourceInfo | inspect.FrameInfo | types.FrameType | None
+) -> Target[Target.T_Data]:
     if isinstance(source, inspect.FrameInfo):
         source = source.frame
     if isinstance(source, types.FrameType):
@@ -104,38 +136,33 @@ def create_target(
     return target
 
 
-class TargetFactoryProtocol(Protocol, Generic[T]):
+class TargetFactoryProtocol(Protocol, Generic[Target.T_Data]):
     def __call__(
         self,
         *,
-        name: str = "",
+        name: str,
         dependencies: Sequence[str | Address] = (),
         _stackframe: inspect.FrameInfo | None = None,
         _stackdepth: int = 0,
         **kwargs: Any,
-    ) -> Target[T]:
+    ) -> Target[Target.T_Data]:
         ...
 
 
-def make_target_factory(
-    func_name: str, default_name: str | None, dataclass_type: type[T_DataclassInstance]
-) -> TargetFactoryProtocol[T_DataclassInstance]:
+def make_target_factory(func_name: str, dataclass_type: type[Target.T_Data]) -> TargetFactoryProtocol[Target.T_Data]:
     """
     Creates a factory for creating targets of the given *dataclass_type*.
-
-    If a *default_name* is specified, then the factory function may be called without a *name* parameter.
-    Otherwise, the *name* is always required when calling the factory.
     """
 
     dataclass_fields = {field.name: TypeHint(field.type) for field in fields(dataclass_type)}
 
     def target_factory(
-        name: str | None = default_name,
+        name: str,
         dependencies: Sequence[str | Address] = (),
         _stackframe: inspect.FrameInfo | None = None,
         _stackdepth: int = 0,
         **kwargs: Any,
-    ) -> Target[T_DataclassInstance]:
+    ) -> Target[Target.T_Data]:
         project = Project.current()
         if _stackframe is None:
             _stackframe = inspect.stack()[_stackdepth + 1]

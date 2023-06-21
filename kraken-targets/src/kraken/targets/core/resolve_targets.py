@@ -12,8 +12,7 @@ from kraken.targets.core.target import Target, TargetNotFoundError, get_target
 
 @dataclass(frozen=True)
 class ResolveTargetsRequest:
-    addresses: tuple[Address]
-    relative_to: Address | None = None
+    addresses: tuple[Address, ...]
     transitive: bool = False
 
 
@@ -37,9 +36,7 @@ def resolve_targets(request: ResolveTargetsRequest) -> ResolvedTargets:
 
     for address in request.addresses:
         if not address.is_absolute():
-            if not request.relative_to:
-                raise ValueError(f"Cannot resolve relative address {address!r} without a relative_to address")
-            address = request.relative_to.concat(address)
+            raise ValueError(f"Cannot resolve relative address {address!r}")
         try:
             project = context.get_project(address.parent)
         except ProjectNotFoundError:

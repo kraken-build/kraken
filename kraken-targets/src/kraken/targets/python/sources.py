@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from kraken.targets.core.target import make_target_factory
+from kraken.targets.core.target import Target, make_target_factory
 
 
 @dataclass(frozen=True)
-class PythonSources:
+class PythonSources(Target.Data):
     """
     Represents a set of Python source files.
     """
@@ -15,4 +15,4 @@ class PythonSources:
     interpreter_constraint: str | None = None
 
 
-python_sources = make_target_factory("python_sources", None, PythonSources)
+python_sources = make_target_factory("python_sources", PythonSources)
