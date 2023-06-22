@@ -133,8 +133,9 @@ class ValidateReadmeTask(Task):
                 minimum_lines=self.minimum_lines.get(),
             )
 
+        print(f"    Check results ({len(statuses)})")
         for status in statuses:
-            print(f"  {status_to_text(status)}")
+            print(f"      {status_to_text(status)}")
 
         num_checks = len(statuses)
         self.statuses.set(statuses)
