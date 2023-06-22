@@ -165,7 +165,7 @@ def test__Property__does_accept_literal_type_hint() -> None:
 
     # Cannot set int when only string literals are accepted.
     with raises(TypeError) as excinfo:
-        prop.set(42)
+        prop.set(42)  # type: ignore[arg-type]
     assert str(excinfo.value).endswith("expected str, got int")
 
     # Cannot set a string literal that is not in the list of accepted literals.
