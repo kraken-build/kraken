@@ -1,0 +1,5 @@
+[[entries]]
+id = "76d27430-6005-4d3a-a219-ea99ccdec0e1"
+type = "improvement"
+description = "Now sets the `KRAKENW=1` environment variable to allow the Kraken-Core CLI to detect if it is run through `krakenw`."
+author = "@NiklasRosenstein"
