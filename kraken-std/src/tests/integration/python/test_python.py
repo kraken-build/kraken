@@ -10,8 +10,7 @@ from typing import Type, TypeVar
 import pytest
 import tomli
 from kraken.common import not_none
-from kraken.core import Context
-from kraken.core.testing import kraken_project
+from kraken.core import Context, Project
 
 from kraken.std import python
 from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject
@@ -105,10 +104,12 @@ def test__python_project_install_lint_and_publish(
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_upgrade_python_version_string(
     kraken_ctx: Context,
-    tempdir: Path,
+    kraken_project: Project,
 ) -> None:
+    tempdir = kraken_project.directory
+
     project_dir = "version-project"
-    tempdir /= project_dir
+    # tempdir /= project_dir
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
     original_dir = Path(__file__).parent / "data" / project_dir
@@ -117,15 +118,14 @@ def test__python_project_upgrade_python_version_string(
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
-    Context.__init__(kraken_ctx, tempdir / "build")
-    with kraken_project(kraken_ctx, tempdir) as loc_project:
-        pyproject = Pyproject.read(original_dir / "pyproject.toml")
-        local_build_system = python.buildsystem.detect_build_system(tempdir)
-        assert local_build_system is not None
-        assert local_build_system.get_pyproject_reader(pyproject) is not None
-        assert local_build_system.get_pyproject_reader(pyproject).get_name() == "version-project"
-        python.settings.python_settings(project=loc_project, build_system=local_build_system)
-        python.build(as_version=build_as_version, project=loc_project)
+
+    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    local_build_system = python.buildsystem.detect_build_system(tempdir)
+    assert local_build_system is not None
+    assert local_build_system.get_pyproject_reader(pyproject) is not None
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "version-project"
+    python.settings.python_settings(project=kraken_project, build_system=local_build_system)
+    python.build(as_version=build_as_version, project=kraken_project)
     kraken_ctx.execute([":build"])
 
     # Check if files that were supposed to be temporarily modified are the same after the build.
@@ -159,24 +159,19 @@ M = TypeVar("M", PDMPyproject, PoetryPyproject)
 def test__python_pyproject_reads_correct_data(
     project_dir: str,
     reader: Type[M],
-    tempdir: Path,
     expected_python_version: str,
-    kraken_ctx: Context,
+    kraken_project: Project,
 ) -> None:
     # Copy the projects to the temporary directory.
-    new_dir = tempdir / project_dir
+    new_dir = kraken_project.directory / project_dir
     shutil.copytree(Path(__file__).parent / "data" / project_dir, new_dir)
 
     pyproject = Pyproject.read(new_dir / "pyproject.toml")
-
-    Context.__init__(kraken_ctx, new_dir / "build")
-    with kraken_project(kraken_ctx, new_dir) as _:
-        pyproject = Pyproject.read(new_dir / "pyproject.toml")
-        local_build_system = python.buildsystem.detect_build_system(new_dir)
-        assert local_build_system is not None
-        assert local_build_system.get_pyproject_reader(pyproject) is not None
-        assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
-        assert local_build_system.get_pyproject_reader(pyproject).get_version() == expected_python_version
+    local_build_system = python.buildsystem.detect_build_system(new_dir)
+    assert local_build_system is not None
+    assert local_build_system.get_pyproject_reader(pyproject) is not None
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
+    assert local_build_system.get_pyproject_reader(pyproject).get_version() == expected_python_version
 
     spec = reader(pyproject)
 

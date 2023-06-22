@@ -3,3 +3,9 @@ id = "491df1d7-02aa-4a45-9fac-c15ee020c423"
 type = "breaking change"
 description = "Reimplement `CheckFileExistsAndIsCommitedTask` as `CheckFileTask` and move it into the `kraken.core.git.tasks` module."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "522dd01e-ed80-4cfe-88e9-625a70346f38"
+type = "breaking change"
+description = "Reimplement `CheckValidReadmeExistsTask` as `ValidateReadmeTask`."
+author = "@NiklasRosenstein"
