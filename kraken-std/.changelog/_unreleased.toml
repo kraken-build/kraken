@@ -1,0 +1,5 @@
+[[entries]]
+id = "491df1d7-02aa-4a45-9fac-c15ee020c423"
+type = "breaking change"
+description = "Reimplement `CheckFileExistsAndIsCommitedTask` as `CheckFileTask` and move it into the `kraken.core.git.tasks` module."
+author = "@NiklasRosenstein"
