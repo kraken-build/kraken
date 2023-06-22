@@ -59,17 +59,9 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
     """This test tests if when a task failed, successor tasks with depedencies will be printed as failed.
 
     ```
-    A
-    |
-    v
-    B
-    |
-    v
-    C
-    |
-    v
-    D
+    A -> B -> C -> D
     ```
+
     If B fails, C, D should be printed.
     """
     task_a = kraken_project.do("fake_task_a", MyTask)

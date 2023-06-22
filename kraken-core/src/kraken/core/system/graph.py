@@ -390,10 +390,7 @@ class TaskGraph(Graph):
                     (t.address not in self._results)
                     or (
                         t.address in self._results
-                        and not self._results[t.address].is_succeeded()
-                        and not self._results[t.address].is_failed()
-                        and not self._results[t.address].is_skipped()
-                        and not self._results[t.address].is_up_to_date()
+                        and self._results[t.address].is_pending()
                     )
                 )
             )
