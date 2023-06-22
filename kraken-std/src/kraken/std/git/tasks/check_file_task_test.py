@@ -16,7 +16,7 @@ def _git_add(path: Path, files: list[Path]) -> None:
 
 def _git_commit(path: Path, message: str) -> None:
     subprocess.run(
-        ["git", "-c", "user.email=John Doe <john@doe.com>", "commit", "--allow-empty", "-m", message],
+        ["git", "-c", "user.email=john@doe.com", "-c", "user.name=John Doe", "commit", "--allow-empty", "-m", message],
         check=True,
         cwd=path,
     )
