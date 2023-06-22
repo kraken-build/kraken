@@ -340,7 +340,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
                 try:
                     resolved_tasks = self.project.context.resolve_tasks([rel.other_task], relative_to=self.project)
                 except ValueError as exc:
-                    raise ValueError(f"in task {self.path}: {exc}")
+                    raise ValueError(f"in task {self.address}: {exc}")
                 for task in resolved_tasks:
                     yield TaskRelationship(task, rel.strict, rel.inverse)
             else:
@@ -547,7 +547,7 @@ class BackgroundTask(Task):
             logger.warning(
                 'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
                 "as an error during serialization or zombie processes.",
-                self.path,
+                self.address,
             )
 
     # Task
