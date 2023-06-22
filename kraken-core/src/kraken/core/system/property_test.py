@@ -171,7 +171,7 @@ def test__Property__does_accept_literal_type_hint() -> None:
     # Cannot set a string literal that is not in the list of accepted literals.
     # This is because we don't currently validate the values.
     # TODO(@NiklasRosenstein): Validate Literal values.
-    prop.set("bazinga")
+    prop.set("bazinga")  # type: ignore[arg-type]
 
 
 def test__PropertyContainer__output_property_is_deferred_by_default() -> None:
