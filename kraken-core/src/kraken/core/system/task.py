@@ -74,6 +74,7 @@ class TaskStatusType(enum.Enum):
     STARTED = enum.auto()  #: The task started a background task that needs to be torn down later.
     SKIPPED = enum.auto()  #: The task was skipped (i.e. it is not applicable).
     UP_TO_DATE = enum.auto()  #: The task is up to date and did not run (or not run it's usual logic).
+    WARNING = enum.auto()  #: The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`).
 
     def is_ok(self) -> bool:
         return not self.is_not_ok()
@@ -101,6 +102,9 @@ class TaskStatusType(enum.Enum):
 
     def is_up_to_date(self) -> bool:
         return self == TaskStatusType.UP_TO_DATE
+
+    def is_warning(self) -> bool:
+        return self == TaskStatusType.WARNING
 
 
 @dataclasses.dataclass
@@ -137,6 +141,9 @@ class TaskStatus:
     def is_up_to_date(self) -> bool:
         return self.type == TaskStatusType.UP_TO_DATE
 
+    def is_warning(self) -> bool:
+        return self.type == TaskStatusType.WARNING
+
     @staticmethod
     def pending(message: str | None = None) -> TaskStatus:
         return TaskStatus(TaskStatusType.PENDING, message)
@@ -164,6 +171,10 @@ class TaskStatus:
     @staticmethod
     def up_to_date(message: str | None = None) -> TaskStatus:
         return TaskStatus(TaskStatusType.UP_TO_DATE, message)
+
+    @staticmethod
+    def warning(message: str | None = None) -> TaskStatus:
+        return TaskStatus(TaskStatusType.WARNING, message)
 
     @staticmethod
     def from_exit_code(command: list[str] | None, code: int) -> TaskStatus:
@@ -441,7 +452,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         accessible.
 
         This method should not return :attr:`TaskStatusType.PENDING`. If `None` is returned, it is assumed that the
-        task is :attr:`TaskStatusType.SUCCEEDED`.
+        task is :attr:`TaskStatusType.SUCCEEDED`. If the task fails, it should return :attr:`TaskStatusType.FAILED`.
+        If an exception is raised during this method, the task status is also assumed to be
+        :attr:`TaskStatusType.FAILED`. If the task finished successfully but with warnings, it should return
+        :attr:`TaskStatusType.WARNING`.
         """
 
         raise NotImplementedError

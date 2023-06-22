@@ -16,11 +16,20 @@ import copy
 import dataclasses
 import sys
 import weakref
+from operator import concat
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
 
 from kraken.common import NotSet, Supplier, not_none
-from typeapi import AnnotatedTypeHint, ClassTypeHint, TupleTypeHint, TypeHint, UnionTypeHint, get_annotations
+from typeapi import (
+    AnnotatedTypeHint,
+    ClassTypeHint,
+    LiteralTypeHint,
+    TupleTypeHint,
+    TypeHint,
+    UnionTypeHint,
+    get_annotations,
+)
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -153,19 +162,22 @@ class Property(Supplier[T]):
         :param deferred: Whether the property should be initialized with a :class:`DeferredSupplier`.
         """
 
-        # NOTE (NiklasRosenstein): We expect that any union member be a ClassTypeHint or TupleTypeHint.
-        def _get_type(hint: TypeHint) -> type:
+        # NOTE(@NiklasRosenstein): We expect that any union member be a ClassTypeHint or TupleTypeHint.
+        def _get_types(hint: TypeHint) -> tuple[type, ...]:
             if isinstance(hint, (ClassTypeHint, TupleTypeHint)):
-                return hint.type
+                return (hint.type,)
+            elif isinstance(hint, LiteralTypeHint):
+                # TODO(@NiklasRosenstein): Add validation to the property to error if a bad value is set.
+                return tuple(set(type(x) for x in hint.values))
             else:
                 raise RuntimeError(f"unexpected Property type hint {hint!r}")
 
         # Determine the accepted types of the property.
         item_type = item_type if isinstance(item_type, TypeHint) else TypeHint(item_type)
         if isinstance(item_type, UnionTypeHint):
-            accepted_types = list(map(_get_type, item_type))
+            accepted_types = tuple(concat(*map(_get_types, item_type)))
         else:
-            accepted_types = [_get_type(item_type)]
+            accepted_types = _get_types(item_type)
 
         # Ensure that we have value adapters for every accepted type.
         for accepted_type in accepted_types:

@@ -2,17 +2,14 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import sys
+import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator
+from typing import Iterator
 
 import pytest
 
 from kraken.core.system.context import Context
 from kraken.core.system.project import Project
-
-if TYPE_CHECKING:
-    from _pytest.fixtures import FixtureRequest
 
 __all__ = [
     "kraken_ctx",
@@ -30,21 +27,21 @@ def _kraken_ctx_fixture() -> Iterator[Context]:
 
 @contextlib.contextmanager
 def kraken_ctx() -> Iterator[Context]:
-    context = Context(Path("build"))
-    with context.as_current():
-        yield context
+    with tempfile.TemporaryDirectory() as tmpdir:
+        context = Context(Path(tmpdir))
+        with context.as_current():
+            yield context
 
 
 @pytest.fixture(name="kraken_project")
-def _kraken_project_fixture(kraken_ctx: Context, request: FixtureRequest) -> Iterator[Project]:
-    with kraken_project(kraken_ctx, request.path) as project:
+def _kraken_project_fixture(kraken_ctx: Context) -> Iterator[Project]:
+    with kraken_project(kraken_ctx) as project:
         yield project
 
 
 @contextlib.contextmanager
-def kraken_project(kraken_ctx: Context, path: Path | None = None) -> Iterator[Project]:
-    if path is None:
-        path = Path(sys._getframe(1).f_code.co_filename)
-    kraken_ctx.root_project = Project("test", path.parent, None, kraken_ctx)
-    with kraken_ctx.root_project.as_current():
-        yield kraken_ctx.root_project
+def kraken_project(kraken_ctx: Context) -> Iterator[Project]:
+    with tempfile.TemporaryDirectory() as tmpdir:
+        kraken_ctx.root_project = Project("test", Path(tmpdir), None, kraken_ctx)
+        with kraken_ctx.root_project.as_current():
+            yield kraken_ctx.root_project
