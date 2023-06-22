@@ -62,7 +62,7 @@ def setup_project_with_subproject(directory: Path, chdir_subproject: bool) -> It
 def test__main__run_in_plain_project(tempdir: Path, task_selector: str) -> None:
     with setup_plain_project(tempdir):
         with raises(SystemExit) as excinfo:
-            main(argv=["run", task_selector])
+            main(argv=["run", task_selector], handle_exceptions=False)
         assert excinfo.value.code == 0
 
     # Assert that the file created by the task exists.
@@ -97,7 +97,7 @@ def test__main__run_in_plain_project_from_subdirectory(tempdir: Path, task_selec
 
     with setup_plain_project(tempdir), chdir_context(tempdir / "sub"):
         with raises(expected_error_type) as excinfo:
-            main(argv=["run", "--project-dir", "..", task_selector])
+            main(argv=["run", "--project-dir", "..", task_selector], handle_exceptions=False)
 
     if is_absolute:
         assert isinstance(excinfo.value, SystemExit)
@@ -115,7 +115,7 @@ def test__main__run_in_plain_project_from_subdirectory(tempdir: Path, task_selec
 def test__main__run_with_subproject_from_root(tempdir: Path, task_selector: str) -> None:
     with setup_project_with_subproject(tempdir, chdir_subproject=False):
         with raises(SystemExit) as excinfo:
-            main(argv=["run", task_selector])
+            main(argv=["run", task_selector], handle_exceptions=False)
         assert excinfo.value.code == 0
 
     # Assert that the files created by the tasks exist.
@@ -131,7 +131,7 @@ def test__main__run_with_subproject_from_root(tempdir: Path, task_selector: str)
 def test__main__run_with_subproject_from_subproject(tempdir: Path, task_selector: str) -> None:
     with setup_project_with_subproject(tempdir, chdir_subproject=True):
         with raises(SystemExit) as excinfo:
-            main(argv=["run", "--project-dir", "..", task_selector])
+            main(argv=["run", "--project-dir", "..", task_selector], handle_exceptions=False)
         assert excinfo.value.code == 0
 
     # Assert that the files created by the tasks exist.

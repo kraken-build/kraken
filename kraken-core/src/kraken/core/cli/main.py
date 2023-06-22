@@ -30,8 +30,7 @@ from nr.io.graphviz.render import render_to_browser
 from nr.io.graphviz.writer import GraphvizWriter
 from termcolor import colored
 
-from kraken.core import __version__
-from kraken.core.address import Address
+from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
 from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
@@ -46,6 +45,12 @@ BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
 logger = logging.getLogger(__name__)
 print = partial(builtins.print, flush=True)
+
+
+class BuildScriptError(Exception):
+    """
+    Raised if an exception occurs while executing the build script.
+    """
 
 
 def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
@@ -195,7 +200,13 @@ def _load_build_state(
         context = Context(build_options.build_dir)
 
         with BuildscriptMetadata.callback(_buildscript_metadata_callback):
-            context.load_project(Path.cwd())
+            try:
+                context.load_project(Path.cwd())
+            except BaseException as exc:
+                raise BuildScriptError(
+                    "An unexpected error occurred while executing the build script. Please check "
+                    "check the earlier log messages for more details."
+                ) from exc
             context.finalize()
             graph = TaskGraph(context)
 
@@ -525,6 +536,50 @@ def env() -> None:
     print(json.dumps([dist.to_json() for dist in dists], sort_keys=True))
 
 
+def on_exception(exc: BaseException) -> int:
+    """
+    Called when an exception occurrs in #main_internal() to handle common errors and provide better error messages.
+    """
+
+    issues_url = "https://github.com/kraken-build/kraken-build/issues"
+
+    # The wrapper will set `KRAKENW=1` so we can detect if we're running in the wrapper or not.
+    command = "krakenw" if os.getenv("KRAKENW") else "kraken"
+
+    match exc:
+        case SystemExit():
+            if not isinstance(exc.code, int):
+                logger.warning("SystemExit.code is not an integer: %r", exc.code)
+                return 1
+            return exc.code
+        case AddressResolutionError():
+            logger.error(
+                "No task matched the selector '%s'. Not finding what you're looking for? You can use the "
+                "'%s query tree --all' command to list every available task.",
+                exc.query,
+                command,
+            )
+            return 1
+        case BuildScriptError():
+            logger.error(
+                "An unexpected error occurred when executing the build script. This either indicates a mistake "
+                "in your build script(s), or a bug in Kraken. If you think this is a bug in Kraken, please "
+                "consider filing a bug report in the respective Kraken component repository. (If the traceback points "
+                "to a bug in the core components, please file the report at %s)\n\n",
+                issues_url,
+                exc_info=exc.__context__ or exc,
+            )
+            return 2
+        case _:
+            logger.error(
+                "An unexpected error occurred in the Kraken CLI. This is likely a bug in Kraken. Please consider "
+                "filing a bug report at %s.\n\n",
+                issues_url,
+                exc_info=exc,
+            )
+            return 3
+
+
 def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoReturn:
     parser = _get_argument_parser(prog)
     args = parser.parse_args(sys.argv[1:] if argv is None else argv)
@@ -580,7 +635,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
     sys.exit(0)
 
 
-def main(prog: str = "kraken", argv: list[str] | None = None) -> NoReturn:
+def main(prog: str = "kraken", argv: list[str] | None = None, handle_exceptions: bool = True) -> NoReturn:
     pdb_enabled = os.getenv("KRAKEN_PDB") == "1"
     profile_outfile = os.getenv("KRAKEN_PROFILING")
     try:
@@ -598,10 +653,13 @@ def main(prog: str = "kraken", argv: list[str] | None = None) -> NoReturn:
         else:
             main_internal(prog, argv, pdb_enabled)
         sys.exit(0)
-    except:  # noqa: E722
+    except BaseException as exc:
+        if not handle_exceptions:
+            raise
+        code = on_exception(exc)
         if pdb_enabled:
             pdb.post_mortem()
-        raise
+        sys.exit(code)
 
 
 if __name__ == "__main__":
