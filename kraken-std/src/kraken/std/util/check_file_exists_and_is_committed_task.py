@@ -18,7 +18,7 @@ class CheckFileExistsAndIsCommittedError(enum.Enum):
         if self == CheckFileExistsAndIsCommittedError.IS_NOT_COMMITTED:
             return f"'{file_path}' exists but is not committed"
 
-        return "IMPOSSIBLE STATE"
+        return "IMPOSSIBLE STATE"  # type: ignore[unreachable]
 
 
 class CheckFileExistsAndIsCommittedTask(Task):
