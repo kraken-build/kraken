@@ -388,10 +388,7 @@ class TaskGraph(Graph):
                 for t in tasks
                 if (
                     (t.address not in self._results)
-                    or (
-                        t.address in self._results
-                        and self._results[t.address].is_pending()
-                    )
+                    or (t.address in self._results and self._results[t.address].is_pending())
                 )
             )
         return tasks
