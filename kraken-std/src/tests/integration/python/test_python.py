@@ -113,10 +113,10 @@ def test__python_project_upgrade_python_version_string(
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
     original_dir = Path(__file__).parent / "data" / project_dir
-    project_dist = tempdir / "build/python-dist"
+    project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
-    shutil.copytree(original_dir, tempdir)
+    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
     pyproject = Pyproject.read(original_dir / "pyproject.toml")

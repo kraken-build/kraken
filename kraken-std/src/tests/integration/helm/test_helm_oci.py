@@ -58,7 +58,9 @@ def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) 
     chart can be accessed via the registry."""
 
     helm_settings(kraken_project).add_auth(oci_registry, USER_NAME, USER_PASS, insecure=True)
-    package = kraken_project.do("helmPackage", HelmPackageTask, chart_directory="data/example-chart")
+    package = kraken_project.do(
+        "helmPackage", HelmPackageTask, chart_directory=Path(__file__).parent / "data" / "example-chart"
+    )
     kraken_project.do(
         "helmPush",
         HelmPushTask,
