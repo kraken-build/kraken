@@ -23,9 +23,11 @@ id = "dbd60541-5ee2-4a87-a7b5-6fb07af9a77d"
 type = "feature"
 description = "Add `TaskStatusType.WARNING`"
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/50"
 
 [[entries]]
 id = "197faa5a-4803-4c7b-8a27-53bbf023dd52"
 type = "feature"
 description = "Support `Literal` type hints in `Property`"
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/50"
