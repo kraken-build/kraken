@@ -17,3 +17,9 @@ type = "improvement"
 description = "Handle common errors in the Kraken CLI to improve the user experience."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/49"
+
+[[entries]]
+id = "dbd60541-5ee2-4a87-a7b5-6fb07af9a77d"
+type = "feature"
+description = "Add `TaskStatusType.WARNING`"
+author = "@NiklasRosenstein"
