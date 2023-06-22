@@ -31,3 +31,9 @@ type = "feature"
 description = "Support `Literal` type hints in `Property`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/50"
+
+[[entries]]
+id = "2746bc35-5f52-41ff-958d-fb269f4fe2ee"
+type = "breaking change"
+description = "The `kraken.core.testing` Pytest fixtures now always create a Context and Project in temporary directories. The temporary directories are distinct, this helps in ensuring that we do not accidentally depend on the current working directory or the project directory being somehow related to the Context directory."
+author = "@NiklasRosenstein"
