@@ -3,3 +3,17 @@ id = "e16431de-a6a4-4a4d-a85f-286de5fc2ab8"
 type = "improvement"
 description = "Replace more references to deprecated `Task.path` and `Project.path` with the new `.address` attribute"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "41818a3d-25b8-46ee-8dc7-198eeb0b6f5d"
+type = "improvement"
+description = "Get rid of `pretty_errors` again, experience has shown that it does not provide the added value that we hoped for as it still just outputs a Python traceback, but now in a different format than people are used to."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/49"
+
+[[entries]]
+id = "fc94e125-f8a9-42ac-92b5-18278ab650db"
+type = "improvement"
+description = "Handle common errors in the Kraken CLI to improve the user experience."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/49"
