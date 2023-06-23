@@ -38,3 +38,9 @@ type = "breaking change"
 description = "The `kraken.core.testing` Pytest fixtures now always create a Context and Project in temporary directories. The temporary directories are distinct, this helps in ensuring that we do not accidentally depend on the current working directory or the project directory being somehow related to the Context directory."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/50"
+
+[[entries]]
+id = "4fa257a1-814b-4c05-bce5-9f4d42205c8d"
+type = "breaking change"
+description = "Moved `as_bytes()` from `kraken.core.lib.check_file_contents_task` to `kraken.common.strings`"
+author = "@NiklasRosenstein"
