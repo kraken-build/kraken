@@ -11,3 +11,10 @@ type = "breaking change"
 description = "Reimplement `CheckValidReadmeExistsTask` as `ValidateReadmeTask`."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/50"
+
+[[entries]]
+id = "8ca5846d-f4a5-4849-8b7b-b8d9f32006c9"
+type = "breaking change"
+description = "Re-implement `GitignoreSyncTask`, simplifying the code by a lot (e.g. no more tracking of a generated content hash) and cache a subset of tokens from gitignore.io to distribute them as part of kraken-std. The old begin/end markers we used in gitignore files before is still supported. We also no longer sort the gitignore file entries."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/51"

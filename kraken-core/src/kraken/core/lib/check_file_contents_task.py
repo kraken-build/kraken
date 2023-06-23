@@ -4,13 +4,10 @@ from pathlib import Path
 from typing import Union
 
 from kraken.common.path import try_relative_to
+from kraken.common.strings import as_bytes
 from termcolor import colored
 
 from kraken.core import Property, Task, TaskStatus
-
-
-def as_bytes(v: str | bytes, encoding: str) -> bytes:
-    return v.encode(encoding) if isinstance(v, str) else v
 
 
 class CheckFileContentsTask(Task):

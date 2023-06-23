@@ -4,11 +4,12 @@ from pathlib import Path
 from typing import Union
 
 from kraken.common.path import try_relative_to
+from kraken.common.strings import as_bytes
 from kraken.common.supplier import Supplier
 
 from kraken.core import Project, Property, Task, TaskStatus
 
-from .check_file_contents_task import CheckFileContentsTask, as_bytes
+from .check_file_contents_task import CheckFileContentsTask
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -52,8 +53,6 @@ class RenderFileTask(Task):
     # Task
 
     def prepare(self) -> TaskStatus | None:
-        from kraken.core.lib.check_file_contents_task import as_bytes
-
         file = self.file.get()
         if file.is_file() and file.read_bytes() == as_bytes(self.content.get(), self.encoding.get()):
             return TaskStatus.up_to_date(f'"{try_relative_to(file)}" is up to date')
