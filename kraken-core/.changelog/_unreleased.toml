@@ -44,9 +44,11 @@ id = "4fa257a1-814b-4c05-bce5-9f4d42205c8d"
 type = "breaking change"
 description = "Moved `as_bytes()` from `kraken.core.lib.check_file_contents_task` to `kraken.common.strings`"
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/51"
 
 [[entries]]
 id = "600f4fac-72a5-4919-ba73-36015a2994ab"
 type = "feature"
 description = "Add `Property.is_set()` which returns `True` if `Property.set()` (or its variants) have not been called before and if the property does not have a default value."
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/51"
