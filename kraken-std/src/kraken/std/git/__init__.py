@@ -2,58 +2,48 @@
 
 from __future__ import annotations
 
-from typing import Optional, Sequence, cast
+from pathlib import Path
+from typing import Literal, Sequence
 
 from kraken.core import Project
+from kraken.core.lib.check_file_contents_task import CheckFileContentsTask
 
-from .tasks.const import (
-    DEFAULT_GITIGNORE_TOKENS,
-    DEFAULT_KRAKEN_GITIGNORE_OVERRIDES,
-    DEFAULT_KRAKEN_GITIGNORE_PATHS,
-    GITIGNORE_TASK_NAME,
-)
-from .tasks.gitignore_check_task import GitignoreCheckTask
-from .tasks.gitignore_sync_task import GitignoreSyncTask
+from . import tasks
+from .config import dump_gitconfig, load_gitconfig
 from .version import GitVersion, git_describe
 
 __all__ = [
+    "tasks",
+    "load_gitconfig",
+    "dump_gitconfig",
     "git_describe",
     "GitVersion",
-    "GitignoreSyncTask",
-    "GitignoreCheckTask",
     "gitignore",
-    "GITIGNORE_TASK_NAME",
-    "DEFAULT_GITIGNORE_TOKENS",
-    "DEFAULT_KRAKEN_GITIGNORE_PATHS",
-    "DEFAULT_KRAKEN_GITIGNORE_OVERRIDES",
 ]
 
 
 def gitignore(
-    tokens: Sequence[str] = DEFAULT_GITIGNORE_TOKENS,
-    kraken_paths: Sequence[str] = DEFAULT_KRAKEN_GITIGNORE_PATHS,
-    kraken_overrides: Sequence[str] = DEFAULT_KRAKEN_GITIGNORE_OVERRIDES,
+    *,
+    name: str = "gitignore",
+    group: str = "apply",
+    check_group: str = "check",
+    gitignore_file: str | Path | None = ".gitignore",
+    generated_content: Sequence[str] | None = (),
+    gitignore_io_tokens: Sequence[str] = (),
+    gitignore_io_allow_http_request_backfill: bool = False,
+    where: Literal["top", "bottom"] = "top",
     project: Project | None = None,
-) -> GitignoreSyncTask:
+) -> tuple[tasks.GitignoreSyncTask, CheckFileContentsTask]:
+    """
+    Creates a #GitignoreSyncTask and #CheckFileContentsTask for the given project.
+    """
+
     project = project or Project.current()
-    task = cast(Optional[GitignoreSyncTask], project.tasks().get(GITIGNORE_TASK_NAME))
-    if task is None:
-        task = project.do(
-            GITIGNORE_TASK_NAME,
-            GitignoreSyncTask,
-            group="apply",
-            tokens=tokens,
-            kraken_paths=kraken_paths,
-            kraken_overrides=kraken_overrides,
-        )
-        project.do(
-            f"{GITIGNORE_TASK_NAME}.check",
-            GitignoreCheckTask,
-            group="check",
-            tokens=tokens,
-            kraken_paths=kraken_paths,
-            kraken_overrides=kraken_overrides,
-        )
-    else:
-        raise ValueError("cannot add gitignore task: task can only be added once")
-    return task
+    task = project.do(name, tasks.GitignoreSyncTask, group=group)
+    task.gitignore_file.set(Path(gitignore_file))
+    if generated_content is not None:
+        task.generated_content.setmap(lambda x: [*x, *generated_content])
+    task.gitignore_io_tokens.set(gitignore_io_tokens)
+    task.gitignore_io_allow_http_request_backfill.set(gitignore_io_allow_http_request_backfill)
+    task.where.set(where)
+    return task, task.create_check(group=check_group)

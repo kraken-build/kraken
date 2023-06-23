@@ -1,14 +1,15 @@
 """
 This module provides a thin client for the gitignore.io API to retrieve template `.gitignore` files.
-We use it to regenerate the `gitignore-io-tokens.json` file that the `kraken-std` package ships with,
-avoiding requests to `gitignore.io` at build time.
+
+Run this module to update the `gitignore-io-tokens.json.gz` file.
 """
 
 import logging
+from functools import lru_cache
 from gzip import compress, decompress
 from json import dumps, loads
 from pathlib import Path
-from typing import Sequence
+from typing import Sequence, cast
 
 from kraken.std import http
 
@@ -35,15 +36,23 @@ TOKENS = [
     # Tooling
     "gcov",
     "git",
-    "node",
     "yarn",
+    # Languages
+    "c",
+    "c++",
+    "matlab",
+    "node",
+    "python",
+    "react",
+    "rust-analyzer",
+    "rust",
 ]
 
 # The file where we store the cached token data.
 OUTPUT_FILE = Path(__file__).parent / "data" / "gitignore-io-tokens.json.gz"
 
 
-def get_gitignore(tokens: Sequence[str]) -> None:
+def gitignore_io_fetch(tokens: Sequence[str]) -> str:
     """
     Fetch a `.gitignore` file from the gitignore.io API.
     """
@@ -54,15 +63,39 @@ def get_gitignore(tokens: Sequence[str]) -> None:
     return response.text.replace("\r\n", "\n")
 
 
+def gitignore_io_fetch_cached(tokens: Sequence[str], backfill: bool) -> str:
+    """
+    Compile the `.gitignore` file for the given tokens from the cache. Any tokens that are not
+    cached by be backfilled by making another request to gitignore.io if *backfill* is enabled.
+    If *backfill* is disabled and a token is not cached, an #ValueError will be raised.
+    """
+
+    cache = load_token_cache()
+    not_cached = set(tokens) - set(cache.keys())
+    if not_cached and not backfill:
+        raise ValueError(
+            f"The following gitignore.io tokens are not distributed as part of kraken-std: {', '.join(not_cached)}"
+            "\nBackfill is disabled, so this error is raised instead of making another HTTP request to "
+            "gitignore.io."
+        )
+
+    additional_tokens = ""
+    if not_cached:
+        additional_tokens = gitignore_io_fetch([t for t in tokens if t in not_cached])  # Consistent order
+
+    return "\n".join([cache[t] for t in tokens if t in cache] + [additional_tokens])
+
+
 def write_token_cache(tokens: dict[str, str]) -> None:
     OUTPUT_FILE.write_bytes(compress(dumps(tokens).encode("utf-8")))
 
 
+@lru_cache()
 def load_token_cache() -> dict[str, str]:
     if not OUTPUT_FILE.is_file():
         logger.warning("No gitignore.io token cache found at %s", OUTPUT_FILE)
         return {}
-    return loads(decompress(OUTPUT_FILE.read_bytes()).decode("utf-8"))
+    return cast(dict[str, str], loads(decompress(OUTPUT_FILE.read_bytes()).decode("utf-8")))
 
 
 def main() -> None:
@@ -71,7 +104,7 @@ def main() -> None:
     result = {}
     for token in sorted(TOKENS):
         logger.info("Fetching token %s", token)
-        result[token] = get_gitignore([token])
+        result[token] = gitignore_io_fetch([token])
 
     write_token_cache(result)
 
