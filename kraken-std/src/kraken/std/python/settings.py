@@ -1,27 +1,45 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from kraken.core import Project
 
-from kraken.std.python.indexes import IndexPriority, PythonIndex
+from kraken.std.python.pyproject import PackageIndex
 
 from .buildsystem import PythonBuildSystem, detect_build_system
 
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
+@dataclass
 class PythonSettings:
     """Project-global settings for Python tasks."""
+
+    @dataclass
+    class _PackageIndex(PackageIndex):
+        """
+        Extends the #PackageIndex with additional fields we need for Python package indexes at runtime in Kraken.
+        """
+
+        #: An alternative URL to upload packages to.
+        upload_url: str | None
+
+        #: Credentials to use when publishing to or reading from the index.
+        credentials: tuple[str, str] | None
+
+        #: Whether this index should be used to source packages from.
+        is_package_source: bool
+
+        #: Whether this index should be used to publish packages to.
+        publish: bool
 
     project: Project
     build_system: PythonBuildSystem | None = None
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
-    package_indexes: dict[str, PythonIndex] = dataclasses.field(default_factory=dict)
+    package_indexes: dict[str, _PackageIndex] = field(default_factory=dict)
     always_use_managed_env: bool = True
 
     def get_tests_directory(self) -> Path | None:
@@ -43,9 +61,13 @@ class PythonSettings:
         test_dir = self.get_tests_directory()
         return [] if test_dir is None else [str(test_dir)]
 
-    def get_default_package_index(self) -> PythonIndex | None:
+    def get_default_package_index(self) -> _PackageIndex | None:
         return next(
-            (index for index in self.package_indexes.values() if index.priority.value == IndexPriority.default.value),
+            (
+                index
+                for index in self.package_indexes.values()
+                if index.priority.value == PackageIndex.Priority.default.value
+            ),
             None,
         )
 
@@ -57,7 +79,7 @@ class PythonSettings:
         upload_url: str | None = None,
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
-        priority: IndexPriority = IndexPriority.supplemental,
+        priority: PackageIndex.Priority | str = PackageIndex.Priority.supplemental,
         publish: bool = False,
     ) -> PythonSettings:
         """Adds an index to consume Python packages from or publish packages to.
@@ -73,7 +95,10 @@ class PythonSettings:
         :param publish: Whether publishing to this index should be enabled.
         """
 
-        if priority == IndexPriority.default:
+        if isinstance(priority, str):
+            priority = PackageIndex.Priority[priority]
+
+        if priority == PackageIndex.Priority.default:
             defidx = self.get_default_package_index()
             if defidx is not None and defidx.alias != alias:
                 raise ValueError(f"cannot add another default index (got: {defidx.alias!r}, trying to add: {alias!r})")
@@ -95,14 +120,15 @@ class PythonSettings:
             else:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
-        self.package_indexes[alias] = PythonIndex(
+        self.package_indexes[alias] = self._PackageIndex(
             alias=alias,
             index_url=index_url,
+            priority=priority,
             upload_url=upload_url,
             credentials=credentials,
             is_package_source=is_package_source,
-            priority=priority,
             publish=publish,
+            verify_ssl=True,
         )
         return self
 

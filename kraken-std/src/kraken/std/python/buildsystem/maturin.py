@@ -13,12 +13,39 @@ from typing import Collection, List, Optional
 from kraken.common.path import is_relative_to
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
+from ..pyproject import Pyproject, PyprojectHandler
 from ..settings import PythonSettings
 from . import ManagedEnvironment
-from .poetry import PoetryManagedEnvironment, PoetryPythonBuildSystem
+from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
 
 logger = logging.getLogger(__name__)
+
+
+class MaturinPyprojectHandler(PoetryPyprojectHandler):
+    """
+    We curently expect Maturin projects to use Poetry.
+    """
+
+    def set_version(self, version: str | None) -> None:
+        PyprojectHandler.set_version(self, version)
+        PoetryPyprojectHandler.set_version(self, version)
+
+    def synchronize_project_section_to_poetry_state(self) -> None:
+        """
+        Synchronize the `[tool.poetry]` package metadata to the `[project]` section.
+
+        In the case where only the `[project]` section exists, we sync it into the other direction.
+        """
+
+        poetry_section = self._poetry_section
+        project_section = self.raw.setdefault("project", {})
+        for field_name in ("name", "version"):
+            poetry_value = poetry_section.get(field_name)
+            project_value = project_section.get(field_name)
+            if poetry_value is None:
+                poetry_section[field_name] = project_value
+            else:
+                project_section[field_name] = poetry_value
 
 
 @dataclass
@@ -71,8 +98,8 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         self._default_build = True
         self._zig_targets: List[MaturinZigTarget] = []
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
-        return PoetryPyproject(pyproject)
+    def get_pyproject_reader(self, pyproject: Pyproject) -> MaturinPyprojectHandler:
+        return MaturinPyprojectHandler(pyproject)
 
     def disable_default_build(self) -> None:
         self._default_build = False
@@ -102,20 +129,18 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
 
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
         super().update_pyproject(settings, pyproject)
-        poetry_pyproj = PoetryPyproject(pyproject)
-        poetry_pyproj.synchronize_project_section_to_poetry_state()
+        handler = self.get_pyproject_reader(pyproject)
+        handler.synchronize_project_section_to_poetry_state()
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         # We set the version
         old_poetry_version = None
-        old_project_version = None
         pyproject_path = self.project_directory / "pyproject.toml"
         if as_version is not None:
-            pyproject = Pyproject.read(pyproject_path)
-            poetry_pyproj = PoetryPyproject(pyproject)
-            old_poetry_version = poetry_pyproj.set_version(as_version)
-            old_project_version = pyproject.set_core_metadata_version(as_version)
-            pyproject.save()
+            pyproject = MaturinPyprojectHandler(Pyproject.read(pyproject_path))
+            old_poetry_version = pyproject.get_version()
+            pyproject.set_version(as_version)
+            pyproject.raw.save()
 
         # We cleanup target dir
         metadata = CargoMetadata.read(self.project_directory)
@@ -169,11 +194,9 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
 
         if as_version is not None:
             # We roll back the version
-            pyproject = Pyproject.read(pyproject_path)
-            poetry_pyproj = PoetryPyproject(pyproject)
-            poetry_pyproj.set_version(old_poetry_version)
-            pyproject.set_core_metadata_version(old_project_version)
-            pyproject.save()
+            pyproject = MaturinPyprojectHandler(Pyproject.read(pyproject_path))
+            pyproject.set_version(old_poetry_version)
+            pyproject.raw.save()
 
         return dst_files
 
