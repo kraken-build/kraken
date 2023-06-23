@@ -44,7 +44,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             poetry_pyproj.delete_source(source["name"])
         for index in settings.package_indexes.values():
             if index.is_package_source:
-                poetry_pyproj.upsert_source(index.alias, index.index_url, index.default, not index.default)
+                poetry_pyproj.upsert_source(index.alias, index.index_url, index.priority)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["poetry", "update"]

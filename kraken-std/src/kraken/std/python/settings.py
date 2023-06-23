@@ -6,20 +6,11 @@ from pathlib import Path
 
 from kraken.core import Project
 
+from kraken.std.python.indexes import IndexPriority, PythonIndex
+
 from .buildsystem import PythonBuildSystem, detect_build_system
 
 logger = logging.getLogger(__name__)
-
-
-@dataclasses.dataclass
-class PythonIndex:
-    alias: str
-    index_url: str
-    upload_url: str | None
-    credentials: tuple[str, str] | None
-    is_package_source: bool
-    default: bool
-    publish: bool
 
 
 @dataclasses.dataclass
@@ -53,7 +44,10 @@ class PythonSettings:
         return [] if test_dir is None else [str(test_dir)]
 
     def get_default_package_index(self) -> PythonIndex | None:
-        return next((index for index in self.package_indexes.values() if index.default), None)
+        return next(
+            (index for index in self.package_indexes.values() if index.priority.value == IndexPriority.default.value),
+            None,
+        )
 
     def add_package_index(
         self,
@@ -63,7 +57,7 @@ class PythonSettings:
         upload_url: str | None = None,
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
-        default: bool = False,
+        priority: IndexPriority = IndexPriority.supplemental,
         publish: bool = False,
     ) -> PythonSettings:
         """Adds an index to consume Python packages from or publish packages to.
@@ -79,7 +73,7 @@ class PythonSettings:
         :param publish: Whether publishing to this index should be enabled.
         """
 
-        if default:
+        if priority == IndexPriority.default:
             defidx = self.get_default_package_index()
             if defidx is not None and defidx.alias != alias:
                 raise ValueError(f"cannot add another default index (got: {defidx.alias!r}, trying to add: {alias!r})")
@@ -107,7 +101,7 @@ class PythonSettings:
             upload_url=upload_url,
             credentials=credentials,
             is_package_source=is_package_source,
-            default=default,
+            priority=priority,
             publish=publish,
         )
         return self

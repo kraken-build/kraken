@@ -16,6 +16,7 @@ from kraken.common import NotSet
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.poetry import PoetryPythonBuildSystem
+from kraken.std.python.indexes import IndexPriority
 from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject, SpecializedPyproject
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -116,7 +117,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
                 if index.credentials:
                     spec += f",username={quote(index.credentials[0])},password={quote(index.credentials[1])}"
                 safe_spec = spec.replace(quote(index.credentials[1]), "[MASKED]") if index.credentials else spec
-                option = "--index" if index.default else "--extra-index"
+                option = "--index" if index.priority.value == IndexPriority.default.value else "--extra-index"
                 command += [option, spec]
                 safe_command += [option, safe_spec]
 

@@ -18,3 +18,10 @@ type = "breaking change"
 description = "Re-implement `GitignoreSyncTask`, simplifying the code by a lot (e.g. no more tracking of a generated content hash) and cache a subset of tokens from gitignore.io to distribute them as part of kraken-std. The old begin/end markers we used in gitignore files before is still supported. We also no longer sort the gitignore file entries."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/51"
+
+[[entries]]
+id = "d3835f19-335c-4824-ad51-1d2c3624591e"
+type = "improvement"
+description = "Use Poetry index priority instead of deprecated default/secondary options"
+author = "sam.rogerson@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/46"

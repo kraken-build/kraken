@@ -8,6 +8,8 @@ from typing import Any, Dict, Iterator, MutableMapping, cast
 import tomli
 import tomli_w
 
+from kraken.std.python.indexes import IndexPriority
+
 
 @dataclass
 class Pyproject(MutableMapping[str, Any]):
@@ -142,7 +144,7 @@ class SpecializedPyproject(ABC):
         pass
 
     @abstractmethod
-    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
         pass
 
 
@@ -161,7 +163,7 @@ class PDMPyproject(SpecializedPyproject):
     def get_version(self) -> str | None:
         return cast(str, self._pyproj["project"].get("requires-python", None))
 
-    def upsert_source(self, source_name: str, url: str, _default: bool = False, _secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: IndexPriority = IndexPriority.supplemental) -> None:
         sources_conf = self.get_sources()
         source_config: dict[str, Any] = {"name": source_name, "url": url}
 
@@ -214,13 +216,9 @@ class PoetryPyproject(SpecializedPyproject):
             else:
                 project_section[field_name] = poetry_value
 
-    def upsert_source(self, source_name: str, url: str, default: bool = False, secondary: bool = False) -> None:
+    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
         sources_conf = self.get_sources()
-        source_config: dict[str, Any] = {"name": source_name, "url": url}
-        if default:
-            source_config["default"] = True
-        if secondary:
-            source_config["secondary"] = True
+        source_config: dict[str, Any] = {"name": source_name, "url": url, "priority": priority.value}
 
         # Find the source with the same name and update it, or create a new one.
         source = next((x for x in sources_conf if x["name"] == source_name), None)
