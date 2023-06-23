@@ -6,8 +6,8 @@
 name: "Selftest"
 
 on:
-  push: { branches: [ "develop" ], tags: [ "*" ] }
-  pull_request: { branches: [ "develop" ] }
+  push: { branches: [ "*" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
 
 jobs:
   kraken-std-selftest:
