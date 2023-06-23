@@ -63,7 +63,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
         return self._poetry_section["name"]  # type: ignore[no-any-return]
 
     def get_version(self) -> str | None:
-        return self._poetry_section.get("version")  # type: ignore[no-any-return]
+        return self._poetry_section.get("version")
 
     def get_python_version_constraint(self) -> str | None:
         return self._poetry_section.get("dependencies", {}).get("python")  # type: ignore[no-any-return]
