@@ -13,7 +13,6 @@ import tomli_w
 logger = logging.getLogger(__name__)
 
 
-@dataclass
 class _PackageIndexPriority(str, Enum):
     """
     Poetry has a very granular representation of priorities for indices, so we inherit that. The priority
@@ -58,11 +57,15 @@ class Pyproject(dict[str, Any]):
     Represents a raw `pyproject.toml` file in deserialized form.
     """
 
-    _path: Path
+    _path: Path | None
 
-    def __init__(self, path: Path, data: Mapping[str, Any]) -> None:
+    def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
         super().__init__(data)
         self._path = path
+
+    @classmethod
+    def read_string(cls, text: str) -> Pyproject:
+        return cls(None, tomli.loads(text))
 
     @classmethod
     def read(cls, path: Path) -> Pyproject:
@@ -71,6 +74,8 @@ class Pyproject(dict[str, Any]):
 
     def save(self, path: Path | None = None) -> None:
         path = path or self._path
+        if not path:
+            raise RuntimeError("No path to save to")
         with path.open("wb") as fp:
             tomli_w.dump(self, fp)
 
@@ -108,7 +113,7 @@ class PyprojectHandler(ABC):
         [1]: https://peps.python.org/pep-0621/#version
         """
 
-        return self.raw.get("project", {})
+        return self.raw.get("project", {}).get("version")  # type: ignore[no-any-return]
 
     def set_version(self, version: str | None) -> None:
         """

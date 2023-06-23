@@ -84,6 +84,18 @@ class PdmPyprojectHandler(PyprojectHandler):
 
         # We don't currently support fully replicating the semantics of the index priority in PDM.
         # Instead, we treat all as primaries but add secondary/supplement to the end of the list.
+        if any(x.priority == PackageIndex.Priority.default for x in indexes):
+            logger.warning(
+                "default index priority is not supported in %s, treating them as primary instead and "
+                "putting them in front",
+                type(self).__name__,
+            )
+        if any(x.priority in (PackageIndex.Priority.secondary, PackageIndex.Priority.supplemental) for x in indexes):
+            logger.warning(
+                "secondary/supplement index priority is not supported in %s, treating them as primary instead and "
+                "putting them at the back",
+                type(self).__name__,
+            )
         indexes = sorted(
             indexes,
             key=lambda x: 0
@@ -93,22 +105,11 @@ class PdmPyprojectHandler(PyprojectHandler):
             else 2,
         )
 
-        if any(x.priority == PackageIndex.Priority.default for x in indexes):
-            logger.warning(
-                "default index priority is not supported in %s, treating them as primary instead and "
-                "putting them in front"
-            )
-        if any(x.priority in (PackageIndex.Priority.secondary, PackageIndex.Priority.supplemental) for x in indexes):
-            logger.warning(
-                "secondary/supplement index priority is not supported in %s, treating them as primary instead and "
-                "putting them at the back"
-            )
-
         for index in indexes:
-            source_config: dict[str, Any] = {"name": index.alias, "url": index.index_url}
+            source: dict[str, Any] = {"name": index.alias, "url": index.index_url}
             if index.verify_ssl is False:
-                source_config["verify_ssl"] = False
-            sources_conf.append(source_config)
+                source["verify_ssl"] = False
+            sources_conf.append(source)
 
 
 class PDMPythonBuildSystem(PythonBuildSystem):

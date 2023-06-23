@@ -105,7 +105,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
                 {
                     "name": index.alias,
                     "url": index.index_url,
-                    "priority": index.priority,
+                    "priority": index.priority.value,
                 }
             )
 
