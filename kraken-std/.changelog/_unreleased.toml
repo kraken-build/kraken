@@ -18,3 +18,9 @@ type = "breaking change"
 description = "Re-implement `GitignoreSyncTask`, simplifying the code by a lot (e.g. no more tracking of a generated content hash) and cache a subset of tokens from gitignore.io to distribute them as part of kraken-std. The old begin/end markers we used in gitignore files before is still supported. We also no longer sort the gitignore file entries."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/51"
+
+[[entries]]
+id = "b9ccf244-cce6-46dc-97b4-6bbcf8874da0"
+type = "improvement"
+description = "bump Cargo.toml version before building, not only before publishing"
+author = "jerome.froissart@helsing.ai"

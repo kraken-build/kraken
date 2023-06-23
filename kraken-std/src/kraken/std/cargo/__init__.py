@@ -252,7 +252,6 @@ def cargo_bump_version(
     version: str,
     revert: bool = True,
     name: str = "cargoBumpVersion",
-    group: str | None = CARGO_PUBLISH_SUPPORT_GROUP_NAME,
     registry: str | None = None,
     project: Project | None = None,
     cargo_toml_file: Path = Path("Cargo.toml"),
@@ -270,14 +269,14 @@ def cargo_bump_version(
     task = project.do(
         name,
         CargoBumpVersionTask,
-        group=group,
+        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
         version=version,
         revert=revert,
         registry=registry,
         cargo_toml_file=cargo_toml_file,
     )
-
-    task.depends_on(":test?")
+    # This is also required before publishing, because the version number will be used to derive a artifact file name
+    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
 
     return task
 
