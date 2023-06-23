@@ -87,7 +87,8 @@ def gitignore_io_fetch_cached(tokens: Sequence[str], backfill: bool) -> str:
 
 
 def write_token_cache(tokens: dict[str, str]) -> None:
-    OUTPUT_FILE.write_bytes(compress(dumps(tokens).encode("utf-8")))
+    # NOTE(@NiklasRosenstein): We set mtime to 0 to ensure the Gzip compression result is stable.
+    OUTPUT_FILE.write_bytes(compress(dumps(tokens).encode("utf-8"), mtime=0))
 
 
 @lru_cache()
