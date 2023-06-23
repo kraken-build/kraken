@@ -264,6 +264,11 @@ def cargo_bump_version(
         it will not change the name of the task and that task will still be reused.
     :param group: The group to assign the task to (even if the task is reused)."""
 
+    # This task will write the "current" version (usually taken from git) into Cargo.toml
+    # That is useful at two places
+    #  * at build time (because apps may use env!("CARGO_PKG_VERSION"))
+    #  * at publish time (because the artifact file name is derived from the version)
+
     project = project or Project.current()
 
     task = project.do(
@@ -275,7 +280,8 @@ def cargo_bump_version(
         registry=registry,
         cargo_toml_file=cargo_toml_file,
     )
-    # This is also required before publishing, because the version number will be used to derive a artifact file name
+
+    # project.do() only supports one group, but this task is needed in two groups
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
 
     return task
