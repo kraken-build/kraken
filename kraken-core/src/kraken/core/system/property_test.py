@@ -158,10 +158,20 @@ def test__Property__does_not_accept_tuple_with_wrong_type() -> None:
         p1.set(("hello", "world"))  # type: ignore[arg-type]
 
 
-def test__Property__does_not_accept_literal_type_hint() -> None:
-    with raises(RuntimeError) as excinfo:
-        Property[Literal["foo", "bar"]](PropertyContainer(), "foo", Literal["foo", "bar"])
-    assert str(excinfo.value) == "unexpected Property type hint TypeHint(%s)" % repr(Literal["foo", "bar"])
+def test__Property__does_accept_literal_type_hint() -> None:
+    prop = Property[Literal["foo", "bar"]](PropertyContainer(), "foo", Literal["foo", "bar"])
+    prop.set("foo")
+    prop.set("bar")
+
+    # Cannot set int when only string literals are accepted.
+    with raises(TypeError) as excinfo:
+        prop.set(42)  # type: ignore[arg-type]
+    assert str(excinfo.value).endswith("expected str, got int")
+
+    # Cannot set a string literal that is not in the list of accepted literals.
+    # This is because we don't currently validate the values.
+    # TODO(@NiklasRosenstein): Validate Literal values.
+    prop.set("bazinga")  # type: ignore[arg-type]
 
 
 def test__PropertyContainer__output_property_is_deferred_by_default() -> None:

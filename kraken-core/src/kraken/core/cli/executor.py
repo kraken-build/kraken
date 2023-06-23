@@ -12,6 +12,7 @@ COLORS_BY_STATUS = {
     TaskStatusType.FAILED: "red",
     TaskStatusType.INTERRUPTED: "red",
     TaskStatusType.SKIPPED: "yellow",
+    TaskStatusType.WARNING: "yellow",
     TaskStatusType.SUCCEEDED: "green",
     TaskStatusType.STARTED: "magenta",
     TaskStatusType.UP_TO_DATE: "green",

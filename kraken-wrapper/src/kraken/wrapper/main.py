@@ -366,6 +366,9 @@ def main() -> NoReturn:
         parser.print_usage()
         sys.exit(0)
 
+    # When we delegate to the Kraken CLI, we want to make sure it can detect that it has been invoked from the wrapper.
+    os.environ["KRAKENW"] = "1"
+
     # Convert the arguments we defined in the argument parser to the actual subcommand that we want
     # delegated.
     cmd: str | None = args.cmd[0] if args.cmd else None

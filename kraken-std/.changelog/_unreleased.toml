@@ -4,3 +4,24 @@ type = "improvement"
 description = "Use Poetry index priority instead of deprecated default/secondary options"
 author = "sam.rogerson@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/46"
+
+[[entries]]
+id = "491df1d7-02aa-4a45-9fac-c15ee020c423"
+type = "breaking change"
+description = "Reimplement `CheckFileExistsAndIsCommitedTask` as `CheckFileTask` and move it into the `kraken.core.git.tasks` module."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/50"
+
+[[entries]]
+id = "522dd01e-ed80-4cfe-88e9-625a70346f38"
+type = "breaking change"
+description = "Reimplement `CheckValidReadmeExistsTask` as `ValidateReadmeTask`."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/50"
+
+[[entries]]
+id = "8ca5846d-f4a5-4849-8b7b-b8d9f32006c9"
+type = "breaking change"
+description = "Re-implement `GitignoreSyncTask`, simplifying the code by a lot (e.g. no more tracking of a generated content hash) and cache a subset of tokens from gitignore.io to distribute them as part of kraken-std. The old begin/end markers we used in gitignore files before is still supported. We also no longer sort the gitignore file entries."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/51"
