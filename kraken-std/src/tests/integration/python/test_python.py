@@ -13,7 +13,9 @@ from kraken.common import not_none
 from kraken.core import Context, Project
 
 from kraken.std import python
-from kraken.std.python.pyproject import PDMPyproject, PoetryPyproject, Pyproject
+from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
+from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
+from kraken.std.python.pyproject import Pyproject
 from tests.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
@@ -144,15 +146,15 @@ def test__python_project_upgrade_python_version_string(
         assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
 
 
-M = TypeVar("M", PDMPyproject, PoetryPyproject)
+M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
 
 
 @pytest.mark.parametrize(
     "project_dir, reader, expected_python_version",
     [
-        ("poetry-project", PoetryPyproject, "^3.7"),
-        ("slap-project", PoetryPyproject, "^3.6"),
-        ("pdm-project", PDMPyproject, ">=3.9"),
+        ("poetry-project", PoetryPyprojectHandler, "^3.7"),
+        ("slap-project", PoetryPyprojectHandler, "^3.6"),
+        ("pdm-project", PdmPyprojectHandler, ">=3.9"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -171,9 +173,9 @@ def test__python_pyproject_reads_correct_data(
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
     assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
-    assert local_build_system.get_pyproject_reader(pyproject).get_version() == expected_python_version
+    assert local_build_system.get_pyproject_reader(pyproject).get_python_version_constraint() == expected_python_version
 
     spec = reader(pyproject)
 
     assert spec.get_name() == project_dir
-    assert spec.get_version() == expected_python_version
+    assert spec.get_python_version_constraint() == expected_python_version

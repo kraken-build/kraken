@@ -7,12 +7,13 @@ import os
 import shutil
 import subprocess as sp
 from pathlib import Path
+from typing import Any, Sequence
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.core import TaskStatus
 
-from kraken.std.python.pyproject import PDMPyproject, Pyproject, SpecializedPyproject
+from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -26,28 +27,105 @@ def get_env_no_build_delete() -> dict[str, str]:
     return env
 
 
+class PdmPyprojectHandler(PyprojectHandler):
+    """
+    Implements the PyprojectHandler interface for PDM projects.
+    """
+
+    def __init__(self, pyproj: Pyproject) -> None:
+        super().__init__(pyproj)
+
+    # PyprojectHandler
+
+    def get_package_indexes(self) -> list[PackageIndex]:
+        results = []
+        for source in self.raw.get("tool", {}).get("pdm", {}).get("source", []):
+            if "username" in source or "password" in source:
+                logger.warning(
+                    "username/password in pyproject.toml [tool.pdm.source] is not supported, the information may "
+                    "be lost (source name: %s)",
+                    source["name"],
+                )
+            if source.get("type") == "find_links":
+                logger.warning(
+                    "source of type 'find_links' in pyproject.toml [tool.pdm.source] is not supported "
+                    "(source name: %s)",
+                    source["name"],
+                )
+                continue
+            # TODO: To understand if a source is a "default" source as per Poetry's definition, we need
+            #       to know if `pypi.ignore_stored_index` is set to `true`. It appears that this may be a
+            #       local (for the project) or global (for the user) option. For now, we assume that this
+            #       option is not turned on (as it is not by default) and all sources we find are primary
+            #       sources instead of default sources. https://pdm.fming.dev/latest/usage/config/
+            # TODO: We may also want to consider ensuring that respect-source-order is enabled, see
+            #       https://pdm.fming.dev/latest/usage/config/#respect-the-order-of-the-sources
+            results.append(
+                PackageIndex(
+                    alias=source["name"],
+                    index_url=source["url"],
+                    verify_ssl=source.get("verify_ssl", True),
+                    priority=PackageIndex.Priority.primary,
+                )
+            )
+        return results
+
+    def set_package_indexes(self, indexes: Sequence[PackageIndex]) -> None:
+        """
+        Set the list of package indexes to the given list of indexes, replacing any existing indexes.
+
+        Note that this only updates the package indexes in the `[tool.pdm.source]` section of the
+        pyproject.toml file.
+        See https://pdm.fming.dev/latest/usage/config/#source for more details.
+        """
+
+        sources_conf = self.raw.setdefault("tool", {}).setdefault("pdm", {}).setdefault("source", [])
+        sources_conf.clear()
+
+        # We don't currently support fully replicating the semantics of the index priority in PDM.
+        # Instead, we treat all as primaries but add secondary/supplement to the end of the list.
+        if any(x.priority == PackageIndex.Priority.default for x in indexes):
+            logger.warning(
+                "default index priority is not supported in %s, treating them as primary instead and "
+                "putting them in front",
+                type(self).__name__,
+            )
+        if any(x.priority in (PackageIndex.Priority.secondary, PackageIndex.Priority.supplemental) for x in indexes):
+            logger.warning(
+                "secondary/supplement index priority is not supported in %s, treating them as primary instead and "
+                "putting them at the back",
+                type(self).__name__,
+            )
+        indexes = sorted(
+            indexes,
+            key=lambda x: 0
+            if x.priority == PackageIndex.Priority.default
+            else 1
+            if x.priority == PackageIndex.Priority.primary
+            else 2,
+        )
+
+        for index in indexes:
+            source: dict[str, Any] = {"name": index.alias, "url": index.index_url}
+            if index.verify_ssl is False:
+                source["verify_ssl"] = False
+            sources_conf.append(source)
+
+
 class PDMPythonBuildSystem(PythonBuildSystem):
     name = "PDM"
 
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
-        return PDMPyproject(pyproject)
+    def get_pyproject_reader(self, pyproject: Pyproject) -> PdmPyprojectHandler:
+        return PdmPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
         return True
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return PDMManagedEnvironment(self.project_directory)
-
-    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        pdm_pyproj = PDMPyproject(pyproject)
-        for source in pdm_pyproj.get_sources():
-            pdm_pyproj.delete_source(source["name"])
-        for index in settings.package_indexes.values():
-            if index.is_package_source:
-                pdm_pyproj.upsert_source(index.alias, index.index_url, index.priority)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["pdm", "update"]
@@ -88,11 +166,11 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
         if as_version is not None:
             # Bump the in-source version number.
-            pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
-            pdm_pyproj = PDMPyproject(pyproject)
-            pdm_pyproj.update_relative_packages(as_version)
-            previous_version = pdm_pyproj.set_version(as_version)
-            pdm_pyproj.save()
+            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
+            previous_version = pyproject.get_version()
+            pyproject.set_path_dependencies_to_version(as_version)
+            pyproject.set_version(as_version)
+            pyproject.raw.save()
 
         # PDM does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
@@ -116,9 +194,8 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
-            pdm_pyproj = PDMPyproject(pyproject)
-            pdm_pyproj.set_version(previous_version)
-            pdm_pyproj.save()
+            pyproject.set_version(previous_version)
+            pyproject.raw.save()
 
         return dst_files
 

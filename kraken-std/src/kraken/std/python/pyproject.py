@@ -1,234 +1,163 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+import logging
+from abc import ABC
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Iterator, MutableMapping, cast
+from typing import Any, ClassVar, Mapping, Sequence, TypeAlias
 
 import tomli
 import tomli_w
 
-from kraken.std.python.indexes import IndexPriority
+logger = logging.getLogger(__name__)
+
+
+class _PackageIndexPriority(str, Enum):
+    """
+    Poetry has a very granular representation of priorities for indices, so we inherit that. The priority
+    should to be interpreted in the spirit of its definition in other tools.
+
+    https://python-poetry.org/docs/repositories/#project-configuration
+    """
+
+    default = "default"
+    primary = "primary"
+    secondary = "secondary"  # Do not use
+    supplemental = "supplemental"
 
 
 @dataclass
-class Pyproject(MutableMapping[str, Any]):
-    _path: Path
-    _data: dict[str, Any]
+class PackageIndex:
+    """
+    Represents a Python package index. Some tool-specific representations of package indices may not support
+    all fields, in which case the implementation should trigger a warning or error if the alternative behaviour
+    conflicts with the field value.
+    """
 
-    def __len__(self) -> int:
-        return len(self._data)
+    Priority: ClassVar[TypeAlias] = _PackageIndexPriority
 
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._data)
+    #: A name for the package index.
+    alias: str
 
-    def __contains__(self, key: object) -> bool:
-        return key in self._data
+    #: The URL to find the packages at.
+    index_url: str
 
-    def __getitem__(self, key: str) -> Any:
-        return self._data[key]
+    #: The priority of the index. Not all tools support it exactly how we model it in here (e.g. like Poetry),
+    #: so the corresponding #PyprojectHandler implementation may need to do some translation.
+    priority: Priority
 
-    def __setitem__(self, key: str, value: Any) -> None:
-        self._data[key] = value
+    #: Whether SSL should be verified when connecting to the index. Not all tools support this.
+    verify_ssl: bool
 
-    def __delitem__(self, key: str) -> None:
-        del self._data[key]
+
+@dataclass
+class Pyproject(dict[str, Any]):
+    """
+    Represents a raw `pyproject.toml` file in deserialized form.
+    """
+
+    _path: Path | None
+
+    def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
+        super().__init__(data)
+        self._path = path
+
+    @classmethod
+    def read_string(cls, text: str) -> Pyproject:
+        return cls(None, tomli.loads(text))
 
     @classmethod
     def read(cls, path: Path) -> Pyproject:
         with path.open("rb") as fp:
-            return cls.of(path, tomli.load(fp))
-
-    @classmethod
-    def of(cls, path: Path, data: dict[str, Any]) -> Pyproject:
-        return Pyproject(path, data)
-
-    def to_json(self) -> dict[str, Any]:
-        return self._data
-
-    def to_toml_string(self) -> str:
-        return tomli_w.dumps(self.to_json())
+            return cls(path, tomli.load(fp))
 
     def save(self, path: Path | None = None) -> None:
         path = path or self._path
+        if not path:
+            raise RuntimeError("No path to save to")
         with path.open("wb") as fp:
-            tomli_w.dump(self.to_json(), fp)
+            tomli_w.dump(self, fp)
 
-    def set_core_metadata_version(self, version: str | None) -> str | None:
-        """Updates the core metadata version field and returns the previous value"""
-        return self._set_version(self.setdefault("project", {}), version)
+    def to_toml_string(self) -> str:
+        return tomli_w.dumps(self)
 
-    @staticmethod
-    def _set_version(config: Any, version: str | None) -> str | None:
-        """Updates the core metadata version field and returns the previous value"""
-        old_version = config.get("version")
-        if version is None:
-            if "version" in config:
-                del config["version"]
+
+class PyprojectHandler(ABC):
+    """
+    A wrapper for a raw Pyproject to implement common read and mutation operations.
+    """
+
+    raw: Pyproject
+
+    def __init__(self, raw: Pyproject) -> None:
+        self.raw = raw
+
+    def get_name(self) -> str | None:
+        """
+        Returns the current project name.
+
+        This returns the name from the `project` section of the Pyproject.toml file as per PEP 621 [1].
+
+        [1]: https://peps.python.org/pep-0621/#name
+        """
+
+        return self.raw.get("project", {}).get("name")  # type: ignore[no-any-return]
+
+    def get_python_version_constraint(self) -> str | None:
+        """
+        Returns the current Python version constraint.
+
+        This returns the Python version constraint from the `project` section of the Pyproject.toml file as per
+        PEP 621 [1].
+
+        [1]: https://peps.python.org/pep-0621/#requires-python
+        """
+
+        return self.raw.get("project", {}).get("requires-python")  # type: ignore[no-any-return]
+
+    def get_version(self) -> str | None:
+        """
+        Returns the current project version. Returns #None if the project version can not be determined.
+
+        This returns the version from the `project` section of the Pyproject.toml file as per PEP 621 [1].
+
+        [1]: https://peps.python.org/pep-0621/#version
+        """
+
+        return self.raw.get("project", {}).get("version")  # type: ignore[no-any-return]
+
+    def set_version(self, version: str | None) -> None:
+        """
+        Set (or unset) the project version.
+
+        This sets the version from the `project` section of the Pyproject.toml file as per PEP 621 [1].
+
+        [1]: https://peps.python.org/pep-0621/#version
+        """
+
+        project: dict[str, Any] | None = self.raw.get("project")
+        if project is None:
+            if version is None:
+                return
+            project = {"version": version}
+            self.raw["project"] = project
         else:
-            config["version"] = version
-        return old_version  # type: ignore[no-any-return]
-
-    def _tool_section(self, name: str) -> Dict[str, Any]:
-        return self.setdefault("tool", {}).setdefault(name, {})  # type: ignore[no-any-return]
-
-    def _get_pyproj_sources(self, sources_conf: Dict[str, Any]) -> list[dict[str, Any]]:
-        return list(sources_conf.setdefault("source", []))
-
-    def _delete_pyproj_source(self, sources_conf: list[dict[str, Any]], source_name: str) -> None:
-        index = [conf["name"] for conf in sources_conf].index(source_name)
-        del sources_conf[index]
-
-    def _find_dependencies_definitions(self, pyproject_section: Dict[str, Any], version: str) -> None:
-        """
-        Finds and updates the version of local dependencies listed in the
-        "dev-dependencies" and "dependencies" sections of the PyProject.toml file.
-        Args:
-            pyproject_section (Dict[str, Any]): A dictionary representing a section of the PyProject.toml file.
-            version (str): The version to update local dependencies with.
-        """
-
-        # TODO(@niklas.rosenstein): Support Poetry dependency groups
-        #       https://python-poetry.org/docs/master/managing-dependencies/#dependency-groups
-
-        for key, value in pyproject_section.items():
-            if key in ("dependencies", "dev-dependencies"):
-                if type(value) == dict:
-                    self._update_dependencies_version(value, version)
-                pass
+            if version is None:
+                project.pop("version", None)
             else:
-                if type(value) is dict:
-                    self._find_dependencies_definitions(value, version)
+                project["version"] = version
 
-    def _update_dependencies_version(self, obj: Dict[str, Any], version: str) -> None:
-        for _key, value in obj.items():
-            if type(value) == dict:
-                if "path" in value and "develop" in value:
-                    del value["path"]
-                    del value["develop"]
-                    value["version"] = version
+    def get_package_indexes(self) -> list[PackageIndex]:
+        raise NotImplementedError("%s.get_package_indexes()" % type(self).__name__)
 
+    def set_package_indexes(self, indexes: Sequence[PackageIndex]) -> None:
+        raise NotImplementedError("%s.set_package_indexes()" % type(self).__name__)
 
-class SpecializedPyproject(ABC):
-    """Builder specific operations"""
-
-    def __init__(self, pyproj: Pyproject) -> None:
-        self._pyproj = pyproj
-
-    def set_version(self, version: str | None) -> str | None:
-        """Updates the poetry version field and returns the previous value"""
-        return self._pyproj._set_version(self._get_section(), version)
-
-    @abstractmethod
-    def _get_section(self) -> Dict[str, Any]:
-        pass
-
-    def get_sources(self) -> list[dict[str, Any]]:
-        return list(self._get_section().setdefault("source", []))
-
-    def delete_source(self, source_name: str) -> None:
-        return self._pyproj._delete_pyproj_source(self.get_sources(), source_name)
-
-    def update_relative_packages(self, version: str) -> None:
-        self._pyproj._find_dependencies_definitions(self._get_section(), version)
-
-    def save(self, path: Path | None = None) -> None:
-        self._pyproj.save(path)
-
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_version(self) -> str | None:
-        pass
-
-    @abstractmethod
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
-        pass
-
-
-class PDMPyproject(SpecializedPyproject):
-    """PDM specific operations"""
-
-    def __init__(self, pyproj: Pyproject) -> None:
-        super().__init__(pyproj)
-
-    def _get_section(self) -> Dict[str, Any]:
-        return self._pyproj._tool_section("pdm")
-
-    def get_name(self) -> str:
-        return cast(str, self._pyproj["project"]["name"])
-
-    def get_version(self) -> str | None:
-        return cast(str, self._pyproj["project"].get("requires-python", None))
-
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority = IndexPriority.supplemental) -> None:
-        sources_conf = self.get_sources()
-        source_config: dict[str, Any] = {"name": source_name, "url": url}
-
-        # Find the source with the same name and update it, or create a new one.
-        source = next((x for x in sources_conf if x["name"] == source_name), None)
-        if source is None:
-            sources_conf.append(source_config)
-        else:
-            source.update(source_config)
-
-
-class PoetryPyproject(SpecializedPyproject):
-    """Poetry specific operations"""
-
-    def __init__(self, pyproj: Pyproject) -> None:
-        super().__init__(pyproj)
-
-    def get_name(self) -> str:
-        return cast(str, self._pyproj["tool"]["poetry"]["name"])
-
-    def get_version(self) -> str | None:
-        return cast(str, self._pyproj.get("tool", {}).get("poetry", {}).get("dependencies", {}).get("python"))
-
-    def _get_section(self) -> Dict[str, Any]:
-        return self._pyproj._tool_section("poetry")
-
-    def get_packages(self, fallback: bool = True) -> list[PoetryPackageInfo]:
+    def set_path_dependencies_to_version(self, version: str) -> None:
         """
-        Returns the information stored in `[tool.poetry.packages]` configuration. If that configuration does not
-        exist and *fallback* is set to True, the default that Poetry will assume is returned.
+        Update all dependencies in the Pyproject that are path dependencies to the given version instead
+        (such that they are no longer path dependencies).
         """
 
-        packages: list[dict[str, Any]] | None = self._get_section().get("packages")
-        if packages is None and fallback:
-            package_name = self._get_section()["name"]
-            return [PoetryPackageInfo(include=package_name.replace("-", "_").replace(".", "_"))]
-        else:
-            return [PoetryPackageInfo(include=x["include"], from_=x.get("from")) for x in packages or ()]
-
-    def synchronize_project_section_to_poetry_state(self) -> None:
-        poetry_section = self._get_section()
-        project_section = self._pyproj.setdefault("project", {})
-        for field_name in ("name", "version"):
-            poetry_value = poetry_section.get(field_name)
-            project_value = project_section.get(field_name)
-            if poetry_value == project_value:
-                continue
-            elif poetry_value is None:
-                poetry_section[field_name] = project_value
-            else:
-                project_section[field_name] = poetry_value
-
-    def upsert_source(self, source_name: str, url: str, priority: IndexPriority) -> None:
-        sources_conf = self.get_sources()
-        source_config: dict[str, Any] = {"name": source_name, "url": url, "priority": priority.value}
-
-        # Find the source with the same name and update it, or create a new one.
-        source = next((x for x in sources_conf if x["name"] == source_name), None)
-        if source is None:
-            sources_conf.append(source_config)
-        else:
-            source.update(source_config)
-
-
-@dataclass
-class PoetryPackageInfo:
-    include: str
-    from_: str | None = None
+        raise NotImplementedError("%s.set_path_dependencies_to_version()" % type(self).__name__)
