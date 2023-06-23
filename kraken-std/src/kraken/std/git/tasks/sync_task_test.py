@@ -1,7 +1,9 @@
 import textwrap
 
-from kraken.core import Project
+from kraken.core import BuildError, Project
+from pytest import raises
 
+from kraken.std.git import gitignore
 from kraken.std.git.tasks.sync_task import GitignoreSyncTask
 
 NO_GENERATED_CONTENT = """
@@ -81,3 +83,13 @@ def test__GitignoreSyncTask__updates_existing_generated_content(kraken_project: 
         baz
         """
     )
+
+
+def test__gitignore__check_and_apply_tasks(kraken_project: Project) -> None:
+    gitignore(gitignore_io_tokens=["python"])
+
+    with raises(BuildError):
+        kraken_project.context.execute([":check"])
+
+    kraken_project.context.execute([":apply"])
+    kraken_project.context.execute([":check"])

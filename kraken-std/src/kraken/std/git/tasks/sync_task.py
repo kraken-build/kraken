@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Literal
 
-from kraken.core import Property
+from kraken.core import Project, Property
 from kraken.core.lib.render_file_task import RenderFileTask
 
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
@@ -75,7 +75,7 @@ class GitignoreSyncTask(RenderFileTask):
 
     # Task
 
-    def finalize(self) -> None:
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
         self.file.setmap(lambda file: self.project.directory / file)
-        assert not self.content.is_set(), "GitignoreSyncTask.content should not be set"
         self.content.setcallable(lambda: self.get_file_contents(self.file.get()))
