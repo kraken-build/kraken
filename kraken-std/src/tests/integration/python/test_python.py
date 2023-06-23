@@ -173,9 +173,9 @@ def test__python_pyproject_reads_correct_data(
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
     assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
-    assert local_build_system.get_pyproject_reader(pyproject).get_version() == expected_python_version
+    assert local_build_system.get_pyproject_reader(pyproject).get_python_version_constraint() == expected_python_version
 
     spec = reader(pyproject)
 
     assert spec.get_name() == project_dir
-    assert spec.get_version() == expected_python_version
+    assert spec.get_python_version_constraint() == expected_python_version

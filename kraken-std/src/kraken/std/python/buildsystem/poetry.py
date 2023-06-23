@@ -65,6 +65,9 @@ class PoetryPyprojectHandler(PyprojectHandler):
     def get_version(self) -> str | None:
         return self._poetry_section.get("version")  # type: ignore[no-any-return]
 
+    def get_python_version_constraint(self) -> str | None:
+        return self._poetry_section.get("dependencies", {}).get("python")  # type: ignore[no-any-return]
+
     def set_version(self, version: str | None) -> None:
         project: dict[str, Any] = self._poetry_section
         if version is None:
@@ -137,7 +140,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
+    # PythonBuildSystem
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> PoetryPyprojectHandler:
         return PoetryPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
@@ -145,10 +150,6 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return PoetryManagedEnvironment(self.project_directory)
-
-    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        poetry_pyproj = PoetryPyprojectHandler(pyproject)
-        poetry_pyproj.set_package_indexes([x for x in settings.package_indexes.values() if x.is_package_source])
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["poetry", "update"]
@@ -173,7 +174,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         revert_version_paths: list[Path] = []
         if as_version is not None:
             # Bump the in-source version number.
-            pyproject = PoetryPyprojectHandler(Pyproject.read(self.project_directory / "pyproject.toml"))
+            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
             pyproject.set_path_dependencies_to_version(as_version)
             previous_version = pyproject.get_version()
             pyproject.set_version(as_version)

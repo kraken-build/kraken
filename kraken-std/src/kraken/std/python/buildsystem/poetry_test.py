@@ -1,4 +1,3 @@
-
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import PackageIndex, Pyproject
 
@@ -11,6 +10,18 @@ version = "0.1.0"
 name = "foo"
 url = "https://foo.bar/simple/"
 priority = "supplemental"
+"""
+
+EXAMPLE_POETRY_PYPROJECT_WITH_LEGACY_SOURCE_CONFIG = """
+[[tool.poetry.source]]
+name = "foo"
+url = "https://foo.bar/simple/"
+default = true
+
+[[tool.poetry.source]]
+name = "bar"
+url = "https://bar.com/simple/"
+secondary = true
 """
 
 
@@ -35,6 +46,24 @@ def test__PoetryPyprojectHandler__get_package_indexes() -> None:
             priority=PackageIndex.Priority.supplemental,
             verify_ssl=True,
         )
+    ]
+
+
+def test__PoetryPyprojectHandler__get_package_indexes__with_legacy_source_config() -> None:
+    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT_WITH_LEGACY_SOURCE_CONFIG))
+    assert handler.get_package_indexes() == [
+        PackageIndex(
+            alias="foo",
+            index_url="https://foo.bar/simple/",
+            priority=PackageIndex.Priority.default,
+            verify_ssl=True,
+        ),
+        PackageIndex(
+            alias="bar",
+            index_url="https://bar.com/simple/",
+            priority=PackageIndex.Priority.secondary,
+            verify_ssl=True,
+        ),
     ]
 
 

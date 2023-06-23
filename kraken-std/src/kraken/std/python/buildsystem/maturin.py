@@ -98,9 +98,6 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         self._default_build = True
         self._zig_targets: List[MaturinZigTarget] = []
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> MaturinPyprojectHandler:
-        return MaturinPyprojectHandler(pyproject)
-
     def disable_default_build(self) -> None:
         self._default_build = False
 
@@ -124,6 +121,11 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
             else:
                 self._zig_targets.append(target)
 
+    # PythonBuildSystem
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> MaturinPyprojectHandler:
+        return MaturinPyprojectHandler(pyproject)
+
     def get_managed_environment(self) -> ManagedEnvironment:
         return MaturinManagedEnvironment(self.project_directory)
 
@@ -137,7 +139,7 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
         old_poetry_version = None
         pyproject_path = self.project_directory / "pyproject.toml"
         if as_version is not None:
-            pyproject = MaturinPyprojectHandler(Pyproject.read(pyproject_path))
+            pyproject = self.get_pyproject_reader(Pyproject.read(pyproject_path))
             old_poetry_version = pyproject.get_version()
             pyproject.set_version(as_version)
             pyproject.raw.save()
@@ -194,7 +196,7 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
 
         if as_version is not None:
             # We roll back the version
-            pyproject = MaturinPyprojectHandler(Pyproject.read(pyproject_path))
+            pyproject = self.get_pyproject_reader(Pyproject.read(pyproject_path))
             pyproject.set_version(old_poetry_version)
             pyproject.raw.save()
 

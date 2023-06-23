@@ -93,7 +93,7 @@ class PyprojectHandler(ABC):
     def __init__(self, raw: Pyproject) -> None:
         self.raw = raw
 
-    def get_name(self) -> str:
+    def get_name(self) -> str | None:
         """
         Returns the current project name.
 
@@ -102,7 +102,19 @@ class PyprojectHandler(ABC):
         [1]: https://peps.python.org/pep-0621/#name
         """
 
-        return self.raw.get("project", {}).get("name", "")  # type: ignore[no-any-return]
+        return self.raw.get("project", {}).get("name")  # type: ignore[no-any-return]
+
+    def get_python_version_constraint(self) -> str | None:
+        """
+        Returns the current Python version constraint.
+
+        This returns the Python version constraint from the `project` section of the Pyproject.toml file as per
+        PEP 621 [1].
+
+        [1]: https://peps.python.org/pep-0621/#requires-python
+        """
+
+        return self.raw.get("project", {}).get("requires-python")  # type: ignore[no-any-return]
 
     def get_version(self) -> str | None:
         """
