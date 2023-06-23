@@ -1,7 +1,7 @@
 name: "Python"
 
 on:
-  push: { branches: [ "*" ], tags: [ "*" ] }
+  push: { branches: [ "develop" ], tags: [ "*" ] }
   pull_request: { branches: [ "*" ] }
 
 jobs:
