@@ -331,6 +331,15 @@ class Property(Supplier[T]):
 
         return decorator
 
+    def is_set(self) -> bool:
+        """
+        Returns #True if the property has been set to a value, #False otherwise. This is different from #is_empty(),
+        because it does not require evaluation of the property value. This method reflects whetehr #set() has been
+        called with any other value than a #VoidSupplier or a #DeferredSupplier.
+        """
+
+        return not self._value.is_void()
+
     # Supplier
 
     def is_empty(self) -> bool:
@@ -409,6 +418,9 @@ class DeferredSupplier(Supplier[Any]):
 
     def get(self) -> Any:
         raise Property.Deferred(not_none(self.property()))
+
+    def is_void(self) -> bool:
+        return True
 
 
 # Register common value adapters
