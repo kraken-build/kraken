@@ -9,3 +9,4 @@ python.python_settings(always_use_managed_env=True).add_package_index(
 )
 python.install()
 python.mypy()
+python.update_pyproject_task()

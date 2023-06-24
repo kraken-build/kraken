@@ -20,6 +20,27 @@ author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/51"
 
 [[entries]]
+id = "d3835f19-335c-4824-ad51-1d2c3624591e"
+type = "improvement"
+description = "Use Poetry index priority instead of deprecated default/secondary options"
+author = "sam.rogerson@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/46"
+
+[[entries]]
+id = "1ebbe4bf-d8e0-4af4-bb4d-9819f1ba2cd8"
+type = "improvement"
+description = "Refactor how data is read and written to a Pyproject dependening on the underlying Project management tool (Poetry, PDM, etc.)"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/46"
+
+[[entries]]
+id = "68ebc51b-95f4-4671-ae99-fcbd83ca86d2"
+type = "improvement"
+description = "Improved PDM implementation to ensure that it targets its own in-project environment instead of a potentially already activated virtual environment in the users terminal when they run Kraken."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/46"
+
+[[entries]]
 id = "b9ccf244-cce6-46dc-97b4-6bbcf8874da0"
 type = "improvement"
 description = "bump Cargo.toml version before building, not only before publishing"

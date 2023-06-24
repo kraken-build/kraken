@@ -7,7 +7,9 @@ import os
 import shutil
 import subprocess as sp
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Iterator, Sequence
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
@@ -15,12 +17,121 @@ from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
 
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import PoetryPyproject, Pyproject, SpecializedPyproject
+from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
 
 logger = logging.getLogger(__name__)
+
+
+class PoetryPyprojectHandler(PyprojectHandler):
+    """
+    Pyproject configuration handler for Poetry projects.
+    """
+
+    @dataclass(frozen=True)
+    class Package:
+        include: str
+        from_: str | None = None
+
+    def __init__(self, pyproj: Pyproject) -> None:
+        super().__init__(pyproj)
+
+    @property
+    def _poetry_section(self) -> dict[str, Any]:
+        return self.raw.setdefault("tool", {}).setdefault("poetry", {})  # type: ignore[no-any-return]
+
+    def get_packages(self, fallback: bool = True) -> list[Package]:
+        """
+        Returns the packages included in the distribution of this project listed in `[tool.poetry.packages]`.
+
+        If that configuration does not exist and *fallback* is set to True, the default that Poetry will
+        assume is returned.
+        """
+
+        packages: list[dict[str, Any]] | None = self._poetry_section.get("packages")
+        if packages is None and fallback:
+            package_name = self._poetry_section["name"]
+            return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
+        else:
+            return [self.Package(include=x["include"], from_=x.get("from")) for x in packages or ()]
+
+    # PyprojectHandler
+
+    def get_name(self) -> str:
+        return self._poetry_section["name"]  # type: ignore[no-any-return]
+
+    def get_version(self) -> str | None:
+        return self._poetry_section.get("version")
+
+    def get_python_version_constraint(self) -> str | None:
+        return self._poetry_section.get("dependencies", {}).get("python")  # type: ignore[no-any-return]
+
+    def set_version(self, version: str | None) -> None:
+        project: dict[str, Any] = self._poetry_section
+        if version is None:
+            project.pop("version", None)
+        else:
+            project["version"] = version
+
+    def get_package_indexes(self) -> list[PackageIndex]:
+        sources = self._poetry_section.get("source", [])
+        return [
+            PackageIndex(
+                alias=source["name"],
+                index_url=source["url"],
+                priority=PackageIndex.Priority[source["priority"]]
+                if "priority" in source
+                else (
+                    PackageIndex.Priority.default
+                    # Support deprecated source configurations.
+                    if source.get("default")
+                    else PackageIndex.Priority.secondary
+                    if source.get("secondary")
+                    else PackageIndex.Priority.supplemental
+                ),
+                verify_ssl=True,
+            )
+            for source in sources
+        ]
+
+    def set_package_indexes(self, indexes: Sequence[PackageIndex]) -> None:
+        sources = self._poetry_section.setdefault("source", [])
+        sources.clear()
+        for index in indexes:
+            if not index.verify_ssl:
+                logger.warning(
+                    "Poetry does not support disabling SSL verification for indexes (source: %s)", index.alias
+                )
+            sources.append(
+                {
+                    "name": index.alias,
+                    "url": index.index_url,
+                    "priority": index.priority.value,
+                }
+            )
+
+    def set_path_dependencies_to_version(self, version: str) -> None:
+        """
+        Walks through the `[tool.poetry.dependencies]`, `[tool.poetry.dev-dependencies]`
+        and `[tool.poetry.group.dev.dependencies]` groups to replace all path dependencies
+        with proper index dependencies pointing using the specified `version` string.
+        """
+
+        def _dependency_groups() -> Iterator[tuple[str, dict[str, Any]]]:
+            if dependencies := self._poetry_section.get("dependencies"):
+                yield "dependencies", dependencies
+            if dev_dependencies := self._poetry_section.get("dev-dependencies"):
+                yield "dev-dependencies", dev_dependencies
+            if group_dev_dependencies := self._poetry_section.get("group", {}).get("dev", {}).get("dependencies"):
+                yield "group.dev.dependencies", group_dev_dependencies
+
+        for name, dependencies in _dependency_groups():
+            for key, value in dependencies.items():
+                if isinstance(value, dict) and "path" in value:
+                    logger.debug("Replacing path dependency %s with version %s in %s", key, version, name)
+                    dependencies[key] = version
 
 
 class PoetryPythonBuildSystem(PythonBuildSystem):
@@ -29,22 +140,16 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> SpecializedPyproject:
-        return PoetryPyproject(pyproject)
+    # PythonBuildSystem
+
+    def get_pyproject_reader(self, pyproject: Pyproject) -> PoetryPyprojectHandler:
+        return PoetryPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
         return True
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return PoetryManagedEnvironment(self.project_directory)
-
-    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
-        poetry_pyproj = PoetryPyproject(pyproject)
-        for source in poetry_pyproj.get_sources():
-            poetry_pyproj.delete_source(source["name"])
-        for index in settings.package_indexes.values():
-            if index.is_package_source:
-                poetry_pyproj.upsert_source(index.alias, index.index_url, index.default, not index.default)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         command = ["poetry", "update"]
@@ -69,12 +174,12 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         revert_version_paths: list[Path] = []
         if as_version is not None:
             # Bump the in-source version number.
-            pyproject = Pyproject.read(self.project_directory / "pyproject.toml")
-            poetry_pyproj = PoetryPyproject(pyproject)
-            poetry_pyproj.update_relative_packages(as_version)
-            previous_version = poetry_pyproj.set_version(as_version)
-            poetry_pyproj.save()
-            for package in poetry_pyproj.get_packages(fallback=True):
+            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
+            pyproject.set_path_dependencies_to_version(as_version)
+            previous_version = pyproject.get_version()
+            pyproject.set_version(as_version)
+            pyproject.raw.save()
+            for package in pyproject.get_packages(fallback=True):
                 package_dir = self.project_directory / (package.from_ or "") / package.include
                 n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
                 if n_replaced > 0:
@@ -104,8 +209,8 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
         # Roll back the previously updated in-source version numbers.
         if previous_version is not None:
-            poetry_pyproj.set_version(previous_version)
-            poetry_pyproj.save()
+            pyproject.set_version(previous_version)
+            pyproject.raw.save()
             for package_dir in revert_version_paths:
                 update_python_version_str_in_source_files(previous_version, package_dir)
 
