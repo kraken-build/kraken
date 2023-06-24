@@ -45,14 +45,14 @@ class BareCallsVisitor(ast.NodeVisitor):
         return (
             getattr(fn, "attr", None) in WRAPPED_HTTP_FUNCTIONS
             and hasattr(fn, "value")
-            and BareCallsVisitor.call_is_from_disallowed_module(fn.value, disallowed_module)  # type: ignore[attr-defined]  # noqa: E501
+            and BareCallsVisitor.call_is_from_disallowed_module(fn.value, disallowed_module)
         )
 
     @classmethod
     def call_is_from_disallowed_module(cls, fn_value: ast.expr, disallowed_module: str) -> bool:
         if getattr(fn_value, "attr", None) == disallowed_module:
             return hasattr(fn_value, "value") and BareCallsVisitor.call_is_from_disallowed_module(
-                fn_value.value, disallowed_module  # type: ignore[attr-defined]
+                fn_value.value, disallowed_module
             )
 
         return getattr(fn_value, "id", None) == disallowed_module

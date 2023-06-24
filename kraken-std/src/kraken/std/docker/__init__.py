@@ -88,7 +88,7 @@ def build_docker_image(
 ) -> DockerBuildTask:
     """Create a new task in the current project that builds a Docker image and eventually pushes it."""
 
-    task_class = import_class(BUILD_BACKENDS[backend], DockerBuildTask)  # type: ignore[misc]
+    task_class = import_class(BUILD_BACKENDS[backend], DockerBuildTask)  # type: ignore[type-abstract]
     return (project or Project.current()).do(name, task_class, **kwds)
 
 
