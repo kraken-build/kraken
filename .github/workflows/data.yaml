@@ -2,7 +2,7 @@ name: "Data"
 
 on:
   push: { branches: [ "develop" ], tags: [ "*" ] }
-  pull_request: { branches: [ "develop" ] }
+  pull_request: { branches: [ "*" ] }
 
 jobs:
   gitignore-io-up-to-date:
