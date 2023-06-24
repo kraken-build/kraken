@@ -38,6 +38,7 @@ id = "68ebc51b-95f4-4671-ae99-fcbd83ca86d2"
 type = "improvement"
 description = "Improved PDM implementation to ensure that it targets its own in-project environment instead of a potentially already activated virtual environment in the users terminal when they run Kraken."
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/46"
 
 [[entries]]
 id = "b9ccf244-cce6-46dc-97b4-6bbcf8874da0"
