@@ -32,3 +32,9 @@ type = "improvement"
 description = "Refactor how data is read and written to a Pyproject dependening on the underlying Project management tool (Poetry, PDM, etc.)"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/46"
+
+[[entries]]
+id = "68ebc51b-95f4-4671-ae99-fcbd83ca86d2"
+type = "improvement"
+description = "Improved PDM implementation to ensure that it targets its own in-project environment instead of a potentially already activated virtual environment in the users terminal when they run Kraken."
+author = "@NiklasRosenstein"

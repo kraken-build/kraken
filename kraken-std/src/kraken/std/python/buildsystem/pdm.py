@@ -21,12 +21,6 @@ from . import ManagedEnvironment, PythonBuildSystem
 logger = logging.getLogger(__name__)
 
 
-def get_env_no_build_delete() -> dict[str, str]:
-    env = os.environ.copy()
-    env["PDM_BUILD_NO_CLEAN"] = "true"
-    return env
-
-
 class PdmPyprojectHandler(PyprojectHandler):
     """
     Implements the PyprojectHandler interface for PDM projects.
@@ -179,9 +173,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["pdm", "build"]
-
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory, env=get_env_no_build_delete())
+        sp.check_call(command, cwd=self.project_directory)
+
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         os.makedirs(output_directory, exist_ok=True)
@@ -205,36 +199,32 @@ class PDMManagedEnvironment(ManagedEnvironment):
         self.project_directory = project_directory
         self._env_path: Path | None | NotSet = NotSet.Value
 
-    def _get_pdm_environment_path(self) -> None | Path:
+    def _get_pdm_environment_path(self, create: bool) -> None | Path:
         """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments."""
 
-        create_command = [
-            "pdm",
-            "venv",
-            "create",
-        ]
-        command = ["pdm", "venv", "--path", "in-project"]
+        get_command = ["pdm", "venv", "--path", "in-project"]
+        logger.debug("$ %s", get_command)
         try:
-            response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
-        except sp.CalledProcessError:
-            # If there is no environment, create one and retrye
-            try:
-                response = sp.check_output(create_command, cwd=self.project_directory).decode().strip().splitlines()
-            except sp.CalledProcessError as exc:
-                if exc.returncode != 1:
-                    raise
+            return Path(sp.check_output(get_command, cwd=self.project_directory, stderr=sp.PIPE).decode().strip())
+        except sp.CalledProcessError as exc:
+            logger.debug("pdm venv --path failed with exit code %s, output: %s", exc.returncode, exc.stderr.decode())
+            if not create:
                 return None
 
-            # Retry to get the env path
-            try:
-                response = sp.check_output(command, cwd=self.project_directory).decode().strip().splitlines()
-            except sp.CalledProcessError as exc:
-                if exc.returncode != 1:
-                    raise
-                return None
-            return None
-        else:
-            return [Path(line.replace(" (Activated)", "").strip()) for line in response if line][0]
+        create_command = ["pdm", "venv", "create"]
+        logger.info("$ %s", create_command)
+        sp.check_call(create_command, cwd=self.project_directory)
+
+        # Make sure we use the in-project environment.
+        use_command = ["pdm", "use", "--venv", "in-project"]
+        logger.info("$ %s", use_command)
+        sp.check_call(use_command, cwd=self.project_directory)
+
+        path = self._get_pdm_environment_path(create=False)
+        if path is None:
+            raise RuntimeError("Failed to create PDM environment")
+
+        return path
 
     # ManagedEnvironment
 
@@ -247,12 +237,14 @@ class PDMManagedEnvironment(ManagedEnvironment):
 
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
-            self._env_path = self._get_pdm_environment_path()
+            self._env_path = self._get_pdm_environment_path(create=False)
         if self._env_path is None:
             raise RuntimeError("managed environment does not exist")
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
+        self._get_pdm_environment_path(create=True)
+
         command = ["pdm", "install"]
         logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory, env=get_env_no_build_delete())
+        sp.check_call(command, cwd=self.project_directory)
