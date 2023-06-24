@@ -57,7 +57,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
     [
         "poetry-project",
         "slap-project",
-        pytest.params(
+        pytest.param(
             "pdm-project",
             marks=pytest.mark.xfail(
                 reason="PDM seems to have an issue with getting the right hash of the package from pypiserver "
