@@ -88,8 +88,6 @@ def test_resume_build_state(tempdir: Path) -> None:
         graph_options = GraphOptions(["b"], resume=True, restart=False, no_save=False, all=False)
         context, graph = _load_build_state(exit_stack, build_options, graph_options)
 
-        # import code; code.interact(local=locals())  #
-        # breakpoint()
         assert not_none(graph.get_status(graph.get_task(":a"))).type == TaskStatusType.SUCCEEDED
         assert graph.get_status(graph.get_task(":b")) is None
         assert graph.get_status(graph.get_task(":c")) is None

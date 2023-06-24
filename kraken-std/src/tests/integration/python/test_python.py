@@ -111,7 +111,6 @@ def test__python_project_upgrade_python_version_string(
     tempdir = kraken_project.directory
 
     project_dir = "version-project"
-    # tempdir /= project_dir
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
     original_dir = Path(__file__).parent / "data" / project_dir
