@@ -94,3 +94,9 @@ type = "feature"
 description = "The `Property` class is now a Python descriptor, allowing to assign property values to tasks using assignments in addition to `set()`. Assigning `None` to it will set it to `None` for optional properties, and clear it for non-optional properties."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "f29e0786-6c0a-42f8-a20a-123a637669e0"
+type = "fix"
+description = "Fix `kraken query tree` command to remove the `--no-save` option and to never save the build context to disk after the command."
+author = "@NiklasRosenstein"
