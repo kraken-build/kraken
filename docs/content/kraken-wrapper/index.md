@@ -74,6 +74,37 @@ where the username is stored in `~/.config/krakenw/config.toml` and the password
 > the password as plain text into the same configuration file. A corresponding warning will be printed.
 
 
+## Sub-project support
+
+The `kraken` CLI supports running in a sub project, but requires that you point it to the root of your project using
+the `-p,--project-dir` option. The `krakenw` CLI will automatically find the root of your project and pass it to the
+`kraken` CLI for you. This means that you can run `krakenw` from anywhere in your project and it will behave as if you
+had run it from the root of your project but in the context of the current directory. Relative addresses passed to the
+CLI will be considered relative to the Kraken project of the current directory.
+
+For example, if you have a project with the following structure:
+
+    .
+    ├── .kraken.py
+    └── sub-project
+        └── .kraken.py
+
+And you have a task `:t` in the sub-project, you can run it from the root of your project or the sub-project with
+the `kraken` CLI like thisL
+
+    (.)           $ kraken run sub-project:t
+    (sub-project) $ kraken run t -p ..
+
+And with the `krakenw` CLI like this:
+
+    (.)           $ krakenw run sub-project:t
+    (sub-project) $ krakenw run t
+
+If you want to stop `krakenw` from crawling up the directories until it finds the `.git` project's top level directory
+and the top-most Kraken build script, you can add `# ::krakenw-root` as a comment to the top of your build script in
+a sub-directory.
+
+
 ## Environment variables
 
 Kraken wrapper supports the following environment variables:
