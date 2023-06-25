@@ -82,8 +82,8 @@ Independent of the Python build system used, Kraken will use [Twine][] to publis
 
 #### Stubtest
 
-@pydoc kraken.std.python.tasks.mypy_subtest_task.MypyStubtestTask
-@pydoc kraken.std.python.tasks.mypy_subtest_task.mypy_stubtest
+@pydoc kraken.std.python.tasks.mypy_stubtest_task.MypyStubtestTask
+@pydoc kraken.std.python.tasks.mypy_stubtest_task.mypy_stubtest
 
 ### Pycln
 

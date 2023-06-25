@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from deprecated import deprecated
 from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -39,7 +38,3 @@ def mypy_stubtest(
 ) -> MypyStubtestTask:
     project = project or Project.current()
     return project.do(name, MypyStubtestTask, group="lint", **kwargs)
-
-
-# Backwards compatibility, added in kraken-std 0.9.0
-mypy_subtest = deprecated(reason="use mypy_stubtest() intead")(mypy_stubtest)
