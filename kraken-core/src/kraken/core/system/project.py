@@ -309,6 +309,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         del self._members[project.name]
 
+    @deprecated(reason="Use Project.task() instead")
     def do(
         self,
         name: str,

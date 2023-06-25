@@ -58,3 +58,9 @@ id = "6bb6c310-8531-4ceb-816c-febc6f087d36"
 type = "feature"
 description = "Add `Project.task()` overload to create tasks, which deprecated `Project.do()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b35ae751-db16-4f63-8ca7-28a6de247c8c"
+type = "deprecation"
+description = "Deprecate `Project.do()` in favor of `Project.task()`"
+author = "@NiklasRosenstein"
