@@ -400,18 +400,39 @@ class Address(metaclass=AddressMeta):
 
         return self._is_container
 
-    def normalize(self) -> "Address":
+    def normalize(self, *, keep_container: bool = False) -> "Address":
         """
         Normalize the address, removing any superfluous elements (`.` for current, `..` for parent). A normalized
-        is not a container address. Use #set_container() after #normalize() to make it a container address.
+        is not a container address. Use #set_container() after #normalize() to make it a container address, or pass
+        `True` to the *keep_container* argument to keep the container state.
 
+        >>> Address("").normalize()
+        Address('.')
+        >>> Address("").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".").normalize()
+        Address('.')
+        >>> Address(".").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".:").normalize()
+        Address('.')
+        >>> Address(".:").normalize(keep_container=True)
+        Address('.:')
         >>> Address(":a:.:b").normalize()
+        Address(':a:b')
+        >>> Address(":a:.:b").normalize(keep_container=True)
         Address(':a:b')
         >>> Address(":a:..:b").normalize()
         Address(':b')
         >>> Address("..:.:b").normalize()
         Address('..:b')
+        >>> Address("..:.:b").normalize(keep_container=True)
+        Address('..:b')
         >>> Address("a:b:").normalize()
+        Address('a:b')
+        >>> Address("a:b:").normalize(keep_container=True)
+        Address('a:b:')
+        >>> Address("a:b:.").normalize(keep_container=True)
         Address('a:b')
         """
 
@@ -427,7 +448,7 @@ class Address(metaclass=AddressMeta):
                 elements.append(current)
         if not self._is_absolute and not elements:
             elements = [Address.Element(Address.Element.CURRENT, False)]
-        return Address.create(self._is_absolute, False, elements)
+        return Address.create(self._is_absolute, self.is_container() and keep_container, elements)
 
     def concat(self, address: "str | Address") -> "Address":
         """
@@ -437,6 +458,8 @@ class Address(metaclass=AddressMeta):
         Address(':a:b:c')
         >>> Address(":a").concat(Address(":b"))
         Address(':b')
+        >>> Address(":a").concat(Address("."))
+        Address(':a:.')
         """
 
         if isinstance(address, str):
@@ -451,6 +474,8 @@ class Address(metaclass=AddressMeta):
 
         >>> Address(":").append("a")
         Address(':a')
+        >>> Address(":a:.").append(".")
+        Address(':a:.:.')
         """
 
         if isinstance(element, str):

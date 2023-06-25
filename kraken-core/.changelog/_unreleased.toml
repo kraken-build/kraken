@@ -64,3 +64,9 @@ id = "b35ae751-db16-4f63-8ca7-28a6de247c8c"
 type = "deprecation"
 description = "Deprecate `Project.do()` in favor of `Project.task()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "22b41084-590b-4f4e-b795-5f329caaac20"
+type = "improvement"
+description = "Add `Address.normalize(keep_container)` keyword argument."
+author = "@NiklasRosenstein"
