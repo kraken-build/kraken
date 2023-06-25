@@ -9,6 +9,10 @@ from .base_task import EnvironmentAwareDispatchTask
 
 
 class Flake8Task(EnvironmentAwareDispatchTask):
+    """
+    Lint Python source files with Flake8.
+    """
+
     description = "Lint Python source files with Flake8."
     python_dependencies = ["flake8"]
 

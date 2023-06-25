@@ -1,29 +1,35 @@
 nav:
   - Home: index.md
+  - Command-line:
+    - cli/index.md
+    - kraken: cli/kraken.md
+    - kraken query: cli/kraken-query.md
+    - kraken query describe: cli/kraken-query-describe.md
+    - kraken query env: cli/kraken-query-env.md
+    - kraken query ls: cli/kraken-query-ls.md
+    - kraken query visualize: cli/kraken-query-visualize.md
+    - kraken run: cli/kraken-run.md
+    - krakenw: cli/krakenw.md
+    - krakenw auth: cli/krakenw-auth.md
+    - krakenw list-pythons: cli/krakenw-list-pythons.md
+  - kraken-common:
+    - kraken-common/changelog.md
   - kraken-core:
-    - core/changelog.md
-    - Documentation:
-      - core/docs/api.md
-      - core/docs/properties.md
-      - core/docs/tasks.md
-      - core/docs/project.md
-      - core/docs/testing.md
-    - Synopsis:
-      - core/synopsis/index.md
-      - core/synopsis/run.md
-      - kraken query:
-        - core/synopsis/query/index.md
-        - core/synopsis/query/ls.md
-        - core/synopsis/query/describe.md
-        - core/synopsis/query/env.md
-        - core/synopsis/query/visualize.md
+    - kraken-core/index.md
+    - kraken-core/api.md
+    - kraken-core/properties.md
+    - kraken-core/tasks.md
+    - kraken-core/project.md
+    - kraken-core/testing.md
+    - kraken-core/changelog.md
   - kraken-std:
-    - std/index.md
-    - std/changelog.md
-    - std/cargo.md
-    - std/docker.md
-    - std/helm.md
-    - std/protobuf.md
-    - std/python.md
+    - kraken-std/index.md
+    - kraken-std/changelog.md
+    - kraken-std/cargo.md
+    - kraken-std/docker.md
+    - kraken-std/helm.md
+    - kraken-std/protobuf.md
+    - kraken-std/python.md
   - kraken-wrapper:
-    - wrapper/index.md
+    - kraken-wrapper/index.md
+    - kraken-wrapper/changelog.md

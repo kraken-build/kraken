@@ -57,66 +57,55 @@ Independent of the Python build system used, Kraken will use [Twine][] to publis
 
 ### Info
 
-@pydoc kraken.std.python.tasks.InfoTask
-
-@pydoc kraken.sts.python.tasks.info
+@pydoc kraken.std.python.tasks.info_task.InfoTask
+@pydoc kraken.sts.python.tasks.info_task.info
 
 ### Black
 
-@pydoc kraken.std.python.tasks.black.BlackTask
-
-@pydoc kraken.std.python.tasks.black.black
+@pydoc kraken.std.python.tasks.black_task.BlackTask
+@pydoc kraken.std.python.tasks.black_task.black
 
 ### Flake8
 
-@pydoc kraken.std.python.tasks.flake8.Flake8Task
-
-@pydoc kraken.std.python.tasks.flake8.flake8
+@pydoc kraken.std.python.tasks.flake8_task.Flake8Task
+@pydoc kraken.std.python.tasks.flake8_task.flake8
 
 ### isort
 
-@pydoc kraken.std.python.tasks.isort.IsortTask
-
-@pydoc kraken.std.python.tasks.isort.isort
+@pydoc kraken.std.python.tasks.isort_task.IsortTask
+@pydoc kraken.std.python.tasks.isort_task.isort
 
 ### Mypy
 
-@pydoc kraken.std.python.tasks.mypy.MypyTask
-
-@pydoc kraken.std.python.tasks.mypy.mypy
+@pydoc kraken.std.python.tasks.mypy_task.MypyTask
+@pydoc kraken.std.python.tasks.mypy_task.mypy
 
 #### Stubtest
 
-@pydoc kraken.std.python.tasks.mypy_stubtest.MypyStubtestTask
-
-@pydoc kraken.std.python.tasks.mypy_stubtest.mypy_stubtest
+@pydoc kraken.std.python.tasks.mypy_subtest_task.MypyStubtestTask
+@pydoc kraken.std.python.tasks.mypy_subtest_task.mypy_stubtest
 
 ### Pycln
 
-@pydoc kraken.std.python.tasks.pycln.PyclnTask
-
-@pydoc kraken.std.python.tasks.pycln.pycln
+@pydoc kraken.std.python.tasks.pycln_task.PyclnTask
+@pydoc kraken.std.python.tasks.pycln_task.pycln
 
 ### Pylint
 
-@pydoc kraken.std.python.tasks.pylint.PylintTask
-
-@pydoc kraken.std.python.tasks.pylint.pylint
+@pydoc kraken.std.python.tasks.pylint_task.PylintTask
+@pydoc kraken.std.python.tasks.pylint_task.pylint
 
 ### Pytest
 
-@pydoc kraken.std.python.tasks.pytest.PytestTask
-
-@pydoc kraken.std.python.tasks.pytest.pytest
-
-### Pyupgrade
-
-@pydoc kraken.std.python.tasks.pyupgrade.PyUpgradeTask
-
-@pydoc kraken.std.python.tasks.pyupgrade.PyUpgradeCheckTask
-
-@pydoc kraken.std.python.tasks.pyupgrade.pyupgrade
+@pydoc kraken.std.python.tasks.pytest_task.PytestTask
+@pydoc kraken.std.python.tasks.pytest_task.pytest
 
 __Environment variables__
 
 * `PYTEST_FLAGS`
+
+### Pyupgrade
+
+@pydoc kraken.std.python.tasks.pyupgrade_task.PyUpgradeTask
+@pydoc kraken.std.python.tasks.pyupgrade_task.PyUpgradeCheckTask
+@pydoc kraken.std.python.tasks.pyupgrade_task.pyupgrade

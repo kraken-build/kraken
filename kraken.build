@@ -30,7 +30,6 @@ for mode in ["Serve", "Build"]:
             def command = [directory / "bin" / "novella"]
             if self.property("serve").get():
                 command += ["--serve"]
-            print(command)
             run(command, cwd=self.property("cwd").get())
         }
     }

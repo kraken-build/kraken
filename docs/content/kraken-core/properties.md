@@ -39,3 +39,9 @@ a value.
 
 In addition, output properties are taken into account when finding task outputs by type using
 {@pylink kraken.core.system.task.TaskSet.select}.
+
+---
+## API Documentation
+
+@pydoc kraken.core.system.property.Property
+@pydoc kraken.core.system.property.PropertyContainer
