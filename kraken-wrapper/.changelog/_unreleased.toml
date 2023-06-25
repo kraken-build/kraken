@@ -4,3 +4,9 @@ type = "improvement"
 description = "Now sets the `KRAKENW=1` environment variable to allow the Kraken-Core CLI to detect if it is run through `krakenw`."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/49"
+
+[[entries]]
+id = "5acaa1a1-946f-421f-9622-4014ccf83752"
+type = "fix"
+description = "Fixed passing the `-p` option to the `kraken` command by appending it to the arguments, allowing to use `krakenw query` subcommands from subdirectories."
+author = "@NiklasRosenstein"
