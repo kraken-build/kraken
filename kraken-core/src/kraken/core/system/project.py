@@ -22,6 +22,14 @@ T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
 
 
+class TaskNotFound(Exception):
+    pass
+
+
+class DuplicateMember(Exception):
+    pass
+
+
 class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     """A project consolidates tasks related to a directory on the filesystem."""
 
@@ -114,12 +122,89 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         return self.context.build_directory / str(self.address).replace(":", "/").lstrip("/")
 
-    def task(self, name: str) -> Task:
-        """Return a task in the project by name."""
+    @overload
+    def task(self, name: str, /) -> Task:
+        """
+        Get a task from the project by name. Raises a #TaskNotFound exception if the task does not exist.
+        """
 
-        task = self._members[name]
-        if not isinstance(task, Task):
-            raise ValueError(f"name {name!r} does not refer to a task, but {type(task).__name__}")
+    @overload
+    def task(
+        self,
+        name: str,
+        type_: Type[T_Task],
+        /,
+        *,
+        default: bool | None = None,
+        group: str | None = None,
+        description: str | None = None,
+    ) -> T_Task:
+        """
+        Create a new task in the project with the specified name. If a member of the project with the same name already
+        exists, a #DuplicateMember exception is raised.
+        """
+
+    @overload
+    def task(self, name: str, type_: Type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
+        """
+        This overload is used to create a task in a #builddsl build script.
+
+        ```py
+        project.task "myTask" MyTaskType {
+            default = False
+            some_property.set("foobar")
+            depends_on "otherTask"
+        }
+        ```
+        """
+
+    def task(
+        self,
+        name: str,
+        type_: Type[T_Task] | None = None,
+        default_or_closure: bool | builddsl.UnboundClosure | None = None,
+        /,
+        *,
+        default: bool | None = None,
+        group: str | None = None,
+        description: str | None = None,
+    ) -> Task | T_Task:
+        if type_ is None:
+            assert default_or_closure is None
+            assert default is None
+            assert group is None
+            assert description is None
+
+            try:
+                task = self._members[name]
+                if not isinstance(task, Task):
+                    raise KeyError("Not a task")
+            except KeyError:
+                raise TaskNotFound(self.address.concat(name))
+            return task
+
+        assert issubclass(type_, Task), type_
+
+        if name in self._members:
+            raise DuplicateMember(f"{self} already has a member {name!r}")
+
+        task = type_(name, self)
+
+        if callable(default_or_closure):
+            default_or_closure(task)
+        elif default_or_closure is not None:
+            assert isinstance(default_or_closure, bool)
+            task.default = default_or_closure
+        elif default is not None:
+            task.default = default
+
+        if group is not None:
+            self.group(group).add(task)
+
+        if description is not None:
+            task.description = description
+
+        self._members[name] = task
         return task
 
     def tasks(self) -> Mapping[str, Task]:

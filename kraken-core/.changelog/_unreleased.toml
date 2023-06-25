@@ -52,3 +52,9 @@ type = "feature"
 description = "Add `Property.is_set()` which returns `True` if `Property.set()` (or its variants) have not been called before and if the property does not have a default value."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/51"
+
+[[entries]]
+id = "6bb6c310-8531-4ceb-816c-febc6f087d36"
+type = "feature"
+description = "Add `Project.task()` overload to create tasks, which deprecated `Project.do()`"
+author = "@NiklasRosenstein"
