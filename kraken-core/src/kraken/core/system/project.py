@@ -183,7 +183,8 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
                 raise TaskNotFound(self.address.concat(name))
             return task
 
-        assert issubclass(type_, Task), type_
+        if type_ is None or not isinstance(type_, type) or not issubclass(type_, Task):
+            raise TypeError(f"Expected a Task type, got {type(type_).__name__}")
 
         if name in self._members:
             raise DuplicateMember(f"{self} already has a member {name!r}")
@@ -203,6 +204,8 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
                 self.group(group).add(task)
             case GroupTask():
                 group.add(task)
+            case None:
+                pass
             case _:
                 raise TypeError(f"Expected str or GroupTask, got {type(group)}")
 

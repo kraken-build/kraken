@@ -150,7 +150,7 @@ class Property(Supplier[T]):
 
     def __init__(
         self,
-        owner: PropertyContainer,
+        owner: PropertyContainer | type[PropertyContainer],
         name: str,
         item_type: TypeHint | Any,
         deferred: bool = False,
@@ -347,6 +347,20 @@ class Property(Supplier[T]):
             return True
         return super().is_empty()
 
+    # Python Descriptor
+
+    def __set__(self, instance: PropertyContainer, value: T | Supplier[T]) -> None:
+        instance_prop = vars(instance)[self.name]
+        assert isinstance(instance_prop, Property)
+        instance_prop.set(value)
+
+    def __get__(self, instance: PropertyContainer | None, owner: type[Any]) -> Property[T]:
+        if instance is None:
+            return self
+        instance_prop = vars(instance)[self.name]
+        assert isinstance(instance_prop, Property)
+        return instance_prop
+
 
 class PropertyContainer:
     """Base class. An object's schema is declared as annotations linking to properties."""
@@ -399,12 +413,16 @@ class PropertyContainer:
 
             cls.__schema__ = schema
 
+        # Make sure there's a Property descriptor on the class for every property in the schema.
+        for key, value in cls.__schema__.items():
+            setattr(cls, key, Property(cls, key, value.item_type, deferred=value.is_output))
+
     def __init__(self) -> None:
         """Creates :class:`Properties <Property>` for every property defined in the object's schema."""
 
         for key, desc in self.__schema__.items():
             prop = Property[Any](self, key, desc.item_type, deferred=desc.is_output)
-            setattr(self, key, prop)
+            vars(self)[key] = prop
             if desc.has_default():
                 prop.setdefault(desc.get_default())
 

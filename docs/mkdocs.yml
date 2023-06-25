@@ -4,6 +4,7 @@ nav:
     - core/changelog.md
     - Documentation:
       - core/docs/api.md
+      - core/docs/properties.md
       - core/docs/tasks.md
       - core/docs/project.md
       - core/docs/testing.md

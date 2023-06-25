@@ -189,3 +189,27 @@ def test__PropertyContainer__output_property_is_deferred_by_default() -> None:
     assert obj.a.get() == "foo"
     obj.b.set("bar")
     assert obj.b.get() == "bar"
+
+
+def test__PropertyContainer__descriptor_get_and_set() -> None:
+    class MyObj(PropertyContainer):
+        a: Property[str]
+        b: Property[str] = Property.output()
+
+    assert isinstance(MyObj.a, Property)
+    assert isinstance(MyObj().a, Property)
+    assert MyObj.a is not MyObj().a
+    assert MyObj.a.name == "a"
+    assert MyObj().a.name == "a"
+
+    obj = MyObj()
+    obj.a = "foo"
+    obj.b = "bar"
+    assert obj.a.get() == "foo"
+    assert obj.b.get() == "bar"
+    with raises(Property.Empty):
+        MyObj.a.get()
+
+    obj = MyObj()
+    with raises(Property.Empty):
+        obj.a.get()

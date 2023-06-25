@@ -33,6 +33,8 @@ Relationships between tasks can be formed with three methods:
     As a side effect of this, Kraken is currently not particularly good at _not_ running a task that may actually
     not need to run another time because it would not perform any new work.
 
+To read more about properties, see {@pydoc kraken.core.property.Property}.
+
 ### Task outputs
 
 A task property can be marked as an output property. The task is then expected to populate its value in
@@ -53,32 +55,24 @@ class ZipTask(Task):
 
 Outputs of a task can be queried and used as inputs by other tasks. For example, if you receive a task and you only
 know that it delivers some particular type of *Python object* as an "output", you can pick it up without knowing the
-exact property.
-
-```py
-paths = task.get_outputs(Path)
-```
-
-More commonly, this is done through the {@pydoc kraken.core.project.Project} when a task factory is called which
-accepts a list of tasks to provide a particular output.
+exact property. Most commonly, this is done via {@pydoc kraken.core.project.Project.resolve_tasks}, which allows you to
+resolve a set of dependencies by name or address, and then select the properties you are interested in.
 
 ```py title="upload_task.py"
 from kraken.core import Project
 
 def upload_task(*, name: str, folder_url: str, dependencies: list[str], project: Project | None) -> UploadTask:
     project = project or Project.current()
-    return project.do(
-        name=name, 
-        task_type=UploadTask,
-        files=project.resolve_tasks(dependencies).select(Path).supplier(),
-    )
+    task = project.task(name=name, task_type=UploadTask)
+    task.files = project.resolve_tasks(dependencies).select(Path).supplier()
+    return task
 ```
 
 There's a bit to unpack here.
 
 1. We use the `Project.current()` static method to retrieve the Kraken project that
     is currently being evaluated unless an explicit project was specified.
-2. Then we use the `project.do()` method to create a new task of type `UploadTask` (which is defined
+2. Then we use the `project.task()` method to create a new task of type `UploadTask` (which is defined
     somewhere else, but not a component delivered by Kraken).
 3. The `UploadTask` has a property defined as `files: Property[Sequence[Path]]`, and we pass the `files=...`
     keyword argument to populate it. As a value, we pass a "supplier" object which will return all the `Path`
@@ -96,3 +90,8 @@ There's a bit to unpack here.
 ## API Documentation
 
 @pydoc kraken.core.task.Task
+@pydoc kraken.core.task.VoidTask
+@pydoc kraken.core.task.GroupTask
+@pydoc kraken.core.task.TaskSet
+@pydoc kraken.core.task.TaskSetSelect
+@pydoc kraken.core.task.TaskSetPartitions
