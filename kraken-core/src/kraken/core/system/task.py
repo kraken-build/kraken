@@ -29,7 +29,7 @@ from typing import (
 )
 
 from deprecated import deprecated
-from kraken.common import Supplier
+from kraken.common import NotSet, Supplier
 from typing_extensions import Literal
 
 from kraken.core.address import Address
@@ -323,6 +323,11 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
         self.depends_on(*tasks, mode=mode, _inverse=True)
 
+    def get_properties(self) -> Iterable[Property[Any]]:
+        for key in self.__schema__:
+            property: Property[Any] = getattr(self, key)
+            yield property
+
     def get_relationships(self) -> Iterable[TaskRelationship]:
         """
         Return an iterable that yields all relationships that this task has to other tasks as indicated by
@@ -335,8 +340,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         # Derive dependencies through property lineage.
-        for key in self.__schema__:
-            property: Property[Any] = getattr(self, key)
+        for property in self.get_properties():
             for supplier, _ in property.lineage():
                 if supplier is property:
                     continue
@@ -582,6 +586,44 @@ class BackgroundTask(Task):
     def teardown(self) -> None:
         self.__exit_stack.close()
         del self.__exit_stack
+
+
+class InlineTask(Task):
+    """
+    This class is what is instantiated when calling #Project.task() with only a name and a BuildDSL closure.
+    It simplifies the implementation of one-off tasks in a BuildDSK Kraken build script, allowing to dynamically
+    define properties.
+    """
+
+    _properties: dict[str, Property[Any]]
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self._properties = {}
+
+    @overload
+    def property(self, name: str) -> Property[Any]:
+        """Retrieve a property by name."""
+
+    @overload
+    def property(self, name: str, value: Any) -> Property[Any]:
+        """Define a property on this task with the given *name* and *value*."""
+
+    def property(self, name: str, value: Any | NotSet = NotSet.Value) -> Property[Any]:
+        if value is NotSet.Value:
+            return self._properties[name]
+        prop = self._properties[name] = Property(self, name, Any)
+        prop.set(value)
+        return prop
+
+    # Task
+
+    def get_properties(self) -> Iterable[Property[Any]]:
+        yield from self._properties.values()
+        yield from super().get_properties()
+
+    def execute(self) -> TaskStatus | None:
+        return None
 
 
 class TaskSet(Collection[Task]):

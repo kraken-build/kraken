@@ -13,7 +13,7 @@ from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task, TaskSet
+from kraken.core.system.task import GroupTask, InlineTask, Task, TaskSet
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
@@ -147,7 +147,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     @overload
     def task(self, name: str, type_: Type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
         """
-        This overload is used to create a task in a #builddsl build script.
+        This overload is used to create a task in a BuildDSL script.
 
         ```py
         project.task "myTask" MyTaskType {
@@ -158,10 +158,37 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         ```
         """
 
+    @overload
     def task(
         self,
         name: str,
-        type_: Type[T_Task] | None = None,
+        closure: builddsl.UnboundClosure,
+        /,
+        *,
+        default: bool | None = None,
+        group: str | GroupTask | None = None,
+        description: str | None = None,
+    ) -> Task:
+        """
+        Create a new task, applying the *closure*. This is useful for BuildDSL scripts that want to implement
+        a custom task. This can be done by overriding the task's `execute()` method with a closure. It will
+        create a task of type #InlineTask for you.
+
+        ```py
+        project.task "myTask" {
+            property "name" "John"
+            execute = () -> {
+                def name = self.property("name").get()
+                print "Hello," name
+            }
+        }
+        ```
+        """
+
+    def task(
+        self,
+        name: str,
+        type_: Type[T_Task] | builddsl.UnboundClosure | None = None,
         default_or_closure: bool | builddsl.UnboundClosure | None = None,
         /,
         *,
@@ -182,6 +209,10 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             except KeyError:
                 raise TaskNotFound(self.address.concat(name))
             return task
+
+        if isinstance(type_, builddsl.UnboundClosure):
+            default_or_closure = type_
+            type_ = InlineTask  # type: ignore[assignment]
 
         if type_ is None or not isinstance(type_, type) or not issubclass(type_, Task):
             raise TypeError(f"Expected a Task type, got {type(type_).__name__}")

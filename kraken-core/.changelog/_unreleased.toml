@@ -76,3 +76,9 @@ id = "b43ae504-597e-47fb-b61f-a2f275cdd79a"
 type = "fix"
 description = "Fixed `Context.resolve_tasks()` when `None` is passed, which is intended to resolve only the default tasks in the current project and its subprojects. Before this fix, the method would return _all_ tasks of the current project instead, because the address `.` would be treated like a single-element address, such as `lint`, which gets turned into `:**:.` (or `:**:lint`)."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e4cca7cc-7aca-4472-937c-cd429e94a6cd"
+type = "feature"
+description = "Add `Project.task(name, closure)` overload that can be used in BuildDSL build scripts to define custom tasks. It creates an instance of an `InlineTask`, which also allows adding properties dynamically."
+author = "@NiklasRosenstein"
