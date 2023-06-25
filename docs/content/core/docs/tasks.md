@@ -89,9 +89,9 @@ There's a bit to unpack here.
 
 ## API Documentation
 
-@pydoc kraken.core.task.Task
-@pydoc kraken.core.task.VoidTask
-@pydoc kraken.core.task.GroupTask
-@pydoc kraken.core.task.TaskSet
-@pydoc kraken.core.task.TaskSetSelect
-@pydoc kraken.core.task.TaskSetPartitions
+@pydoc kraken.core.system.task.Task
+@pydoc kraken.core.system.task.VoidTask
+@pydoc kraken.core.system.task.GroupTask
+@pydoc kraken.core.system.task.TaskSet
+@pydoc kraken.core.system.task.TaskSetSelect
+@pydoc kraken.core.system.task.TaskSetPartitions

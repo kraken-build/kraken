@@ -4,4 +4,4 @@
 
 ## API Documentation
 
-@pydoc kraken.core.project.Project
+@pydoc kraken.core.system.project.Project

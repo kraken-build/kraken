@@ -78,9 +78,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: slap install --no-venv-check --only-extras docs
-    - run: slap run --no-venv-check docs:install
-    - run: slap run --no-venv-check docs:build
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: kraken run docsBuild --no-save
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v1
       with:
