@@ -349,10 +349,13 @@ class Property(Supplier[T]):
 
     # Python Descriptor
 
-    def __set__(self, instance: PropertyContainer, value: T | Supplier[T]) -> None:
+    def __set__(self, instance: PropertyContainer, value: T | Supplier[T] | None) -> None:
         instance_prop = vars(instance)[self.name]
         assert isinstance(instance_prop, Property)
-        instance_prop.set(value)
+        if value is not None or type(None) in self.accepted_types:
+            instance_prop.set(value)
+        else:
+            instance_prop.clear()
 
     def __get__(self, instance: PropertyContainer | None, owner: type[Any]) -> Property[T]:
         if instance is None:

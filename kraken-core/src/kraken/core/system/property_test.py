@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
+from kraken.common.supplier import OfSupplier, VoidSupplier
 from pytest import mark, raises
 from typing_extensions import Literal
 
@@ -195,6 +196,7 @@ def test__PropertyContainer__descriptor_get_and_set() -> None:
     class MyObj(PropertyContainer):
         a: Property[str]
         b: Property[str] = Property.output()
+        c: Property[str | None]
 
     assert isinstance(MyObj.a, Property)
     assert isinstance(MyObj().a, Property)
@@ -209,6 +211,19 @@ def test__PropertyContainer__descriptor_get_and_set() -> None:
     assert obj.b.get() == "bar"
     with raises(Property.Empty):
         MyObj.a.get()
+
+    # Setting a non-optional property to None sets it to a void supplier.
+    print("@@>>", obj.a)
+    print("@@>>", obj.a.accepted_types)
+    obj.a = None
+    print("@@>>", obj.a._value)
+    assert isinstance(obj.a._value, VoidSupplier)
+
+    # Setting an optional property to None just sets it to None.
+    obj.c = "foo"
+    assert obj.c.get() == "foo"
+    obj.c = None
+    assert isinstance(obj.c._value, OfSupplier)
 
     obj = MyObj()
     with raises(Property.Empty):
