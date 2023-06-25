@@ -72,5 +72,5 @@ def test__Project__do__does_not_set_property_on_None_value(kraken_project: Proje
         def execute(self) -> None:
             ...
 
-    task = kraken_project.task("carrier", MyTask)
+    kraken_project.task("carrier", MyTask)
     assert kraken_project.resolve_tasks(":carrier").select(str).supplier().get() == []
