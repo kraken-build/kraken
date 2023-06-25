@@ -70,3 +70,9 @@ id = "22b41084-590b-4f4e-b795-5f329caaac20"
 type = "improvement"
 description = "Add `Address.normalize(keep_container)` keyword argument."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b43ae504-597e-47fb-b61f-a2f275cdd79a"
+type = "fix"
+description = "Fixed `Context.resolve_tasks()` when `None` is passed, which is intended to resolve only the default tasks in the current project and its subprojects. Before this fix, the method would return _all_ tasks of the current project instead, because the address `.` would be treated like a single-element address, such as `lint`, which gets turned into `:**:.` (or `:**:lint`)."
+author = "@NiklasRosenstein"
