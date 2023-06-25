@@ -1,5 +1,6 @@
 from subprocess import run
 from pathlib import Path
+import os
 
 buildscript {
     requirements = ["kraken-std"]
@@ -19,7 +20,6 @@ project.task "docsVenv" {
     }
 }
 
-
 for mode in ["Serve", "Build"]:
     project.task "docs" + mode {
         property "venv" project.task("docsVenv").property("directory")
@@ -30,6 +30,8 @@ for mode in ["Serve", "Build"]:
             def command = [directory / "bin" / "novella"]
             if self.property("serve").get():
                 command += ["--serve"]
-            run(command, cwd=self.property("cwd").get())
+            def env = os.environ.copy()
+            env["PATH"] = str(directory / "bin") + os.pathsep + env["PATH"]
+            run(command, cwd=self.property("cwd").get(), env=env)
         }
     }
