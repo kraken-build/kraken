@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.core import Project, Property
 
@@ -45,11 +45,12 @@ class PyclnTasks:
     format: PyclnTask
 
 
-def pycln(*, name: str = "python.pycln", project: Project | None = None, **kwargs: Any) -> PyclnTasks:
+def pycln(*, name: str = "python.pycln", project: Project | None = None) -> PyclnTasks:
     """Creates two pycln tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
 
     project = project or Project.current()
-    check_task = project.do(f"{name}.check", PyclnTask, group="lint", **kwargs, check_only=True)
-    format_task = project.do(name, PyclnTask, group="fmt", default=False, **kwargs)
+    check_task = project.task(f"{name}.check", PyclnTask, group="lint")
+    check_task.check_only = True
+    format_task = project.task(name, PyclnTask, group="fmt")
     return PyclnTasks(check_task, format_task)

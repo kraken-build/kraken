@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from kraken.core import Project, Property
 
@@ -33,8 +32,6 @@ class MypyStubtestTask(EnvironmentAwareDispatchTask):
         return command
 
 
-def mypy_stubtest(
-    *, name: str = "python.mypy.stubtest", project: Project | None = None, **kwargs: Any
-) -> MypyStubtestTask:
+def mypy_stubtest(*, name: str = "python.mypy.stubtest", project: Project | None = None) -> MypyStubtestTask:
     project = project or Project.current()
-    return project.do(name, MypyStubtestTask, group="lint", **kwargs)
+    return project.task(name, MypyStubtestTask, group="lint")

@@ -10,17 +10,17 @@ from kraken.core.system.task import VoidTask
 
 def test__Context__resolve_tasks(kraken_ctx: Context, kraken_project: Project) -> None:
     # Generate tasks
-    kraken_project.do("default1", VoidTask, default=True)
-    kraken_project.do("default2", VoidTask, default=True)
-    kraken_project.do("task_from_group_g1", VoidTask, group="g1")
-    kraken_project.do("other_task_from_group_g1", VoidTask, group="g1")
-    kraken_project.do("no_group", VoidTask)
+    kraken_project.task("default1", VoidTask, default=True)
+    kraken_project.task("default2", VoidTask, default=True)
+    kraken_project.task("task_from_group_g1", VoidTask, group="g1")
+    kraken_project.task("other_task_from_group_g1", VoidTask, group="g1")
+    kraken_project.task("no_group", VoidTask)
 
     sub_proj = Project("sub_proj", Path(), parent=kraken_project, context=kraken_ctx)
     kraken_project.add_child(sub_proj)
-    sub_proj.do("subproject_task", VoidTask, default=True)
-    sub_proj.do("subproject_task_in_group", VoidTask, group="g1")
-    sub_proj.do("subproject_task2", VoidTask)
+    sub_proj.task("subproject_task", VoidTask, default=True)
+    sub_proj.task("subproject_task_in_group", VoidTask, group="g1")
+    sub_proj.task("subproject_task2", VoidTask)
 
     # Search for tasks from their addresses
     tasks = kraken_ctx.resolve_tasks(["default1"])
@@ -70,7 +70,7 @@ def test__Context__resolve_tasks__can_resolve_optional_tasks(kraken_ctx: Context
     sub1 = kraken_project.subproject("sub1", mode="empty")
     sub2 = kraken_project.subproject("sub2", mode="empty")
 
-    publish_task = sub2.do("publishSomething", VoidTask, group="publish")
+    publish_task = sub2.task("publishSomething", VoidTask, group="publish")
     assert sub2.group("publish").tasks == [sub2.task("publishSomething")]
 
     # Note: A "publish" task group already exists on all projects by default.

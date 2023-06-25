@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.core import Project, Property
 
@@ -47,6 +47,6 @@ class MypyTask(EnvironmentAwareDispatchTask):
         return command
 
 
-def mypy(*, name: str = "python.mypy", project: Project | None = None, **kwargs: Any) -> MypyTask:
+def mypy(*, name: str = "python.mypy", project: Project | None = None) -> MypyTask:
     project = project or Project.current()
-    return project.do(name, MypyTask, group="lint", **kwargs)
+    return project.task(name, MypyTask, group="lint")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -56,6 +56,6 @@ class PytestTask(EnvironmentAwareDispatchTask):
         return TaskStatus.from_exit_code(None, code)
 
 
-def pytest(*, name: str = "pytest", group: str = "test", project: Project | None = None, **kwargs: Any) -> PytestTask:
+def pytest(*, name: str = "pytest", group: str = "test", project: Project | None = None) -> PytestTask:
     project = project or Project.current()
-    return project.do(name, PytestTask, group=group, **kwargs)
+    return project.task(name, PytestTask, group=group)

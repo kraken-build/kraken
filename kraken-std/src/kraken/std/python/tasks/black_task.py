@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.core import Project, Property
 
@@ -47,11 +47,12 @@ class BlackTasks:
     format: BlackTask
 
 
-def black(*, name: str = "python.black", project: Project | None = None, **kwargs: Any) -> BlackTasks:
+def black(*, name: str = "python.black", project: Project | None = None) -> BlackTasks:
     """Creates two black tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
 
     project = project or Project.current()
-    check_task = project.do(f"{name}.check", BlackTask, group="lint", **kwargs, check_only=True)
-    format_task = project.do(name, BlackTask, group="fmt", default=False, **kwargs)
+    check_task = project.task(f"{name}.check", BlackTask, group="lint")
+    check_task.check_only = True
+    format_task = project.task(name, BlackTask, group="fmt")
     return BlackTasks(check_task, format_task)

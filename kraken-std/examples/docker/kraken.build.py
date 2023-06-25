@@ -5,14 +5,11 @@ from kraken.std.generic.render_file import RenderFileTask
 
 project = Project.current()
 
-dockerfile = project.do(
-    name="dockerfile",
-    task_type=RenderFileTask,
-    content="FROM ubuntu:focal\nRUN echo Hello world\n",
-    file=project.build_directory / "Dockerfile",
-)
+dockerfile = project.task("dockerfile", RenderFileTask)
+dockerfile.content.set("FROM ubuntu:focal\nRUN echo Hello world\n")
+dockerfile.file.set(project.build_directory / "Dockerfile"),
 
-build_docker_image(
+build = build_docker_image(
     name="buildDocker",
     dockerfile=dockerfile.file,
     tags=["kraken-example"],

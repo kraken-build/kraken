@@ -50,12 +50,7 @@ def build(
     The build task relies on the build system configured in the Python project settings."""
 
     project = project or Project.current()
-    task = project.do(
-        name,
-        BuildTask,
-        default=False,
-        group=group,
-        build_system=Supplier.of_callable(lambda: python_settings(project).build_system),
-        as_version=as_version,
-    )
+    task = project.task(name, BuildTask)
+    task.build_system = Supplier.of_callable(lambda: python_settings(project).build_system)
+    task.as_version = as_version
     return task

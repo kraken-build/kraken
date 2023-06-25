@@ -44,12 +44,9 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
     with tempfile.TemporaryDirectory() as tempdir, contextlib.ExitStack() as exit_stack:
         kraken_project.directory = Path(tempdir)
 
-        dockerfile = kraken_project.do(
-            name="writeDockerfile",
-            task_type=RenderFileTask,
-            file=kraken_project.build_directory / "Dockerfile",
-            content=dockerfile_content,
-        )
+        dockerfile = kraken_project.task("writeDockerfile", RenderFileTask)
+        dockerfile.file = kraken_project.build_directory / "Dockerfile"
+        dockerfile.content = dockerfile_content
 
         build_docker_image(
             name="buildDocker",

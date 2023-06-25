@@ -108,10 +108,10 @@ def pyupgrade(
         if not any(_is_relative_to(f, i) for i in exclude) and not any(f.match(p) for p in exclude_patterns)
     ]
 
-    check_task = project.do(
-        f"{name}.check", PyUpgradeCheckTask, group="lint", **kwargs, additional_files=filtered_files
-    )
-    format_task = project.do(name, PyUpgradeTask, group="fmt", default=False, **kwargs, additional_files=filtered_files)
+    check_task = project.task(f"{name}.check", PyUpgradeCheckTask, group="lint")
+    check_task.additional_files = filtered_files
+    format_task = project.task(name, PyUpgradeTask, group="fmt")
+    format_task.additional_files = filtered_files
     return PyUpgradeTasks(check_task, format_task)
 
 

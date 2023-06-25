@@ -13,7 +13,7 @@ class MyDescriptor:
 
 
 def test__Project__resolve_outputs__can_find_dataclass_in_metadata(kraken_project: Project) -> None:
-    kraken_project.do("carrier", VoidTask).outputs.append(MyDescriptor("foobar"))
+    kraken_project.task("carrier", VoidTask).outputs.append(MyDescriptor("foobar"))
     assert list(kraken_project.resolve_tasks(":carrier").select(MyDescriptor).all()) == [MyDescriptor("foobar")]
 
 
@@ -24,7 +24,8 @@ def test__Project__resolve_outputs__can_find_dataclass_in_properties(kraken_proj
         def execute(self) -> None:
             ...
 
-    kraken_project.do("carrier", MyTask, out_prop=MyDescriptor("foobar"))
+    task = kraken_project.task("carrier", MyTask)
+    task.out_prop = MyDescriptor("foobar")
     assert list(kraken_project.resolve_tasks(":carrier").select(MyDescriptor).all()) == [MyDescriptor("foobar")]
 
 
@@ -35,7 +36,8 @@ def test__Project__resolve_outputs__can_not_find_input_property(kraken_project: 
         def execute(self) -> None:
             ...
 
-    kraken_project.do("carrier", MyTask, out_prop=MyDescriptor("foobar"))
+    task = kraken_project.task("carrier", MyTask)
+    task.out_prop = MyDescriptor("foobar")
     assert list(kraken_project.resolve_tasks(":carrier").select(MyDescriptor).all()) == []
 
 
@@ -46,7 +48,8 @@ def test__Project__resolve_outputs_supplier(kraken_project: Project) -> None:
         def execute(self) -> None:
             ...
 
-    kraken_project.do("carrier", MyTask, out_prop=MyDescriptor("foobar"))
+    task = kraken_project.task("carrier", MyTask)
+    task.out_prop = MyDescriptor("foobar")
     assert kraken_project.resolve_tasks(":carrier").select(MyDescriptor).supplier().get() == [MyDescriptor("foobar")]
 
 
@@ -69,5 +72,5 @@ def test__Project__do__does_not_set_property_on_None_value(kraken_project: Proje
         def execute(self) -> None:
             ...
 
-    kraken_project.do("carrier", MyTask, in_prop=None)
+    task = kraken_project.task("carrier", MyTask)
     assert kraken_project.resolve_tasks(":carrier").select(str).supplier().get() == []

@@ -246,14 +246,12 @@ def dist(
         )
     )
 
-    return project.do(
-        name,
-        DistributionTask,
-        resources=resources,
-        output_file=output_file,
-        archive_type=archive_type,
-        prefix=prefix,
-    )
+    dist_task = project.task(name, DistributionTask)
+    dist_task.resources = resources
+    dist_task.output_file = output_file
+    dist_task.archive_type = archive_type
+    dist_task.prefix = prefix
+    return dist_task
 
 
 def get_configured_resources(

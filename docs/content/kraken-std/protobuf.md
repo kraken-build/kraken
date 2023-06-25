@@ -13,8 +13,8 @@ from kraken.std.protobuf import BufFormatTask, BufLintTask
 
 
 project = Project.current()
-project.do(name, BufLintTask, group="lint", **kwargs)
-project.do(name, BufFormatTask, group="fmt", **kwargs)
+project.task(name, BufLintTask, group="lint")
+project.task(name, BufFormatTask, group="fmt")
 ```
 
 ## Requirements

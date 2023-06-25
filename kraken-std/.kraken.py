@@ -1,3 +1,5 @@
+# ::krakenw-root
+
 from __future__ import annotations
 
 from kraken.common import buildscript

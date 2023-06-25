@@ -23,8 +23,8 @@ def _git_commit(path: Path, message: str) -> None:
 
 
 def test__CheckFileTask__file_does_not_exist(kraken_project: Project) -> None:
-    task = kraken_project.do("check_file", CheckFileTask)
-    task.file_to_check.set(Path("warbl.garbl"))
+    task = kraken_project.task("check_file", CheckFileTask)
+    task.file_to_check = Path("warbl.garbl")
     status = task.execute()
     assert status == TaskStatus.failed("'warbl.garbl' does not exist")
 
@@ -39,8 +39,8 @@ def test__CheckFileTask__file_exists_but_is_not_committed(kraken_project: Projec
     file_name = Path("warbl.garbl")
     (kraken_project.directory / file_name).touch()
 
-    task = kraken_project.do("check_file", CheckFileTask)
-    task.file_to_check.set(file_name)
+    task = kraken_project.task("check_file", CheckFileTask)
+    task.file_to_check = file_name
     status = task.execute()
     assert status == TaskStatus.failed("'warbl.garbl' exists but is not committed")
 
@@ -55,8 +55,8 @@ def test__file_exists_and_is_committed(kraken_project: Project) -> None:
     _git_add(kraken_project.directory, [file_name])
     _git_commit(kraken_project.directory, "Initial commit")
 
-    task = kraken_project.do("check_file", CheckFileTask)
-    task.file_to_check.set(file_name)
+    task = kraken_project.task("check_file", CheckFileTask)
+    task.file_to_check = file_name
     status = task.execute()
     assert status == TaskStatus.succeeded("'warbl.garbl' exists and is committed")
 

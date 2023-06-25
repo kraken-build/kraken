@@ -54,5 +54,6 @@ def info(build_system: PythonBuildSystem, project: Project) -> InfoTask:
     This task displays a list of useful info on current Python and virtual environment settings.
     """
     project = project or Project.current()
-    task = project.do("python.info", InfoTask, build_system=build_system)
+    task = project.task("python.info", InfoTask)
+    task.build_system = build_system
     return task

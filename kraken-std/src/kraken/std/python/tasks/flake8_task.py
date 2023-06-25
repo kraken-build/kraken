@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.core import Project, Property
 
@@ -29,6 +29,11 @@ class Flake8Task(EnvironmentAwareDispatchTask):
         return command
 
 
-def flake8(*, name: str = "python.flake8", project: Project | None = None, **kwargs: Any) -> Flake8Task:
+def flake8(
+    *, name: str = "python.flake8", project: Project | None = None, config_file: Path | None = None
+) -> Flake8Task:
     project = project or Project.current()
-    return project.do(name, Flake8Task, group="lint", **kwargs)
+    task = project.task(name, Flake8Task, group="lint")
+    if config_file is not None:
+        task.config_file = config_file
+    return task

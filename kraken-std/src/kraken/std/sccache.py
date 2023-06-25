@@ -127,4 +127,6 @@ def sccache(
     """Creates a background task that starts the sccache server."""
 
     project = project or Project.current()
-    return project.do(name, SccacheTask, False, group=group, manager=manager)
+    task = project.task(name, SccacheTask, group=group)
+    task.manager = manager
+    return task
