@@ -136,7 +136,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         /,
         *,
         default: bool | None = None,
-        group: str | None = None,
+        group: str | GroupTask | None = None,
         description: str | None = None,
     ) -> T_Task:
         """
@@ -166,7 +166,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         /,
         *,
         default: bool | None = None,
-        group: str | None = None,
+        group: str | GroupTask | None = None,
         description: str | None = None,
     ) -> Task | T_Task:
         if type_ is None:
@@ -198,8 +198,13 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         elif default is not None:
             task.default = default
 
-        if group is not None:
-            self.group(group).add(task)
+        match group:
+            case str():
+                self.group(group).add(task)
+            case GroupTask():
+                group.add(task)
+            case _:
+                raise TypeError(f"Expected str or GroupTask, got {type(group)}")
 
         if description is not None:
             task.description = description
@@ -388,7 +393,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         task = self.tasks().get(name)
         if task is None:
-            task = self.do(name, GroupTask)
+            task = self.task(name, GroupTask)
         elif not isinstance(task, GroupTask):
             raise RuntimeError(f"{task.address!r} must be a GroupTask, but got {type(task).__name__}")
         if description is not None:
