@@ -682,12 +682,6 @@ class TaskSetSelect(Generic[T]):
         self._tasks = tasks
         self._output_type = output_type
 
-    def dict(self) -> dict[Task, list[T]]:
-        results: dict[Task, list[T]] = {}
-        for task in self._tasks:
-            results[task] = list(task.get_outputs(self._output_type))
-        return results
-
     def all(self) -> Iterable[T]:
         for task in self._tasks:
             yield from task.get_outputs(self._output_type)
@@ -697,6 +691,12 @@ class TaskSetSelect(Generic[T]):
 
     def supplier(self) -> Supplier[list[T]]:
         return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
+
+    def dict(self) -> dict[Task, list[T]]:
+        results: dict[Task, list[T]] = {}
+        for task in self._tasks:
+            results[task] = list(task.get_outputs(self._output_type))
+        return results
 
 
 class TaskSetPartitions:
