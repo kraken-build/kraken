@@ -57,11 +57,11 @@ class Pyproject(dict[str, Any]):
     Represents a raw `pyproject.toml` file in deserialized form.
     """
 
-    _path: Path | None
+    path: Path | None
 
     def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
         super().__init__(data)
-        self._path = path
+        self.path = path
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
@@ -73,7 +73,7 @@ class Pyproject(dict[str, Any]):
             return cls(path, tomli.load(fp))
 
     def save(self, path: Path | None = None) -> None:
-        path = path or self._path
+        path = path or self.path
         if not path:
             raise RuntimeError("No path to save to")
         with path.open("wb") as fp:
