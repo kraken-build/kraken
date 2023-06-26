@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from kraken.common.supplier import OfSupplier, VoidSupplier
 from pytest import mark, raises
@@ -13,11 +13,11 @@ from kraken.core.system.property import Property, PropertyContainer
 def test__Property_value_adapter_order_is_semantically_revelant() -> None:
     """Tests that a `str | Path` and `Path | str` property behave differently."""
 
-    prop1: Property[Union[str, Path]] = Property(PropertyContainer(), "prop1", Union[str, Path])
+    prop1: Property[str | Path] = Property(PropertyContainer(), "prop1", Union[str, Path])
     prop1.set("foo/bar")
     assert prop1.get() == "foo/bar"
 
-    prop2: Property[Union[Path, str]] = Property(PropertyContainer(), "prop2", Union[Path, str])
+    prop2: Property[Path | str] = Property(PropertyContainer(), "prop2", Union[Path, str])
     prop2.set("foo/bar")
     assert prop2.get() == Path("foo/bar")
 
@@ -31,7 +31,7 @@ def test__Property_default() -> None:
     a_value = ["abc"]
 
     class MyObj(PropertyContainer):
-        a: Property[List[str]] = Property.config(default=a_value)
+        a: Property[list[str]] = Property.config(default=a_value)
         b: Property[int] = Property.config(default_factory=lambda: 42)
         c: Property[str]
 
@@ -46,7 +46,7 @@ def test__Property_default_factory_with_subclass() -> None:
     """Tests that property default factory works with a subclass (a known previous semantic failure case)."""
 
     class MyObj(PropertyContainer):
-        b: Property[Dict[str, str]] = Property.default_factory(dict)
+        b: Property[dict[str, str]] = Property.default_factory(dict)
 
     class SubObj(MyObj):
         pass

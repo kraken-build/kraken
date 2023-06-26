@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
@@ -13,7 +12,7 @@ from ..settings import PythonSettings, python_settings
 
 class UpdateLockfileTask(Task):
     settings: Property[PythonSettings]
-    build_system: Property[Optional[PythonBuildSystem]]
+    build_system: Property[PythonBuildSystem | None]
     pyproject_toml: Property[Path]
 
     def get_description(self) -> str | None:

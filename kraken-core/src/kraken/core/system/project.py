@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, Mapping, Optional, Type, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Iterable, Mapping, TypeVar, cast, overload
 
 import builddsl
 from deprecated import deprecated
@@ -37,7 +37,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     context: Context
     metadata: list[Any]  #: A list of arbitrary objects that are usually looked up by type.
 
-    def __init__(self, name: str, directory: Path, parent: Optional[Project], context: Context) -> None:
+    def __init__(self, name: str, directory: Path, parent: Project | None, context: Context) -> None:
         assert isinstance(name, str), type(name)
         assert isinstance(directory, Path), type(directory)
         assert isinstance(parent, Project) or parent is None, type(parent)
@@ -132,7 +132,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     def task(
         self,
         name: str,
-        type_: Type[T_Task],
+        type_: type[T_Task],
         /,
         *,
         default: bool | None = None,
@@ -145,7 +145,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         """
 
     @overload
-    def task(self, name: str, type_: Type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
+    def task(self, name: str, type_: type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
         """
         This overload is used to create a task in a BuildDSL script.
 
@@ -188,7 +188,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     def task(
         self,
         name: str,
-        type_: Type[T_Task] | builddsl.UnboundClosure | None = None,
+        type_: type[T_Task] | builddsl.UnboundClosure | None = None,
         default_or_closure: bool | builddsl.UnboundClosure | None = None,
         /,
         *,
@@ -352,7 +352,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     def do(
         self,
         name: str,
-        task_type: Type[T_Task] = cast(Any, Task),
+        task_type: type[T_Task] = cast(Any, Task),
         default: bool | builddsl.UnboundClosure | None = None,
         *,
         group: str | GroupTask | None = None,

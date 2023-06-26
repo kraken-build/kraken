@@ -15,13 +15,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Collection,
-    Dict,
     ForwardRef,
     Generic,
     Iterable,
     Iterator,
-    List,
-    Optional,
     Sequence,
     TypeVar,
     cast,
@@ -205,7 +202,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
     #: A human readable description of the task's purpose. This is displayed in the terminal upon
     #: closer inspection of a task.
-    description: Optional[str] = None
+    description: str | None = None
 
     #: Whether the task executes by default when no explicit task is selected to run on the command-line.
     default: bool = False
@@ -479,7 +476,7 @@ class GroupTask(Task):
     the tasks in the group, forcing them to be executed when this task is targeted. Group tasks are not enabled
     by default."""
 
-    tasks: List[Task]
+    tasks: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -685,21 +682,21 @@ class TaskSetSelect(Generic[T]):
         self._tasks = tasks
         self._output_type = output_type
 
+    def all(self) -> Iterable[T]:
+        for task in self._tasks:
+            yield from task.get_outputs(self._output_type)
+
+    def dict_supplier(self) -> Supplier[dict[Task, list[T]]]:
+        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
+
+    def supplier(self) -> Supplier[list[T]]:
+        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
+
     def dict(self) -> dict[Task, list[T]]:
         results: dict[Task, list[T]] = {}
         for task in self._tasks:
             results[task] = list(task.get_outputs(self._output_type))
         return results
-
-    def all(self) -> Iterable[T]:
-        for task in self._tasks:
-            yield from task.get_outputs(self._output_type)
-
-    def dict_supplier(self) -> Supplier[Dict[Task, list[T]]]:
-        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
-
-    def supplier(self) -> Supplier[list[T]]:
-        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
 
 
 class TaskSetPartitions:

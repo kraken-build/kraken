@@ -5,7 +5,7 @@ import dataclasses
 import enum
 import logging
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Optional, Sequence, TypeVar, overload
+from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Sequence, TypeVar, overload
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from nr.stream import Stream
@@ -103,7 +103,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         self.executor = executor or DefaultGraphExecutor(DefaultTaskExecutor())
         self.observer = observer or DefaultPrintingExecutorObserver()
         self._finalized: bool = False
-        self._root_project: Optional[Project] = None
+        self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
 
