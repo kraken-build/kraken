@@ -8,7 +8,7 @@ import subprocess
 from dataclasses import dataclass, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import tomli
 import tomli_w
@@ -161,7 +161,7 @@ class WorkspacePackage:
 @dataclass
 class Workspace:
     package: WorkspacePackage | None
-    members: List[str] | None
+    members: list[str] | None
     unhandled: dict[str, Any] | None
 
     @classmethod

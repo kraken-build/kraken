@@ -8,7 +8,7 @@ import shutil
 import subprocess as sp
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Collection, List, Optional
+from typing import Collection
 
 from kraken.common.path import is_relative_to
 
@@ -71,9 +71,9 @@ class MaturinZigTarget:
     """
 
     target: str
-    rustflags: Optional[str] = None
-    ld_library_path: Optional[str] = None
-    macos_sdk_root: Optional[Path] = None
+    rustflags: str | None = None
+    ld_library_path: str | None = None
+    macos_sdk_root: Path | None = None
     manylinux: bool = True
     zig_features: Collection[str] = ()
 
@@ -96,7 +96,7 @@ class MaturinPythonBuildSystem(PoetryPythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
         self._default_build = True
-        self._zig_targets: List[MaturinZigTarget] = []
+        self._zig_targets: list[MaturinZigTarget] = []
 
     def disable_default_build(self) -> None:
         self._default_build = False

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import List
 
 from kraken.core import Project, Property
 
@@ -16,8 +15,8 @@ class PyclnTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     config_file: Property[Path]
-    additional_args: Property[List[str]] = Property.config(default_factory=list)
-    additional_files: Property[List[Path]] = Property.config(default_factory=list)
+    additional_args: Property[list[str]] = Property.config(default_factory=list)
+    additional_files: Property[list[Path]] = Property.config(default_factory=list)
 
     # EnvironmentAwareDispatchTask
 

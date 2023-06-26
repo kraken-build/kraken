@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional, Union, cast
+from typing import Union, cast
 
 from kraken.common import Supplier
 from kraken.common.pyenv import get_current_venv
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class InstallTask(Task):
-    build_system: Property[Optional[PythonBuildSystem]]
+    build_system: Property[PythonBuildSystem | None]
     always_use_managed_env: Property[bool]
 
     # Task

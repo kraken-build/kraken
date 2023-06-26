@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import subprocess as sp
-from typing import List, Sequence
+from typing import Sequence
 
 from kraken.core import Project, Property, Task, TaskStatus
 
@@ -23,7 +23,7 @@ class ManifestToolPushTask(Task):
     """
 
     #: The Docker platforms to create the manifest for.
-    platforms: Property[List[str]]
+    platforms: Property[list[str]]
 
     #: A Docker image tag that should contain the variables `OS`, `ARCH` and `VARIANT`.
     template: Property[str]

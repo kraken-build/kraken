@@ -3,7 +3,6 @@ from __future__ import annotations
 import os
 import subprocess as sp
 from pathlib import Path
-from typing import List
 
 from kraken.core import Property, Task, TaskStatus
 
@@ -12,7 +11,7 @@ class CargoBaseSqlxTask(Task):
     base_directory: Property[Path]
     database_url: Property[str]
 
-    def _execute_command(self, arguments: List[str]) -> TaskStatus:
+    def _execute_command(self, arguments: list[str]) -> TaskStatus:
         command = ["cargo", "sqlx", *arguments]
         if self.database_url.is_filled():
             command.extend(["--database-url", self.database_url.get()])

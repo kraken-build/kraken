@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
@@ -14,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class BuildTask(Task):
-    build_system: Property[Optional[PythonBuildSystem]]
+    build_system: Property[PythonBuildSystem | None]
     output_directory: Property[Path]
-    as_version: Property[Optional[str]] = Property.config(default=None)
-    output_files: Property[List[Path]] = Property.output()
+    as_version: Property[str | None] = Property.config(default=None)
+    output_files: Property[list[Path]] = Property.output()
 
     # Task
 

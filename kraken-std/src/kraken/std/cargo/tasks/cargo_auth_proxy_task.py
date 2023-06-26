@@ -4,7 +4,7 @@ import contextlib
 import logging
 import time
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator
 from urllib.parse import urlparse
 
 import tomli
@@ -28,7 +28,7 @@ class CargoAuthProxyTask(BackgroundTask):
     cargo_config_file: Property[Path] = Property.default(".cargo/config.toml")
 
     #: A list of the Cargo registries for which to inject credentials for based on matching paths.
-    registries: Property[List[CargoRegistry]]
+    registries: Property[list[CargoRegistry]]
 
     #: The proxy port.
     proxy_port: Property[int] = Property.default(8899)
