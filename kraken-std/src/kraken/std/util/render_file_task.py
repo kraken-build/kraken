@@ -5,7 +5,6 @@ from pathlib import Path
 from kraken.common.path import try_relative_to
 from kraken.common.strings import as_bytes
 from kraken.common.supplier import Supplier
-
 from kraken.core import Project, Property, Task, TaskStatus
 
 from .check_file_contents_task import CheckFileContentsTask

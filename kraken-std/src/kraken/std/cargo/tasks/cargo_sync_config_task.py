@@ -5,7 +5,8 @@ from pathlib import Path
 import tomli
 import tomli_w
 from kraken.core import Project, Property
-from kraken.core.lib.render_file_task import RenderFileTask
+
+from kraken.std.util.render_file_task import RenderFileTask
 
 from ..config import CargoRegistry
 

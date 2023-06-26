@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Literal
 
 from kraken.core import Project, Property
-from kraken.core.lib.render_file_task import RenderFileTask
 
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
+from kraken.std.util.render_file_task import RenderFileTask
 
 from ..gitignore.gitignore_io import gitignore_io_fetch_cached
 from ..gitignore.parser import GitignoreEntry, GitignoreFile

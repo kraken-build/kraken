@@ -60,16 +60,16 @@ kraken = "kraken.core.cli.main:main"
 typed = true
 
 [tool.slap.test]
-black = "black --check src/ tests/ example/"
+black = "black --check src/ tests/"
 check = "slap check"
-flake8 = "flake8 src/ tests/ example/"
-isort = "isort --check-only src/ tests/ example/"
-pycln = "pycln src/ tests/ example/ --check"
-mypy = "dmypy run src/ tests/ example/"
+flake8 = "flake8 src/ tests/"
+isort = "isort --check-only src/ tests/"
+pycln = "pycln src/ tests/ --check"
+mypy = "dmypy run src/ tests/"
 pytest = "pytest src/ tests/ -vv"
 
 [tool.slap.run]
-fmt = "black src/ tests/ example/ && isort src/ tests/ example/ && pycln src/ tests/ example/"
+fmt = "black src/ tests/ && isort src/ tests/ && pycln src/ tests/"
 
 [tool.mypy]
 explicit_package_bases = true

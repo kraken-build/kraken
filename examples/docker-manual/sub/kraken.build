@@ -1,7 +1,7 @@
 
-from kraken.core.lib.render_file_task import RenderFileTask
+from kraken.std.util.render_file_task import RenderFileTask
 
-project.do "helloWorld" RenderFileTask {
+project.task "helloWorld" RenderFileTask {
     default = True
     file.set(project.build_directory / "out.txt")
     content.set("Hello, World!")

@@ -20,7 +20,7 @@ def setup_plain_project(directory: Path) -> Iterator[None]:
     build_script_code = dedent(
         """
         from kraken.core import Project
-        from kraken.core.lib.render_file_task import render_file
+        from kraken.std.util.render_file_task import render_file
 
         render_file(name="task", file="root.txt", content="This is in root")
         """
@@ -43,7 +43,7 @@ def setup_project_with_subproject(directory: Path, chdir_subproject: bool) -> It
     build_script_code = dedent(
         """
         from kraken.core import Project
-        from kraken.core.lib.render_file_task import render_file
+        from kraken.std.util.render_file_task import render_file
 
         sub = Project.current().subproject("sub")
 

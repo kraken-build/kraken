@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Literal, Sequence
 
 from kraken.core import Project
-from kraken.core.lib.check_file_contents_task import CheckFileContentsTask
+
+from kraken.std.util.check_file_contents_task import CheckFileContentsTask
 
 from . import tasks
 from .config import dump_gitconfig, load_gitconfig

@@ -5,7 +5,8 @@ from typing import Any
 
 from kraken.common import Supplier, import_class
 from kraken.core import Project, Property, Task
-from kraken.core.lib.render_file_task import RenderFileTask, render_file
+
+from kraken.std.util.render_file_task import RenderFileTask, render_file
 
 from .util import render_docker_auth
 

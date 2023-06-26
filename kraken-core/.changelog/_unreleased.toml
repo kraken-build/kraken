@@ -101,3 +101,10 @@ type = "fix"
 description = "Fix `kraken query tree` command to remove the `--no-save` option and to never save the build context to disk after the command."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "867fafe2-0802-442e-9d17-4dd9115bc34d"
+type = "breaking change"
+description = "Move `kraken.core.lib.render_file_task` and `kraken.core.lib.check_file_contents_task` to `kraken.std.util`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/56"
