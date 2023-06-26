@@ -221,6 +221,10 @@ class GitAwareProjectFinder(ProjectFinder):
     """
     Finds the root of a project by picking the highest-up build script that does not cross a Git repository boundary
     or a home directory boundary. Starts from a directory and works it's way up until a stop condition is encountered.
+
+    If any build script contains the string `# ::krakenw-root`, then the directory containing that build script is
+    considered the root of the project. This is useful for projects that have multiple build scripts in different
+    directories, but they should not be considered part of the same project.
     """
 
     def __init__(self, delegate: ProjectFinder, home_boundary: "Path | None | NotSet" = None) -> None:
@@ -252,6 +256,8 @@ class GitAwareProjectFinder(ProjectFinder):
             script = self.delegate.find_project(directory)
             if script is not None:
                 highest_script = script
+                if script.script.read_text().find("# ::krakenw-root") != -1:
+                    break
 
             # If in the next loop we would cross a Git repository boundary, we stop searching.
             if (directory / ".git").exists():

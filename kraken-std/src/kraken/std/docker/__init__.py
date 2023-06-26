@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from kraken.common import Supplier, import_class
 from kraken.core import Project, Property, Task
@@ -26,17 +26,17 @@ class DockerBuildTask(Task):
 
     build_context: Property[Path]
     dockerfile: Property[Path] = Property.default(Path("Dockerfile"))
-    auth: Property[Dict[str, Tuple[str, str]]] = Property.default_factory(dict)
+    auth: Property[dict[str, tuple[str, str]]] = Property.default_factory(dict)
     platform: Property[str]
-    build_args: Property[Dict[str, str]] = Property.default_factory(dict)
-    secrets: Property[Dict[str, str]] = Property.default_factory(dict)
-    cache_repo: Property[Optional[str]] = Property.default(None)
+    build_args: Property[dict[str, str]] = Property.default_factory(dict)
+    secrets: Property[dict[str, str]] = Property.default_factory(dict)
+    cache_repo: Property[str | None] = Property.default(None)
     cache: Property[bool] = Property.default(True)
-    tags: Property[List[str]] = Property.default_factory(list)
+    tags: Property[list[str]] = Property.default_factory(list)
     push: Property[bool] = Property.default(False)
     squash: Property[bool] = Property.default(False)
-    target: Property[Optional[str]] = Property.default(None)
-    image_output_file: Property[Optional[Path]] = Property.default(None)
+    target: Property[str | None] = Property.default(None)
+    image_output_file: Property[Path | None] = Property.default(None)
     load: Property[bool] = Property.default(False)
 
     # If enabled, a separate Dockerfile preprocessing task will be created during finalize().

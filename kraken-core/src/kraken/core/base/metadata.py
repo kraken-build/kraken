@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, List, TypeVar, overload
+from typing import Any, Callable, TypeVar, overload
 
 T = TypeVar("T")
 
@@ -12,7 +12,7 @@ class MetadataContainer:
     method.
     """
 
-    metadata: List[Any]
+    metadata: list[Any]
 
     def __init__(self) -> None:
         self.metadata = []

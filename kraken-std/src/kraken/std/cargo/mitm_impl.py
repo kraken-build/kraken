@@ -4,7 +4,7 @@ import base64
 import json
 import logging
 import os
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from proxy.http.parser import HttpParser
 from proxy.http.proxy.plugin import HttpProxyBasePlugin
@@ -31,7 +31,7 @@ class AuthInjector(HttpProxyBasePlugin):
             self._auth = json.loads(os.environ["INJECT_AUTH"])
         return self._auth
 
-    def handle_client_request(self, request: HttpParser) -> Optional[HttpParser]:
+    def handle_client_request(self, request: HttpParser) -> HttpParser | None:
         # NOTE (@NiklasRosenstein): This method is only called for requests in an HTTPS tunnel if TLS
         #       interception is enabled, which requires a self-signed CA-certificate.
 

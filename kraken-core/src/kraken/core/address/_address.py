@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, ClassVar, Sequence, Tuple
+from typing import Any, ClassVar, Sequence, TypeAlias
 
 
 class AddressMeta(type):
@@ -16,6 +16,94 @@ class AddressMeta(type):
         obj = object.__new__(Address)
         obj.__init__(value)  # type: ignore[misc]
         return obj
+
+
+@dataclass(frozen=True)
+class Element:
+    """Represents an element in the address, which is the text between colon separators (`:`)."""
+
+    VALID_CHARACTERS: ClassVar[str] = r"a-zA-Z0-9/_\-\.\*"
+    VALIDATION_REGEX: ClassVar[str] = rf"^[{VALID_CHARACTERS}]+$"
+    CURRENT: ClassVar[str] = "."
+    PARENT: ClassVar[str] = ".."
+    RECURSIVE_WILDCARD: ClassVar[str] = "**"
+
+    # The value of the element. This may contain asterisks for globbing.
+    value: str
+
+    #: Whether the element is followed by a question mark to permit resolution failure.
+    fallible: bool = False
+
+    __qualname__ = "Address.Element"
+
+    def __post_init__(self) -> None:
+        if not re.match(self.VALIDATION_REGEX, self.value):
+            raise ValueError(f"invalid address element: {str(self)!r}")
+
+    def __str__(self) -> str:
+        if self.fallible:
+            return f"{self.value}?"
+        return self.value
+
+    def is_current(self) -> bool:
+        """
+        Returns `True` if the element represents the current project (`.`).
+
+        >>> Address.Element('.').is_current()
+        True
+        """
+
+        return self.value == self.CURRENT
+
+    def is_parent(self) -> bool:
+        """
+        Returns `True` if the element represents the parent project (`..`).
+
+        >>> Address.Element('..').is_parent()
+        True
+        """
+
+        return self.value == self.PARENT
+
+    def is_concrete(self) -> bool:
+        """
+        Returns `True` if the element is a concrete element that can only have exactly one match. Elements that
+        are not concrete have zero or more matches by asterisk (wildcards) in the #value or if #fallible is
+        enabled.
+
+        >>> Address.Element("test").is_concrete()
+        True
+        >>> Address.Element("test*").is_concrete()
+        False
+        >>> Address.Element("test", fallible=True).is_concrete()
+        False
+        """
+
+        return not (self.fallible or "*" in self.value)
+
+    def is_recursive_wildcard(self) -> bool:
+        return self.value == self.RECURSIVE_WILDCARD
+
+    @classmethod
+    def of(cls, value: str) -> Address.Element:
+        """
+        Creates an element from a string. #fallible is set depending on whether *value* is trailed by a
+        question mark.
+
+        >>> Address.Element.of("test")
+        Address.Element(value='test', fallible=False)
+        >>> Address.Element.of("test?")
+        Address.Element(value='test', fallible=True)
+        >>> Address.Element.of("test??")
+        Traceback (most recent call last):
+        ValueError: invalid address element: 'test??'
+        """
+
+        fallible = False
+        if value.endswith("?"):
+            fallible = True
+            value = value[:-1]
+        return cls(value, fallible)
 
 
 class Address(metaclass=AddressMeta):
@@ -44,91 +132,6 @@ class Address(metaclass=AddressMeta):
     EMPTY: ClassVar[Address]
     WILDCARD: ClassVar[Address]
     RECURSIVE_WILDCARD: ClassVar[Address]
-
-    @dataclass(frozen=True)
-    class Element:
-        """Represents an element in the address, which is the text between colon separators (`:`)."""
-
-        VALID_CHARACTERS: ClassVar[str] = r"a-zA-Z0-9/_\-\.\*"
-        VALIDATION_REGEX: ClassVar[str] = rf"^[{VALID_CHARACTERS}]+$"
-        CURRENT: ClassVar[str] = "."
-        PARENT: ClassVar[str] = ".."
-        RECURSIVE_WILDCARD: ClassVar[str] = "**"
-
-        # The value of the element. This may contain asterisks for globbing.
-        value: str
-
-        #: Whether the element is followed by a question mark to permit resolution failure.
-        fallible: bool = False
-
-        def __post_init__(self) -> None:
-            if not re.match(self.VALIDATION_REGEX, self.value):
-                raise ValueError(f"invalid address element: {str(self)!r}")
-
-        def __str__(self) -> str:
-            if self.fallible:
-                return f"{self.value}?"
-            return self.value
-
-        def is_current(self) -> bool:
-            """
-            Returns `True` if the element represents the current project (`.`).
-
-            >>> Address.Element('.').is_current()
-            True
-            """
-
-            return self.value == self.CURRENT
-
-        def is_parent(self) -> bool:
-            """
-            Returns `True` if the element represents the parent project (`..`).
-
-            >>> Address.Element('..').is_parent()
-            True
-            """
-
-            return self.value == self.PARENT
-
-        def is_concrete(self) -> bool:
-            """
-            Returns `True` if the element is a concrete element that can only have exactly one match. Elements that
-            are not concrete have zero or more matches by asterisk (wildcards) in the #value or if #fallible is
-            enabled.
-
-            >>> Address.Element("test").is_concrete()
-            True
-            >>> Address.Element("test*").is_concrete()
-            False
-            >>> Address.Element("test", fallible=True).is_concrete()
-            False
-            """
-
-            return not (self.fallible or "*" in self.value)
-
-        def is_recursive_wildcard(self) -> bool:
-            return self.value == self.RECURSIVE_WILDCARD
-
-        @classmethod
-        def of(cls, value: str) -> Address.Element:
-            """
-            Creates an element from a string. #fallible is set depending on whether *value* is trailed by a
-            question mark.
-
-            >>> Address.Element.of("test")
-            Address.Element(value='test', fallible=False)
-            >>> Address.Element.of("test?")
-            Address.Element(value='test', fallible=True)
-            >>> Address.Element.of("test??")
-            Traceback (most recent call last):
-            ValueError: invalid address element: 'test??'
-            """
-
-            fallible = False
-            if value.endswith("?"):
-                fallible = True
-                value = value[:-1]
-            return cls(value, fallible)
 
     _is_absolute: bool
     _is_container: bool
@@ -242,7 +245,7 @@ class Address(metaclass=AddressMeta):
         self._is_absolute, self._is_container, self._elements = self._parse(value)
         self._hash_key: int | None = None
 
-    def __getnewargs__(self) -> Tuple[Any, ...]:
+    def __getnewargs__(self) -> tuple[Any, ...]:
         # For dill to serialize/deserialize the object.
         return (str(self),)
 
@@ -397,18 +400,39 @@ class Address(metaclass=AddressMeta):
 
         return self._is_container
 
-    def normalize(self) -> "Address":
+    def normalize(self, *, keep_container: bool = False) -> Address:
         """
         Normalize the address, removing any superfluous elements (`.` for current, `..` for parent). A normalized
-        is not a container address. Use #set_container() after #normalize() to make it a container address.
+        is not a container address. Use #set_container() after #normalize() to make it a container address, or pass
+        `True` to the *keep_container* argument to keep the container state.
 
+        >>> Address("").normalize()
+        Address('.')
+        >>> Address("").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".").normalize()
+        Address('.')
+        >>> Address(".").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".:").normalize()
+        Address('.')
+        >>> Address(".:").normalize(keep_container=True)
+        Address('.:')
         >>> Address(":a:.:b").normalize()
+        Address(':a:b')
+        >>> Address(":a:.:b").normalize(keep_container=True)
         Address(':a:b')
         >>> Address(":a:..:b").normalize()
         Address(':b')
         >>> Address("..:.:b").normalize()
         Address('..:b')
+        >>> Address("..:.:b").normalize(keep_container=True)
+        Address('..:b')
         >>> Address("a:b:").normalize()
+        Address('a:b')
+        >>> Address("a:b:").normalize(keep_container=True)
+        Address('a:b:')
+        >>> Address("a:b:.").normalize(keep_container=True)
         Address('a:b')
         """
 
@@ -424,9 +448,9 @@ class Address(metaclass=AddressMeta):
                 elements.append(current)
         if not self._is_absolute and not elements:
             elements = [Address.Element(Address.Element.CURRENT, False)]
-        return Address.create(self._is_absolute, False, elements)
+        return Address.create(self._is_absolute, self.is_container() and keep_container, elements)
 
-    def concat(self, address: "str | Address") -> "Address":
+    def concat(self, address: str | Address) -> Address:
         """
         Concatenate two addresses. If *address* is absolute, return *address*.
 
@@ -434,6 +458,8 @@ class Address(metaclass=AddressMeta):
         Address(':a:b:c')
         >>> Address(":a").concat(Address(":b"))
         Address(':b')
+        >>> Address(":a").concat(Address("."))
+        Address(':a:.')
         """
 
         if isinstance(address, str):
@@ -442,12 +468,14 @@ class Address(metaclass=AddressMeta):
             return address
         return Address.create(self._is_absolute, address._is_container, self._elements + address._elements)
 
-    def append(self, element: str | Element) -> "Address":
+    def append(self, element: str | Element) -> Address:
         """
         Return a new address with one element appended.
 
         >>> Address(":").append("a")
         Address(':a')
+        >>> Address(":a:.").append(".")
+        Address(':a:.:.')
         """
 
         if isinstance(element, str):
@@ -455,7 +483,7 @@ class Address(metaclass=AddressMeta):
         assert isinstance(element, Address.Element), type(element)
         return Address.create(self._is_absolute, False, self._elements + [element])
 
-    def set_container(self, is_container: bool) -> "Address":
+    def set_container(self, is_container: bool) -> Address:
         """
         Return a copy of this address with the container flag set to the given value. The container flag indicates
         whether the string representation of the address is followed by a colon (`:`). This status is irrelevant
@@ -526,7 +554,7 @@ class Address(metaclass=AddressMeta):
         return self._elements
 
     @property
-    def parent(self) -> "Address":
+    def parent(self) -> Address:
         """
         Returns the parent address.
 
@@ -581,6 +609,8 @@ class Address(metaclass=AddressMeta):
         # Strip the last element.
         assert self._elements, self
         return Address.create(self._is_absolute, self._is_container, self._elements[:-1])
+
+    Element: ClassVar[TypeAlias] = Element
 
 
 Address.ROOT = Address(":")

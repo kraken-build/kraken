@@ -1,0 +1,8 @@
+release-date = "2023-06-19"
+
+[[entries]]
+id = "7528c7ef-e3ba-4cbf-99e3-3226fd15e8da"
+type = "fix"
+description = "Don't wrap license or copyright holder in quotes"
+author = "scott@stevenson.io"
+pr = "https://github.com/kraken-build/kraken-build/pull/40"

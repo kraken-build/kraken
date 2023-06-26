@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import builtins
 import getpass
 import logging
 import os
 import shlex
 import sys
 import time
-from functools import partial
 from pathlib import Path
 from textwrap import indent
 from typing import NamedTuple, NoReturn
@@ -22,12 +20,13 @@ from kraken.common import (
     RequirementSpec,
     TomlConfigFile,
     datetime_to_iso8601,
-    deprecated_get_requirement_spec_from_file_header,
     inline_text,
 )
+from kraken.common.exceptions import exit_on_known_exceptions
 from termcolor import colored
 
 from . import __version__
+from ._buildenv import BuildEnvError
 from ._buildenv_manager import BuildEnvManager
 from ._config import DEFAULT_CONFIG_PATH, AuthModel
 from ._lockfile import Lockfile, calculate_lockfile
@@ -36,12 +35,9 @@ from ._option_sets import AuthOptions, EnvOptions
 BUILDENV_PATH = Path("build/.kraken/venv")
 BUILDSCRIPT_FILENAME = ".kraken.py"
 BUILD_SUPPORT_DIRECTORY = "build-support"
-DEFAULT_INTERPRETER_CONSTRAINT = ">=3.7"
 LOCK_FILENAME = ".kraken.lock"
 _FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: 731
 logger = logging.getLogger(__name__)
-print = partial(builtins.print, "[krakenw]", flush=True)
-eprint = partial(print, file=sys.stderr)
 
 
 def _get_argument_parser() -> argparse.ArgumentParser:
@@ -75,7 +71,7 @@ def _get_argument_parser() -> argparse.ArgumentParser:
     # NOTE (@NiklasRosenstein): If we combine "+" with remainder, we get options passed after the `cmd`
     #       passed directly into `args` without argparse treating it like an option. This is not the case
     #       when using `nargs=1` for `cmd`.
-    parser.add_argument("cmd", nargs="*", metavar="cmd", help="{a,auth,lock,l} or a kraken command")
+    parser.add_argument("cmd", nargs="*", metavar="cmd", help="{auth,list-pythons,lock} or a kraken command")
     parser.add_argument("args", nargs=argparse.REMAINDER, help="additional arguments")
     return parser
 
@@ -99,7 +95,7 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
     parser.parse_args(argv)
 
     if not manager.exists():
-        print("error: cannot lock without a build environment")
+        logger.error("cannot lock without a build environment")
         sys.exit(1)
 
     environment = manager.get_environment()
@@ -110,13 +106,13 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         extra_distributions.discard("pip")  # We'll always have that in a virtual env.
 
     if extra_distributions:
-        eprint("found extra distributions in build enviroment:", ", ".join(extra_distributions))
+        logger.warning("Found extra distributions in your Kraken build enviroment: %s", ", ".join(extra_distributions))
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
     manager.set_locked(lockfile)
 
-    eprint("lock file", "updated" if had_lockfile else "created", f"({project.lockfile_path})")
+    logger.info("Lock file %s (%s)", "updated" if had_lockfile else "created", os.path.relpath(project.lockfile_path))
     sys.exit(0)
 
 
@@ -180,6 +176,20 @@ def auth(prog: str, argv: list[str]) -> NoReturn:
     sys.exit(0)
 
 
+def list_pythons(prog: str, argv: list[str]) -> NoReturn:
+    import rich
+    from kraken.common import findpython
+
+    if argv:
+        logger.error(f"{prog}: unexpected arguments")
+        sys.exit(1)
+
+    interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
+    table = findpython.build_rich_table(interpreters)
+    rich.print(table)
+    sys.exit(0)
+
+
 def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
     """Print the status of the environent as a nicely formatted table."""
 
@@ -221,13 +231,13 @@ def _ensure_installed(
 
     if not exists:
         env_type = env_type or env_type or manager.get_environment().get_type()
-        operation = "initializing"
+        operation = "Initializing"
     elif upgrade:
-        operation = "upgrading"
+        operation = "Upgrading"
     elif reinstall:
-        operation = "reinstalling"
+        operation = "Reinstalling"
     else:
-        operation = "reusing"
+        operation = "Reusing"
 
     current_type = manager.get_environment().get_type()
     if env_type is not None:
@@ -235,7 +245,7 @@ def _ensure_installed(
         if not install and type_changed:
             install = True
             manager.remove()
-            operation = "re-initializing"
+            operation = "Re-initializing"
             reason = f"type changed from {current_type.name}"
         elif install and type_changed:
             reason = f"type changed from {current_type.name}"
@@ -246,40 +256,41 @@ def _ensure_installed(
             metadata.hash_algorithm
         ):
             install = True
-            operation = "re-initializing"
+            operation = "Re-initializing"
             reason = "outdated compared to lockfile"
         if not project.lockfile and metadata.requirements_hash != project.requirements.to_hash(metadata.hash_algorithm):
             install = True
-            operation = "re-initializing"
+            operation = "Re-initializing"
             reason = "outdated compared to requirements"
 
     if install:
         if not project.lockfile or upgrade:
             source_name = "requirements"
             source = project.requirements
+            source_file = project.requirements_path
             transitive = True
         else:
             source_name = "lock file"
             source = project.lockfile.to_pinned_requirement_spec()
+            source_file = project.lockfile_path
             transitive = False
 
         env_type = env_type or manager.get_environment().get_type()
-        eprint(
+        logger.info(
+            "%s build environment from %s (%s)%s",
             operation,
-            "build environment of type",
-            env_type.name,
-            "from",
             source_name,
-            f"({reason})" if reason else "",
+            os.path.relpath(source_file),
+            f" ({reason})" if reason else "",
         )
 
         tstart = time.perf_counter()
         manager.install(source, env_type, transitive)
         duration = time.perf_counter() - tstart
-        eprint(f"operation complete after {duration:.3f}s")
+        logger.info("Operation complete after %.3fs.", duration)
 
     else:
-        eprint(operation, "build environment of type", current_type.name)
+        logger.info("%s build environment of type %s", operation, current_type.name)
 
 
 class Project(NamedTuple):
@@ -303,55 +314,47 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
 
     project_info = GitAwareProjectFinder.default().find_project(directory)
     if not project_info:
-        eprint("error: no buildscript")
+        logger.error("no buildscript")
         sys.exit(1)
     script, runner = project_info
 
     # Load requirement spec from build script.
-    logger.debug('loading requirements from "%s" (runner: %s)', script, runner)
+    logger.debug('Loading requirements from "%s" (runner: %s)', script, runner)
 
-    # For backwards compatibility, support loading the requirements from the comment header.
-    requirements = deprecated_get_requirement_spec_from_file_header(script)
-    if requirements is not None:
-        eprint(
-            "error: The # ::requirements header is deprecated and support for it will be removed in a future version "
-            "of kraken-wrapper. Please use the `buildscript()` function from the `kraken.common` package "
-            "from now on.\n\n%s\n"
-            % indent(runner.get_buildscript_call_recommendation(requirements.to_metadata()), "    "),
+    # Extract the metadata provided by the buildscript() function call at the top of the build script.
+    if not runner.has_buildscript_call(script):
+        metadata = BuildscriptMetadata(requirements=["kraken-core"])
+        logger.error(
+            "Kraken build scripts must call the `buildscript()` function to be compatible with Kraken wrapper. "
+            "Please add something like this at the top of your build script:\n\n%s\n"
+            % indent(runner.get_buildscript_call_recommendation(metadata), "    "),
         )
+        sys.exit(1)
 
-    # Otherwise, extract the relevant data from the buildscript() call instead.
-    else:
-        if not runner.has_buildscript_call(script):
-            metadata = BuildscriptMetadata(requirements=["kraken-core"])
-            eprint(
-                "Kraken build scripts must call the `buildscript()` function to be compatible with Kraken wrapper. "
-                "Please add something like this at the top of your build script:\n\n%s\n"
-                % indent(runner.get_buildscript_call_recommendation(metadata), "    "),
-            )
-            sys.exit(1)
-
-        with BuildscriptMetadata.capture() as future:
-            runner.execute_script(script, {})
-        assert future.done()
-        requirements = RequirementSpec.from_metadata(future.result())
-
-    # Derive the lockfile path.
-    lockfile_path = script.with_suffix(".lock")
+    with BuildscriptMetadata.capture() as future:
+        runner.execute_script(script, {})
+    assert future.done()
+    requirements = RequirementSpec.from_metadata(future.result())
 
     # Load lockfile if it exists.
+    lockfile_path = script.with_suffix(".lock")
     if lockfile_path.is_file():
         logger.debug('loading lockfile from "%s"', lockfile_path)
         lockfile = Lockfile.from_path(lockfile_path)
         if outdated_check and lockfile and lockfile.requirements != requirements:
-            eprint(f'lock file "{lockfile_path}" is outdated compared to requirements in "{script}"')
-            eprint("consider updating the lock file with `krakenw --upgrade lock`")
+            logger.warning(
+                'Lock file "%s" is outdated compared to requirements in "%s". Consider updating the lock file with '
+                '"krakenw --upgrade lock"',
+                os.path.relpath(lockfile_path),
+                os.path.relpath(script),
+            )
     else:
         lockfile = None
 
     return Project(script.parent, script, requirements, lockfile_path, lockfile)
 
 
+@exit_on_known_exceptions(BuildEnvError, exit_code=2)
 def main() -> NoReturn:
     parser = _get_argument_parser()
     args = parser.parse_args()
@@ -363,6 +366,9 @@ def main() -> NoReturn:
         parser.print_usage()
         sys.exit(0)
 
+    # When we delegate to the Kraken CLI, we want to make sure it can detect that it has been invoked from the wrapper.
+    os.environ["KRAKENW"] = "1"
+
     # Convert the arguments we defined in the argument parser to the actual subcommand that we want
     # delegated.
     cmd: str | None = args.cmd[0] if args.cmd else None
@@ -371,6 +377,9 @@ def main() -> NoReturn:
     if cmd in ("a", "auth"):
         # The `auth` comand does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv)
+
+    if cmd in ("list-pythons",):
+        list_pythons(f"{parser.prog} list-pythons", argv)
 
     # The project details and build environment manager are relevant for any command that we are delegating.
     # This includes the built-in `lock` command.
@@ -384,14 +393,14 @@ def main() -> NoReturn:
 
     if env_options.status:
         if cmd or argv:
-            eprint("error: --status option must be used alone")
+            logger.error("--status option must be used alone")
             sys.exit(1)
         _print_env_status(manager, project)
         sys.exit(0)
 
     if env_options.uninstall:
         if cmd or argv:
-            eprint("error: --uninstall option must be used alone")
+            logger.error("--uninstall option must be used alone")
             sys.exit(1)
         manager.remove()
         sys.exit(0)
@@ -413,9 +422,9 @@ def main() -> NoReturn:
 
     else:
         if project.directory.absolute() != Path.cwd():
-            argv = ["-p", str(project.directory)] + argv
+            argv += ["-p", str(project.directory)]
         command = [cmd, *argv]
-        eprint("$", " ".join(map(shlex.quote, ["kraken"] + command)))
+        logger.info("$ %s", " ".join(map(shlex.quote, ["kraken"] + command)))
         environment = manager.get_environment()
         environment.dispatch_to_kraken_cli(command)
 

@@ -4,15 +4,18 @@
 from __future__ import annotations
 
 import abc
+import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 from kraken.core import TaskStatus
 
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
+
+logger = logging.getLogger(__name__)
 
 
 class PythonBuildSystem(abc.ABC):
@@ -31,9 +34,16 @@ class PythonBuildSystem(abc.ABC):
         :raise NotImplementedError: If :meth:`supports_managed_environment` returns `False`.
         """
 
-    @abc.abstractmethod
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
         """A chance to permanently update the Pyproject configuration."""
+
+        handler = self.get_pyproject_reader(pyproject)
+        package_sources = [x for x in settings.package_indexes.values() if x.is_package_source]
+        if package_sources:
+            try:
+                handler.set_package_indexes(package_sources)
+            except NotImplementedError:
+                logger.debug("build system %r does not support managing package indexes", self.name)
 
     @abc.abstractmethod
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
@@ -57,6 +67,10 @@ class PythonBuildSystem(abc.ABC):
         :param output_directory: The directory where the distributions should be placed.
         :param as_version: A version number for the built distributions.
         """
+
+    @abc.abstractmethod
+    def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
+        """Return an object able to read the pyproject file depending on the build system."""
 
 
 class ManagedEnvironment(abc.ABC):
@@ -106,5 +120,10 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         from .maturin import MaturinPythonBuildSystem
 
         return MaturinPythonBuildSystem(project_directory)
+
+    if "pdm" in pyproject_content:
+        from .pdm import PDMPythonBuildSystem
+
+        return PDMPythonBuildSystem(project_directory)
 
     return None

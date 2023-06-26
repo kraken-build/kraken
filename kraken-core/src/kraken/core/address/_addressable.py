@@ -10,5 +10,6 @@ class Addressable(Protocol):
     address of any such object is expected to be concrete (see #Address.is_concrete()).
     """
 
-    #: The concrete address of the object.
-    address: Address
+    @property
+    def address(self) -> Address:
+        raise NotImplementedError

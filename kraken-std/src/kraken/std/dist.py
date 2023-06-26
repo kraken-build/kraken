@@ -9,7 +9,7 @@ import zipfile
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Union, cast
+from typing import Any, Mapping, Sequence, Union, cast
 
 import databind.json
 from kraken.core import Project, Property, Task, TaskSet
@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class IndividualDistOptions:
-    arcname: Optional[str] = None
+    arcname: str | None = None
     exclude: Sequence[str] = ()
-    include: Optional[Sequence[str]] = None
+    include: Sequence[str] | None = None
 
 
 @dataclass
@@ -49,7 +49,7 @@ class DistributionTask(Task):
     prefix: Property[str]
 
     #: A list of resources to include.
-    resources: Property[List[ConfiguredResource]] = Property.default_factory(list)
+    resources: Property[list[ConfiguredResource]] = Property.default_factory(list)
 
     #: A resource that describes the output file.
     _output_file_resource: Property[Resource] = Property.output()
@@ -246,18 +246,16 @@ def dist(
         )
     )
 
-    return project.do(
-        name,
-        DistributionTask,
-        resources=resources,
-        output_file=output_file,
-        archive_type=archive_type,
-        prefix=prefix,
-    )
+    dist_task = project.task(name, DistributionTask)
+    dist_task.resources = resources
+    dist_task.output_file = output_file
+    dist_task.archive_type = archive_type
+    dist_task.prefix = prefix
+    return dist_task
 
 
 def get_configured_resources(
-    resources: Dict[Task, list[Resource]],
+    resources: dict[Task, list[Resource]],
     dependencies_map: dict[str, IndividualDistOptions],
     dependencies_set: TaskSet,
 ) -> list[ConfiguredResource]:

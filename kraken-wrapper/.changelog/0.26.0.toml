@@ -1,0 +1,15 @@
+release-date = "2023-06-19"
+
+[[entries]]
+id = "8f52da53-4be9-41f9-b2d6-3ac9b8af1d12"
+type = "improvement"
+description = "Make better use of logging and hide the logs of creating a virtual environment, upgrading Pip and installing dependencies unless the operations fail."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/45"
+
+[[entries]]
+id = "4f43421e-0ab9-4fc7-bdc8-900350470745"
+type = "breaking change"
+description = "Remove support for specifying Kraken build script requirements in the hash-comment (#) format. Only the `buildscript()` call from `kraken.common` is now supported."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/45"

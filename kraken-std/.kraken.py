@@ -1,3 +1,5 @@
+# ::krakenw-root
+
 from __future__ import annotations
 
 from kraken.common import buildscript
@@ -12,7 +14,7 @@ from kraken.std import python
 from kraken.std.git import git_describe
 
 project = Project.current()
-python.pyupgrade(additional_files=[__file__, project.directory / "examples"], keep_runtime_typing=True)
+python.pyupgrade(additional_files=[__file__, project.directory / "examples"])
 python.pycln()
 python.black(additional_files=[__file__, project.directory / "examples"])
 python.flake8()
@@ -26,6 +28,7 @@ python.pytest(
     group="integrationTest",
 )
 python.install()
+# python.info()
 
 (
     python.python_settings()

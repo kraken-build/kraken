@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
@@ -14,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class BuildTask(Task):
-    build_system: Property[Optional[PythonBuildSystem]]
+    build_system: Property[PythonBuildSystem | None]
     output_directory: Property[Path]
-    as_version: Property[Optional[str]] = Property.config(default=None)
-    output_files: Property[List[Path]] = Property.output()
+    as_version: Property[str | None] = Property.config(default=None)
+    output_files: Property[list[Path]] = Property.output()
 
     # Task
 
@@ -50,12 +49,7 @@ def build(
     The build task relies on the build system configured in the Python project settings."""
 
     project = project or Project.current()
-    task = project.do(
-        name,
-        BuildTask,
-        default=False,
-        group=group,
-        build_system=Supplier.of_callable(lambda: python_settings(project).build_system),
-        as_version=as_version,
-    )
+    task = project.task(name, BuildTask, group=group)
+    task.build_system = Supplier.of_callable(lambda: python_settings(project).build_system)
+    task.as_version = as_version
     return task

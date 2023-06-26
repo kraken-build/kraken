@@ -8,7 +8,7 @@ import subprocess
 from dataclasses import dataclass, fields
 from enum import Enum
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import tomli
 import tomli_w
@@ -39,9 +39,10 @@ class Artifact:
     name: str
     path: str
     kind: ArtifactKind
+    manifest_path: str
 
     def to_json(self) -> dict[str, str]:
-        return {"name": self.name, "path": self.path, "kind": str(self.kind)}
+        return {"name": self.name, "path": self.path, "kind": str(self.kind), "manifest_path": self.manifest_path}
 
 
 @dataclass
@@ -106,9 +107,13 @@ class CargoMetadata:
                 )
                 for target in package["targets"]:
                     if "bin" in target["kind"]:
-                        artifacts.append(Artifact(target["name"], target["src_path"], ArtifactKind.BIN))
+                        artifacts.append(
+                            Artifact(target["name"], target["src_path"], ArtifactKind.BIN, package["manifest_path"])
+                        )
                     elif "lib" in target["kind"]:
-                        artifacts.append(Artifact(target["name"], target["src_path"], ArtifactKind.LIB))
+                        artifacts.append(
+                            Artifact(target["name"], target["src_path"], ArtifactKind.LIB, package["manifest_path"])
+                        )
 
         return cls(path, data, workspace_members, artifacts, Path(data["target_directory"]))
 
@@ -156,7 +161,7 @@ class WorkspacePackage:
 @dataclass
 class Workspace:
     package: WorkspacePackage | None
-    members: List[str] | None
+    members: list[str] | None
     unhandled: dict[str, Any] | None
 
     @classmethod

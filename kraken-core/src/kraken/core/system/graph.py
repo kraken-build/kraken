@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Sequence, TypeVar, cast
+from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, TypeVar, cast
 
 from kraken.common import not_none
 from networkx import DiGraph, restricted_view, transitive_reduction
 from networkx.algorithms import topological_sort
 from nr.stream import Stream
 
+from kraken.core.address import Address
 from kraken.core.system.executor import Graph
 from kraken.core.system.task import GroupTask, Task, TaskStatus
 
@@ -46,18 +47,18 @@ class TaskGraph(Graph):
         self._digraph = DiGraph()
 
         # Keep track of task execution results.
-        self._results: dict[str, TaskStatus] = {}
+        self._results: dict[Address, TaskStatus] = {}
 
         # All tasks that have a successful or skipped status are stored here.
-        self._ok_tasks: set[str] = set()
+        self._ok_tasks: set[Address] = set()
 
         # All tasks that have a failed status are stored here.
-        self._failed_tasks: set[str] = set()
+        self._failed_tasks: set[Address] = set()
 
         # Keep track of the tasks that returned TaskStatus.STARTED. That means the task is a background task, and
         # if the TaskGraph is deserialized from a state file to continue the build, background tasks need to be
         # reset so they start again if another task requires them.
-        self._background_tasks: set[str] = set()
+        self._background_tasks: set[Address] = set()
 
         if populate:
             self.populate()
@@ -70,22 +71,23 @@ class TaskGraph(Graph):
 
     # Low level internal API
 
-    def _get_task(self, task_path: str) -> Task | None:
-        data = self._digraph.nodes.get(task_path)
+    def _get_task(self, addr: Address) -> Task | None:
+        assert isinstance(addr, Address), type(addr)
+        data = self._digraph.nodes.get(addr)
         if data is None:
             return None
         try:
             return cast(Task, data["data"])
         except KeyError:
-            raise RuntimeError(f"An unexpected error occurred when fetching the task by address {task_path!r}.")
+            raise RuntimeError(f"An unexpected error occurred when fetching the task by address {addr!r}.")
 
     def _add_task(self, task: Task) -> None:
-        self._digraph.add_node(task.path, data=task)
+        self._digraph.add_node(task.address, data=task)
         for rel in task.get_relationships():
-            if rel.other_task.path not in self._digraph.nodes:
+            if rel.other_task.address not in self._digraph.nodes:
                 self._add_task(rel.other_task)
             a, b = (task, rel.other_task) if rel.inverse else (rel.other_task, task)
-            self._add_edge(a.path, b.path, rel.strict, False)
+            self._add_edge(a.address, b.address, rel.strict, False)
 
             # If this relationship is one implied through group membership, we're done.
             if isinstance(task, GroupTask) and not rel.inverse and rel.other_task in task.tasks:
@@ -98,7 +100,7 @@ class TaskGraph(Graph):
                 downstream_tasks = list(downstream.tasks)
                 while downstream_tasks:
                     member = downstream_tasks.pop(0)
-                    if member.path not in self._digraph.nodes:
+                    if member.address not in self._digraph.nodes:
                         self._add_task(member)
                     if isinstance(member, GroupTask):
                         downstream_tasks += member.tasks
@@ -107,15 +109,15 @@ class TaskGraph(Graph):
                     # NOTE(niklas.rosenstein): When a group is nested in another group, we would end up declaring
                     #       that the group depends on itself. That's obviously not supposed to happen. :)
                     if upstream != member:
-                        self._add_edge(upstream.path, member.path, rel.strict, True)
+                        self._add_edge(upstream.address, member.address, rel.strict, True)
 
-    def _get_edge(self, task_a: str, task_b: str) -> _Edge | None:
+    def _get_edge(self, task_a: Address, task_b: Address) -> _Edge | None:
         data = self._digraph.edges.get((task_a, task_b)) or self._digraph.edges.get((task_a, task_b))
         if data is None:
             return None
         return cast(_Edge, data["data"])
 
-    def _add_edge(self, task_a: str, task_b: str, strict: bool, implicit: bool) -> None:
+    def _add_edge(self, task_a: Address, task_b: Address, strict: bool, implicit: bool) -> None:
         # add_edge() would implicitly add a node, we only want to do that once the node actually exists in
         # the graph though.
         assert task_a in self._digraph.nodes, f"{task_a!r} not yet in the graph"
@@ -127,43 +129,43 @@ class TaskGraph(Graph):
 
     # High level internal API
 
-    def _get_required_tasks(self, goals: Iterable[Task]) -> set[str]:
+    def _get_required_tasks(self, goals: Iterable[Task]) -> set[Address]:
         """Internal. Return the set of tasks that are required transitively from the goal tasks."""
 
-        def _is_empty_group_subtree(task_path: str) -> bool:
+        def _is_empty_group_subtree(addr: Address) -> bool:
             """
-            Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty or only depends on
+            Returns `True` if the task pointed to by *addr* is a GroupTask and it is empty or only depends on
             other empty groups.
             """
 
-            def _is_empty_group(task_path: str) -> bool:
-                """Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty."""
+            def _is_empty_group(addr: Address) -> bool:
+                """Returns `True` if the task pointed to by *addr* is a GroupTask and it is empty."""
 
-                task = self._get_task(task_path)
+                task = self._get_task(addr)
                 if not isinstance(task, GroupTask):
                     return False
                 return len(task.tasks) == 0
 
-            def _is_empty_group_or_subtree(task_path: str) -> bool:
-                """Returns `True` if the task pointed to by *task_path* is a GroupTask and it is empty or only depends
+            def _is_empty_group_or_subtree(addr: Address) -> bool:
+                """Returns `True` if the task pointed to by *addr* is a GroupTask and it is empty or only depends
                 on other empty groups."""
 
-                task = self._get_task(task_path)
+                task = self._get_task(addr)
                 if not isinstance(task, GroupTask):
                     return False
-                for pred in self._digraph.predecessors(task_path):
+                for pred in self._digraph.predecessors(addr):
                     if not _is_empty_group_or_subtree(pred):
                         return False
                 return True
 
-            return _is_empty_group(task_path) or _is_empty_group_or_subtree(task_path)
+            return _is_empty_group(addr) or _is_empty_group_or_subtree(addr)
 
-        def _recurse_task(task_path: str, visited: set[str], path: list[str]) -> None:
-            if task_path in path:
-                raise RuntimeError(f"encountered a dependency cycle: {' → '.join(path)}")
-            visited.add(task_path)
-            for pred in self._digraph.predecessors(task_path):
-                if not_none(self._get_edge(pred, task_path)).strict:
+        def _recurse_task(addr: Address, visited: set[Address], path: list[Address]) -> None:
+            if addr in path:
+                raise RuntimeError(f"encountered a dependency cycle: {' → '.join(map(str, path))}")
+            visited.add(addr)
+            for pred in self._digraph.predecessors(addr):
+                if not_none(self._get_edge(pred, addr)).strict:
                     # If the thing we want to pick up is a GroupTask and it doesn't have any members or other
                     # dependencies that are not also empty groups, we can skip it. It really doesn't need to be in the
                     # build graph.
@@ -171,37 +173,37 @@ class TaskGraph(Graph):
                         # Check if the group is empty or only depends on other empty groups.
                         if _is_empty_group_subtree(pred):
                             continue
-                    _recurse_task(pred, visited, path + [task_path])
+                    _recurse_task(pred, visited, path + [addr])
 
-        active_tasks: set[str] = set()
+        active_tasks: set[Address] = set()
         for task in goals:
-            _recurse_task(task.path, active_tasks, [])
+            _recurse_task(task.address, active_tasks, [])
 
         return active_tasks
 
-    def _remove_nodes_keep_transitive_edges(self, nodes: Iterable[str]) -> None:
+    def _remove_nodes_keep_transitive_edges(self, nodes: Iterable[Address]) -> None:
         """Internal. Remove nodes from the graph, but ensure that transitive dependencies are kept in tact."""
 
-        for task_path in nodes:
-            for in_task_path in self._digraph.predecessors(task_path):
-                in_edge = not_none(self._get_edge(in_task_path, task_path))
-                for out_task_path in self._digraph.successors(task_path):
-                    out_edge = not_none(self._get_edge(task_path, out_task_path))
+        for addr in nodes:
+            for in_task_path in self._digraph.predecessors(addr):
+                in_edge = not_none(self._get_edge(in_task_path, addr))
+                for out_task_path in self._digraph.successors(addr):
+                    out_edge = not_none(self._get_edge(addr, out_task_path))
                     self._add_edge(
                         in_task_path,
                         out_task_path,
                         strict=in_edge.strict or out_edge.strict,
                         implicit=in_edge.implicit and out_edge.implicit,
                     )
-            self._digraph.remove_node(task_path)
+            self._digraph.remove_node(addr)
 
     def _get_ready_graph(self) -> DiGraph:
         """Updates the ready graph. Remove all ok tasks (successful or skipped) and any non-strict dependencies
         (edges) on failed tasks."""
 
-        removable_edges: set[tuple[str, str]] = set()
+        removable_edges: set[tuple[Address, Address]] = set()
 
-        def set_non_strict_edge_for_removal(u: str, v: str) -> None:
+        def set_non_strict_edge_for_removal(u: Address, v: Address) -> None:
             out_edge = not_none(self._get_edge(u, v))
             if not out_edge.strict:
                 removable_edges.add((u, v))
@@ -213,7 +215,7 @@ class TaskGraph(Graph):
                 if isinstance(out_task, GroupTask):
                     # If the successor is a group task, check that the all of the groups tasks are either successful
                     # or failed, and then remove any non strict dependency (edge) on said group task.
-                    group_task_paths = {task.path for task in out_task.tasks}
+                    group_task_paths = {task.address for task in out_task.tasks}
                     if not group_task_paths.issubset(self._failed_tasks | self._ok_tasks):
                         continue
 
@@ -241,13 +243,15 @@ class TaskGraph(Graph):
         return self
 
     def get_edge(self, pred: Task, succ: Task) -> _Edge:
-        return not_none(self._get_edge(pred.path, succ.path), f"edge does not exist ({pred.path} --> {succ.path})")
+        return not_none(
+            self._get_edge(pred.address, succ.address), f"edge does not exist ({pred.address} --> {succ.address})"
+        )
 
-    def get_predecessors(self, task: Task, ignore_groups: bool = False) -> List[Task]:
+    def get_predecessors(self, task: Task, ignore_groups: bool = False) -> list[Task]:
         """Returns the predecessors of the task in the original full build graph."""
 
         result = []
-        for task in (not_none(self._get_task(task_path)) for task_path in self._digraph.predecessors(task.path)):
+        for task in (not_none(self._get_task(addr)) for addr in self._digraph.predecessors(task.address)):
             if ignore_groups and isinstance(task, GroupTask):
                 result += task.tasks
             else:
@@ -257,7 +261,7 @@ class TaskGraph(Graph):
     def get_status(self, task: Task) -> TaskStatus | None:
         """Return the status of a task."""
 
-        return self._results.get(task.path)
+        return self._results.get(task.address)
 
     def populate(self, goals: Iterable[Task] | None = None) -> None:
         """Populate the graph with the tasks from the context. This need only be called if the graph was
@@ -273,11 +277,11 @@ class TaskGraph(Graph):
         if goals is None:
             for project in self.context.iter_projects():
                 for task in project.tasks().values():
-                    if task.path not in self._digraph.nodes:
+                    if task.address not in self._digraph.nodes:
                         self._add_task(task)
         else:
             for task in goals:
-                if task.path not in self._digraph.nodes:
+                if task.address not in self._digraph.nodes:
                     self._add_task(task)
 
     def trim(self, goals: Sequence[Task]) -> TaskGraph:
@@ -319,8 +323,8 @@ class TaskGraph(Graph):
         self._failed_tasks.update(other._failed_tasks)
 
         for task in self.tasks():
-            status_a = self._results.get(task.path)
-            status_b = other._results.get(task.path)
+            status_a = self._results.get(task.address)
+            status_b = other._results.get(task.address)
             if status_a is not None and status_b is not None and status_a.type != status_b.type:
                 resolved_status: TaskStatus | None = status_a if status_a.is_not_ok() else status_b
             else:
@@ -334,18 +338,20 @@ class TaskGraph(Graph):
         called when a build graph is resumed in a secondary execution to ensure that background tasks are active
         for the tasks that require them."""
 
-        reset_tasks: set[str] = set()
+        reset_tasks: set[Address] = set()
         for task in self.tasks(pending=True):
             for pred in self.get_predecessors(task, ignore_groups=True):
-                if pred.path in self._background_tasks:
-                    self._background_tasks.discard(pred.path)
-                    self._ok_tasks.discard(pred.path)
-                    self._failed_tasks.discard(pred.path)
-                    self._results.pop(pred.path, None)
-                    reset_tasks.add(pred.path)
+                if pred.address in self._background_tasks:
+                    self._background_tasks.discard(pred.address)
+                    self._ok_tasks.discard(pred.address)
+                    self._failed_tasks.discard(pred.address)
+                    self._results.pop(pred.address, None)
+                    reset_tasks.add(pred.address)
 
         if reset_tasks:
-            logger.info("Reset the status of %d background task(s): %s", len(reset_tasks), " ".join(reset_tasks))
+            logger.info(
+                "Reset the status of %d background task(s): %s", len(reset_tasks), " ".join(map(str, reset_tasks))
+            )
 
     def restart(self) -> None:
         """Discard the results of all tasks."""
@@ -369,26 +375,20 @@ class TaskGraph(Graph):
         :param failed: Return only failed tasks.
         :param not_executed: Return only not executed tasks (i.e. downstream of failed tasks)"""
 
-        tasks = (not_none(self._get_task(task_path)) for task_path in self._digraph)
+        tasks = (not_none(self._get_task(addr)) for addr in self._digraph)
         if goals:
-            tasks = (t for t in tasks if self._digraph.out_degree(t.path) == 0)
+            tasks = (t for t in tasks if self._digraph.out_degree(t.address) == 0)
         if pending:
-            tasks = (t for t in tasks if t.path not in self._results)
+            tasks = (t for t in tasks if t.address not in self._results)
         if failed:
-            tasks = (t for t in tasks if t.path in self._results and self._results[t.path].is_failed())
+            tasks = (t for t in tasks if t.address in self._results and self._results[t.address].is_failed())
         if not_executed:
             tasks = (
                 t
                 for t in tasks
                 if (
-                    (t.path not in self._results)
-                    or (
-                        t.path in self._results
-                        and not self._results[t.path].is_succeeded()
-                        and not self._results[t.path].is_failed()
-                        and not self._results[t.path].is_skipped()
-                        and not self._results[t.path].is_up_to_date()
-                    )
+                    (t.address not in self._results)
+                    or (t.address in self._results and self._results[t.address].is_pending())
                 )
             )
         return tasks
@@ -399,7 +399,7 @@ class TaskGraph(Graph):
         :param all: Return the execution order of all tasks, not just from the target subgraph."""
 
         order = topological_sort(self._digraph if all else self._get_ready_graph())
-        return (not_none(self._get_task(task_path)) for task_path in order)
+        return (not_none(self._get_task(addr)) for addr in order)
 
     # Graph
 
@@ -413,7 +413,7 @@ class TaskGraph(Graph):
         root_set = (
             node for node in ready_graph.nodes if ready_graph.in_degree(node) == 0 and node not in self._results
         )
-        tasks = [not_none(self._get_task(task_path)) for task_path in root_set]
+        tasks = [not_none(self._get_task(addr)) for addr in root_set]
         if not tasks:
             return []
 
@@ -433,30 +433,32 @@ class TaskGraph(Graph):
         Never returns group tasks."""
 
         result = []
-        for task in (not_none(self._get_task(task_path)) for task_path in self._digraph.successors(task.path)):
+        for task in (not_none(self._get_task(addr)) for addr in self._digraph.successors(task.address)):
             if ignore_groups and isinstance(task, GroupTask):
                 result += task.tasks
             else:
                 result.append(task)
         return result
 
-    def get_task(self, task_path: str) -> Task:
+    def get_task(self, addr: Address | str) -> Task:
+        if isinstance(addr, str):
+            addr = Address(addr)
         if self._parent is None:
-            return not_none(self._get_task(task_path))
-        return self.root.get_task(task_path)
+            return not_none(self._get_task(addr))
+        return self.root.get_task(addr)
 
     def set_status(self, task: Task, status: TaskStatus, *, _force: bool = False) -> None:
         """Sets the status of a task, marking it as executed."""
 
-        if not _force and (task.path in self._results and not self._results[task.path].is_started()):
-            raise RuntimeError(f"already have a status for task {task.path!r}")
-        self._results[task.path] = status
+        if not _force and (task.address in self._results and not self._results[task.address].is_started()):
+            raise RuntimeError(f"already have a status for task `{task.address}`")
+        self._results[task.address] = status
         if status.is_started():
-            self._background_tasks.add(task.path)
+            self._background_tasks.add(task.address)
         if status.is_ok():
-            self._ok_tasks.add(task.path)
+            self._ok_tasks.add(task.address)
         if status.is_failed():
-            self._failed_tasks.add(task.path)
+            self._failed_tasks.add(task.address)
 
     def is_complete(self) -> bool:
         """Returns `True` if, an only if, all tasks in the target subgraph have a non-failure result."""

@@ -1,0 +1,20 @@
+[[entries]]
+id = "76d27430-6005-4d3a-a219-ea99ccdec0e1"
+type = "improvement"
+description = "Now sets the `KRAKENW=1` environment variable to allow the Kraken-Core CLI to detect if it is run through `krakenw`."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/49"
+
+[[entries]]
+id = "5acaa1a1-946f-421f-9622-4014ccf83752"
+type = "fix"
+description = "Fixed passing the `-p` option to the `kraken` command by appending it to the arguments, allowing to use `krakenw query` subcommands from subdirectories."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "6cb1e252-b8dd-4c0d-b37a-3fd6ddfef7be"
+type = "feature"
+description = "Treat `# ::krakenw-root` comment in build scripts to avoid searching up higher for the project root directory."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/54"

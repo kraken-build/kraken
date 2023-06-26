@@ -36,22 +36,12 @@ class LoggingOptions:
             quietness=args.quietness,
         )
 
-    def init_logging(self, format: "str | None" = None) -> None:
+    def init_logging(self) -> None:
         import logging
 
-        from termcolor import colored
+        from rich.logging import RichHandler
 
         verbosity = self.verbosity - self.quietness
-
-        if format is None:
-            format = " | ".join(
-                (
-                    colored("%(levelname)-7s", "magenta"),
-                    colored("%(name)-24s", "blue"),
-                    colored("%(message)s", "cyan"),
-                )
-            )
-
         if verbosity > 1:
             level = logging.DEBUG
         elif verbosity > 0:
@@ -63,4 +53,4 @@ class LoggingOptions:
         else:
             assert False, verbosity
 
-        logging.basicConfig(level=level, format=format)
+        logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler()])

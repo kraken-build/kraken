@@ -24,4 +24,6 @@ class LoginTask(Task):
 
 def login(*, name: str = "python.login", project: Project | None = None) -> LoginTask:
     project = project or Project.current()
-    return project.do(name, LoginTask, settings=python_settings(project))
+    task = project.task(name, LoginTask)
+    task.settings = python_settings(project)
+    return task

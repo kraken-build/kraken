@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import subprocess as sp
-from typing import Any
 
 from kraken.core import Project, Task, TaskStatus
 
@@ -26,11 +25,11 @@ class BufLintTask(Task):
         return TaskStatus.from_exit_code(command, result)
 
 
-def buf_format(*, name: str = "buf.format", project: Project | None = None, **kwargs: Any) -> BufFormatTask:
+def buf_format(*, name: str = "buf.format", project: Project | None = None) -> BufFormatTask:
     project = project or Project.current()
-    return project.do(name, BufFormatTask, group="fmt", **kwargs)
+    return project.task(name, BufFormatTask, group="fmt")
 
 
-def buf_lint(*, name: str = "buf.lint", project: Project | None = None, **kwargs: Any) -> BufLintTask:
+def buf_lint(*, name: str = "buf.lint", project: Project | None = None) -> BufLintTask:
     project = project or Project.current()
-    return project.do(name, BufLintTask, group="lint", **kwargs)
+    return project.task(name, BufLintTask, group="lint")

@@ -5,14 +5,17 @@ import shutil
 import tarfile
 import unittest.mock
 from pathlib import Path
+from typing import Type, TypeVar
 
 import pytest
 import tomli
 from kraken.common import not_none
-from kraken.core import Context
-from kraken.core.testing import kraken_project
+from kraken.core import Context, Project
 
 from kraken.std import python
+from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
+from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
+from kraken.std.python.pyproject import Pyproject
 from tests.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
@@ -39,7 +42,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
     index_url = f"http://localhost:{PYPISERVER_PORT}/simple"
     docker_service_manager.run(
         "pypiserver/pypiserver:latest",
-        ["--passwords", "/.htpasswd", "-a", "update"],
+        ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
         ports=[f"{PYPISERVER_PORT}:8080"],
         volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
         detach=True,
@@ -52,20 +55,15 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
 @pytest.mark.parametrize(
     "project_dir",
     [
+        "poetry-project",
+        "slap-project",
         pytest.param(
-            "poetry-project",
+            "pdm-project",
             marks=pytest.mark.xfail(
-                reason="""
-                    There appears to be an issue with Poetry 1.2.x and Pypiserver where the hashsums don't add up.
-                    Example error message:
-
-                        Retrieved digest for link poetry_project-0.1.0-py3-none-any.whl(md5:6340bed3198ccf181970f82cf6220f78)
-                        not in poetry.lock metadata ['sha256:a2916a4e6ccb4c2f43f0ee9fb7fb1331962b9ec061f967c642fcfb9dbda435f3',
-                        'sha256:80a47720d855408d426e835fc6088ed3aba2d0238611e16b483efe8e063d71ee']
-                """  # noqa: E501
+                reason="PDM seems to have an issue with getting the right hash of the package from pypiserver "
+                "when locking."
             ),
         ),
-        "slap-project",
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -95,6 +93,10 @@ def test__python_project_install_lint_and_publish(
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
     kraken_ctx.load_project(directory=tempdir / consumer_dir)
+
+    # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
+    kraken_ctx.execute([":apply"])
+
     kraken_ctx.execute([":python.install"])
     # TODO (@NiklasRosenstein): Test importing the consumer project.
 
@@ -102,23 +104,27 @@ def test__python_project_install_lint_and_publish(
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_upgrade_python_version_string(
     kraken_ctx: Context,
-    tempdir: Path,
+    kraken_project: Project,
 ) -> None:
+    tempdir = kraken_project.directory
+
     project_dir = "version-project"
-    tempdir /= project_dir
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
     original_dir = Path(__file__).parent / "data" / project_dir
-    project_dist = tempdir / "build/python-dist"
+    project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
-    shutil.copytree(original_dir, tempdir)
+    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
-    Context.__init__(kraken_ctx, tempdir / "build")
-    with kraken_project(kraken_ctx, tempdir) as loc_project:
-        local_build_system = python.buildsystem.detect_build_system(tempdir)
-        python.settings.python_settings(project=loc_project, build_system=local_build_system)
-        python.build(as_version=build_as_version, project=loc_project)
+
+    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    local_build_system = python.buildsystem.detect_build_system(tempdir)
+    assert local_build_system is not None
+    assert local_build_system.get_pyproject_reader(pyproject) is not None
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "version-project"
+    python.settings.python_settings(project=kraken_project, build_system=local_build_system)
+    python.build(as_version=build_as_version, project=kraken_project)
     kraken_ctx.execute([":build"])
 
     # Check if files that were supposed to be temporarily modified are the same after the build.
@@ -135,3 +141,38 @@ def test__python_project_upgrade_python_version_string(
         conf_file = tar.extractfile(f"version_project-{build_as_version}/pyproject.toml")
         assert conf_file is not None, ".tar.gz file does not contain an 'pyproject.toml'"
         assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
+
+
+M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
+
+
+@pytest.mark.parametrize(
+    "project_dir, reader, expected_python_version",
+    [
+        ("poetry-project", PoetryPyprojectHandler, "^3.7"),
+        ("slap-project", PoetryPyprojectHandler, "^3.6"),
+        ("pdm-project", PdmPyprojectHandler, ">=3.9"),
+    ],
+)
+@unittest.mock.patch.dict(os.environ, {})
+def test__python_pyproject_reads_correct_data(
+    project_dir: str,
+    reader: Type[M],
+    expected_python_version: str,
+    kraken_project: Project,
+) -> None:
+    # Copy the projects to the temporary directory.
+    new_dir = kraken_project.directory / project_dir
+    shutil.copytree(Path(__file__).parent / "data" / project_dir, new_dir)
+
+    pyproject = Pyproject.read(new_dir / "pyproject.toml")
+    local_build_system = python.buildsystem.detect_build_system(new_dir)
+    assert local_build_system is not None
+    assert local_build_system.get_pyproject_reader(pyproject) is not None
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
+    assert local_build_system.get_pyproject_reader(pyproject).get_python_version_constraint() == expected_python_version
+
+    spec = reader(pyproject)
+
+    assert spec.get_name() == project_dir
+    assert spec.get_python_version_constraint() == expected_python_version

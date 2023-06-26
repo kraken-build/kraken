@@ -15,14 +15,12 @@ from itertools import chain
 from pathlib import Path
 from typing import Any, NoReturn, Optional
 
-import pretty_errors  # type: ignore
 from kraken.common import (
     BuildscriptMetadata,
     CurrentDirectoryProjectFinder,
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
-    deprecated_get_requirement_spec_from_file_header,
     get_terminal_width,
     not_none,
     propagate_argparse_formatter_to_subparser,
@@ -32,8 +30,7 @@ from nr.io.graphviz.render import render_to_browser
 from nr.io.graphviz.writer import GraphvizWriter
 from termcolor import colored
 
-from kraken.core import __version__
-from kraken.core.address import Address
+from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
 from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
@@ -44,70 +41,16 @@ from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import GroupTask, Task, TaskStatus
 
-pretty_errors.configure(
-    separator_character=pretty_errors.CYAN + "≈",
-    filename_display=pretty_errors.FILENAME_COMPACT,
-    line_number_first=False,
-    lines_before=2,
-    lines_after=2,
-    display_link=True,
-    display_locals=False,
-    display_arrow=True,
-    display_trace_locals=False,
-    display_timestamp=False,
-    prefix=pretty_errors.MAGENTA
-    + "\nLet no joyful voice be heard! Let no man look up at the sky with hope!"
-    + " And let this day be cursed by we who ready to wake... the Kraken!"
-    + pretty_errors.default_config.line_color
-    + "\nAlas sailor, there is nought you can do. Please check your Kraken build"
-    + " script, and then report this stacktrace to the Kraken repository:\n"
-    + pretty_errors.CYAN
-    + "https://github.com/kraken-build/kraken-build/issues\n\n"
-    + pretty_errors.MAGENTA
-    + "> "
-    + pretty_errors.default_config.line_color
-    + "Kraken Version: "
-    + pretty_errors.BRIGHT_MAGENTA
-    + __version__
-    + pretty_errors.MAGENTA
-    + "\n>",
-    infix=pretty_errors.MAGENTA + "> ",
-    arrow_head_character="  ↑",
-    arrow_tail_character=" ",
-    trace_lines_before=0,
-    trace_lines_after=0,
-    header_color=pretty_errors.default_config.line_color,
-    line_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
-    link_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
-    code_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
-    line_number_color=pretty_errors.MAGENTA + "#" + pretty_errors.default_config.line_color,
-    filename_color=pretty_errors.MAGENTA + "> " + pretty_errors.default_config.line_color,
-    exception_color=pretty_errors.CYAN + "> " + pretty_errors.YELLOW,
-    exception_arg_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
-    exception_file_color=pretty_errors.MAGENTA + "> " + pretty_errors.YELLOW,
-    function_color=pretty_errors.CYAN,
-    local_name_color=pretty_errors.CYAN + "> " + pretty_errors.default_config.line_color,
-    local_value_color=pretty_errors.YELLOW,
-    inner_exception_message=pretty_errors.MAGENTA
-    + "\n> "
-    + pretty_errors.YELLOW
-    + "WARNING: "
-    + pretty_errors.default_config.line_color
-    + "The above exception was the direct cause of the following exception:\n",
-    syntax_error_color=pretty_errors.MAGENTA,
-    arrow_head_color=pretty_errors.CYAN,
-    inner_exception_separator=True,
-    show_suppressed=True,
-)
-
-if not pretty_errors.terminal_is_interactive:
-    pretty_errors.mono()
-
-
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
 logger = logging.getLogger(__name__)
 print = partial(builtins.print, flush=True)
+
+
+class BuildScriptError(Exception):
+    """
+    Raised if an exception occurs while executing the build script.
+    """
 
 
 def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
@@ -134,7 +77,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     )
     LoggingOptions.add_to_parser(run)
     BuildOptions.add_to_parser(run)
-    GraphOptions.add_to_parser(run, include_all_option=False)
+    GraphOptions.add_to_parser(run)
     RunOptions.add_to_parser(run)
 
     query = subparsers.add_parser("query", aliases=["q"])
@@ -163,7 +106,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     tree = query_subparsers.add_parser("tree", aliases=["t"], description="Output the project and task tree.")
     LoggingOptions.add_to_parser(tree)
     BuildOptions.add_to_parser(tree)
-    GraphOptions.add_to_parser(tree)
+    GraphOptions.add_to_parser(tree, saveable=False)
     ExcludeOptions.add_to_parser(tree)
 
     # This command is used by kraken-wrapper to produce a lock file.
@@ -218,24 +161,14 @@ def _load_build_state(
     # we can rely on the buildscript() call in the script to update `sys.path`; but if the deprecated file header
     # is used to define the pythonpath we still need to parse it explicitly.
 
-    if project_info:
-        # Attempt to read the requirement spec in the deprecated format first.
-        requirements = deprecated_get_requirement_spec_from_file_header(project_info.script)
-
-        # If the file does not have the deprecated requirement spec file header as comments, we instead want
-        # to capture the buildscript() call by tenatively executing the script. However, we only need to do
-        # this if we want to resume from a serialized build state. When we need to execute the full script
-        # anyway, we can rely on a callback that we register for when buildscript() is called to update
-        # the `sys.path`, which avoids that we execute the script twice.
-        if not requirements and graph_options.resume and project_info.runner.has_buildscript_call(project_info.script):
-            with BuildscriptMetadata.capture() as future:
-                project_info.runner.execute_script(project_info.script, {})
-            assert future.done()
-            requirements = RequirementSpec.from_metadata(future.result())
-
-        # Update `sys.path` with the python path from the requirement spec, if any.
-        if requirements:
-            exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
+    # When we resume a build from serialized state files, we do not execute the build script. Thus, in order
+    # to ensure we add the correct paths to `sys.path`, we need to parse the extract the build metadata again.
+    if project_info and graph_options.resume and project_info.runner.has_buildscript_call(project_info.script):
+        with BuildscriptMetadata.capture() as future:
+            project_info.runner.execute_script(project_info.script, {})
+        assert future.done()
+        requirements = RequirementSpec.from_metadata(future.result())
+        exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
 
     context: Context | None = None
 
@@ -267,7 +200,13 @@ def _load_build_state(
         context = Context(build_options.build_dir)
 
         with BuildscriptMetadata.callback(_buildscript_metadata_callback):
-            context.load_project(Path.cwd())
+            try:
+                context.load_project(Path.cwd())
+            except BaseException as exc:
+                raise BuildScriptError(
+                    "An unexpected error occurred while executing the build script. Please check "
+                    "check the earlier log messages for more details."
+                ) from exc
             context.finalize()
             graph = TaskGraph(context)
 
@@ -355,7 +294,7 @@ def ls(graph: TaskGraph) -> None:
     if not all_tasks:
         print("no tasks")
         sys.exit(1)
-    longest_name = max(map(len, (t.path for t in all_tasks))) + 1
+    longest_name = max(map(len, (str(t.address) for t in all_tasks))) + 1
 
     print()
     print(colored("Tasks", "blue", attrs=["bold", "underline"]))
@@ -364,7 +303,7 @@ def ls(graph: TaskGraph) -> None:
     width = get_terminal_width(120)
 
     def _print_task(task: Task) -> None:
-        line = [task.path.ljust(longest_name)]
+        line = [str(task.address).ljust(longest_name)]
         remaining_width = width - len(line[0])
         if task in goal_tasks:
             line[0] = colored(line[0], "green")
@@ -391,7 +330,7 @@ def ls(graph: TaskGraph) -> None:
         print("  " + " ".join(line))
 
     def sort_key(task: Task) -> str:
-        return task.path
+        return str(task.address)
 
     for task in sorted(graph.tasks(), key=sort_key):
         if isinstance(task, GroupTask):
@@ -510,18 +449,19 @@ def describe(graph: TaskGraph) -> None:
     print()
 
     for task in tasks:
-        print("Group" if isinstance(task, GroupTask) else "Task", colored(task.path, attrs=["bold", "underline"]))
+        print(
+            "Group" if isinstance(task, GroupTask) else "Task", colored(str(task.address), attrs=["bold", "underline"])
+        )
         print("  Type:", type(task).__module__ + "." + type(task).__name__)
         print("  Type defined in:", colored(sys.modules[type(task).__module__].__file__ or "???", "cyan"))
         print("  Default:", task.default)
         print("  Selected:", task.selected)
-        print("  Capture:", task.capture)
         rels = list(task.get_relationships())
         print(colored("  Relationships", attrs=["bold"]), f"({len(rels)})")
         for rel in rels:
             print(
                 "".ljust(4),
-                colored(rel.other_task.path, "blue"),
+                colored(str(rel.other_task.address), "blue"),
                 f"before={rel.inverse}, strict={rel.strict}",
             )
         print("  " + colored("Properties", attrs=["bold"]) + f" ({len(type(task).__schema__)})")
@@ -575,11 +515,11 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
         style.update(style_select if task in selected_tasks else {})
         style.update(style_goal if task in goal_tasks else {})
 
-        writer.node(task.path, **style)
+        writer.node(str(task.address), **style)
         for predecessor in main.get_predecessors(task, ignore_groups=False):
             writer.edge(
-                predecessor.path,
-                task.path,
+                str(predecessor.address),
+                str(task.address),
                 **({} if main.get_edge(predecessor, task).strict else style_edge_non_strict),
                 **(style_edge_implicit if main.get_edge(predecessor, task).implicit else {}),
             )
@@ -594,6 +534,50 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
 def env() -> None:
     dists = sorted(get_distributions().values(), key=lambda dist: dist.name)
     print(json.dumps([dist.to_json() for dist in dists], sort_keys=True))
+
+
+def on_exception(exc: BaseException) -> int:
+    """
+    Called when an exception occurrs in #main_internal() to handle common errors and provide better error messages.
+    """
+
+    issues_url = "https://github.com/kraken-build/kraken-build/issues"
+
+    # The wrapper will set `KRAKENW=1` so we can detect if we're running in the wrapper or not.
+    command = "krakenw" if os.getenv("KRAKENW") else "kraken"
+
+    match exc:
+        case SystemExit():
+            if not isinstance(exc.code, int):
+                logger.warning("SystemExit.code is not an integer: %r", exc.code)
+                return 1
+            return exc.code
+        case AddressResolutionError():
+            logger.error(
+                "No task matched the selector '%s'. Not finding what you're looking for? You can use the "
+                "'%s query tree --all' command to list every available task.",
+                exc.query,
+                command,
+            )
+            return 1
+        case BuildScriptError():
+            logger.error(
+                "An unexpected error occurred when executing the build script. This either indicates a mistake "
+                "in your build script(s), or a bug in Kraken. If you think this is a bug in Kraken, please "
+                "consider filing a bug report in the respective Kraken component repository. (If the traceback points "
+                "to a bug in the core components, please file the report at %s)\n\n",
+                issues_url,
+                exc_info=exc.__context__ or exc,
+            )
+            return 2
+        case _:
+            logger.error(
+                "An unexpected error occurred in the Kraken CLI. This is likely a bug in Kraken. Please consider "
+                "filing a bug report at %s.\n\n",
+                issues_url,
+                exc_info=exc,
+            )
+            return 3
 
 
 def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoReturn:
@@ -663,7 +647,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
     sys.exit(0)
 
 
-def main(prog: str = "kraken", argv: list[str] | None = None) -> NoReturn:
+def main(prog: str = "kraken", argv: list[str] | None = None, handle_exceptions: bool = True) -> NoReturn:
     pdb_enabled = os.getenv("KRAKEN_PDB") == "1"
     profile_outfile = os.getenv("KRAKEN_PROFILING")
     try:
@@ -681,10 +665,13 @@ def main(prog: str = "kraken", argv: list[str] | None = None) -> NoReturn:
         else:
             main_internal(prog, argv, pdb_enabled)
         sys.exit(0)
-    except:  # noqa: E722
+    except BaseException as exc:
+        if not handle_exceptions:
+            raise
+        code = on_exception(exc)
         if pdb_enabled:
             pdb.post_mortem()
-        raise
+        sys.exit(code)
 
 
 if __name__ == "__main__":

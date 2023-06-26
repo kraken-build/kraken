@@ -16,11 +16,20 @@ import copy
 import dataclasses
 import sys
 import weakref
+from operator import concat
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
 
 from kraken.common import NotSet, Supplier, not_none
-from typeapi import AnnotatedTypeHint, ClassTypeHint, TupleTypeHint, TypeHint, UnionTypeHint, get_annotations
+from typeapi import (
+    AnnotatedTypeHint,
+    ClassTypeHint,
+    LiteralTypeHint,
+    TupleTypeHint,
+    TypeHint,
+    UnionTypeHint,
+    get_annotations,
+)
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -73,7 +82,7 @@ class Property(Supplier[T]):
         :class:`Supplier.Empty` exception in that it will propagate to the caller in any case.
         """
 
-        def __init__(self, property: "Property[Any]", message: "str | None" = None) -> None:
+        def __init__(self, property: Property[Any], message: str | None = None) -> None:
             self.property = property
             self.message = message
 
@@ -141,7 +150,7 @@ class Property(Supplier[T]):
 
     def __init__(
         self,
-        owner: PropertyContainer,
+        owner: PropertyContainer | type[PropertyContainer],
         name: str,
         item_type: TypeHint | Any,
         deferred: bool = False,
@@ -153,19 +162,22 @@ class Property(Supplier[T]):
         :param deferred: Whether the property should be initialized with a :class:`DeferredSupplier`.
         """
 
-        # NOTE (NiklasRosenstein): We expect that any union member be a ClassTypeHint or TupleTypeHint.
-        def _get_type(hint: TypeHint) -> type:
+        # NOTE(@NiklasRosenstein): We expect that any union member be a ClassTypeHint or TupleTypeHint.
+        def _get_types(hint: TypeHint) -> tuple[type, ...]:
             if isinstance(hint, (ClassTypeHint, TupleTypeHint)):
-                return hint.type
+                return (hint.type,)
+            elif isinstance(hint, LiteralTypeHint):
+                # TODO(@NiklasRosenstein): Add validation to the property to error if a bad value is set.
+                return tuple({type(x) for x in hint.values})
             else:
                 raise RuntimeError(f"unexpected Property type hint {hint!r}")
 
         # Determine the accepted types of the property.
         item_type = item_type if isinstance(item_type, TypeHint) else TypeHint(item_type)
         if isinstance(item_type, UnionTypeHint):
-            accepted_types = list(map(_get_type, item_type))
+            accepted_types = tuple(concat(*map(_get_types, item_type)))
         else:
-            accepted_types = [_get_type(item_type)]
+            accepted_types = _get_types(item_type)
 
         # Ensure that we have value adapters for every accepted type.
         for accepted_type in accepted_types:
@@ -319,12 +331,38 @@ class Property(Supplier[T]):
 
         return decorator
 
+    def is_set(self) -> bool:
+        """
+        Returns #True if the property has been set to a value, #False otherwise. This is different from #is_empty(),
+        because it does not require evaluation of the property value. This method reflects whetehr #set() has been
+        called with any other value than a #VoidSupplier or a #DeferredSupplier.
+        """
+
+        return not self._value.is_void()
+
     # Supplier
 
     def is_empty(self) -> bool:
         if isinstance(self._value, DeferredSupplier):
             return True
         return super().is_empty()
+
+    # Python Descriptor
+
+    def __set__(self, instance: PropertyContainer, value: T | Supplier[T] | None) -> None:
+        instance_prop = vars(instance)[self.name]
+        assert isinstance(instance_prop, Property)
+        if value is not None or type(None) in self.accepted_types:
+            instance_prop.set(value)
+        else:
+            instance_prop.clear()
+
+    def __get__(self, instance: PropertyContainer | None, owner: type[Any]) -> Property[T]:
+        if instance is None:
+            return self
+        instance_prop = vars(instance)[self.name]
+        assert isinstance(instance_prop, Property)
+        return instance_prop
 
 
 class PropertyContainer:
@@ -378,12 +416,16 @@ class PropertyContainer:
 
             cls.__schema__ = schema
 
+        # Make sure there's a Property descriptor on the class for every property in the schema.
+        for key, value in cls.__schema__.items():
+            setattr(cls, key, Property(cls, key, value.item_type, deferred=value.is_output))
+
     def __init__(self) -> None:
         """Creates :class:`Properties <Property>` for every property defined in the object's schema."""
 
         for key, desc in self.__schema__.items():
             prop = Property[Any](self, key, desc.item_type, deferred=desc.is_output)
-            setattr(self, key, prop)
+            vars(self)[key] = prop
             if desc.has_default():
                 prop.setdefault(desc.get_default())
 
@@ -392,11 +434,14 @@ class DeferredSupplier(Supplier[Any]):
     def __init__(self, property: Property[Any]) -> None:
         self.property = weakref.ref(property)
 
-    def derived_from(self) -> Iterable["Supplier[Any]"]:
+    def derived_from(self) -> Iterable[Supplier[Any]]:
         return ()
 
     def get(self) -> Any:
         raise Property.Deferred(not_none(self.property()))
+
+    def is_void(self) -> bool:
+        return True
 
 
 # Register common value adapters

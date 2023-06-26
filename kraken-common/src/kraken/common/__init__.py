@@ -1,4 +1,4 @@
-__version__ = "0.23.7"
+__version__ = "0.26.1"
 
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
@@ -10,14 +10,7 @@ from ._fs import atomic_file_swap, safe_rmpath
 from ._generic import NotSet, flatten, not_none
 from ._importlib import appending_to_sys_path, import_class
 from ._option_sets import LoggingOptions
-from ._requirements import (
-    LocalRequirement,
-    PipRequirement,
-    Requirement,
-    RequirementSpec,
-    deprecated_get_requirement_spec_from_file_header,
-    parse_requirement,
-)
+from ._requirements import LocalRequirement, PipRequirement, Requirement, RequirementSpec, parse_requirement
 from ._runner import (
     BuildDslScriptRunner,
     CurrentDirectoryProjectFinder,
@@ -65,7 +58,6 @@ __all__ = [
     "LocalRequirement",
     "PipRequirement",
     "RequirementSpec",
-    "deprecated_get_requirement_spec_from_file_header",
     # _runner
     "BuildDslScriptRunner",
     "CurrentDirectoryProjectFinder",

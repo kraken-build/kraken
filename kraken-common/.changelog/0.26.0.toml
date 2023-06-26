@@ -1,0 +1,15 @@
+release-date = "2023-06-19"
+
+[[entries]]
+id = "ca06abb8-6ebf-4ee9-90d7-2e9b28c8218d"
+type = "improvement"
+description = "Use `rich`'s logging handler, add `kraken.common.exceptions` module"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/45"
+
+[[entries]]
+id = "8b21f89e-a679-4333-aa85-b7d897c47927"
+type = "breaking change"
+description = "Remove `deprecated_get_requirement_spec_from_file_header()` function"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/45"

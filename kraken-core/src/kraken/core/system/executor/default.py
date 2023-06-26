@@ -8,6 +8,7 @@ import traceback
 from functools import partial
 from typing import Callable, Iterable
 
+from kraken.core.address import Address
 from kraken.core.system.executor import Graph, GraphExecutor, GraphExecutorObserver
 from kraken.core.system.executor.utils import TaskRememberer
 from kraken.core.system.task import GroupTask, Task, TaskStatus, VoidTask
@@ -127,9 +128,9 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         self.format_header = format_header or str
         self.format_duration = format_duration or str
         self._lock = threading.Lock()
-        self._status: dict[str, TaskStatus] = {}
-        self._started: dict[str, float] = {}
-        self._duration: dict[str, float] = {}
+        self._status: dict[Address, TaskStatus] = {}
+        self._started: dict[Address, float] = {}
+        self._duration: dict[Address, float] = {}
 
     def _ask_report_task_status(self, task: Task, status: TaskStatus) -> bool:
         return not (isinstance(task, (GroupTask, VoidTask)) and status.is_skipped())
@@ -144,13 +145,13 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         print(self.format_header("Build summary"), flush=True)
         print(flush=True)
 
-        for task_path, status in self._status.items():
-            task = graph.get_task(task_path)
+        for task_addr, status in self._status.items():
+            task = graph.get_task(task_addr)
             if self._ask_report_task_status(task, status):
                 print(
-                    " " * (len(self.execute_prefix) + 1) + task_path,
+                    " " * (len(self.execute_prefix) + 1) + str(task_addr),
                     self.status_to_text(status),
-                    self.format_duration(f"[{self._duration[task_path]:.3f}s]") if task_path in self._duration else "",
+                    self.format_duration(f"[{self._duration[task_addr]:.3f}s]") if task_addr in self._duration else "",
                 )
         not_executed_tasks = list(graph.tasks(not_executed=True))
         if len(not_executed_tasks) != 0:
@@ -158,7 +159,7 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
             print(self.format_header("Tasks that were not executed due to failing dependencies"), flush=True)
             print(flush=True)
             for task in not_executed_tasks:
-                print(" " * (len(self.execute_prefix) + 1) + task.path)
+                print(" " * (len(self.execute_prefix) + 1) + str(task.address))
         print(flush=True)
 
     def default_status_to_text(self, status: TaskStatus) -> str:
@@ -168,9 +169,9 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
             return status.type.name
 
     def before_execute_task(self, task: Task, status: TaskStatus) -> None:
-        print(self.execute_prefix, task.path, self.status_to_text(status), flush=True)
+        print(self.execute_prefix, task.address, self.status_to_text(status), flush=True)
         with self._lock:
-            self._started[task.path] = time.perf_counter()
+            self._started[task.address] = time.perf_counter()
 
     def on_task_output(self, task: Task, chunk: bytes) -> None:
         sys.stdout.buffer.write(chunk)
@@ -178,16 +179,16 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
 
     def after_execute_task(self, task: Task, status: TaskStatus) -> None:
         if self._ask_report_task_status(task, status):
-            print(self.execute_prefix, task.path, self.status_to_text(status), flush=True)
+            print(self.execute_prefix, task.address, self.status_to_text(status), flush=True)
         with self._lock:
-            self._status[task.path] = status
-            if task.path in self._started:
-                self._duration[task.path] = time.perf_counter() - self._started[task.path]
+            self._status[task.address] = status
+            if task.address in self._started:
+                self._duration[task.address] = time.perf_counter() - self._started[task.address]
 
     def before_teardown_task(self, task: Task) -> None:
-        print(self.teardown_prefix, task.path, flush=True)
+        print(self.teardown_prefix, task.address, flush=True)
 
     def after_teardown_task(self, task: Task, status: TaskStatus) -> None:
-        print(self.teardown_prefix, task.path, self.status_to_text(status), flush=True)
+        print(self.teardown_prefix, task.address, self.status_to_text(status), flush=True)
         with self._lock:
-            self._status[task.path] = status
+            self._status[task.address] = status

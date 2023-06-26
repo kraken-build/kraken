@@ -1,0 +1,8 @@
+release-date = "2023-06-19"
+
+[[entries]]
+id = "4bb4ce3d-2e97-4239-b696-819434b6525e"
+type = "improvement"
+description = "Set Python version requirement to =3.10"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/42"

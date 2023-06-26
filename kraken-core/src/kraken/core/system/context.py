@@ -5,7 +5,7 @@ import dataclasses
 import enum
 import logging
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Optional, Sequence, TypeVar, overload
+from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Sequence, TypeVar, overload
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from nr.stream import Stream
@@ -103,7 +103,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         self.executor = executor or DefaultGraphExecutor(DefaultTaskExecutor())
         self.observer = observer or DefaultPrintingExecutorObserver()
         self._finalized: bool = False
-        self._root_project: Optional[Project] = None
+        self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
 
@@ -204,7 +204,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert project is not None
 
         for element in address.elements:
-            project = project.subproject(element.value, load=False)
+            project = project.subproject(element.value, "if-exists")
             if not project:
                 raise ProjectNotFoundError(address)
 
@@ -253,7 +253,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         if addresses is None:
             addresses = [
-                ".",  # The current project (will be "expanded" to its default tasks)
+                ".:",  # The current project (will be "expanded" to its default tasks)
                 "**:",  # All sub-projects (will be "expanded" to their default tasks)
             ]
 
@@ -289,10 +289,15 @@ class Context(MetadataContainer, Currentable["Context"]):
             raise TaskResolutionException("Impossible to resolve the empty address.")
 
         # Prefix single-element addresses with `**:`, unless the last element already is `**`.
-        if not address.is_absolute() and len(address) == 1 and not address.elements[0].is_recursive_wildcard():
+        if (
+            not address.is_absolute()
+            and not address.is_container()
+            and len(address) == 1
+            and not address.elements[0].is_recursive_wildcard()
+        ):
             address = Address.RECURSIVE_WILDCARD.concat(address)
         if not address.is_absolute():
-            address = relative_to.concat(address)
+            address = relative_to.concat(address).normalize(keep_container=True)
 
         matches = list(resolve_address(space, self.root_project, address).matches())
         tasks = Stream(matches).of_type(Task).collect()  # type: ignore[type-abstract]
@@ -373,9 +378,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         if not graph.is_complete():
             failed_tasks = list(graph.tasks(failed=True))
             if len(failed_tasks) == 1:
-                message = f'task "{failed_tasks[0].path}" failed'
+                message = f'task "{failed_tasks[0].address}" failed'
             else:
-                message = "tasks " + ", ".join(f'"{task.path}"' for task in failed_tasks) + " failed"
+                message = "tasks " + ", ".join(f'"{task.address}"' for task in failed_tasks) + " failed"
             raise BuildError(message)
 
     @overload

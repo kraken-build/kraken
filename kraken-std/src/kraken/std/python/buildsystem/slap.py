@@ -15,10 +15,11 @@ from urllib.parse import quote
 from kraken.common import NotSet
 from kraken.core import TaskStatus
 
-from kraken.std.python.buildsystem.poetry import PoetryPythonBuildSystem
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 
 from . import ManagedEnvironment, PythonBuildSystem
+from .pdm import PdmPyprojectHandler, PDMPythonBuildSystem
+from .poetry import PoetryPyprojectHandler, PoetryPythonBuildSystem
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
@@ -32,6 +33,13 @@ class SlapPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
+    def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
+        if "poetry" in pyproject.get("tool", {}):
+            return PoetryPyprojectHandler(pyproject)
+        if "pdm" in pyproject.get("build-backend", {}):
+            return PdmPyprojectHandler(pyproject)
+        raise NotImplementedError("Don't know this build system")
+
     def supports_managed_environments(self) -> bool:
         return True
 
@@ -41,6 +49,8 @@ class SlapPythonBuildSystem(PythonBuildSystem):
     def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
         if "poetry" in pyproject.get("tool", {}):
             PoetryPythonBuildSystem(self.project_directory).update_pyproject(settings, pyproject)
+        if "pdm" in pyproject.get("tool", {}):
+            PDMPythonBuildSystem(self.project_directory).update_pyproject(settings, pyproject)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
         return TaskStatus.skipped("not supported")
@@ -109,7 +119,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
                 if index.credentials:
                     spec += f",username={quote(index.credentials[0])},password={quote(index.credentials[1])}"
                 safe_spec = spec.replace(quote(index.credentials[1]), "[MASKED]") if index.credentials else spec
-                option = "--index" if index.default else "--extra-index"
+                option = "--index" if index.priority.value == PackageIndex.Priority.default.value else "--extra-index"
                 command += [option, spec]
                 safe_command += [option, safe_spec]
 

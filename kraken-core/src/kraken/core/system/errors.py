@@ -22,7 +22,7 @@ class ProjectLoaderError(Exception):
         self.message = message
 
     def __str__(self) -> str:
-        return f"[{self.project.path}] {self.message}"
+        return f"[{self.project.address}] {self.message}"
 
 
 class BuildError(Exception):

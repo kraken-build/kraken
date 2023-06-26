@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 from kraken.common.path import try_relative_to
+from kraken.common.strings import as_bytes
 from termcolor import colored
 
 from kraken.core import Property, Task, TaskStatus
-
-
-def as_bytes(v: str | bytes, encoding: str) -> bytes:
-    return v.encode(encoding) if isinstance(v, str) else v
 
 
 class CheckFileContentsTask(Task):
@@ -21,7 +17,7 @@ class CheckFileContentsTask(Task):
     description = 'Check if "%(file)s" is up to date.'
 
     file: Property[Path]
-    content: Property[Union[str, bytes]]
+    content: Property[str | bytes]
     encoding: Property[str]
     update_task_name: Property[str]
     render_prepare: Property[TaskStatus]

@@ -5,6 +5,8 @@ from __future__ import annotations
 import abc
 from typing import TYPE_CHECKING, Iterator
 
+from kraken.core.address import Address
+
 if TYPE_CHECKING:
     from kraken.core.system.task import Task, TaskStatus
 
@@ -22,7 +24,7 @@ class Graph(abc.ABC):
         """Return all active dependants of the given task."""
 
     @abc.abstractmethod
-    def get_task(self, task_path: str) -> Task:
+    def get_task(self, task_path: Address) -> Task:
         """Return a task by its path."""
 
     @abc.abstractmethod

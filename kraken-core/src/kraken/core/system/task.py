@@ -10,28 +10,27 @@ import dataclasses
 import enum
 import logging
 import shlex
-import warnings
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     Collection,
-    Dict,
     ForwardRef,
     Generic,
     Iterable,
     Iterator,
-    List,
-    Optional,
     Sequence,
     TypeVar,
     cast,
     overload,
 )
 
-from kraken.common import Supplier
+from deprecated import deprecated
+from kraken.common import NotSet, Supplier
+from typing_extensions import Literal
 
 from kraken.core.address import Address
+from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
 
@@ -59,6 +58,7 @@ class _Relationship(Generic[T]):
 
 
 TaskRelationship = _Relationship["Task"]
+RelationshipMode = Literal["strict", "order-only"]
 
 
 class TaskStatusType(enum.Enum):
@@ -71,6 +71,7 @@ class TaskStatusType(enum.Enum):
     STARTED = enum.auto()  #: The task started a background task that needs to be torn down later.
     SKIPPED = enum.auto()  #: The task was skipped (i.e. it is not applicable).
     UP_TO_DATE = enum.auto()  #: The task is up to date and did not run (or not run it's usual logic).
+    WARNING = enum.auto()  #: The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`).
 
     def is_ok(self) -> bool:
         return not self.is_not_ok()
@@ -98,6 +99,9 @@ class TaskStatusType(enum.Enum):
 
     def is_up_to_date(self) -> bool:
         return self == TaskStatusType.UP_TO_DATE
+
+    def is_warning(self) -> bool:
+        return self == TaskStatusType.WARNING
 
 
 @dataclasses.dataclass
@@ -134,6 +138,9 @@ class TaskStatus:
     def is_up_to_date(self) -> bool:
         return self.type == TaskStatusType.UP_TO_DATE
 
+    def is_warning(self) -> bool:
+        return self.type == TaskStatusType.WARNING
+
     @staticmethod
     def pending(message: str | None = None) -> TaskStatus:
         return TaskStatus(TaskStatusType.PENDING, message)
@@ -163,6 +170,10 @@ class TaskStatus:
         return TaskStatus(TaskStatusType.UP_TO_DATE, message)
 
     @staticmethod
+    def warning(message: str | None = None) -> TaskStatus:
+        return TaskStatus(TaskStatusType.WARNING, message)
+
+    @staticmethod
     def from_exit_code(command: list[str] | None, code: int) -> TaskStatus:
         return TaskStatus(
             TaskStatusType.SUCCEEDED if code == 0 else TaskStatusType.FAILED,
@@ -172,67 +183,80 @@ class TaskStatus:
         )
 
 
-class Task(PropertyContainer, abc.ABC):
-    """A task is an isolated unit of work that is configured with properties. Every task has some common settings that
-    are not treated as properties, such as it's :attr:`name`, :attr:`default` and :attr:`capture` flag. A task is a
-    member of a :class:`Project` and can be uniquely identified with a path that is derived from its project and name.
+class Task(KrakenObject, PropertyContainer, abc.ABC):
+    """
+    A Kraken Task is a unit of work that can be executed.
 
-    A task can have a relationship to any number of other tasks. Relationships are directional and the direction can
-    be inverted. A strict relationship indicates that one task *must* run before the other, while a non-strict
-    relationship only dictates the order of tasks if both were to be executed (and prevents the task from being
-    executed in parallel).
+    Tasks goe through a number of stages during its lifetime:
+
+    * Creation and configuration
+    * Finalization (:meth:`finalize`) -- Mutations to properties of the task are locked after this.
+    * Preparation (:meth:`prepare`) -- The task prepares itself for execution; it may indicate that it
+        does not need to be executed at this state.
+    * Execution (:meth:`execute`) -- The task executes its logic.
+
+    Tasks are uniquely identified by their name and the project they belong to, which is also represented
+    by the tasks's :property:`address`. Relationhips to other tasks can be added via the :meth:`depends_on`
+    and `required_by` methods, or by passing properties of one task into the properties of another.
     """
 
-    address: Address
-    project: Project
-    description: Optional[str] = None
+    #: A human readable description of the task's purpose. This is displayed in the terminal upon
+    #: closer inspection of a task.
+    description: str | None = None
+
+    #: Whether the task executes by default when no explicit task is selected to run on the command-line.
     default: bool = False
+
+    #: Whether the task was explicitly selected on the command-line.
     selected: bool = False
+
+    #: A logger that is bound to the task's address. Use this logger to log messages related to the task,
+    #: for example when implementing :meth:`finalize`, :meth:`prepare` or :meth:`execute`.
     logger: logging.Logger
-    outputs: List[Any]
 
     def __init__(self, name: str, project: Project) -> None:
+        from kraken.core.system.project import Project
+
+        assert isinstance(name, str), type(name)
+        assert isinstance(project, Project), type(project)
+        KrakenObject.__init__(self, name, project)
         PropertyContainer.__init__(self)
-        self._capture = False
-        self.address = project.address.append(name)
-        self.project = project
-        self.logger = logging.getLogger(f"{self.path} [{type(self).__module__}.{type(self).__qualname__}]")
-        self.outputs = []
-        self.__relationships: list[_Relationship[str | Task]] = []
+        self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
+        self._outputs: list[Any] = []
+        self.__relationships: list[_Relationship[Address | Task]] = []
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}({self.path})"
+        return f"{type(self).__name__}({self.address})"
 
     @property
-    def capture(self) -> bool:
-        warnings.warn(
-            "The Task.capture attribute will be deprecated in a future version.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._capture
+    def project(self) -> Project:
+        """
+        A convenient alias for :attr:`parent` which is a lot easier to understand when reading the code.
+        """
 
-    @capture.setter
-    def capture(self, value: bool) -> None:
-        warnings.warn(
-            "The Task.capture attribute will be deprecated in a future version.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._capture = value
+        from kraken.core.system.project import Project
+
+        assert isinstance(self._parent, Project), "Task.parent must be a Project"
+        return self._parent
+
+    ###
+    # Begin: Deprecated APIs
+    ###
 
     @property
-    def name(self) -> str:
-        return self.address.name
-
-    # TODO(NiklasRosenstein): Deprecated in v0.13.0
-    @property
+    @deprecated(reason="Task.path is deprecated, use str(Task.address) instead.")
     def path(self) -> str:
         return str(self.address)
 
+    @property
+    @deprecated(reason="Task.outputs is deprecated.")
+    def outputs(self) -> list[Any]:
+        return self._outputs
+
+    @deprecated(reason="Task.add_relationship() is deprecated, use Task.depends_on() or Task.required_by() instead.")
     def add_relationship(
         self,
-        task_or_selector: Task | Sequence[Task] | str,
+        task_or_selector: Task | Sequence[Task | Address] | Address | str,
         strict: bool = True,
         inverse: bool = False,
     ) -> None:
@@ -248,6 +272,8 @@ class Task(PropertyContainer, abc.ABC):
         """
 
         if isinstance(task_or_selector, (Task, str)):
+            if isinstance(task_or_selector, str):
+                task_or_selector = Address(task_or_selector)
             self.__relationships.append(_Relationship(task_or_selector, strict, inverse))
         elif isinstance(task_or_selector, Sequence):
             for idx, task in enumerate(task_or_selector):
@@ -257,18 +283,61 @@ class Task(PropertyContainer, abc.ABC):
                         f"{type(task_or_selector).__name__}"
                     )
             for task in task_or_selector:
+                if isinstance(task, str):
+                    task = Address(task)
                 self.__relationships.append(_Relationship(task, strict, inverse))
         else:
             raise TypeError(
                 f"task_or_selector argument must be Task | Sequence[Task] | str, got {type(task_or_selector).__name__}"
             )
 
-    def get_relationships(self) -> Iterable[TaskRelationship]:
-        """Iterates over the relationships to other tasks based on the property provenance."""
+    # End: Deprecated APIs
 
-        # Derive dependencies through property lineage.
+    def depends_on(
+        self, *tasks: Task | Address | str, mode: RelationshipMode = "strict", _inverse: bool = False
+    ) -> None:
+        """
+        Declare that this task depends on the specified other tasks. Relationships are lazy, meaning references
+        to tasks using an address will be evaluated when :meth:`get_relationships` is called.
+
+        If the *mode* is set to `strict`, the relationship is considered a strong dependency, meaning that the
+        dependent task must be executed after the dependency. If the *mode* is set to `order-only`, the relationship
+        indicates only the order in which the tasks must be executed if both were to be executed in the same run.
+        """
+
+        for idx, task in enumerate(tasks):
+            if isinstance(task, str):
+                task = Address(task)
+            if not isinstance(task, Address | Task):
+                raise TypeError(f"tasks[{idx}] must be Address | Task | str, got {type(task).__name__}")
+            self.__relationships.append(_Relationship(task, mode == "strict", _inverse))
+
+    def required_by(self, *tasks: Task | Address | str, mode: RelationshipMode = "strict") -> None:
+        """
+        Declare that this task is required by the specified other tasks. This is the inverse of :meth:`depends_on`,
+        effectively declaring the same relationship in the opposite direction.
+        """
+
+        self.depends_on(*tasks, mode=mode, _inverse=True)
+
+    def get_properties(self) -> Iterable[Property[Any]]:
         for key in self.__schema__:
             property: Property[Any] = getattr(self, key)
+            yield property
+
+    def get_relationships(self) -> Iterable[TaskRelationship]:
+        """
+        Return an iterable that yields all relationships that this task has to other tasks as indicated by
+        information available in the task itself. The method will not return relationships established to
+        this task from other tasks.
+
+        The iterable will contain every relationship that is declared via :meth:`depends_on` or :meth:`required_by`,
+        as well as relationships that are implied by the task's properties. For example, if a property of this
+        task is set to the value of a property of another task, a relationship is implied between the tasks.
+        """
+
+        # Derive dependencies through property lineage.
+        for property in self.get_properties():
             for supplier, _ in property.lineage():
                 if supplier is property:
                     continue
@@ -279,11 +348,11 @@ class Task(PropertyContainer, abc.ABC):
 
         # Manually added relationships.
         for rel in self.__relationships:
-            if isinstance(rel.other_task, str):
+            if isinstance(rel.other_task, Address):
                 try:
                     resolved_tasks = self.project.context.resolve_tasks([rel.other_task], relative_to=self.project)
                 except ValueError as exc:
-                    raise ValueError(f"in task {self.path}: {exc}")
+                    raise ValueError(f"in task {self.address}: {exc}")
                 for task in resolved_tasks:
                     yield TaskRelationship(task, rel.strict, rel.inverse)
             else:
@@ -291,8 +360,10 @@ class Task(PropertyContainer, abc.ABC):
                 yield cast(TaskRelationship, rel)
 
     def get_description(self) -> str | None:
-        """Return the task's description. The default implementation formats the :attr:`description` string with the
-        task's properties. Any Path property will be converted to a relative string to assist the reader."""
+        """
+        Return the task's description. The default implementation formats the :attr:`description` string with the
+        task's properties. Any Path property will be converted to a relative string to assist the reader.
+        """
 
         class _MappingProxy:
             def __getitem__(_, key: str) -> Any:
@@ -333,6 +404,7 @@ class Task(PropertyContainer, abc.ABC):
 
         :param output_type: The output type to search for."""
 
+    # @deprecated(reason="Rely on the target-rule system to derive the artifacts of a task.")
     def get_outputs(self, output_type: type[T] | type[object] = object) -> Iterable[T] | Iterable[Any]:
         results = []
 
@@ -350,9 +422,11 @@ class Task(PropertyContainer, abc.ABC):
         return results
 
     def finalize(self) -> None:
-        """This method is called by :meth:`Context.finalize()`. It gives the task a chance update its
+        """
+        This method is called by :meth:`Context.finalize()`. It gives the task a chance update its
         configuration before the build process is executed. The default implementation finalizes all non-output
-        properties, preventing them to be further mutated."""
+        properties, preventing them to be further mutated.
+        """
 
         for key in self.__schema__:
             prop: Property[Any] = getattr(self, key)
@@ -360,7 +434,8 @@ class Task(PropertyContainer, abc.ABC):
                 prop.finalize()
 
     def prepare(self) -> TaskStatus | None:
-        """Called before a task is executed. This is called from the main process to check for example if the task
+        """
+        Called before a task is executed. This is called from the main process to check for example if the task
         is skippable or up to date. The implementation of this method should be quick to determine the task status,
         otherwise it should be done in :meth:`execute`.
 
@@ -372,20 +447,26 @@ class Task(PropertyContainer, abc.ABC):
 
     @abc.abstractmethod
     def execute(self) -> TaskStatus | None:
-        """Implements the behaviour of the task. The task can assume that all strict dependencies have been executed
+        """
+        Implements the behaviour of the task. The task can assume that all strict dependencies have been executed
         successfully. Output properties of dependency tasks that are only written by the task's execution are now
         accessible.
 
         This method should not return :attr:`TaskStatusType.PENDING`. If `None` is returned, it is assumed that the
-        task is :attr:`TaskStatusType.SUCCEEDED`.
+        task is :attr:`TaskStatusType.SUCCEEDED`. If the task fails, it should return :attr:`TaskStatusType.FAILED`.
+        If an exception is raised during this method, the task status is also assumed to be
+        :attr:`TaskStatusType.FAILED`. If the task finished successfully but with warnings, it should return
+        :attr:`TaskStatusType.WARNING`.
         """
 
         raise NotImplementedError
 
     def teardown(self) -> TaskStatus | None:
-        """This method is called only if the task returns :attr:`TaskStatusType.STARTED` from :meth:`execute`. It is
+        """
+        This method is called only if the task returns :attr:`TaskStatusType.STARTED` from :meth:`execute`. It is
         called if _all_ direct dependants of the task have been executed (whether successfully or not) or if no further
-        task execution is queued."""
+        task execution is queued.
+        """
 
         return None
 
@@ -395,7 +476,7 @@ class GroupTask(Task):
     the tasks in the group, forcing them to be executed when this task is targeted. Group tasks are not enabled
     by default."""
 
-    tasks: List[Task]
+    tasks: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -481,7 +562,7 @@ class BackgroundTask(Task):
             logger.warning(
                 'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
                 "as an error during serialization or zombie processes.",
-                self.path,
+                self.address,
             )
 
     # Task
@@ -502,6 +583,44 @@ class BackgroundTask(Task):
     def teardown(self) -> None:
         self.__exit_stack.close()
         del self.__exit_stack
+
+
+class InlineTask(Task):
+    """
+    This class is what is instantiated when calling #Project.task() with only a name and a BuildDSL closure.
+    It simplifies the implementation of one-off tasks in a BuildDSK Kraken build script, allowing to dynamically
+    define properties.
+    """
+
+    _properties: dict[str, Property[Any]]
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self._properties = {}
+
+    @overload
+    def property(self, name: str) -> Property[Any]:
+        """Retrieve a property by name."""
+
+    @overload
+    def property(self, name: str, value: Any) -> Property[Any]:
+        """Define a property on this task with the given *name* and *value*."""
+
+    def property(self, name: str, value: Any | NotSet = NotSet.Value) -> Property[Any]:
+        if value is NotSet.Value:
+            return self._properties[name]
+        prop = self._properties[name] = Property(self, name, Any)
+        prop.set(value)
+        return prop
+
+    # Task
+
+    def get_properties(self) -> Iterable[Property[Any]]:
+        yield from self._properties.values()
+        yield from super().get_properties()
+
+    def execute(self) -> TaskStatus | None:
+        return None
 
 
 class TaskSet(Collection[Task]):
@@ -563,21 +682,21 @@ class TaskSetSelect(Generic[T]):
         self._tasks = tasks
         self._output_type = output_type
 
+    def all(self) -> Iterable[T]:
+        for task in self._tasks:
+            yield from task.get_outputs(self._output_type)
+
+    def dict_supplier(self) -> Supplier[dict[Task, list[T]]]:
+        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
+
+    def supplier(self) -> Supplier[list[T]]:
+        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
+
     def dict(self) -> dict[Task, list[T]]:
         results: dict[Task, list[T]] = {}
         for task in self._tasks:
             results[task] = list(task.get_outputs(self._output_type))
         return results
-
-    def all(self) -> Iterable[T]:
-        for task in self._tasks:
-            yield from task.get_outputs(self._output_type)
-
-    def dict_supplier(self) -> Supplier[Dict[Task, list[T]]]:
-        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
-
-    def supplier(self) -> Supplier[list[T]]:
-        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
 
 
 class TaskSetPartitions:

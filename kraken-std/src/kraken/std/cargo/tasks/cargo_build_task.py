@@ -5,7 +5,6 @@ import shlex
 import subprocess as sp
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 from kraken.core import Project, Property, Task, TaskStatus
 
@@ -32,22 +31,22 @@ class CargoBuildTask(Task):
     target: Property[str]
 
     #: Additional arguments to pass to the Cargo command-line.
-    additional_args: Property[List[str]] = Property.default_factory(list)
+    additional_args: Property[list[str]] = Property.default_factory(list)
 
     #: Whether to build incrementally or not.
-    incremental: Property[Optional[bool]] = Property.default(None)
+    incremental: Property[bool | None] = Property.default(None)
 
     #: Environment variables for the Cargo command.
-    env: Property[Dict[str, str]] = Property.default_factory(dict)
+    env: Property[dict[str, str]] = Property.default_factory(dict)
 
     #: Number of times to retry before failing this job
     retry_attempts: Property[int] = Property.default(0)
 
     #: An output property for the Cargo binaries that are being produced by this build.
-    out_binaries: Property[List[CargoBinaryArtifact]] = Property.output()
+    out_binaries: Property[list[CargoBinaryArtifact]] = Property.output()
 
     #: An output property for the Cargo libraries that are being produced by this build.
-    out_libraries: Property[List[CargoLibraryArtifact]] = Property.output()
+    out_libraries: Property[list[CargoLibraryArtifact]] = Property.output()
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -57,16 +56,16 @@ class CargoBuildTask(Task):
         self.make_safe(command, {})
         return f"Run `{' '.join(command)}`."
 
-    def get_cargo_command_additional_flags(self) -> List[str]:
+    def get_cargo_command_additional_flags(self) -> list[str]:
         return shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
 
-    def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
+    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         incremental = self.incremental.get()
         if incremental is not None:
             env["CARGO_INCREMENTAL"] = "1" if incremental else "0"
         return ["cargo", "build"] + self.additional_args.get()
 
-    def make_safe(self, args: List[str], env: Dict[str, str]) -> None:
+    def make_safe(self, args: list[str], env: dict[str, str]) -> None:
         pass
 
     def execute(self) -> TaskStatus:
@@ -78,8 +77,8 @@ class CargoBuildTask(Task):
         self.make_safe(safe_command, safe_env)
         self.logger.info("%s [env: %s]", safe_command, safe_env)
 
-        out_binaries: List[CargoBinaryArtifact] = []
-        out_libraries_candidates: List[CargoLibraryArtifact] = []
+        out_binaries: list[CargoBinaryArtifact] = []
+        out_libraries_candidates: list[CargoLibraryArtifact] = []
         if self.target.get_or(None) in ("debug", "release"):
             # Expose the output binaries that are produced by this task.
             # We only expect a binary to be built if the target is debug or release.

@@ -89,7 +89,7 @@ class GraphOptions:
     all: bool
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True, include_all_option: bool = True) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True) -> None:
         group = parser.add_argument_group("graph options")
         group.add_argument("--resume", action="store_true", help="load previous build state")
         group.add_argument(

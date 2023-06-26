@@ -1,0 +1,17 @@
+[project]
+name = "pdm-project-consumer"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Simone Zandara", email = "simone.zandara@helsing.ai"},
+]
+dependencies = [
+    "pdm-project"
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

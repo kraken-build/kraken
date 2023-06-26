@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, Iterable, List
+from typing import Sequence
 
 from kraken.core import Project, Property
 
@@ -16,21 +16,21 @@ class CopyrightTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     holder: Property[str] = Property.config(default="")
-    ignore: Property[List[str]] = Property.config(default_factory=list)
+    ignore: Property[Sequence[str]] = Property.config(default_factory=list)
     custom_license: Property[str]
     custom_license_file: Property[Path]
 
-    def get_execute_command(self) -> List[str]:
+    def get_execute_command(self) -> list[str]:
         command = ["pyaddlicense"]
 
         if self.holder.get() != "":
-            command += ["-o", f"'{self.holder.get()}'"]
+            command += ["-o", f"{self.holder.get()}"]
 
         if self.check_only.get():
             command += ["-c"]
 
         if self.custom_license.is_filled():
-            command += ["-l", f"'{str(self.custom_license.get())}'"]
+            command += ["-l", f"{str(self.custom_license.get())}"]
 
         if self.custom_license_file.is_filled():
             command += ["-f", str(self.custom_license_file.get().absolute())]
@@ -57,28 +57,29 @@ class CopyrightTasks:
 
 
 def check_and_format_copyright(
-    holder: str, name: str = "copyright", project: Project | None = None, ignore: Iterable[str] = [], **kwargs: Any
+    holder: str,
+    name: str = "copyright",
+    project: Project | None = None,
+    ignore: Sequence[str] = (),
+    custom_license: str | None = None,
+    custom_license_file: Path | None = None,
 ) -> CopyrightTasks:
     """Creates two copyright tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
 
     project = project or Project.current()
-    check_task = project.do(
-        name=f"{name}.check",
-        task_type=CopyrightTask,
-        group="lint",
-        check_only=True,
-        holder=holder,
-        ignore=ignore,
-        **kwargs,
-    )
-    format_task = project.do(
-        name=f"{name}.fmt",
-        task_type=CopyrightTask,
-        group="fmt",
-        check_only=False,
-        holder=holder,
-        ignore=ignore,
-        **kwargs,
-    )
+    check_task = project.task(f"{name}.check", CopyrightTask, group="lint")
+    check_task.check_only = True
+    check_task.holder = holder
+    check_task.ignore = ignore
+    check_task.custom_license = custom_license
+    check_task.custom_license_file = custom_license_file
+
+    format_task = project.task(f"{name}.fmt", CopyrightTask, group="fmt")
+    format_task.check_only = False
+    format_task.holder = holder
+    format_task.ignore = ignore
+    format_task.custom_license = custom_license
+    format_task.custom_license_file = custom_license_file
+
     return CopyrightTasks(check_task, format_task)

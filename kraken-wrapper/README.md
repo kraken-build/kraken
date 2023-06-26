@@ -7,6 +7,6 @@ For more information, check out the [Kraken Documentation](https://kraken-build.
 
 __Installation__
 
-You need Python 3.7+, <3.11 (currently limited due to an incompatibility with Dill).
+You need Python 3.7 or newer:
 
     $ pipx install kraken-wrapper

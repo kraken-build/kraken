@@ -59,27 +59,19 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
     """This test tests if when a task failed, successor tasks with depedencies will be printed as failed.
 
     ```
-    A
-    |
-    v
-    B
-    |
-    v
-    C
-    |
-    v
-    D
+    A -> B -> C -> D
     ```
+
     If B fails, C, D should be printed.
     """
-    task_a = kraken_project.do("fake_task_a", MyTask)
-    task_b = kraken_project.do("fake_task_b", MyFailingTask)
-    task_c = kraken_project.do("fake_task_c", MyTask)
-    task_d = kraken_project.do("fake_task_d", MyTask)
+    task_a = kraken_project.task("fake_task_a", MyTask)
+    task_b = kraken_project.task("fake_task_b", MyFailingTask)
+    task_c = kraken_project.task("fake_task_c", MyTask)
+    task_d = kraken_project.task("fake_task_d", MyTask)
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_d.add_relationship(task_c)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_d.depends_on(task_c)
 
     graph = TaskGraph(kraken_project.context).trim([task_d])
     assert set(graph.tasks()) == {task_a, task_b, task_c, task_d}
@@ -101,9 +93,9 @@ def test__DefaultExecutor__print_correct_failures_inside_groups_without_dependen
     If B fails, C is not printed as failed
     """
 
-    kraken_project.do("fake_task_a", MyTask, group="group")
-    kraken_project.do("fake_task_b", MyFailingTask, group="group")
-    kraken_project.do("fake_task_c", MyTask, group="group")
+    kraken_project.task("fake_task_a", MyTask, group="group")
+    kraken_project.task("fake_task_b", MyFailingTask, group="group")
+    kraken_project.task("fake_task_c", MyTask, group="group")
 
     group = kraken_project.group("group")
 
@@ -133,16 +125,16 @@ def test__DefaultExecutor__print_correct_failures_inside_group_with_dependency(
     ```
     If B fails, C and D should be printed as failed
     """
-    task_a = kraken_project.do("fake_task_a", MyTask, group="group")
-    task_b = kraken_project.do("fake_task_b", MyFailingTask, group="group")
-    task_c = kraken_project.do("fake_task_c", MyTask, group="group")
-    task_d = kraken_project.do("fake_task_d", MyTask, group="group")
+    task_a = kraken_project.task("fake_task_a", MyTask, group="group")
+    task_b = kraken_project.task("fake_task_b", MyFailingTask, group="group")
+    task_c = kraken_project.task("fake_task_c", MyTask, group="group")
+    task_d = kraken_project.task("fake_task_d", MyTask, group="group")
 
     group = kraken_project.group("group")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_d.add_relationship(task_b)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_d.depends_on(task_b)
 
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
@@ -170,20 +162,20 @@ def test__DefaultExecutor__print_correct_failures_with_independent_groups(
     ```
     If B fails, C will be printed
     """
-    task_a = kraken_project.do("fake_task_a", MyTask, group="g1")
-    task_b = kraken_project.do("fake_task_b", MyFailingTask, group="g1")
-    task_c = kraken_project.do("fake_task_c", MyTask, group="g1")
-    task_d = kraken_project.do("fake_task_d", MyTask, group="g2")
-    task_e = kraken_project.do("fake_task_e", MyTask, group="g2")
-    task_f = kraken_project.do("fake_task_f", MyTask, group="g2")
+    task_a = kraken_project.task("fake_task_a", MyTask, group="g1")
+    task_b = kraken_project.task("fake_task_b", MyFailingTask, group="g1")
+    task_c = kraken_project.task("fake_task_c", MyTask, group="g1")
+    task_d = kraken_project.task("fake_task_d", MyTask, group="g2")
+    task_e = kraken_project.task("fake_task_e", MyTask, group="g2")
+    task_f = kraken_project.task("fake_task_f", MyTask, group="g2")
 
     g1 = kraken_project.group("g1")
     g2 = kraken_project.group("g2")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_e.add_relationship(task_d)
-    task_f.add_relationship(task_e)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_e.depends_on(task_d)
+    task_f.depends_on(task_e)
 
     graph = TaskGraph(kraken_project.context).trim([g1, g2])
     execute_print_test(graph)
@@ -214,22 +206,22 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
     ```
     If B fails, C, D, E and F will be printed
     """
-    task_a = kraken_project.do("fake_task_a", MyTask, group="g1")
-    task_b = kraken_project.do("fake_task_b", MyFailingTask, group="g1")
-    task_c = kraken_project.do("fake_task_c", MyTask, group="g1")
-    task_d = kraken_project.do("fake_task_d", MyTask, group="g2")
-    task_e = kraken_project.do("fake_task_e", MyTask, group="g2")
-    task_f = kraken_project.do("fake_task_f", MyTask, group="g2")
+    task_a = kraken_project.task("fake_task_a", MyTask, group="g1")
+    task_b = kraken_project.task("fake_task_b", MyFailingTask, group="g1")
+    task_c = kraken_project.task("fake_task_c", MyTask, group="g1")
+    task_d = kraken_project.task("fake_task_d", MyTask, group="g2")
+    task_e = kraken_project.task("fake_task_e", MyTask, group="g2")
+    task_f = kraken_project.task("fake_task_f", MyTask, group="g2")
 
     g1 = kraken_project.group("g1")
     g2 = kraken_project.group("g2")
 
-    task_b.add_relationship(task_a)
-    task_c.add_relationship(task_b)
-    task_e.add_relationship(task_d)
-    task_f.add_relationship(task_e)
+    task_b.depends_on(task_a)
+    task_c.depends_on(task_b)
+    task_e.depends_on(task_d)
+    task_f.depends_on(task_e)
 
-    g2.add_relationship(g1)
+    g2.depends_on(g1)
 
     graph = TaskGraph(kraken_project.context).trim([g2])
     execute_print_test(graph)

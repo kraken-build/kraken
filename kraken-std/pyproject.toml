@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kraken-std"
-version = "0.23.7"
+version = "0.26.1"
 description = "The Kraken standard library."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
@@ -20,13 +20,13 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
+python = ">=3.10,<3.11"
 pyaddlicense = "^0.2.1"
-python = "^3.7"
 databind-json = "^4.2.5"
 deprecated = "^1.2.13"
 httpx = "^0.23.0"
-kraken-common = "^0.23.7"
-kraken-core = "^0.23.7"
+kraken-common = "^0.26.1"
+kraken-core = "^0.26.1"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
@@ -61,15 +61,15 @@ typed = true
 
 [tool.slap.test]
 check = "slap check"
-kraken-lint = "krakenw -vv run lint"
-kraken-test = "krakenw -vv run test"
+kraken-lint = "krakenw -v run lint"
+kraken-test = "krakenw -v run test"
 # kraken-integrationTest = "kraken run integrationTest"
 
 [tool.slap.run]
-fmt = "krakenw -vv run fmt"
+fmt = "krakenw -v run fmt"
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.10"
 exclude = ["src/tests/integration/.*/data/.*"]
 explicit_package_bases = true
 mypy_path = ["src"]
