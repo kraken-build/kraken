@@ -74,7 +74,7 @@ class PyUpgradeCheckTask(PyUpgradeTask):
                     )
             return result
 
-    def get_execute_command(self) -> List[str]:
+    def get_execute_command(self) -> list[str]:
         return self.run_pyupgrade(self._files, ())
 
 
