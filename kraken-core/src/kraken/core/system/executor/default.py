@@ -13,6 +13,8 @@ from kraken.core.system.executor import Graph, GraphExecutor, GraphExecutorObser
 from kraken.core.system.executor.utils import TaskRememberer
 from kraken.core.system.task import GroupTask, Task, TaskStatus, VoidTask
 
+TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE = "Tasks that were not executed due to failing dependencies"
+
 
 class TaskExecutor(abc.ABC):
     @abc.abstractmethod
@@ -153,10 +155,11 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
                     self.status_to_text(status),
                     self.format_duration(f"[{self._duration[task_addr]:.3f}s]") if task_addr in self._duration else "",
                 )
-        not_executed_tasks = list(graph.tasks(not_executed=True))
+
+        not_executed_tasks = [t for t in graph.tasks(not_executed=True) if not isinstance(t, GroupTask)]
         if len(not_executed_tasks) != 0:
             print(flush=True)
-            print(self.format_header("Tasks that were not executed due to failing dependencies"), flush=True)
+            print(self.format_header(TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE), flush=True)
             print(flush=True)
             for task in not_executed_tasks:
                 print(" " * (len(self.execute_prefix) + 1) + str(task.address))
