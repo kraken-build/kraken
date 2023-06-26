@@ -102,7 +102,7 @@ And with the `krakenw` CLI like this:
 
 If you want to stop `krakenw` from crawling up the directories until it finds the `.git` project's top level directory
 and the top-most Kraken build script, you can add `# ::krakenw-root` as a comment to the top of your build script in
-a sub-directory.
+a sub-directory. This allows you to effectively treat a sub-directory as a separate Kraken project.
 
 
 ## Environment variables
