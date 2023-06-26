@@ -4,3 +4,9 @@ type = "feature"
 description = "Add `kraken.common.strings` module with the `as_bytes()` function"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/51"
+
+[[entries]]
+id = "8d877165-07ec-4b8e-859f-636687cee884"
+type = "feature"
+description = "Add `kraken.common.strings.as_string()`"
+author = "@NiklasRosenstein"
