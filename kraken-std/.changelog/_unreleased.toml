@@ -67,3 +67,9 @@ type = "improvement"
 description = "Make parameters to task factory functions in `kraken.std.python.tasks` explicit and change `List` properties to contain a `Sequence`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "33ee8b9f-63b3-4548-b0fa-f4f0e553e5e9"
+type = "feature"
+description = "Move `kraken.core.lib.render_file_task` and `kraken.core.lib.check_file_contents_task` to `kraken.std.util`"
+author = "@NiklasRosenstein"

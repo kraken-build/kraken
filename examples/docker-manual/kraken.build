@@ -5,11 +5,11 @@ buildscript {
 
 from my_tasks import WriteDockerfileTask, DockerBuildTask
 
-project.do "writeDockerfile" WriteDockerfileTask {
+project.task "writeDockerfile" WriteDockerfileTask {
     content.set("FROM ubuntu:latest\nRUN echo Hello World")
 }
 
-project.do "dockerBuild" DockerBuildTask {
+project.task "dockerBuild" DockerBuildTask {
     dockerfile.set(project.task("writeDockerfile").dockerfile)
 }
 

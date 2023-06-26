@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ..git import GitVersion
+from kraken.std.git.version import GitVersion
 
 _PRE_RELEASE_NAMES = {
     GitVersion.PreRelease.Kind.ALPHA: "a",

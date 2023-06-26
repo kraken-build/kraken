@@ -42,7 +42,7 @@ def test_resume_build_state(tempdir: Path) -> None:
     build_script = tempdir / ".kraken.py"
     build_script_code = dedent(
         """
-        from kraken.core.lib.render_file_task import render_file
+        from kraken.std.util.render_file_task import render_file
         from kraken.core import Project
 
         project = Project.current()

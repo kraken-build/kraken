@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 from kraken.core import Project
-from kraken.core.lib.render_file_task import RenderFileTask
 
 from kraken.std.docker import BUILD_BACKENDS, build_docker_image
+from kraken.std.util.render_file_task import RenderFileTask
 
 
 @pytest.mark.parametrize("backend", BUILD_BACKENDS.keys())

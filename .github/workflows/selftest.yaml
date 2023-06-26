@@ -23,3 +23,13 @@ jobs:
     - run: cd kraken-std && kraken q tree
     - run: cd kraken-std && kraken q viz
     - run: cd kraken-std && kraken q d python.mypy
+
+  examples-docker-manual:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: NiklasRosenstein/slap@gha/install/v1
+    - uses: actions/setup-python@v2
+      with: { python-version: "3.10" }
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: cd exmaples/docker-manual && kraken run :dockerBuild :sub:helloWorld

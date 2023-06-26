@@ -4,9 +4,8 @@ from pathlib import Path
 
 from kraken.common.path import try_relative_to
 from kraken.common.strings import as_bytes
-from termcolor import colored
-
 from kraken.core import Property, Task, TaskStatus
+from termcolor import colored
 
 
 class CheckFileContentsTask(Task):
