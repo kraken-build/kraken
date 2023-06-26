@@ -3,6 +3,7 @@ from typing import Generator
 from _pytest.capture import CaptureFixture, CaptureResult
 
 from kraken.core.system.executor.default import (
+    TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE,
     DefaultGraphExecutor,
     DefaultPrintingExecutorObserver,
     DefaultTaskExecutor,
@@ -30,9 +31,6 @@ class MyFailingTask(Task):
         raise RuntimeError("Wow this is failing")
 
 
-skipped_tests_title = "Tasks that were not executed due to failing dependencies"
-
-
 def execute_print_test(graph: TaskGraph) -> None:
     """
     Basic common execution to get the final printed result
@@ -48,7 +46,9 @@ def trim_printed_result(captured: CaptureResult[str]) -> str:
     Retrieving the skipped test printed part
     """
     print_output = str(captured.out)
-    title_index_end = print_output.find(skipped_tests_title) + len(skipped_tests_title)
+    title_index_end = print_output.find(TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE) + len(
+        TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE
+    )
     result = print_output[(title_index_end + 1) :]
     return result
 
@@ -78,7 +78,7 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
     execute_print_test(graph)
     captured = capsys.readouterr()  # type: ignore
     result = trim_printed_result(captured)
-    assert skipped_tests_title in captured.out
+    assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     assert ":fake_task_c" in result
     assert ":fake_task_d" in result
 
@@ -86,11 +86,13 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
 def test__DefaultExecutor__print_correct_failures_inside_groups_without_dependencies(
     kraken_project: Project, capsys: Generator[CaptureFixture[str], None, None]
 ) -> None:
-    """This test tests if when a task failed within a group, group will be printed as failed.
+    """This test tests if when a task failed within a group, the group will not be printed as failed.
+
     ```
-    Group: A, B, C
+    Group "group", Tasks: A, B, C
     ```
-    If B fails, C is not printed as failed
+
+    If B fails, C is not printed as failed.
     """
 
     kraken_project.task("fake_task_a", MyTask, group="group")
@@ -102,9 +104,9 @@ def test__DefaultExecutor__print_correct_failures_inside_groups_without_dependen
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
     captured = capsys.readouterr()  # type: ignore
-    assert skipped_tests_title in captured.out
+    assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE not in captured.out
     result = trim_printed_result(captured)
-    assert ":group" in result
+    assert ":group" not in result
 
 
 def test__DefaultExecutor__print_correct_failures_inside_group_with_dependency(
@@ -139,7 +141,7 @@ def test__DefaultExecutor__print_correct_failures_inside_group_with_dependency(
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
     captured = capsys.readouterr()  # type: ignore
-    assert skipped_tests_title in captured.out
+    assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result
     assert ":fake_task_d" in result
@@ -180,7 +182,7 @@ def test__DefaultExecutor__print_correct_failures_with_independent_groups(
     graph = TaskGraph(kraken_project.context).trim([g1, g2])
     execute_print_test(graph)
     captured = capsys.readouterr()  # type: ignore
-    assert skipped_tests_title in captured.out
+    assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result
     assert ":fake_task_d" not in result
@@ -226,7 +228,7 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
     graph = TaskGraph(kraken_project.context).trim([g2])
     execute_print_test(graph)
     captured = capsys.readouterr()  # type: ignore
-    assert skipped_tests_title in captured.out
+    assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result
     assert ":fake_task_d" in result

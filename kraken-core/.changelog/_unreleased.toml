@@ -108,3 +108,10 @@ type = "breaking change"
 description = "Move `kraken.core.lib.render_file_task` and `kraken.core.lib.check_file_contents_task` to `kraken.std.util`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/56"
+
+[[entries]]
+id = "4d40c573-419f-49c9-9648-d4acde6c7687"
+type = "improvement"
+description = "When a build fails, the summary of which tasks have not been executed no longer include groups."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/57"
