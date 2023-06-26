@@ -5,7 +5,7 @@ from difflib import unified_diff
 from pathlib import Path
 from sys import stdout
 from tempfile import TemporaryDirectory
-from typing import Any, Collection, Iterable, List
+from typing import Collection, Iterable, Sequence
 
 from kraken.core import Project, Property, TaskStatus
 
@@ -18,15 +18,15 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pyupgrade"]
 
     keep_runtime_typing: Property[bool] = Property.config(default=False)
-    additional_files: Property[List[Path]] = Property.config(default_factory=list)
+    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
     python_version: Property[str]
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> List[str]:
+    def get_execute_command(self) -> list[str]:
         return self.run_pyupgrade(self.additional_files.get(), ("--exit-zero-even-if-changed",))
 
-    def run_pyupgrade(self, files: Iterable[Path], extra: Iterable[str]) -> List[str]:
+    def run_pyupgrade(self, files: Iterable[Path], extra: Iterable[str]) -> list[str]:
         command = ["pyupgrade", f"--py{self.python_version.get_or('3').replace('.', '')}-plus", *extra]
         if self.keep_runtime_typing.get():
             command.append("--keep-runtime-typing")
@@ -39,7 +39,7 @@ class PyUpgradeCheckTask(PyUpgradeTask):
     python_dependencies = ["pyupgrade"]
 
     keep_runtime_typing: Property[bool] = Property.config(default=False)
-    additional_files: Property[List[Path]] = Property.config(default_factory=list)
+    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
     python_version: Property[str]
 
     def execute(self) -> TaskStatus:
@@ -90,15 +90,15 @@ def pyupgrade(
     project: Project | None = None,
     exclude: Collection[Path] = (),
     exclude_patterns: Collection[str] = (),
-    **kwargs: Any,
+    keep_runtime_typing: bool = False,
+    python_version: str = "3",
+    additional_files: Sequence[Path] = (),
 ) -> PyUpgradeTasks:
     project = project or Project.current()
     settings = python_settings(project)
 
     directories = [
-        p
-        for p in (*kwargs.pop("additional_files", ()), settings.source_directory, settings.get_tests_directory())
-        if p is not None
+        p for p in (*additional_files, settings.source_directory, settings.get_tests_directory()) if p is not None
     ]
     files = {f.resolve() for p in directories for f in Path(p).glob("**/*.py")}
     exclude = [e.resolve() for e in exclude]
@@ -110,8 +110,14 @@ def pyupgrade(
 
     check_task = project.task(f"{name}.check", PyUpgradeCheckTask, group="lint")
     check_task.additional_files = filtered_files
+    check_task.keep_runtime_typing = keep_runtime_typing
+    check_task.python_version = python_version
+
     format_task = project.task(name, PyUpgradeTask, group="fmt")
     format_task.additional_files = filtered_files
+    format_task.keep_runtime_typing = keep_runtime_typing
+    format_task.python_version = python_version
+
     return PyUpgradeTasks(check_task, format_task)
 
 

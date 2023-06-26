@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import List
+from typing import Sequence
 
 from kraken.core import Project, Property
 
@@ -16,8 +16,8 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     config_file: Property[Path]
-    additional_args: Property[List[str]] = Property.config(default_factory=list)
-    additional_files: Property[List[Path]] = Property.config(default_factory=list)
+    additional_args: Property[Sequence[str]] = Property.config(default_factory=list)
+    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
 
     # EnvironmentAwareDispatchTask
 
@@ -47,12 +47,28 @@ class BlackTasks:
     format: BlackTask
 
 
-def black(*, name: str = "python.black", project: Project | None = None) -> BlackTasks:
+def black(
+    *,
+    name: str = "python.black",
+    project: Project | None = None,
+    config_file: Path | None = None,
+    additional_args: Sequence[str] = (),
+    additional_files: Sequence[Path] = (),
+) -> BlackTasks:
     """Creates two black tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
 
     project = project or Project.current()
     check_task = project.task(f"{name}.check", BlackTask, group="lint")
     check_task.check_only = True
+    check_task.config_file = config_file
+    check_task.additional_args = additional_args
+    check_task.additional_files = additional_files
+
     format_task = project.task(name, BlackTask, group="fmt")
+    format_task.check_only = False
+    format_task.config_file = config_file
+    format_task.additional_args = additional_args
+    format_task.additional_files = additional_files
+
     return BlackTasks(check_task, format_task)

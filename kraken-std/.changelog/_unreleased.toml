@@ -59,3 +59,9 @@ id = "825d21c2-8cd1-42b6-ad57-1187c82dbfd2"
 type = "breaking change"
 description = "Update signature of `info()` function to align with the rest of the task factory functions (e.g. automatically take the current project and build system)."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d976ab0a-dfb3-4b03-aa48-ca9798d95c3c"
+type = "improvement"
+description = "Make parameters to task factory functions in `kraken.std.python.tasks` explicit and change `List` properties to contain a `Sequence`"
+author = "@NiklasRosenstein"

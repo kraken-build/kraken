@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Sequence
 
 from kraken.core import Project, Property
 
@@ -13,7 +13,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["mypy"]
 
     config_file: Property[Path]
-    additional_args: Property[List[str]] = Property.config(default_factory=list)
+    additional_args: Property[Sequence[str]] = Property.config(default_factory=list)
     check_tests: Property[bool] = Property.config(default=True)
     use_daemon: Property[bool] = Property.config(default=True)
     python_version: Property[str]
@@ -47,6 +47,21 @@ class MypyTask(EnvironmentAwareDispatchTask):
         return command
 
 
-def mypy(*, name: str = "python.mypy", project: Project | None = None) -> MypyTask:
+def mypy(
+    *,
+    name: str = "python.mypy",
+    project: Project | None = None,
+    config_file: Path | None = None,
+    additional_args: Sequence[str] = (),
+    check_tests: bool = True,
+    use_daemon: bool = True,
+    python_version: str | None = None,
+) -> MypyTask:
     project = project or Project.current()
-    return project.task(name, MypyTask, group="lint")
+    task = project.task(name, MypyTask, group="lint")
+    task.config_file = config_file
+    task.additional_args = additional_args
+    task.check_tests = check_tests
+    task.use_daemon = use_daemon
+    task.python_version = python_version
+    return task
