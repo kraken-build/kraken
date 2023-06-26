@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "kraken-wrapper"
 version = "0.26.1"
 description = ""
-authors = ["Unknown <me@unknown.org>"]
+authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{ include = "kraken/wrapper", from = "src" }]
