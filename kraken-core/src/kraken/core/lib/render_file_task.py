@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 from kraken.common.path import try_relative_to
 from kraken.common.strings import as_bytes
@@ -27,7 +26,7 @@ class RenderFileTask(Task):
     description = 'Create or update "%(file)s".'
 
     file: Property[Path]
-    content: Property[Union[str, bytes]]
+    content: Property[str | bytes]
     encoding: Property[str] = Property.default(DEFAULT_ENCODING)
 
     def create_check(

@@ -82,7 +82,7 @@ class Property(Supplier[T]):
         :class:`Supplier.Empty` exception in that it will propagate to the caller in any case.
         """
 
-        def __init__(self, property: "Property[Any]", message: "str | None" = None) -> None:
+        def __init__(self, property: Property[Any], message: str | None = None) -> None:
             self.property = property
             self.message = message
 
@@ -168,7 +168,7 @@ class Property(Supplier[T]):
                 return (hint.type,)
             elif isinstance(hint, LiteralTypeHint):
                 # TODO(@NiklasRosenstein): Add validation to the property to error if a bad value is set.
-                return tuple(set(type(x) for x in hint.values))
+                return tuple({type(x) for x in hint.values})
             else:
                 raise RuntimeError(f"unexpected Property type hint {hint!r}")
 
@@ -434,7 +434,7 @@ class DeferredSupplier(Supplier[Any]):
     def __init__(self, property: Property[Any]) -> None:
         self.property = weakref.ref(property)
 
-    def derived_from(self) -> Iterable["Supplier[Any]"]:
+    def derived_from(self) -> Iterable[Supplier[Any]]:
         return ()
 
     def get(self) -> Any:
