@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Sequence
 
+from kraken.common import Supplier
 from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -51,11 +52,11 @@ def mypy(
     *,
     name: str = "python.mypy",
     project: Project | None = None,
-    config_file: Path | None = None,
-    additional_args: Sequence[str] = (),
+    config_file: Path | Supplier[Path] | None = None,
+    additional_args: Sequence[str] | Supplier[Sequence[str]] = (),
     check_tests: bool = True,
     use_daemon: bool = True,
-    python_version: str | None = None,
+    python_version: str | Supplier[str] | None = None,
 ) -> MypyTask:
     project = project or Project.current()
     task = project.task(name, MypyTask, group="lint")

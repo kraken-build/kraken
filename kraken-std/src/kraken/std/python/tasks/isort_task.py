@@ -4,6 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Sequence
 
+from kraken.common import Supplier
 from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -46,8 +47,8 @@ def isort(
     *,
     name: str = "python.isort",
     project: Project | None = None,
-    config_file: Path | None = None,
-    additional_files: Sequence[Path] = (),
+    config_file: Path | Supplier[Path] | None = None,
+    additional_files: Sequence[Path] | Supplier[Sequence[Path]] = (),
 ) -> IsortTasks:
     # TODO (@NiklasRosenstein): We may need to ensure an order to isort and block somehow, sometimes they yield
     #       slightly different results based on the order they run.

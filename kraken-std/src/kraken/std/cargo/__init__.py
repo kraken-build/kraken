@@ -182,7 +182,12 @@ def cargo_clippy(
     return task
 
 
-def cargo_deny(*, project: Project | None = None) -> CargoDenyTask:
+def cargo_deny(
+    *,
+    project: Project | None = None,
+    checks: Sequence[str] | Supplier[Sequence[str]] = (),
+    config_file: Path | Supplier[Path] | None = None,
+) -> CargoDenyTask:
     """Adds a task running cargo-deny for cargo projects. This checks different rules on dependencies, such as scanning
     for vulnerabilities, unwanted licences, or custom bans.
 
@@ -193,7 +198,10 @@ def cargo_deny(*, project: Project | None = None) -> CargoDenyTask:
     """
 
     project = project or Project.current()
-    return project.task("cargoDeny", CargoDenyTask)
+    task = project.task("cargoDeny", CargoDenyTask)
+    task.checks = checks
+    task.config_file = config_file
+    return task
 
 
 @dataclasses.dataclass

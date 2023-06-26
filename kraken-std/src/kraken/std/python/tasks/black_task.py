@@ -51,9 +51,9 @@ def black(
     *,
     name: str = "python.black",
     project: Project | None = None,
-    config_file: Path | None = None,
-    additional_args: Sequence[str] = (),
-    additional_files: Sequence[Path] = (),
+    config_file: Path | Supplier[Path] | None = None,
+    additional_args: Sequence[str] | Supplier[Sequence[str]] = (),
+    additional_files: Sequence[Path] | Supplier[Sequence[Path]] = (),
 ) -> BlackTasks:
     """Creates two black tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`."""
