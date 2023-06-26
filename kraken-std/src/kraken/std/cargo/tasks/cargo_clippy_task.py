@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 from kraken.core import Property
 
 from .cargo_build_task import CargoBuildTask
@@ -11,11 +9,11 @@ class CargoClippyTask(CargoBuildTask):
     """Runs `cargo clippy` for linting or applying suggestions."""
 
     fix: Property[bool] = Property.default(False)
-    allow: Property[Optional[str]] = Property.default("staged")
+    allow: Property[str | None] = Property.default("staged")
 
     # CargoBuildTask
 
-    def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
+    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         command = ["cargo", "clippy"]
         if self.fix.get():
             command += ["--fix"]

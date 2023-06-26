@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Iterable, Iterator, List, Sequence, TypeVar, cast
+from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, TypeVar, cast
 
 from kraken.common import not_none
 from networkx import DiGraph, restricted_view, transitive_reduction
@@ -247,7 +247,7 @@ class TaskGraph(Graph):
             self._get_edge(pred.address, succ.address), f"edge does not exist ({pred.address} --> {succ.address})"
         )
 
-    def get_predecessors(self, task: Task, ignore_groups: bool = False) -> List[Task]:
+    def get_predecessors(self, task: Task, ignore_groups: bool = False) -> list[Task]:
         """Returns the predecessors of the task in the original full build graph."""
 
         result = []
@@ -388,13 +388,7 @@ class TaskGraph(Graph):
                 for t in tasks
                 if (
                     (t.address not in self._results)
-                    or (
-                        t.address in self._results
-                        and not self._results[t.address].is_succeeded()
-                        and not self._results[t.address].is_failed()
-                        and not self._results[t.address].is_skipped()
-                        and not self._results[t.address].is_up_to_date()
-                    )
+                    or (t.address in self._results and self._results[t.address].is_pending())
                 )
             )
         return tasks

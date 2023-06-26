@@ -29,6 +29,6 @@ def resource(*, name: str, path: str | Path, project: Project | None = None) -> 
 
     project = project or Project.current()
     resource = Resource(name, project.directory / path)
-    task = project.do(name, VoidTask)
+    task = project.task(name, VoidTask)
     task.outputs.append(resource)
     return resource

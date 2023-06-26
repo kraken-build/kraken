@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import shutil
 import subprocess as sp
-from typing import List
 
 from kraken.core import Property, Task, TaskStatus
 
@@ -28,7 +27,7 @@ class CargoFmtTask(Task):
 
         return TaskStatus.from_exit_code(command, sp.call(command, cwd=self.project.directory))
 
-    def get_command(self) -> List[str]:
+    def get_command(self) -> list[str]:
         command = ["cargo"]
 
         if self.config.get().nightly:

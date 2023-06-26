@@ -15,13 +15,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Collection,
-    Dict,
     ForwardRef,
     Generic,
     Iterable,
     Iterator,
-    List,
-    Optional,
     Sequence,
     TypeVar,
     cast,
@@ -29,7 +26,7 @@ from typing import (
 )
 
 from deprecated import deprecated
-from kraken.common import Supplier
+from kraken.common import NotSet, Supplier
 from typing_extensions import Literal
 
 from kraken.core.address import Address
@@ -74,6 +71,7 @@ class TaskStatusType(enum.Enum):
     STARTED = enum.auto()  #: The task started a background task that needs to be torn down later.
     SKIPPED = enum.auto()  #: The task was skipped (i.e. it is not applicable).
     UP_TO_DATE = enum.auto()  #: The task is up to date and did not run (or not run it's usual logic).
+    WARNING = enum.auto()  #: The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`).
 
     def is_ok(self) -> bool:
         return not self.is_not_ok()
@@ -101,6 +99,9 @@ class TaskStatusType(enum.Enum):
 
     def is_up_to_date(self) -> bool:
         return self == TaskStatusType.UP_TO_DATE
+
+    def is_warning(self) -> bool:
+        return self == TaskStatusType.WARNING
 
 
 @dataclasses.dataclass
@@ -137,6 +138,9 @@ class TaskStatus:
     def is_up_to_date(self) -> bool:
         return self.type == TaskStatusType.UP_TO_DATE
 
+    def is_warning(self) -> bool:
+        return self.type == TaskStatusType.WARNING
+
     @staticmethod
     def pending(message: str | None = None) -> TaskStatus:
         return TaskStatus(TaskStatusType.PENDING, message)
@@ -164,6 +168,10 @@ class TaskStatus:
     @staticmethod
     def up_to_date(message: str | None = None) -> TaskStatus:
         return TaskStatus(TaskStatusType.UP_TO_DATE, message)
+
+    @staticmethod
+    def warning(message: str | None = None) -> TaskStatus:
+        return TaskStatus(TaskStatusType.WARNING, message)
 
     @staticmethod
     def from_exit_code(command: list[str] | None, code: int) -> TaskStatus:
@@ -194,7 +202,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
     #: A human readable description of the task's purpose. This is displayed in the terminal upon
     #: closer inspection of a task.
-    description: Optional[str] = None
+    description: str | None = None
 
     #: Whether the task executes by default when no explicit task is selected to run on the command-line.
     default: bool = False
@@ -312,6 +320,11 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
         self.depends_on(*tasks, mode=mode, _inverse=True)
 
+    def get_properties(self) -> Iterable[Property[Any]]:
+        for key in self.__schema__:
+            property: Property[Any] = getattr(self, key)
+            yield property
+
     def get_relationships(self) -> Iterable[TaskRelationship]:
         """
         Return an iterable that yields all relationships that this task has to other tasks as indicated by
@@ -324,8 +337,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         # Derive dependencies through property lineage.
-        for key in self.__schema__:
-            property: Property[Any] = getattr(self, key)
+        for property in self.get_properties():
             for supplier, _ in property.lineage():
                 if supplier is property:
                     continue
@@ -441,7 +453,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         accessible.
 
         This method should not return :attr:`TaskStatusType.PENDING`. If `None` is returned, it is assumed that the
-        task is :attr:`TaskStatusType.SUCCEEDED`.
+        task is :attr:`TaskStatusType.SUCCEEDED`. If the task fails, it should return :attr:`TaskStatusType.FAILED`.
+        If an exception is raised during this method, the task status is also assumed to be
+        :attr:`TaskStatusType.FAILED`. If the task finished successfully but with warnings, it should return
+        :attr:`TaskStatusType.WARNING`.
         """
 
         raise NotImplementedError
@@ -461,7 +476,7 @@ class GroupTask(Task):
     the tasks in the group, forcing them to be executed when this task is targeted. Group tasks are not enabled
     by default."""
 
-    tasks: List[Task]
+    tasks: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -570,6 +585,44 @@ class BackgroundTask(Task):
         del self.__exit_stack
 
 
+class InlineTask(Task):
+    """
+    This class is what is instantiated when calling #Project.task() with only a name and a BuildDSL closure.
+    It simplifies the implementation of one-off tasks in a BuildDSK Kraken build script, allowing to dynamically
+    define properties.
+    """
+
+    _properties: dict[str, Property[Any]]
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        self._properties = {}
+
+    @overload
+    def property(self, name: str) -> Property[Any]:
+        """Retrieve a property by name."""
+
+    @overload
+    def property(self, name: str, value: Any) -> Property[Any]:
+        """Define a property on this task with the given *name* and *value*."""
+
+    def property(self, name: str, value: Any | NotSet = NotSet.Value) -> Property[Any]:
+        if value is NotSet.Value:
+            return self._properties[name]
+        prop = self._properties[name] = Property(self, name, Any)
+        prop.set(value)
+        return prop
+
+    # Task
+
+    def get_properties(self) -> Iterable[Property[Any]]:
+        yield from self._properties.values()
+        yield from super().get_properties()
+
+    def execute(self) -> TaskStatus | None:
+        return None
+
+
 class TaskSet(Collection[Task]):
     """Represents a collection of tasks."""
 
@@ -629,21 +682,21 @@ class TaskSetSelect(Generic[T]):
         self._tasks = tasks
         self._output_type = output_type
 
+    def all(self) -> Iterable[T]:
+        for task in self._tasks:
+            yield from task.get_outputs(self._output_type)
+
+    def dict_supplier(self) -> Supplier[dict[Task, list[T]]]:
+        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
+
+    def supplier(self) -> Supplier[list[T]]:
+        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
+
     def dict(self) -> dict[Task, list[T]]:
         results: dict[Task, list[T]] = {}
         for task in self._tasks:
             results[task] = list(task.get_outputs(self._output_type))
         return results
-
-    def all(self) -> Iterable[T]:
-        for task in self._tasks:
-            yield from task.get_outputs(self._output_type)
-
-    def dict_supplier(self) -> Supplier[Dict[Task, list[T]]]:
-        return Supplier.of_callable(lambda: self.dict(), [TaskSupplier(x) for x in self._tasks])
-
-    def supplier(self) -> Supplier[list[T]]:
-        return Supplier.of_callable(lambda: list(self.all()), [TaskSupplier(x) for x in self._tasks])
 
 
 class TaskSetPartitions:

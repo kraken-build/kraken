@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import shlex
 from pathlib import Path
-from typing import Any, List
+from typing import Sequence
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -18,7 +18,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pytest"]
 
     tests_dir: Property[Path]
-    ignore_dirs: Property[List[Path]] = Property.config(default_factory=list)
+    ignore_dirs: Property[Sequence[Path]] = Property.config(default_factory=list)
     allow_no_tests: Property[bool] = Property.config(default=False)
     doctest_modules: Property[bool] = Property.config(default=True)
     marker: Property[str]
@@ -56,6 +56,22 @@ class PytestTask(EnvironmentAwareDispatchTask):
         return TaskStatus.from_exit_code(None, code)
 
 
-def pytest(*, name: str = "pytest", group: str = "test", project: Project | None = None, **kwargs: Any) -> PytestTask:
+def pytest(
+    *,
+    name: str = "pytest",
+    group: str = "test",
+    project: Project | None = None,
+    tests_dir: Path | None = None,
+    ignore_dirs: Sequence[Path] = (),
+    allow_no_tests: bool = False,
+    doctest_modules: bool = True,
+    marker: str | None = None,
+) -> PytestTask:
     project = project or Project.current()
-    return project.do(name, PytestTask, group=group, **kwargs)
+    task = project.task(name, PytestTask, group=group)
+    task.tests_dir = tests_dir
+    task.ignore_dirs = ignore_dirs
+    task.allow_no_tests = allow_no_tests
+    task.doctest_modules = doctest_modules
+    task.marker = marker
+    return task

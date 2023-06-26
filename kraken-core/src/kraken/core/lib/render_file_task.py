@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
 
 from kraken.common.path import try_relative_to
+from kraken.common.strings import as_bytes
 from kraken.common.supplier import Supplier
 
 from kraken.core import Project, Property, Task, TaskStatus
 
-from .check_file_contents_task import CheckFileContentsTask, as_bytes
+from .check_file_contents_task import CheckFileContentsTask
 
 DEFAULT_ENCODING = "utf-8"
 
@@ -26,7 +26,7 @@ class RenderFileTask(Task):
     description = 'Create or update "%(file)s".'
 
     file: Property[Path]
-    content: Property[Union[str, bytes]]
+    content: Property[str | bytes]
     encoding: Property[str] = Property.default(DEFAULT_ENCODING)
 
     def create_check(
@@ -36,24 +36,19 @@ class RenderFileTask(Task):
         description: str | None = None,
         group: str | None = "check",
     ) -> CheckFileContentsTask:
-        task = self.project.do(
-            name.replace("{name}", self.name),
-            task_class or CheckFileContentsTask,
-            description=description,
-            group=group,
-            file=self.file.value,
-            content=self.content.value,
-            encoding=self.encoding.value,
-            render_prepare=Supplier.of_callable(self.prepare),
+        task = self.project.task(
+            name.replace("{name}", self.name), task_class or CheckFileContentsTask, description=description, group=group
         )
+        task.file = self.file.value
+        task.content = self.content.value
+        task.encoding = self.encoding.value
+        task.render_prepare = Supplier.of_callable(self.prepare)
         task.depends_on(self, mode="order-only")
         return task
 
     # Task
 
-    def prepare(self) -> TaskStatus | None:
-        from kraken.core.lib.check_file_contents_task import as_bytes
-
+    def prepare(self) -> TaskStatus:
         file = self.file.get()
         if file.is_file() and file.read_bytes() == as_bytes(self.content.get(), self.encoding.get()):
             return TaskStatus.up_to_date(f'"{try_relative_to(file)}" is up to date')
@@ -84,22 +79,14 @@ def render_file(
     encoding: str | Supplier[str] = DEFAULT_ENCODING,
 ) -> tuple[RenderFileTask, CheckFileContentsTask | None]:
     project = project or Project.current()
-    render_task = project.do(
-        name,
-        task_class or RenderFileTask,
-        description=description,
-        group=group,
-        file=file,
-        content=content,
-        encoding=encoding,
-    )
+    render_task = project.task(name, task_class or RenderFileTask, description=description, group=group)
+    render_task.file = Path(file) if isinstance(file, str) else file
+    render_task.content = content
+    render_task.encoding = encoding
 
     if create_check:
         check_task = render_task.create_check(
-            check_name.replace("{name}", name),
-            check_task_class,
-            description=check_description,
-            group=check_group,
+            check_name.replace("{name}", name), check_task_class, description=check_description, group=check_group
         )
     else:
         check_task = None

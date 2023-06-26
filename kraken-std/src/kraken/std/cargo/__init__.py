@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, Collection, Sequence
+from typing import Collection, Sequence
 
 from kraken.common import Supplier
 from kraken.core import Project
@@ -73,21 +73,18 @@ def cargo_config(*, project: Project | None = None, nightly: bool = False) -> Ca
     return config
 
 
-def cargo_sqlx_migrate(
-    *, name: str = "sqlxMigrate", project: Project | None = None, **kwargs: Any
-) -> CargoSqlxMigrateTask:
+def cargo_sqlx_migrate(*, name: str = "sqlxMigrate", project: Project | None = None) -> CargoSqlxMigrateTask:
     project = project or Project.current()
-    return project.do(name, CargoSqlxMigrateTask, **kwargs)
+    return project.task(name, CargoSqlxMigrateTask)
 
 
 def cargo_sqlx_prepare(
-    *, name: str = "sqlxPrepare", project: Project | None = None, check: bool, **kwargs: Any
+    *, name: str = "sqlxPrepare", project: Project | None = None, check: bool
 ) -> CargoSqlxPrepareTask:
     project = project or Project.current()
-    if check:
-        name = f"{name}Check"
-        kwargs["group"] = "check"
-    task = project.do(name, CargoSqlxPrepareTask, check=check, **kwargs)
+    name = f"{name}Check" if check else name
+    task = project.task(name, CargoSqlxPrepareTask, group="check" if check else None)
+    task.check = check
 
     # Preparing or checking sqlx metadata calls `cargo metadata`, which can require the auth proxy
     # Without the auth proxy, cargo sqlx commands would fail with a cryptic error
@@ -130,13 +127,9 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
-    task = project.do(
-        "cargoAuthProxy",
-        CargoAuthProxyTask,
-        False,
-        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
-        registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
-    )
+    task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
+    task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
 
@@ -158,13 +151,9 @@ def cargo_sync_config(
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
-    task = project.do(
-        "cargoSyncConfig",
-        CargoSyncConfigTask,
-        group="apply",
-        registries=Supplier.of_callable(lambda: list(cargo.registries.values())),
-        replace=replace,
-    )
+    task = project.task("cargoSyncConfig", CargoSyncConfigTask, group="apply")
+    task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+    task.replace = replace
     check_task = task.create_check()
     project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(check_task)
     return task
@@ -182,15 +171,10 @@ def cargo_clippy(
     name = "cargoClippyFix" if fix else "cargoClippy"
     group = ("fmt" if fix else "lint") if group == "_auto_" else group
     cargo = CargoProject.get_or_create(project)
-    task = project.do(
-        name,
-        CargoClippyTask,
-        False,
-        group=group,
-        fix=fix,
-        allow=allow,
-        env=Supplier.of_callable(lambda: cargo.build_env),
-    )
+    task = project.task(name, CargoClippyTask, group=group)
+    task.fix = fix
+    task.allow = allow
+    task.env = Supplier.of_callable(lambda: cargo.build_env)
 
     # Clippy builds your code.
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
@@ -198,7 +182,7 @@ def cargo_clippy(
     return task
 
 
-def cargo_deny(*, project: Project | None = None, **kwargs: Any) -> CargoDenyTask:
+def cargo_deny(*, project: Project | None = None) -> CargoDenyTask:
     """Adds a task running cargo-deny for cargo projects. This checks different rules on dependencies, such as scanning
     for vulnerabilities, unwanted licences, or custom bans.
 
@@ -209,7 +193,7 @@ def cargo_deny(*, project: Project | None = None, **kwargs: Any) -> CargoDenyTas
     """
 
     project = project or Project.current()
-    return project.do("cargoDeny", CargoDenyTask, **kwargs)
+    return project.task("cargoDeny", CargoDenyTask)
 
 
 @dataclasses.dataclass
@@ -221,29 +205,21 @@ class CargoFmtTasks:
 def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> CargoFmtTasks:
     project = project or Project.current()
     config = project.find_metadata(CargoConfig) or cargo_config(project=project)
-    format = project.do(
-        "cargoFmt",
-        CargoFmtTask,
-        all_packages=all_packages,
-        config=config,
-        group="fmt",
-    )
-    check = project.do(
-        "cargoFmtCheck",
-        CargoFmtTask,
-        all_packages=all_packages,
-        config=config,
-        group="lint",
-        check=True,
-    )
+    format = project.task("cargoFmt", CargoFmtTask, group="fmt")
+    format.all_packages = all_packages
+    format.config = config
+
+    check = project.task("cargoFmtCheck", CargoFmtTask, group="lint")
+    check.all_packages = all_packages
+    check.config = config
+    check.check = True
     return CargoFmtTasks(check=check, format=format)
 
 
 def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:
     project = project or Project.current()
-    task = project.do("cargoUpdate", CargoUpdateTask, group="update")
+    task = project.task("cargoUpdate", CargoUpdateTask, group="update")
     task.depends_on(":cargoBuildSupport")
-
     return task
 
 
@@ -252,7 +228,6 @@ def cargo_bump_version(
     version: str,
     revert: bool = True,
     name: str = "cargoBumpVersion",
-    group: str | None = CARGO_PUBLISH_SUPPORT_GROUP_NAME,
     registry: str | None = None,
     project: Project | None = None,
     cargo_toml_file: Path = Path("Cargo.toml"),
@@ -265,19 +240,21 @@ def cargo_bump_version(
         it will not change the name of the task and that task will still be reused.
     :param group: The group to assign the task to (even if the task is reused)."""
 
+    # This task will write the "current" version (usually taken from git) into Cargo.toml
+    # That is useful at two places
+    #  * at build time (because apps may use env!("CARGO_PKG_VERSION"))
+    #  * at publish time (because the artifact file name is derived from the version)
+
     project = project or Project.current()
 
-    task = project.do(
-        name,
-        CargoBumpVersionTask,
-        group=group,
-        version=version,
-        revert=revert,
-        registry=registry,
-        cargo_toml_file=cargo_toml_file,
-    )
+    task = project.task(name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
+    task.version = version
+    task.revert = revert
+    task.registry = registry
+    task.cargo_toml_file = cargo_toml_file
 
-    task.depends_on(":test?")
+    # project.do() only supports one group, but this task is needed in two groups
+    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
 
     return task
 
@@ -317,16 +294,12 @@ def cargo_build(
     if mode == "release":
         additional_args.append("--release")
 
-    task = project.do(
-        f"cargoBuild{mode.capitalize()}" if name is None else name,
-        CargoBuildTask,
-        default=False,
-        group=group,
-        incremental=incremental,
-        target=mode,
-        additional_args=additional_args,
-        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
-    )
+    task = project.task(f"cargoBuild{mode.capitalize()}" if name is None else name, CargoBuildTask, group=group)
+    task.incremental = incremental
+    task.target = mode
+    task.additional_args = additional_args
+    task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
+
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
 
@@ -347,14 +320,9 @@ def cargo_test(
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
-    task = project.do(
-        "cargoTest",
-        CargoTestTask,
-        default=False,
-        group=group,
-        incremental=incremental,
-        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
-    )
+    task = project.task("cargoTest", CargoTestTask, group=group)
+    task.incremental = incremental
+    task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
 
@@ -386,23 +354,18 @@ def cargo_publish(
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    task = project.do(
-        f"{name}/{package_name}" if package_name is not None else name,
-        CargoPublishTask,
-        False,
-        group="publish",
-        registry=Supplier.of_callable(lambda: cargo.registries[registry]),
-        additional_args=list(additional_args),
-        allow_dirty=True,
-        incremental=incremental,
-        verify=verify,
-        retry_attempts=retry_attempts,
-        package_name=package_name,
-        env=Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})}),
+    task = project.task(
+        f"{name}/{package_name}" if package_name is not None else name, CargoPublishTask, group="publish"
     )
-
+    task.registry = Supplier.of_callable(lambda: cargo.registries[registry])
+    task.additional_args = list(additional_args)
+    task.allow_dirty = True
+    task.incremental = incremental
+    task.verify = verify
+    task.retry_attempts = retry_attempts
+    task.package_name = package_name
+    task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
-
     return task
 
 
@@ -412,16 +375,17 @@ def cargo_check_toolchain_version(
     """Creates a task that checks that cargo is at least at version `minimal_version`"""
 
     project = project or Project.current()
-    return project.do(
-        f"cargoCheckVersion/{minimal_version}",
-        CargoCheckToolchainVersionTask,
-        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
-        minimal_version=minimal_version,
+    task = project.task(
+        f"cargoCheckVersion/{minimal_version}", CargoCheckToolchainVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
     )
+    task.minimal_version = minimal_version
+    return task
 
 
 def rustup_target_add(target: str, *, group: str | None = None, project: Project | None = None) -> RustupTargetAddTask:
     """Creates a task that installs a given target for Cargo"""
 
     project = project or Project.current()
-    return project.do(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group, target=target)
+    task = project.task(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group)
+    task.target = target
+    return task

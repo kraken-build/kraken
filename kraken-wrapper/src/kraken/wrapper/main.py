@@ -422,7 +422,7 @@ def main() -> NoReturn:
 
     else:
         if project.directory.absolute() != Path.cwd():
-            argv = ["-p", str(project.directory)] + argv
+            argv += ["-p", str(project.directory)]
         command = [cmd, *argv]
         logger.info("$ %s", " ".join(map(shlex.quote, ["kraken"] + command)))
         environment = manager.get_environment()

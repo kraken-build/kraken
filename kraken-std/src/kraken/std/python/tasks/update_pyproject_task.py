@@ -28,7 +28,7 @@ class UpdatePyprojectTask(RenderFileTask):
         settings.build_system.update_pyproject(settings, pyproject)
         return pyproject.to_toml_string()
 
-    def prepare(self) -> TaskStatus | None:
+    def prepare(self) -> TaskStatus:
         settings = self.settings.get()
         if not settings.build_system:
             return TaskStatus.skipped("no build system")
@@ -42,12 +42,8 @@ def update_pyproject_task(
     project: Project | None = None,
 ) -> UpdatePyprojectTask:
     project = project or Project.current()
-    task = project.do(
-        name,
-        UpdatePyprojectTask,
-        group=group,
-        settings=python_settings(project),
-        file=project.directory / "pyproject.toml",
-    )
+    task = project.task(name, UpdatePyprojectTask, group=group)
+    task.settings = python_settings(project)
+    task.file = project.directory / "pyproject.toml"
     task.create_check()
     return task

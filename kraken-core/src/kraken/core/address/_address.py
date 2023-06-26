@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Any, ClassVar, Sequence, Tuple, TypeAlias
+from typing import Any, ClassVar, Sequence, TypeAlias
 
 
 class AddressMeta(type):
@@ -245,7 +245,7 @@ class Address(metaclass=AddressMeta):
         self._is_absolute, self._is_container, self._elements = self._parse(value)
         self._hash_key: int | None = None
 
-    def __getnewargs__(self) -> Tuple[Any, ...]:
+    def __getnewargs__(self) -> tuple[Any, ...]:
         # For dill to serialize/deserialize the object.
         return (str(self),)
 
@@ -400,18 +400,39 @@ class Address(metaclass=AddressMeta):
 
         return self._is_container
 
-    def normalize(self) -> "Address":
+    def normalize(self, *, keep_container: bool = False) -> Address:
         """
         Normalize the address, removing any superfluous elements (`.` for current, `..` for parent). A normalized
-        is not a container address. Use #set_container() after #normalize() to make it a container address.
+        is not a container address. Use #set_container() after #normalize() to make it a container address, or pass
+        `True` to the *keep_container* argument to keep the container state.
 
+        >>> Address("").normalize()
+        Address('.')
+        >>> Address("").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".").normalize()
+        Address('.')
+        >>> Address(".").normalize(keep_container=True)
+        Address('.')
+        >>> Address(".:").normalize()
+        Address('.')
+        >>> Address(".:").normalize(keep_container=True)
+        Address('.:')
         >>> Address(":a:.:b").normalize()
+        Address(':a:b')
+        >>> Address(":a:.:b").normalize(keep_container=True)
         Address(':a:b')
         >>> Address(":a:..:b").normalize()
         Address(':b')
         >>> Address("..:.:b").normalize()
         Address('..:b')
+        >>> Address("..:.:b").normalize(keep_container=True)
+        Address('..:b')
         >>> Address("a:b:").normalize()
+        Address('a:b')
+        >>> Address("a:b:").normalize(keep_container=True)
+        Address('a:b:')
+        >>> Address("a:b:.").normalize(keep_container=True)
         Address('a:b')
         """
 
@@ -427,9 +448,9 @@ class Address(metaclass=AddressMeta):
                 elements.append(current)
         if not self._is_absolute and not elements:
             elements = [Address.Element(Address.Element.CURRENT, False)]
-        return Address.create(self._is_absolute, False, elements)
+        return Address.create(self._is_absolute, self.is_container() and keep_container, elements)
 
-    def concat(self, address: "str | Address") -> "Address":
+    def concat(self, address: str | Address) -> Address:
         """
         Concatenate two addresses. If *address* is absolute, return *address*.
 
@@ -437,6 +458,8 @@ class Address(metaclass=AddressMeta):
         Address(':a:b:c')
         >>> Address(":a").concat(Address(":b"))
         Address(':b')
+        >>> Address(":a").concat(Address("."))
+        Address(':a:.')
         """
 
         if isinstance(address, str):
@@ -445,12 +468,14 @@ class Address(metaclass=AddressMeta):
             return address
         return Address.create(self._is_absolute, address._is_container, self._elements + address._elements)
 
-    def append(self, element: str | Element) -> "Address":
+    def append(self, element: str | Element) -> Address:
         """
         Return a new address with one element appended.
 
         >>> Address(":").append("a")
         Address(':a')
+        >>> Address(":a:.").append(".")
+        Address(':a:.:.')
         """
 
         if isinstance(element, str):
@@ -458,7 +483,7 @@ class Address(metaclass=AddressMeta):
         assert isinstance(element, Address.Element), type(element)
         return Address.create(self._is_absolute, False, self._elements + [element])
 
-    def set_container(self, is_container: bool) -> "Address":
+    def set_container(self, is_container: bool) -> Address:
         """
         Return a copy of this address with the container flag set to the given value. The container flag indicates
         whether the string representation of the address is followed by a colon (`:`). This status is irrelevant
@@ -529,7 +554,7 @@ class Address(metaclass=AddressMeta):
         return self._elements
 
     @property
-    def parent(self) -> "Address":
+    def parent(self) -> Address:
         """
         Returns the parent address.
 

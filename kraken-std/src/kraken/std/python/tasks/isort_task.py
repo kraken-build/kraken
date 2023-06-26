@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any, List
+from typing import Sequence
 
 from kraken.core import Project, Property
 
@@ -14,7 +14,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
 
     check_only: Property[bool] = Property.config(default=False)
     config_file: Property[Path]
-    additional_files: Property[List[Path]] = Property.config(default_factory=list)
+    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
 
     # EnvironmentAwareDispatchTask
 
@@ -42,10 +42,25 @@ class IsortTasks:
     format: IsortTask
 
 
-def isort(*, name: str = "python.isort", project: Project | None = None, **kwargs: Any) -> IsortTasks:
+def isort(
+    *,
+    name: str = "python.isort",
+    project: Project | None = None,
+    config_file: Path | None = None,
+    additional_files: Sequence[Path] = (),
+) -> IsortTasks:
     # TODO (@NiklasRosenstein): We may need to ensure an order to isort and block somehow, sometimes they yield
     #       slightly different results based on the order they run.
     project = project or Project.current()
-    check_task = project.do(f"{name}.check", IsortTask, group="lint", **kwargs, check_only=True)
-    format_task = project.do(name, IsortTask, group="fmt", default=False, **kwargs)
+
+    check_task = project.task(f"{name}.check", IsortTask, group="lint")
+    check_task.check_only = True
+    check_task.config_file = config_file
+    check_task.additional_files = additional_files
+
+    format_task = project.task(name, IsortTask, group="fmt")
+    format_task.check_only = False
+    format_task.config_file = config_file
+    format_task.additional_files = additional_files
+
     return IsortTasks(check_task, format_task)

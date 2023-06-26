@@ -1,0 +1,26 @@
+name: "Documentation"
+
+on:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+    - uses: actions/checkout@v2
+    - uses: NiklasRosenstein/slap@gha/install/v1
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: cd docs && kraken run docsBuild --no-save
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: docs/_site
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/develop'
+      id: deployment
+      uses: actions/deploy-pages@v2

@@ -1,0 +1,17 @@
+name: "Data"
+
+on:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
+
+jobs:
+  gitignore-io-up-to-date:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: NiklasRosenstein/slap@gha/install/v1
+    - uses: actions/setup-python@v2
+      with: { python-version: "3.10" }
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: python -m kraken.std.git.gitignore.gitignore_io
+    - run: git diff --exit-code

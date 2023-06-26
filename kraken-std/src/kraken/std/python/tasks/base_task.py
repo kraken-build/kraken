@@ -5,7 +5,7 @@ import logging
 import os
 import shutil
 import subprocess as sp
-from typing import Iterable, List, MutableMapping
+from typing import Iterable, MutableMapping
 
 from kraken.common.pyenv import VirtualEnvInfo, get_current_venv
 from kraken.core import Project, Task, TaskRelationship, TaskStatus
@@ -21,7 +21,7 @@ class EnvironmentAwareDispatchTask(Task):
     """Base class for tasks that run a subcommand. The command ensures that the command is aware of the
     environment configured in the project settings."""
 
-    python_dependencies: List[str] = []
+    python_dependencies: list[str] = []
     """Packages that should be installed for this task to run."""
 
     def __init__(self, name: str, project: Project) -> None:

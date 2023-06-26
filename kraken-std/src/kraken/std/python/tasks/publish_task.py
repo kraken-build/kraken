@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable
 
 from kraken.core import Project, Property, Task, TaskRelationship
 from twine.commands.upload import upload as twine_upload
@@ -15,10 +15,10 @@ class PublishTask(Task):
 
     description = "Upload the distributions of your Python project. [index url: %(index_upload_url)s]"
     index_upload_url: Property[str]
-    index_credentials: Property[Optional[Tuple[str, str]]] = Property.config(default=None)
-    distributions: Property[List[Path]]
+    index_credentials: Property[tuple[str, str] | None] = Property.config(default=None)
+    distributions: Property[list[Path]]
     skip_existing: Property[bool] = Property.config(default=False)
-    dependencies: List[Task]
+    dependencies: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -43,7 +43,7 @@ class PublishTask(Task):
 def publish(
     *,
     package_index: str,
-    distributions: list[Path] | Property[List[Path]],
+    distributions: list[Path] | Property[list[Path]],
     skip_existing: bool = False,
     name: str = "python.publish",
     group: str | None = "publish",
@@ -59,15 +59,10 @@ def publish(
         raise ValueError(f"package index {package_index!r} is not defined")
 
     index = settings.package_indexes[package_index]
-    task = project.do(
-        name,
-        PublishTask,
-        default=default,
-        group=group,
-        index_upload_url=index.upload_url,
-        index_credentials=index.credentials,
-        distributions=distributions,
-        skip_existing=skip_existing,
-    )
-    task.dependencies += after or []
+    task = project.task(name, PublishTask, group=group)
+    task.index_upload_url = index.upload_url
+    task.index_credentials = index.credentials
+    task.distributions = distributions
+    task.skip_existing = skip_existing
+    task.depends_on(*(after or []))
     return task

@@ -1,0 +1,43 @@
+from subprocess import run
+from pathlib import Path
+from kraken.core import TaskStatus
+import os
+
+buildscript {
+    requirements = ["kraken-std"]
+}
+
+# NOTE(@NiklasRosenstein): BuildDSL support is still experimental in Kraken. Serializing BuildDSL closures
+#       currently fails with 'unable to serialize frame objects', thus you should run this build script with
+#       the `--no-save` option.
+
+project.task "docsVenv" {
+    property "directory" project.build_directory / "docs-venv"
+    prepare = () -> {
+        def directory = self.property("directory").get()
+        if directory.is_dir():
+            return TaskStatus.skipped("docs-venv exists")
+    }
+    execute = () -> {
+        def directory = self.property("directory").get()
+        if not directory.is_dir():
+            run(["python3", "-m", "venv", directory])
+            run([directory / "bin" / "pip", "install", "-r", project.directory / "requirements.txt"])
+    }
+}
+
+for mode in ["Serve", "Build"]:
+    project.task "docs" + mode {
+        property "venv" project.task("docsVenv").property("directory")
+        property "cwd" project.directory
+        property "serve" mode == "Serve"
+        execute = () -> {
+            def directory = self.property("venv").get().absolute()
+            def command = [directory / "bin" / "novella"]
+            if self.property("serve").get():
+                command += ["--serve"]
+            def env = os.environ.copy()
+            env["PATH"] = str(directory / "bin") + os.pathsep + env["PATH"]
+            run(command, cwd=self.property("cwd").get(), env=env)
+        }
+    }

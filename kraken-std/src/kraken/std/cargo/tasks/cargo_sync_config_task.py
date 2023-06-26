@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
 
 import tomli
 import tomli_w
@@ -20,7 +19,7 @@ class CargoSyncConfigTask(RenderFileTask):
     replace: Property[bool] = Property.config(default=False)
 
     #: The registries to insert into the configuration.
-    registries: Property[List[CargoRegistry]] = Property.config(default_factory=list)
+    registries: Property[list[CargoRegistry]] = Property.config(default_factory=list)
 
     #: Enable fetching Cargo indexes with the Git CLI.
     git_fetch_with_cli: Property[bool]

@@ -15,13 +15,3 @@ license = {text = "MIT"}
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[[tool.pdm.source]]
-url = "http://localhost:23213"
-verify_ssl = false
-name = "local"
-username = "integration-test-user"
-password = "password-for-integration-test"
