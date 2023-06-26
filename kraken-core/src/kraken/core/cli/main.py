@@ -77,7 +77,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     )
     LoggingOptions.add_to_parser(run)
     BuildOptions.add_to_parser(run)
-    GraphOptions.add_to_parser(run, include_all_option=False)
+    GraphOptions.add_to_parser(run)
     RunOptions.add_to_parser(run)
 
     query = subparsers.add_parser("query", aliases=["q"])
@@ -106,7 +106,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     tree = query_subparsers.add_parser("tree", aliases=["t"], description="Output the project and task tree.")
     LoggingOptions.add_to_parser(tree)
     BuildOptions.add_to_parser(tree)
-    GraphOptions.add_to_parser(tree)
+    GraphOptions.add_to_parser(tree, saveable=False)
     ExcludeOptions.add_to_parser(tree)
 
     # This command is used by kraken-wrapper to produce a lock file.

@@ -20,8 +20,8 @@ def _write_example_readme(kraken_project: Project) -> None:
 
 def test__ValidateReadmeTask__fails_on_no_preferred_readme_file(kraken_project: Project) -> None:
     _write_example_readme(kraken_project)
-    task = kraken_project.do("validate_readme", ValidateReadmeTask)
-    task.preferred_file_names.set(["README.rst"])
+    task = kraken_project.task("validate_readme", ValidateReadmeTask)
+    task.preferred_file_names = ["README.rst"]
     status = task.execute()
     assert status == TaskStatus.failed("completed 1 out of 1 check(s) with errors")
     assert task.statuses.get() == [
@@ -31,8 +31,8 @@ def test__ValidateReadmeTask__fails_on_no_preferred_readme_file(kraken_project: 
 
 def test__ValidateReadmeTask__warns_on_disallowed_content(kraken_project: Project) -> None:
     _write_example_readme(kraken_project)
-    task = kraken_project.do("validate_readme", ValidateReadmeTask)
-    task.disallowed_md5_content_hashes.set({"bad hash": BAD_CONTENT_MD5_SUM})
+    task = kraken_project.task("validate_readme", ValidateReadmeTask)
+    task.disallowed_md5_content_hashes = {"bad hash": BAD_CONTENT_MD5_SUM}
     status = task.execute()
     assert status == TaskStatus.warning("completed 1 out of 2 check(s) with warnings")
     assert task.statuses.get() == [
@@ -44,7 +44,7 @@ def test__ValidateReadmeTask__warns_on_disallowed_content(kraken_project: Projec
 def test__ValidateReadmeTask__warns_on_multiple_readme_files(kraken_project: Project) -> None:
     _write_example_readme(kraken_project)
     (kraken_project.directory / "README.rst").write_text("foobar")
-    task = kraken_project.do("validate_readme", ValidateReadmeTask)
+    task = kraken_project.task("validate_readme", ValidateReadmeTask)
     status = task.execute()
     assert status == TaskStatus.warning("completed 1 out of 1 check(s) with warnings")
     assert task.statuses.get() == [
@@ -54,8 +54,8 @@ def test__ValidateReadmeTask__warns_on_multiple_readme_files(kraken_project: Pro
 
 def test__ValidateReadmeTask__warns_about_disallowed_pattern_match(kraken_project: Project) -> None:
     _write_example_readme(kraken_project)
-    task = kraken_project.do("validate_readme", ValidateReadmeTask)
-    task.disallowed_regex_patterns.set([r"auto\s*generated"])
+    task = kraken_project.task("validate_readme", ValidateReadmeTask)
+    task.disallowed_regex_patterns = [r"auto\s*generated"]
     status = task.execute()
     assert status == TaskStatus.warning("completed 1 out of 2 check(s) with warnings")
     assert task.statuses.get() == [
@@ -66,8 +66,8 @@ def test__ValidateReadmeTask__warns_about_disallowed_pattern_match(kraken_projec
 
 def test__ValidateReadmeTask__warns_about_minimum_lines(kraken_project: Project) -> None:
     _write_example_readme(kraken_project)
-    task = kraken_project.do("validate_readme", ValidateReadmeTask)
-    task.minimum_lines.set(10)
+    task = kraken_project.task("validate_readme", ValidateReadmeTask)
+    task.minimum_lines = 10
     status = task.execute()
     assert status == TaskStatus.warning("completed 1 out of 2 check(s) with warnings")
     assert task.statuses.get() == [

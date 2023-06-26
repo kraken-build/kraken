@@ -13,13 +13,21 @@ from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task, TaskSet
+from kraken.core.system.task import GroupTask, InlineTask, Task, TaskSet
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
 
 T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
+
+
+class TaskNotFound(Exception):
+    pass
+
+
+class DuplicateMember(Exception):
+    pass
 
 
 class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
@@ -114,12 +122,128 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         return self.context.build_directory / str(self.address).replace(":", "/").lstrip("/")
 
-    def task(self, name: str) -> Task:
-        """Return a task in the project by name."""
+    @overload
+    def task(self, name: str, /) -> Task:
+        """
+        Get a task from the project by name. Raises a #TaskNotFound exception if the task does not exist.
+        """
 
-        task = self._members[name]
-        if not isinstance(task, Task):
-            raise ValueError(f"name {name!r} does not refer to a task, but {type(task).__name__}")
+    @overload
+    def task(
+        self,
+        name: str,
+        type_: Type[T_Task],
+        /,
+        *,
+        default: bool | None = None,
+        group: str | GroupTask | None = None,
+        description: str | None = None,
+    ) -> T_Task:
+        """
+        Create a new task in the project with the specified name. If a member of the project with the same name already
+        exists, a #DuplicateMember exception is raised.
+        """
+
+    @overload
+    def task(self, name: str, type_: Type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
+        """
+        This overload is used to create a task in a BuildDSL script.
+
+        ```py
+        project.task "myTask" MyTaskType {
+            default = False
+            some_property.set("foobar")
+            depends_on "otherTask"
+        }
+        ```
+        """
+
+    @overload
+    def task(
+        self,
+        name: str,
+        closure: builddsl.UnboundClosure,
+        /,
+        *,
+        default: bool | None = None,
+        group: str | GroupTask | None = None,
+        description: str | None = None,
+    ) -> Task:
+        """
+        Create a new task, applying the *closure*. This is useful for BuildDSL scripts that want to implement
+        a custom task. This can be done by overriding the task's `execute()` method with a closure. It will
+        create a task of type #InlineTask for you.
+
+        ```py
+        project.task "myTask" {
+            property "name" "John"
+            execute = () -> {
+                def name = self.property("name").get()
+                print "Hello," name
+            }
+        }
+        ```
+        """
+
+    def task(
+        self,
+        name: str,
+        type_: Type[T_Task] | builddsl.UnboundClosure | None = None,
+        default_or_closure: bool | builddsl.UnboundClosure | None = None,
+        /,
+        *,
+        default: bool | None = None,
+        group: str | GroupTask | None = None,
+        description: str | None = None,
+    ) -> Task | T_Task:
+        if type_ is None:
+            assert default_or_closure is None
+            assert default is None
+            assert group is None
+            assert description is None
+
+            try:
+                task = self._members[name]
+                if not isinstance(task, Task):
+                    raise KeyError("Not a task")
+            except KeyError:
+                raise TaskNotFound(self.address.concat(name))
+            return task
+
+        if isinstance(type_, builddsl.UnboundClosure):
+            default_or_closure = type_
+            type_ = InlineTask  # type: ignore[assignment]
+
+        if type_ is None or not isinstance(type_, type) or not issubclass(type_, Task):
+            raise TypeError(f"Expected a Task type, got {type(type_).__name__}")
+
+        if name in self._members:
+            raise DuplicateMember(f"{self} already has a member {name!r}")
+
+        task = type_(name, self)
+
+        if callable(default_or_closure):
+            default_or_closure(task)
+        elif default_or_closure is not None:
+            assert isinstance(default_or_closure, bool)
+            task.default = default_or_closure
+        elif default is not None:
+            task.default = default
+
+        match group:
+            case str():
+                self.group(group).add(task)
+            case GroupTask():
+                group.add(task)
+            case None:
+                pass
+            case _:
+                raise TypeError(f"Expected str or GroupTask, got {type(group)}")
+
+        if description is not None:
+            task.description = description
+
+        self._members[name] = task
         return task
 
     def tasks(self) -> Mapping[str, Task]:
@@ -224,6 +348,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         del self._members[project.name]
 
+    @deprecated(reason="Use Project.task() instead")
     def do(
         self,
         name: str,
@@ -302,7 +427,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         task = self.tasks().get(name)
         if task is None:
-            task = self.do(name, GroupTask)
+            task = self.task(name, GroupTask)
         elif not isinstance(task, GroupTask):
             raise RuntimeError(f"{task.address!r} must be a GroupTask, but got {type(task).__name__}")
         if description is not None:

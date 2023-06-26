@@ -59,15 +59,10 @@ def publish(
         raise ValueError(f"package index {package_index!r} is not defined")
 
     index = settings.package_indexes[package_index]
-    task = project.do(
-        name,
-        PublishTask,
-        default=default,
-        group=group,
-        index_upload_url=index.upload_url,
-        index_credentials=index.credentials,
-        distributions=distributions,
-        skip_existing=skip_existing,
-    )
-    task.dependencies += after or []
+    task = project.task(name, PublishTask, group=group)
+    task.index_upload_url = index.upload_url
+    task.index_credentials = index.credentials
+    task.distributions = distributions
+    task.skip_existing = skip_existing
+    task.depends_on(*(after or []))
     return task

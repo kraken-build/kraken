@@ -64,8 +64,8 @@ def install(*, name: str = "python.install", project: Project | None = None) -> 
     project = project or Project.current()
     task = cast(Union[InstallTask, None], project.tasks().get(name))
     if task is None:
-        task = project.do(name, InstallTask, default=False)
-        task.build_system.set(Supplier.of_callable(lambda: python_settings(project).build_system))
-        task.always_use_managed_env.set(Supplier.of_callable(lambda: python_settings(project).always_use_managed_env))
+        task = project.task(name, InstallTask)
+        task.build_system = Supplier.of_callable(lambda: python_settings(project).build_system)
+        task.always_use_managed_env = Supplier.of_callable(lambda: python_settings(project).always_use_managed_env)
 
     return task

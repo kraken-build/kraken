@@ -23,7 +23,7 @@ baz
 def test__GitignoreSyncTask__inserts_generated_content_on_top(kraken_project: Project) -> None:
     path = kraken_project.directory / ".gitignore"
     path.write_text(NO_GENERATED_CONTENT)
-    task = kraken_project.do("gitignore", GitignoreSyncTask)
+    task = kraken_project.task("gitignore", GitignoreSyncTask)
     task.finalize()
     print(task.prepare())
     print(task.execute())
@@ -46,8 +46,8 @@ def test__GitignoreSyncTask__inserts_generated_content_on_top(kraken_project: Pr
 def test__GitignoreSyncTask__inserts_generated_content_on_bottom(kraken_project: Project) -> None:
     path = kraken_project.directory / ".gitignore"
     path.write_text(NO_GENERATED_CONTENT)
-    task = kraken_project.do("gitignore", GitignoreSyncTask)
-    task.where.set("bottom")
+    task = kraken_project.task("gitignore", GitignoreSyncTask)
+    task.where = "bottom"
     task.finalize()
     print(task.prepare())
     print(task.execute())
@@ -67,7 +67,7 @@ def test__GitignoreSyncTask__inserts_generated_content_on_bottom(kraken_project:
 def test__GitignoreSyncTask__updates_existing_generated_content(kraken_project: Project) -> None:
     path = kraken_project.directory / ".gitignore"
     path.write_text(WITH_GENERATED_CONTENT)
-    task = kraken_project.do("gitignore", GitignoreSyncTask)
+    task = kraken_project.task("gitignore", GitignoreSyncTask)
     task.finalize()
     print(task.prepare())
     print(task.execute())
@@ -86,10 +86,8 @@ def test__GitignoreSyncTask__updates_existing_generated_content(kraken_project: 
 
 
 def test__gitignore__check_and_apply_tasks(kraken_project: Project) -> None:
-    gitignore(gitignore_io_tokens=["python"])
-
+    gitignore(gitignore_io_tokens=["python"])[0]
     with raises(BuildError):
         kraken_project.context.execute([":check"])
-
     kraken_project.context.execute([":apply"])
     kraken_project.context.execute([":check"])

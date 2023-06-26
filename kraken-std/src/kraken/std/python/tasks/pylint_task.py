@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from kraken.core import Project, Property
 
@@ -25,6 +25,6 @@ class PylintTask(EnvironmentAwareDispatchTask):
         return command
 
 
-def pylint(*, name: str = "python.pylint", project: Project | None = None, **kwargs: Any) -> PylintTask:
+def pylint(*, name: str = "python.pylint", project: Project | None = None) -> PylintTask:
     project = project or Project.current()
-    return project.do(name, PylintTask, group="lint", **kwargs)
+    return project.task(name, PylintTask, group="lint")

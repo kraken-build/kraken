@@ -6,7 +6,7 @@ from .tasks.info_task import InfoTask, info
 from .tasks.install_task import InstallTask, install
 from .tasks.isort_task import IsortTask, isort
 from .tasks.login_task import login
-from .tasks.mypy_subtest_task import MypyStubtestTask, mypy_stubtest, mypy_subtest
+from .tasks.mypy_stubtest_task import MypyStubtestTask, mypy_stubtest
 from .tasks.mypy_task import MypyTask, mypy
 from .tasks.publish_task import PublishTask, publish
 from .tasks.pycln_task import PyclnTask, pycln
@@ -38,7 +38,6 @@ __all__ = [
     "login",
     "mypy",
     "MypyTask",
-    "mypy_subtest",  # Backwards compatibility, added in kraken-std 0.9.0
     "mypy_stubtest",
     "MypyStubtestTask",
     "publish",

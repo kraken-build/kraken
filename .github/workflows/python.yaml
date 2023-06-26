@@ -68,24 +68,3 @@ jobs:
             "url": "${{ vars.ARTIFACTORY_URL }}",
             "user": "${{ vars.ARTIFACTORY_USER }}"
           }
-
-  documentation:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-    - uses: actions/checkout@v2
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: slap install --no-venv-check --only-extras docs
-    - run: slap run --no-venv-check docs:install
-    - run: slap run --no-venv-check docs:build
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v1
-      with:
-        path: docs/_site
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/develop'
-      id: deployment
-      uses: actions/deploy-pages@v2

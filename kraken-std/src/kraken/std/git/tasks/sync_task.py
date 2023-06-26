@@ -77,5 +77,8 @@ class GitignoreSyncTask(RenderFileTask):
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
-        self.file.setmap(lambda file: self.project.directory / file)
         self.content.setcallable(lambda: self.get_file_contents(self.file.get()))
+
+    def finalize(self) -> None:
+        self.file.setmap(lambda file: self.project.directory / file)
+        super().finalize()

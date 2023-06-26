@@ -39,7 +39,7 @@ def gitignore(
     """
 
     project = project or Project.current()
-    task = project.do(name, tasks.GitignoreSyncTask, group=group)
+    task = project.task(name, tasks.GitignoreSyncTask, group=group)
     task.file.set(Path(gitignore_file))
     if generated_content is not None:
         task.generated_content.setmap(lambda x: [*x, *generated_content])  # type: ignore[misc]  # See https://github.com/python/mypy/issues/14891  # noqa: E501

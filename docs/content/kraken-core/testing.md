@@ -36,7 +36,7 @@ And then in the unit test:
 
 ```py
 def test__MyCustomTask__can_do_cool_things(kraken_project: Project) -> None:
-    task = kraken_project.do("mytask", MyCustomTask)
+    task = kraken_project.task("mytask", MyCustomTask)
     task.some_property.set("foobar")
     status = task.execute()
     assert status == TaskStatus.succeeded()

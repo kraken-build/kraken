@@ -46,3 +46,24 @@ type = "improvement"
 description = "bump Cargo.toml version before building, not only before publishing"
 author = "jerome.froissart@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/52"
+
+[[entries]]
+id = "3a8f284e-1259-4f02-817b-a6ba9e41f3bc"
+type = "breaking change"
+description = "Correct name of `mypy_stubtest_task` module and remove backwards compatibility for `mypy_subtest()` function name."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "825d21c2-8cd1-42b6-ad57-1187c82dbfd2"
+type = "breaking change"
+description = "Update signature of `info()` function to align with the rest of the task factory functions (e.g. automatically take the current project and build system)."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "d976ab0a-dfb3-4b03-aa48-ca9798d95c3c"
+type = "improvement"
+description = "Make parameters to task factory functions in `kraken.std.python.tasks` explicit and change `List` properties to contain a `Sequence`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/54"

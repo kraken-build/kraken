@@ -4,6 +4,8 @@ from pathlib import Path
 from kraken.core import Project, Property, Task, TaskStatus
 from termcolor import colored
 
+from kraken.std.python.settings import python_settings
+
 from ..buildsystem import PythonBuildSystem
 
 
@@ -25,8 +27,8 @@ class InfoTask(Task):
         print(
             colored(f" ---------- {self.build_system.get().name}-managed environment information ----------", "magenta")
         )
-        print(colored("Python version: ", "cyan"), colored(f"{version.strip()}", "blue"))
-        print(colored("Python path: ", "cyan"), colored(f"{python_path}", "blue"))
+        print(colored("Python version:           ", "cyan"), colored(f"{version.strip()}", "blue"))
+        print(colored("Python path:              ", "cyan"), colored(f"{python_path}", "blue"))
         print(colored("Virtual environment path: ", "cyan"), colored(f"{virtual_env_path}", "blue"))
         print(colored(" ------------------------------------------------------------", "magenta"))
 
@@ -49,10 +51,15 @@ class InfoTask(Task):
         ).stdout.decode("utf-8")
 
 
-def info(build_system: PythonBuildSystem, project: Project) -> InfoTask:
+def info(*, project: Project | None = None, build_system: PythonBuildSystem | None = None) -> InfoTask:
     """
     This task displays a list of useful info on current Python and virtual environment settings.
     """
+
     project = project or Project.current()
-    task = project.do("python.info", InfoTask, build_system=build_system)
+    if build_system is None:
+        build_system = python_settings().build_system
+
+    task = project.task("python.info", InfoTask)
+    task.build_system = build_system
     return task

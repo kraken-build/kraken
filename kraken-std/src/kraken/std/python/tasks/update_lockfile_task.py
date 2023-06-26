@@ -36,7 +36,6 @@ def update_lockfile_task(
     *,
     name: str = "python.update",
     group: str | None = "update",
-    as_version: str | None = None,
     project: Project | None = None,
 ) -> UpdateLockfileTask:
     """Creates an update task for the given project.
@@ -44,12 +43,8 @@ def update_lockfile_task(
     The update task relies on the build system configured in the Python project settings."""
 
     project = project or Project.current()
-    task = project.do(
-        name,
-        UpdateLockfileTask,
-        group=group,
-        settings=python_settings(project),
-        build_system=Supplier.of_callable(lambda: python_settings(project).build_system),
-        pyproject_toml=project.directory / "pyproject.toml",
-    )
+    task = project.task(name, UpdateLockfileTask, group=group)
+    task.settings = python_settings(project)
+    task.build_system = Supplier.of_callable(lambda: python_settings(project).build_system)
+    task.pyproject_toml = project.directory / "pyproject.toml"
     return task
