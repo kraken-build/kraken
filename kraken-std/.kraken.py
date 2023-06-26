@@ -28,7 +28,7 @@ python.pytest(
     group="integrationTest",
 )
 python.install()
-python.info()
+# python.info()
 
 (
     python.python_settings()
