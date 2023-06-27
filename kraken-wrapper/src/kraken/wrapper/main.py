@@ -65,7 +65,7 @@ def _get_argument_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument("-V", "--version", version=__version__, action="version")
-    LoggingOptions.add_to_parser(parser)
+    LoggingOptions.add_to_parser(parser, default_verbosity=1)
     EnvOptions.add_to_parser(parser)
 
     # NOTE (@NiklasRosenstein): If we combine "+" with remainder, we get options passed after the `cmd`

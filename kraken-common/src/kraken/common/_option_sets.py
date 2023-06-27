@@ -8,13 +8,13 @@ class LoggingOptions:
     quietness: int
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, default_verbosity: int = 0) -> None:
         group = parser.add_argument_group("logging options")
         group.add_argument(
             "-v",
             dest="verbosity",
             action="count",
-            default=0,
+            default=default_verbosity,
             help="increase the log level (can be specified multiple times)",
         )
         group.add_argument(

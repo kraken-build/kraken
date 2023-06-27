@@ -18,3 +18,9 @@ type = "feature"
 description = "Treat `# ::krakenw-root` comment in build scripts to avoid searching up higher for the project root directory."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/54"
+
+[[entries]]
+id = "2ccd0767-b104-4997-b92e-96939898b31c"
+type = "improvement"
+description = "Set default verbosity of `krakenw` command to 1, ensuring that `INFO` logs are always printed."
+author = "@NiklasRosenstein"
