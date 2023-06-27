@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal
 
 import tomli
 import tomli_w
@@ -25,6 +26,9 @@ class CargoSyncConfigTask(RenderFileTask):
     #: Enable fetching Cargo indexes with the Git CLI.
     git_fetch_with_cli: Property[bool]
 
+    #: Whether to use the sparse protocol for crates.io.
+    crates_io_protocol: Property[Literal["git", "sparse"]] = Property.config(default="sparse")
+
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.file.setcallable(lambda: project.directory / ".cargo" / "config.toml")
@@ -32,6 +36,7 @@ class CargoSyncConfigTask(RenderFileTask):
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
+        content.setdefault("registries", {})["crates-io"] = {"protocol": self.crates_io_protocol.get()}
         for registry in self.registries.get():
             content.setdefault("registries", {})[registry.alias] = {"index": registry.index}
         if self.git_fetch_with_cli.is_filled():

@@ -81,3 +81,10 @@ type = "feature"
 description = "The `CheckFileContentsTask` will now print a diff by default if the file it checks is not up to date."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/56"
+
+[[entries]]
+id = "547b947a-c29b-4a40-bc0b-51b6420a82ba"
+type = "feature"
+description = "The `CargoSyncConfigTask` now has a `crates_io_protocol` option, which defaults to `sparse`. This means Cargo builds by default use the sparse protocol from now on."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/58"
