@@ -4,6 +4,7 @@ import dataclasses
 from pathlib import Path
 from typing import Sequence
 
+from kraken.common import Supplier
 from kraken.core import Project, Property
 
 from .base_task import EnvironmentAwareDispatchTask
