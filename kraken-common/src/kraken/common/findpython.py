@@ -121,7 +121,7 @@ def get_candidates(
 
     # pythonX
     for command in commands_sorted:
-        match = re.match(r"python(\d)?$", command.name)
+        match = re.match(r"python(\d)$", command.name)
         if match:
             yield {
                 "path": str(command),
@@ -130,13 +130,13 @@ def get_candidates(
 
     # pythonX.Y
     for command in commands_sorted:
-        match = re.match(r"python(\d\.\d)$", command.name)
+        match = re.match(r"python(\d\.\d\d?)$", command.name)
         if match:
             yield {"path": str(command), "min_version": f"{match.group(1)}.0"}
 
     # pythonX.Y.Z
     for command in commands_sorted:
-        match = re.match(r"python(\d\.\d\.\d)$", command.name)
+        match = re.match(r"python(\d\.\d\d?\.\d\d?)$", command.name)
         if match:
             yield {"path": str(command), "exact_version": match.group(1)}
 
