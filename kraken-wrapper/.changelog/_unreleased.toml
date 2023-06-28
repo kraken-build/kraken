@@ -4,3 +4,9 @@ type = "fix"
 description = "Handle `keyring.backends.null` the same as the fail backend -- i.e. as if no keyring backend is available. Improve logs to show the available keyring backend."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/61"
+
+[[entries]]
+id = "05a17a7b-5b54-497e-9773-9a506921bbad"
+type = "improvement"
+description = "If the selected keyring backend is `null`, add a log to prompt the user to re-enable keyring"
+author = "@NiklasRosenstein"
