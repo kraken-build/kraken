@@ -73,18 +73,38 @@ def cargo_config(*, project: Project | None = None, nightly: bool = False) -> Ca
     return config
 
 
-def cargo_sqlx_migrate(*, name: str = "sqlxMigrate", project: Project | None = None) -> CargoSqlxMigrateTask:
+def cargo_sqlx_migrate(
+    *,
+    name: str = "sqlxMigrate",
+    project: Project | None = None,
+    base_directory: Path | None = None,
+    database_url: str | None = None,
+    migrations: Path | None = None,
+) -> CargoSqlxMigrateTask:
     project = project or Project.current()
-    return project.task(name, CargoSqlxMigrateTask)
+    task = project.task(name, CargoSqlxMigrateTask)
+    task.base_directory = base_directory
+    task.database_url = database_url
+    task.migrations = migrations
+    return task
 
 
 def cargo_sqlx_prepare(
-    *, name: str = "sqlxPrepare", project: Project | None = None, check: bool
+    *,
+    name: str = "sqlxPrepare",
+    project: Project | None = None,
+    check: bool,
+    base_directory: Path | None = None,
+    database_url: str | None = None,
+    migrations: Path | None = None,
 ) -> CargoSqlxPrepareTask:
     project = project or Project.current()
     name = f"{name}Check" if check else name
     task = project.task(name, CargoSqlxPrepareTask, group="check" if check else None)
     task.check = check
+    task.base_directory = base_directory
+    task.database_url = database_url
+    task.migrations = migrations
 
     # Preparing or checking sqlx metadata calls `cargo metadata`, which can require the auth proxy
     # Without the auth proxy, cargo sqlx commands would fail with a cryptic error
