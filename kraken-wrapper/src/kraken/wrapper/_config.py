@@ -7,9 +7,16 @@ from typing import Any, MutableMapping, NamedTuple
 
 import keyring
 import keyring.backends.fail
+import keyring.backends.null
 
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
+
+
+def type_fqn(x: type[Any] | object) -> str:
+    if not isinstance(x, type):
+        x = type(x)
+    return f"{x.__module__}.{x.__name__}"
 
 
 class AuthModel:
@@ -29,7 +36,7 @@ class AuthModel:
         self._config = config
         self._path = path
         self._has_keyring = os.getenv("KRAKENW_NO_KEYRING") != "1" and not isinstance(
-            keyring.get_keyring(), keyring.backends.fail.Keyring
+            keyring.get_keyring(), (keyring.backends.fail.Keyring, keyring.backends.null.Keyring)
         )
 
     def get_credentials(self, host: str) -> Credentials | None:
@@ -54,9 +61,21 @@ class AuthModel:
         auth[host] = {"username": username}
         if not self._has_keyring:
             auth[host]["password"] = password
-            logger.warning("no keyring backend available, password will be stored in plain text")
+            logger.warning(
+                "no keyring backend available (%s), password will be stored in plain text",
+                type_fqn(keyring.get_keyring()),
+            )
+            if isinstance(keyring.get_keyring(), keyring.backends.null.Keyring):
+                logger.warning(
+                    "it looks like you may have disabled keyring globally. consider re-enabling it by running `python "
+                    "-m keyring diagnose` to find the config file and either removing the file entirely or removing "
+                    "the `keyring.backends.null.Keyring` entry from the `default-backend` key in the `[backend]` "
+                    "section. (the file is usually located at `~/.local/share/python_keyring/keyringrc.cfg` "
+                    "or `~/.config/python_keyring/keyringrc.cfg`)"
+                )
             logger.info("saving username and password for %s in %s", host, self._path)
         else:
+            logger.debug("keyring backend available (%s)", type_fqn(keyring.get_keyring()))
             logger.info("saving username for %s in %s", host, self._path)
             logger.info("saving password for %s in keyring", host)
             keyring.set_password(host, username, password)
