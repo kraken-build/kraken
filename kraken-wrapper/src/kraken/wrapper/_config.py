@@ -13,6 +13,12 @@ logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
 
 
+def type_fqn(x: type[Any] | object) -> str:
+    if not isinstance(x, type):
+        x = type(x)
+    return f"{x.__module__}.{x.__name__}"
+
+
 class AuthModel:
     """Provides an interface to store credentials safely in the system keyring. If keyring backend is available,
     the credentials are stored in the config file instead."""
@@ -57,11 +63,11 @@ class AuthModel:
             auth[host]["password"] = password
             logger.warning(
                 "no keyring backend available (%s), password will be stored in plain text",
-                type(keyring.get_keyring()).__name__,
+                type_fqn(keyring.get_keyring()),
             )
             logger.info("saving username and password for %s in %s", host, self._path)
         else:
-            logger.debug("keyring backend available (%s)", type(keyring.get_keyring()).__name__)
+            logger.debug("keyring backend available (%s)", type_fqn(keyring.get_keyring()))
             logger.info("saving username for %s in %s", host, self._path)
             logger.info("saving password for %s in keyring", host)
             keyring.set_password(host, username, password)
