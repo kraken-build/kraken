@@ -67,9 +67,9 @@ class AuthModel:
             )
             if isinstance(keyring.get_keyring(), keyring.backends.null.Keyring):
                 logger.warning(
-                    "it looks like you may have disabled keyring globally. consider re-enabling it by running "
-                    "`python -m keyring diagnose` to find the config file and either removing the file entirely "
-                    "or removing the `keyring.backends.null.Keyring` entry from the `backend` key in the `[backend]` "
+                    "it looks like you may have disabled keyring globally. consider re-enabling it by running `python "
+                    "-m keyring diagnose` to find the config file and either removing the file entirely or removing "
+                    "the `keyring.backends.null.Keyring` entry from the `default-backend` key in the `[backend]` "
                     "section. (the file is usually located at `~/.local/share/python_keyring/keyringrc.cfg` "
                     "or `~/.config/python_keyring/keyringrc.cfg`)"
                 )
