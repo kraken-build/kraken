@@ -5,7 +5,7 @@ import shutil
 import tarfile
 import unittest.mock
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import TypeVar
 
 import pytest
 import tomli
@@ -157,7 +157,7 @@ M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_pyproject_reads_correct_data(
     project_dir: str,
-    reader: Type[M],
+    reader: type[M],
     expected_python_version: str,
     kraken_project: Project,
 ) -> None:

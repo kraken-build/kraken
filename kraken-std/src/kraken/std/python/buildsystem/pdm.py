@@ -6,8 +6,9 @@ import logging
 import os
 import shutil
 import subprocess as sp
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to

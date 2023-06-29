@@ -5,11 +5,12 @@ Run this module to update the `gitignore-io-tokens.json.gz` file.
 """
 
 import logging
+from collections.abc import Sequence
 from functools import lru_cache
 from gzip import compress, decompress
 from json import dumps, loads
 from pathlib import Path
-from typing import Sequence, cast
+from typing import cast
 
 from kraken.std import http
 
@@ -91,7 +92,7 @@ def write_token_cache(tokens: dict[str, str]) -> None:
     OUTPUT_FILE.write_bytes(compress(dumps(tokens).encode("utf-8"), mtime=0))
 
 
-@lru_cache()
+@lru_cache
 def load_token_cache() -> dict[str, str]:
     if not OUTPUT_FILE.is_file():
         logger.warning("No gitignore.io token cache found at %s", OUTPUT_FILE)

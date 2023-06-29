@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 from abc import ABC
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, ClassVar, Mapping, Sequence, TypeAlias
+from typing import Any, ClassVar, TypeAlias
 
 import tomli
 import tomli_w

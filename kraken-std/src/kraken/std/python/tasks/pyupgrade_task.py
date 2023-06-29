@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Collection, Iterable, Sequence
 from difflib import unified_diff
 from pathlib import Path
 from sys import stdout
 from tempfile import TemporaryDirectory
-from typing import Collection, Iterable, Sequence
 
 from kraken.core import Project, Property, TaskStatus
 

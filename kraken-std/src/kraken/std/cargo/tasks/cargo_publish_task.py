@@ -1,6 +1,5 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from kraken.common import not_none
 from kraken.core import Project, Property
@@ -18,7 +17,7 @@ class CargoPublishTask(CargoBuildTask):
     cargo_config_file: Property[Path] = Property.default(".cargo/config.toml")
 
     #: Name of the package to publish (only requried for publishing packages from workspace)
-    package_name: Property[Optional[str]] = Property.default(None)
+    package_name: Property[str | None] = Property.default(None)
 
     #: The registry to publish the package to.
     registry: Property[CargoRegistry]
@@ -29,7 +28,7 @@ class CargoPublishTask(CargoBuildTask):
     #: Allow dirty worktree.
     allow_dirty: Property[bool] = Property.default(False)
 
-    def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
+    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         super().get_cargo_command(env)
         registry = self.registry.get()
         if registry.publish_token is None:
@@ -47,7 +46,7 @@ class CargoPublishTask(CargoBuildTask):
             command.append("--allow-dirty")
         return command
 
-    def make_safe(self, args: List[str], env: Dict[str, str]) -> None:
+    def make_safe(self, args: list[str], env: dict[str, str]) -> None:
         args[args.index(not_none(self.registry.get().publish_token))] = "[MASKED]"
         super().make_safe(args, env)
 

@@ -6,9 +6,9 @@ import logging
 import os
 import shutil
 import subprocess as sp
+from collections.abc import Collection
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Collection
 
 from kraken.common.path import is_relative_to
 

@@ -6,15 +6,15 @@ import abc
 import logging
 import tarfile
 import zipfile
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from fnmatch import fnmatch
 from pathlib import Path
-from typing import Any, Mapping, Sequence, Union, cast
+from typing import Any, Literal, Union, cast
 
 import databind.json
 from kraken.core import Project, Property, Task, TaskSet
 from termcolor import colored
-from typing_extensions import Literal
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
 

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Collection, Sequence
 from pathlib import Path
-from typing import Collection, Sequence
+from typing import Literal
 
 from kraken.common import Supplier
 from kraken.core import Project
-from typing_extensions import Literal
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask

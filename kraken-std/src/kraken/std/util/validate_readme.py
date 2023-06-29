@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Generator, Iterator
 from pathlib import Path
-from typing import Any, Generator, Iterator, TypeVar
+from typing import Any, TypeVar
 
 from kraken.core import Property, Task, TaskStatus
 from kraken.core.cli.executor import status_to_text

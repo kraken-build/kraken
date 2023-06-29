@@ -14,7 +14,7 @@ from kraken.std import python
 from kraken.std.git import git_describe
 
 project = Project.current()
-python.pyupgrade(additional_files=[__file__, project.directory / "examples"])
+python.pyupgrade(additional_files=[__file__, project.directory / "examples"], python_version="3.10")
 python.pycln()
 python.black(additional_files=[__file__, project.directory / "examples"])
 python.flake8()
