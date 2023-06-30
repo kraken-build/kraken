@@ -47,7 +47,6 @@ def publish(
     skip_existing: bool = False,
     name: str = "python.publish",
     group: str | None = "publish",
-    default: bool = False,
     project: Project | None = None,
     after: list[Task] | None = None,
 ) -> PublishTask:

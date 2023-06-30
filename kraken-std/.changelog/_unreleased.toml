@@ -1,0 +1,5 @@
+[[entries]]
+id = "cfdd846b-6a9b-43f0-aa11-fa54ebcf06f5"
+type = "tests"
+description = "Test `PythonBuildSystem.build()` with `as_version` set for Slap/Poetry/Pdm"
+author = "@NiklasRosenstein"
