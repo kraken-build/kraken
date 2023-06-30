@@ -162,7 +162,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             # Bump the in-source version number.
             pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
             previous_version = pyproject.get_version()
-            pyproject.set_path_dependencies_to_version(as_version)
+            # pyproject.set_path_dependencies_to_version(as_version)
             pyproject.set_version(as_version)
             pyproject.raw.save()
 
