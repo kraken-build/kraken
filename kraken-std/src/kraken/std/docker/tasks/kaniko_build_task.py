@@ -10,12 +10,13 @@ import deprecated
 from kraken.common import flatten
 from kraken.core import Project, Property
 
-from . import DockerBuildTask
-from .dockerapi import docker_load, docker_run
-from .util import render_docker_auth, update_run_commands
+from kraken.std.docker.util.dockerapi import docker_load, docker_run
+from kraken.std.docker.util.dockerfile import render_docker_auth, update_run_commands
+
+from .base_build_task import BaseBuildTask
 
 
-class KanikoBuildTask(DockerBuildTask):
+class KanikoBuildTask(BaseBuildTask):
     """
     An implementation for building Docker images with Kaniko.
 
@@ -161,7 +162,7 @@ class KanikoBuildTask(DockerBuildTask):
             if result != 0:
                 raise Exception(f"Docker load failed with exit code {result}")
 
-    # DockerBuildTask
+    # BaseBuildTask overrides
 
     def _preprocess_dockerfile(self, dockerfile: Path) -> str:
         return update_run_commands(
@@ -174,7 +175,7 @@ class KanikoBuildTask(DockerBuildTask):
             only_for_root_user=True,
         )
 
-    # Task
+    # Task overrides
 
     def finalize(self) -> None:
         if self.cache.get() and not self.push.get() and not self.cache_repo.get():

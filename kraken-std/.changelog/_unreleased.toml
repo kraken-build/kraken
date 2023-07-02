@@ -10,3 +10,9 @@ type = "improvement"
 description = "Adjust task property definitions to replace `Property.config()` with `Property.default()` and `Property.default_factory()`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/64"
+
+[[entries]]
+id = "15468abe-332f-480d-b287-db44bab5eea7"
+type = "breaking change"
+description = "Move Kraken task definitions in `kraken.std.docker` into `kraken.std.docker.tasks` module"
+author = "@NiklasRosenstein"

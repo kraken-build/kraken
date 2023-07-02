@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import subprocess as sp
-from typing import Sequence
 
-from kraken.core import Project, Property, Task, TaskStatus
+from kraken.core import Property, Task, TaskStatus
 
 RELEASE_URL = (
     "https://github.com/estesp/manifest-tool/releases/download/v{VERSION}/binaries-manifest-tool-{VERSION}.tar.gz"
@@ -46,22 +45,3 @@ class ManifestToolPushTask(Task):
         self.logger.info("%s", command)
         result = sp.call(command)
         return TaskStatus.from_exit_code(command, result)
-
-
-def manifest_tool(
-    *,
-    name: str,
-    template: str,
-    platforms: Sequence[str],
-    target: str,
-    inputs: Sequence[Task],
-    group: str | None = None,
-    project: Project | None = None,
-) -> ManifestToolPushTask:
-    project = Project.current()
-    task = project.task(name, ManifestToolPushTask, group=group)
-    task.template = template
-    task.target = target
-    task.platforms = list(platforms)
-    task.depends_on(*inputs)
-    return task

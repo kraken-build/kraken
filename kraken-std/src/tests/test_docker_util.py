@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from kraken.std.docker.util import update_run_commands
+from kraken.std.docker.util.dockerfile import update_run_commands
 
 
 def test__update_run_commands() -> None:
