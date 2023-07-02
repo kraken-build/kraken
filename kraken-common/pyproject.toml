@@ -36,7 +36,7 @@ rich = "^13.4.2"
 black = "*"
 flake8 = "*"
 isort = "*"
-mypy = "*"
+mypy = "=1.4.0"
 pytest = "*"
 termcolor = "*"
 types-dataclasses = { version = "^0.6.6", python = "<3.7" }
