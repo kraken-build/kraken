@@ -34,11 +34,13 @@ rich = "^13.4.2"
 #       See also https://github.com/python/mypy/issues/12162
 markdown-it-py = "<3.0.0"
 
+typing-extensions = "4.6.3"
+
 [tool.poetry.dev-dependencies]
 black = "*"
 flake8 = "*"
 isort = "*"
-mypy = "<1.4.0"
+mypy = "*"
 pytest = "*"
 types-setuptools = "^57.4.18"
 types-termcolor = "^1.1.5"
