@@ -31,8 +31,8 @@ def test__Property_default() -> None:
     a_value = ["abc"]
 
     class MyObj(PropertyContainer):
-        a: Property[list[str]] = Property.config(default=a_value)
-        b: Property[int] = Property.config(default_factory=lambda: 42)
+        a: Property[list[str]] = Property.default(a_value)
+        b: Property[int] = Property.default_factory(lambda: 42)
         c: Property[str]
 
     obj = MyObj()

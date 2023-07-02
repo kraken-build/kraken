@@ -1,0 +1,11 @@
+[[entries]]
+id = "1fd57aac-6ed7-417d-8075-c948f7567194"
+type = "breaking change"
+description = "Remove `Property.config()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2799f865-f670-44ed-981c-1c6d52275f1f"
+type = "feature"
+description = "Add `Property.required()` and a `help` parameter to `Property.output()`, `Property.default()` and `Property.default_factory()`"
+author = "@NiklasRosenstein"
