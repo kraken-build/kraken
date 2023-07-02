@@ -18,9 +18,9 @@ class PytestTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pytest"]
 
     tests_dir: Property[Path]
-    ignore_dirs: Property[Sequence[Path]] = Property.config(default_factory=list)
-    allow_no_tests: Property[bool] = Property.config(default=False)
-    doctest_modules: Property[bool] = Property.config(default=True)
+    ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
+    allow_no_tests: Property[bool] = Property.default(False)
+    doctest_modules: Property[bool] = Property.default(True)
     marker: Property[str]
 
     # EnvironmentAwareDispatchTask

@@ -17,7 +17,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     python_dependencies = ["flake8"]
 
     config_file: Property[Path]
-    additional_args: Property[list[str]] = Property.config(default_factory=list)
+    additional_args: Property[list[str]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
 

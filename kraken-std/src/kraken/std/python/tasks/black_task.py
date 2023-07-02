@@ -15,10 +15,10 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     python_dependencies = ["black"]
 
-    check_only: Property[bool] = Property.config(default=False)
+    check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
-    additional_args: Property[Sequence[str]] = Property.config(default_factory=list)
-    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
+    additional_args: Property[Sequence[str]] = Property.default_factory(list)
+    additional_files: Property[Sequence[Path]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
 

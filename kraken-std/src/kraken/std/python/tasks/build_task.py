@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class BuildTask(Task):
     build_system: Property[PythonBuildSystem | None]
     output_directory: Property[Path]
-    as_version: Property[str | None] = Property.config(default=None)
+    as_version: Property[str | None] = Property.default(None)
     output_files: Property[list[Path]] = Property.output()
 
     # Task

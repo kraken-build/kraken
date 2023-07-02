@@ -36,10 +36,10 @@ class GitignoreSyncTask(RenderFileTask):
 
     #: Whether to permit backfilling gitignore.io tokens that are not distributed with kraken-std via
     #: and HTTP request to gitignore.io.
-    gitignore_io_allow_http_request_backfill: Property[bool] = Property.config(default=False)
+    gitignore_io_allow_http_request_backfill: Property[bool] = Property.default(False)
 
     #: Where to place the generated content, if no generated content is found in the file.
-    where: Property[Literal["top", "bottom"]] = Property.config(default="top")
+    where: Property[Literal["top", "bottom"]] = Property.default("top")
 
     def get_file_contents(self, file: Path) -> str:
         if file.exists():

@@ -15,9 +15,9 @@ class PublishTask(Task):
 
     description = "Upload the distributions of your Python project. [index url: %(index_upload_url)s]"
     index_upload_url: Property[str]
-    index_credentials: Property[tuple[str, str] | None] = Property.config(default=None)
+    index_credentials: Property[tuple[str, str] | None] = Property.default(None)
     distributions: Property[list[Path]]
-    skip_existing: Property[bool] = Property.config(default=False)
+    skip_existing: Property[bool] = Property.default(False)
     dependencies: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:

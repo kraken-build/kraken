@@ -13,10 +13,10 @@ class PyclnTask(EnvironmentAwareDispatchTask):
 
     python_dependencies = ["pycln"]
 
-    check_only: Property[bool] = Property.config(default=False)
+    check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
-    additional_args: Property[list[str]] = Property.config(default_factory=list)
-    additional_files: Property[list[Path]] = Property.config(default_factory=list)
+    additional_args: Property[list[str]] = Property.default_factory(list)
+    additional_files: Property[list[Path]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
 

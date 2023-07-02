@@ -14,9 +14,9 @@ class CopyrightTask(EnvironmentAwareDispatchTask):
 
     python_dependencies = ["pyaddlicense"]
 
-    check_only: Property[bool] = Property.config(default=False)
-    holder: Property[str] = Property.config(default="")
-    ignore: Property[Sequence[str]] = Property.config(default_factory=list)
+    check_only: Property[bool] = Property.default(False)
+    holder: Property[str] = Property.default("")
+    ignore: Property[Sequence[str]] = Property.default_factory(list)
     custom_license: Property[str]
     custom_license_file: Property[Path]
 
