@@ -34,7 +34,7 @@ rich = "^13.4.2"
 #       See also https://github.com/python/mypy/issues/12162
 markdown-it-py = "<3.0.0"
 
-typing-extensions = "4.6.3"
+typing-extensions = "<4.7.0"  # Upper constraint due to https://github.com/python/typing_extensions/issues/265
 
 [tool.poetry.dev-dependencies]
 black = "*"
