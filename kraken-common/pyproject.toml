@@ -24,7 +24,8 @@ python = "^3.6"
 builddsl = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
 setuptools = "*"
-typing-extensions = ">=3.0.0.0"
+# typing-extensions = ">=3.0.0.0"
+typing-extensions = "4.6.3"
 
 # Allow older versions for Python 3.6 compatibility.
 tomli = ">=1.0.0,<3.0.0"
@@ -32,7 +33,6 @@ tomli_w = ">=0.4.0,<2.0.0"
 packaging = "^23.1"
 rich = "^13.4.2"
 
-typing-extensions = "4.6.3"
 
 [tool.poetry.dev-dependencies]
 black = "*"
