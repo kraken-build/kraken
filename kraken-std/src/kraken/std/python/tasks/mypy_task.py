@@ -14,9 +14,9 @@ class MypyTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["mypy"]
 
     config_file: Property[Path]
-    additional_args: Property[Sequence[str]] = Property.config(default_factory=list)
-    check_tests: Property[bool] = Property.config(default=True)
-    use_daemon: Property[bool] = Property.config(default=True)
+    additional_args: Property[Sequence[str]] = Property.default_factory(list)
+    check_tests: Property[bool] = Property.default(True)
+    use_daemon: Property[bool] = Property.default(True)
     python_version: Property[str]
 
     # EnvironmentAwareDispatchTask

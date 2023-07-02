@@ -17,8 +17,8 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
     description = "Upgrades to newer Python syntax sugars with pyupgrade."
     python_dependencies = ["pyupgrade"]
 
-    keep_runtime_typing: Property[bool] = Property.config(default=False)
-    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
+    keep_runtime_typing: Property[bool] = Property.default(False)
+    additional_files: Property[Sequence[Path]] = Property.default_factory(list)
     python_version: Property[str]
 
     # EnvironmentAwareDispatchTask
@@ -38,8 +38,8 @@ class PyUpgradeCheckTask(PyUpgradeTask):
     description = "Check Python source files syntax sugars with pyupgrade."
     python_dependencies = ["pyupgrade"]
 
-    keep_runtime_typing: Property[bool] = Property.config(default=False)
-    additional_files: Property[Sequence[Path]] = Property.config(default_factory=list)
+    keep_runtime_typing: Property[bool] = Property.default(False)
+    additional_files: Property[Sequence[Path]] = Property.default_factory(list)
     python_version: Property[str]
 
     def execute(self) -> TaskStatus:

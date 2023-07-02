@@ -51,6 +51,7 @@ class PropertyConfig:
     output: bool = False
     default: Any | NotSet = NotSet.Value
     default_factory: Callable[[], Any] | NotSet = NotSet.Value
+    help: str | None = None
 
 
 @dataclasses.dataclass
@@ -60,6 +61,7 @@ class PropertyDescriptor:
     default: Any | NotSet
     default_factory: Callable[[], Any] | NotSet
     item_type: TypeHint
+    help: str | None = None
 
     def has_default(self) -> bool:
         return not (self.default is NotSet.Value and self.default_factory is NotSet.Value)
@@ -101,7 +103,7 @@ class Property(Supplier[T]):
     VALUE_ADAPTERS: ClassVar[dict[type, ValueAdapter]] = {}
 
     @staticmethod
-    def output() -> Any:
+    def output(*, help: str | None = None) -> Any:
         """Assign the result of this function as a default value to a property on the class level of an :class:`Object`
         subclass to mark it as an output property. This is an alternative to using the :class:`typing.Annotated` type
         hint.
@@ -114,39 +116,29 @@ class Property(Supplier[T]):
                 a: Property[int] = output()
         """
 
-        return PropertyConfig(output=True)
+        return PropertyConfig(output=True, help=help)
 
     @staticmethod
-    def config(
-        output: bool = False,
-        default: Any | NotSet = NotSet.Value,
-        default_factory: Callable[[], Any] | NotSet = NotSet.Value,
-    ) -> Any:
-        """Assign the result of this function as a default value to a property on the class level of an :class:`Object`
-        subclass to configure it's default value or whether it is an output property. This is an alternative to using
-        a :class:`typing.Annotated` type hint.
-
-        .. code:: Example
-
-            from kraken.core.system.property import Object, Property, config
-
-            class MyObj(Object):
-                a: Property[int] = config(default=42)
+    def required(*, help: str | None = None) -> Any:
+        """
+        Assign the result of this function as a default value to a property class to declare that it is required. This
+        is the default behaviour of the a property, so this function is only useful to specify a help text or to make
+        it more explicit in the code.
         """
 
-        return PropertyConfig(output, default, default_factory)
+        return PropertyConfig(help=help)
 
     @staticmethod
-    def default(value: Any) -> Any:
+    def default(value: Any, *, help: str | None = None) -> Any:
         """Assign the result of this function as a default value to a property to declare it's default value."""
 
-        return PropertyConfig(False, value, NotSet.Value)
+        return PropertyConfig(default=value, help=help)
 
     @staticmethod
-    def default_factory(func: Callable[[], Any]) -> Any:
+    def default_factory(func: Callable[[], Any], help: str | None = None) -> Any:
         """Assign the result of this function as a default value to a property to declare it's default factory."""
 
-        return PropertyConfig(False, NotSet.Value, func)
+        return PropertyConfig(default_factory=func, help=help)
 
     def __init__(
         self,
@@ -154,12 +146,14 @@ class Property(Supplier[T]):
         name: str,
         item_type: TypeHint | Any,
         deferred: bool = False,
+        help: str | None = None,
     ) -> None:
         """
         :param owner: The object that owns the property instance.
         :param name: The name of the property.
         :param item_type: The original inner type hint of the property (excluding the Property type itself).
         :param deferred: Whether the property should be initialized with a :class:`DeferredSupplier`.
+        :param help: A help text for the property.
         """
 
         # NOTE(@NiklasRosenstein): We expect that any union member be a ClassTypeHint or TupleTypeHint.
@@ -188,6 +182,7 @@ class Property(Supplier[T]):
 
         self.owner = owner
         self.name = name
+        self.help = help
         self.accepted_types = accepted_types
         self.item_type = item_type
         self._value: Supplier[T] = DeferredSupplier(self) if deferred else Supplier.void()
@@ -405,6 +400,7 @@ class PropertyContainer:
                     default=config.default,
                     default_factory=config.default_factory,
                     item_type=hint[0].evaluate(vars(sys.modules[cls.__module__])),
+                    help=config.help,
                 )
 
             # The attribute is annotated as an output but not actually typed as a property?
@@ -418,13 +414,13 @@ class PropertyContainer:
 
         # Make sure there's a Property descriptor on the class for every property in the schema.
         for key, value in cls.__schema__.items():
-            setattr(cls, key, Property(cls, key, value.item_type, deferred=value.is_output))
+            setattr(cls, key, Property[Any](cls, key, value.item_type, value.is_output, value.help))
 
     def __init__(self) -> None:
         """Creates :class:`Properties <Property>` for every property defined in the object's schema."""
 
         for key, desc in self.__schema__.items():
-            prop = Property[Any](self, key, desc.item_type, deferred=desc.is_output)
+            prop = Property[Any](self, key, desc.item_type, desc.is_output, desc.help)
             vars(self)[key] = prop
             if desc.has_default():
                 prop.setdefault(desc.get_default())

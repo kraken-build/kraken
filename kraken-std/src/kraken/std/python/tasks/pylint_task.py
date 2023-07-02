@@ -14,7 +14,7 @@ class PylintTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pylint"]
 
     config_file: Property[Path]
-    additional_args: Property[Sequence[str]] = Property.config(default_factory=list)
+    additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
 

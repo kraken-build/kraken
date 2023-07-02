@@ -18,16 +18,16 @@ class CargoSyncConfigTask(RenderFileTask):
     file: Property[Path]
 
     #: If enabled, the configuration file will be replaced rather than updated.
-    replace: Property[bool] = Property.config(default=False)
+    replace: Property[bool] = Property.default(False)
 
     #: The registries to insert into the configuration.
-    registries: Property[list[CargoRegistry]] = Property.config(default_factory=list)
+    registries: Property[list[CargoRegistry]] = Property.default_factory(list)
 
     #: Enable fetching Cargo indexes with the Git CLI.
     git_fetch_with_cli: Property[bool]
 
     #: Whether to use the sparse protocol for crates.io.
-    crates_io_protocol: Property[Literal["git", "sparse"]] = Property.config(default="sparse")
+    crates_io_protocol: Property[Literal["git", "sparse"]] = Property.default("sparse")
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
