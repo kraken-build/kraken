@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Sequence
 
 from kraken.common import import_class
@@ -7,9 +8,9 @@ from kraken.core import Project, Task
 
 from kraken.std.docker.tasks.base_build_task import BaseBuildTask
 from kraken.std.docker.tasks.manifest_tool_push_task import ManifestToolPushTask
-from kraken.std.docker.util.dockerfile import render_docker_auth
+from kraken.std.docker.tasks.run_container_task import RunContainerTask, WaitForProcessTask
 
-__all__ = ["build", "DockerBuildTask", "manifest_tool", "render_docker_auth"]
+__all__ = ["build_docker_image", "manifest_tool", "sidecar_container"]
 
 DEFAULT_BUILD_BACKEND = "native"
 BUILD_BACKENDS = {
@@ -48,4 +49,34 @@ def manifest_tool(
     task.target = target
     task.platforms = list(platforms)
     task.depends_on(*inputs)
+    return task
+
+
+def sidecar_container(
+    *,
+    name: str,
+    image: str,
+    ports: Sequence[str] = (),
+    env: dict[str, str] = {},
+    args: Sequence[str] = (),
+    workdir: str | None = None,
+    entrypoint: str | None = None,
+    cwd: Path | None = None,
+    project: Project | None = None,
+) -> RunContainerTask:
+    project = project or Project.current()
+    task = project.task(f"{name}.start", RunContainerTask)
+    task.container_name = name
+    task.image = image
+    task.ports = ports
+    task.env = env
+    task.args = args
+    task.workdir = workdir
+    task.entrypoint = entrypoint
+    task.cwd = cwd
+
+    wait = project.task(name, WaitForProcessTask)
+    wait.pid = task._pid
+    wait.depends_on(task)
+
     return task
