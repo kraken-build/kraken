@@ -35,19 +35,19 @@ time secrets under `/run/secrets` don't appear in the final image.
 
 @pydoc kraken.std.docker.build_docker_image
 
-@pydoc kraken.std.docker.DockerBuildTask
+@pydoc kraken.std.docker.tasks.base_build_task.BaseBuildTask
 
 ### Native
 
-@pydoc kraken.std.docker.native.NativeBuildTask
+@pydoc kraken.std.docker.tasks.native_build_task.NativeBuildTask
 
 ### Buildx
 
-@pydoc kraken.std.docker.buildx.BuildxBuildTask
+@pydoc kraken.std.docker.tasks.buildx_build_task.BuildxBuildTask
 
 ### Kaniko
 
-@pydoc kraken.std.docker.kaniko.KanikoBuildTask
+@pydoc kraken.std.docker.tasks.kaniko_build_task.KanikoBuildTask
 
 ### Manifest Tool
 

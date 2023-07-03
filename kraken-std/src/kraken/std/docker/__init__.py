@@ -7,14 +7,15 @@ from kraken.core import Project, Task
 
 from kraken.std.docker.tasks.base_build_task import BaseBuildTask
 from kraken.std.docker.tasks.manifest_tool_push_task import ManifestToolPushTask
+from kraken.std.docker.tasks.run_container_task import RunContainerTask, WaitForProcessTask
 
 __all__ = ["build_docker_image", "manifest_tool", "sidecar_container"]
 
 DEFAULT_BUILD_BACKEND = "native"
 BUILD_BACKENDS = {
-    "buildx": f"{__name__}.buildx.BuildxBuildTask",
-    "kaniko": f"{__name__}.kaniko.KanikoBuildTask",
-    "native": f"{__name__}.native.NativeBuildTask",
+    "buildx": f"{__name__}.tasks.buildx_build_task.BuildxBuildTask",
+    "kaniko": f"{__name__}.tasks.kaniko_build_task.KanikoBuildTask",
+    "native": f"{__name__}.tasks.native_build_task.NativeBuildTask",
 }
 
 
