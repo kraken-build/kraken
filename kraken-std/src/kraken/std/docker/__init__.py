@@ -7,7 +7,6 @@ from kraken.core import Project, Task
 
 from kraken.std.docker.tasks.base_build_task import BaseBuildTask
 from kraken.std.docker.tasks.manifest_tool_push_task import ManifestToolPushTask
-from kraken.std.docker.tasks.run_container_task import RunContainerTask, WaitForProcessTask
 
 __all__ = ["build_docker_image", "manifest_tool", "sidecar_container"]
 
