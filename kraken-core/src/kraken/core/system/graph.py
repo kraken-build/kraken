@@ -428,7 +428,11 @@ class TaskGraph(Graph):
 
             if task in recursive_tasks:
                 self.mark_tasks_as_skipped(
-                    [], self.get_predecessors(task, ignore_groups=False), reason=reason, origin=origin, reset=False
+                    [],
+                    self.get_predecessors(task, ignore_groups=False),
+                    reason=reason,
+                    origin=origin,
+                    reset=False,
                 )
 
     # Graph
