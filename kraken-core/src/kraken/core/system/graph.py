@@ -401,6 +401,36 @@ class TaskGraph(Graph):
         order = topological_sort(self._digraph if all else self._get_ready_graph())
         return (not_none(self._get_task(addr)) for addr in order)
 
+    def mark_tasks_as_skipped(
+        self,
+        tasks: Sequence[Task | str | Address] = (),
+        recursive_tasks: Sequence[Task | str | Address] = (),
+        *,
+        reason: str,
+        origin: str,
+        reset: bool,
+    ) -> None:
+        """
+        Mark all tasks matching the *tasks* or *recursive_tasks* addresses as skipped using a #Task.SkipMarker.
+        If *reset* is enabled, all previous markers created with this method will be removed.
+        """
+
+        tasks = self.context.resolve_tasks(tasks)
+        recursive_tasks = self.context.resolve_tasks(recursive_tasks)
+
+        for task in (*tasks, *recursive_tasks):
+            if reset:
+                tag = next((t for t in task.get_tags("skip") if t.origin == origin), None)
+                if tag is not None:
+                    task.remove_tag(tag)
+
+            task.add_tag("skip", reason=reason, origin=origin)
+
+            if task in recursive_tasks:
+                self.mark_tasks_as_skipped(
+                    [], self.get_predecessors(task, ignore_groups=False), reason=reason, origin=origin, reset=False
+                )
+
     # Graph
 
     def ready(self) -> list[Task]:

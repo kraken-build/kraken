@@ -15,7 +15,7 @@ pr = "https://github.com/kraken-build/kraken-build/pull/64"
 [[entries]]
 id = "4c2eef2a-9e4c-4c0c-b5f9-494097fcc5b3"
 type = "feature"
-description = "Add `Task.set_skip_task()` and `Task.get_skip_task()`"
+description = "Add `Task.add_tag()`, `Task.remove_tag()` and `Task.get_tags()`. A \"skip\" tag can now be added to a task to skip it."
 author = "@NiklasRosenstein"
 
 [[entries]]

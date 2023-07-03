@@ -183,6 +183,13 @@ class TaskStatus:
         )
 
 
+@dataclasses.dataclass(frozen=True)
+class TaskTag:
+    name: str
+    reason: str
+    origin: str | None = None
+
+
 class Task(KrakenObject, PropertyContainer, abc.ABC):
     """
     A Kraken Task is a unit of work that can be executed.
@@ -223,7 +230,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         PropertyContainer.__init__(self)
         self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
         self._outputs: list[Any] = []
-        self.__skip_task = (False, "")
+        self.__tags: dict[str, set[TaskTag]] = {}
         self.__relationships: list[_Relationship[Address | Task]] = []
 
     def __repr__(self) -> str:
@@ -292,21 +299,36 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
                 f"task_or_selector argument must be Task | Sequence[Task] | str, got {type(task_or_selector).__name__}"
             )
 
-    def get_skip_task(self) -> tuple[bool, str]:
+    def add_tag(self, name: str, *, reason: str, origin: str | None = None) -> None:
         """
-        Returns if the task should be skipped, and the reason for skipping it.
-        """
-
-        return self.__skip_task
-
-    def set_skip_task(self, do_skip: bool, *, reason: str) -> None:
-        """
-        Set the task to be skipped in the execution of the task graph. A reason must be attached, which will be output
-        along with the #TaskStatusType.SUCCEEDED status.
+        Add a tag to this task. The built-in tag "skip" is used to indicate that a task should not be executed.
         """
 
-        self.logger.debug("set_skip(%s, reason=%r)", do_skip, reason)
-        self.__skip_task = (do_skip, reason)
+        if name not in self.__tags:
+            self.__tags[name] = set()
+
+        logger.debug("Adding tag %r (reason: %r, origin: %r) to %s", name, reason, origin, self.address)
+        self.__tags[name].add(TaskTag(name, reason, origin))
+
+    def remove_tag(self, tag: TaskTag) -> None:
+        """
+        Remove a tag from the task. If the tag does not exist, this is a no-op.
+        """
+
+        try:
+            self.__tags[tag.name].discard(tag)
+        except KeyError:
+            logger.debug("Attempted to remove tag %r from %s, but it does not exist", tag, self.address)
+            pass
+        else:
+            logger.debug("Removed tag %r from %s", tag, self.address)
+
+    def get_tags(self, name: str) -> Collection[TaskTag]:
+        """
+        Get all tags of the specified name.
+        """
+
+        return self.__tags.get(name, set())
 
     # End: Deprecated APIs
 

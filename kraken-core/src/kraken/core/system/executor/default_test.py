@@ -240,7 +240,7 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
 
 def test__DefaultTaskExecutor__skips_tasks_to_be_skipped(kraken_project: Project) -> None:
     t1 = kraken_project.task("t1", VoidTask)
-    t1.set_skip_task(True, reason="This task must be skipped.")
+    t1.add_tag("skip", reason="This task must be skipped.")
     t2 = kraken_project.task("t2", MyTask)
 
     statuses: list[TaskStatus] = []
@@ -258,7 +258,7 @@ def test__DefaultTaskExecutor__skips_tasks_to_be_skipped(kraken_project: Project
 
 def test__DefaultGraphExecutor__skips_tasks_to_be_skipped(kraken_project: Project) -> None:
     t1 = kraken_project.task("t1", VoidTask)
-    t1.set_skip_task(True, reason="This task must be skipped.")
+    t1.add_tag("skip", reason="This task must be skipped.")
     kraken_project.task("t2", MyTask)
 
     statuses: list[TaskStatus] = []
