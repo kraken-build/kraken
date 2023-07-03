@@ -100,10 +100,14 @@ class RunContainerTask(BackgroundTask):
                     proc.kill()
 
         if self.detach.get():
-            return TaskStatus.from_exit_code(command, proc.wait())
+            returncode = proc.wait()
+            if returncode == 0:
+                return TaskStatus.succeeded("Container %s started" % container_name)
+            else:
+                return TaskStatus.failed("Container %s could not be started" % container_name)
         else:
             exit_stack.callback(_stop_proc)
-            return TaskStatus.succeeded("Container %s start" % self.container_name.get())
+            return TaskStatus.succeeded("Container %s start" % container_name)
 
 
 class StopContainerTask(Task):

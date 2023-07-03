@@ -56,6 +56,24 @@ This example will start a Postgres container before running the tests. The `depe
 Postgres container is started before the tests are run. The `start` suffix is added to the task name. The function
 will also generate a `postgres.stop` task that you can run to stop the container via the CLI.
 
+```
+$ kraken run :postgres.start
+
+Start build
+
+> :postgres.start PENDING
+1d3e0c9d2ccf5f60f82f179e1340fbfaaeda398c0ee0167b34cd8b9ee6ba51ac
+> :postgres.start SUCCEEDED (Container kraken.sidecar-container.postgres started)
+
+Build summary
+
+  :postgres.start SUCCEEDED (Container kraken.sidecar-container.postgres started) [0.866s]
+
+> docker ps
+CONTAINER ID   IMAGE             COMMAND                  CREATED          STATUS          PORTS                    NAMES
+e40cc9fc9ff3   postgres:latest   "docker-entrypoint.s…"   14 seconds ago   Up 13 seconds   0.0.0.0:5432->5432/tcp   kraken.sidecar-container.postgres
+```
+
 ---
 
 ## API Documentation
