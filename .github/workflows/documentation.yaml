@@ -4,6 +4,9 @@ on:
   push: { branches: [ "develop" ], tags: [ "*" ] }
   pull_request: { branches: [ "*" ] }
 
+env:
+  COLUMNS: 200
+
 jobs:
   documentation:
     runs-on: ubuntu-latest
