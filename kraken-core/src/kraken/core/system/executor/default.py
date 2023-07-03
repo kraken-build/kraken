@@ -94,7 +94,9 @@ class DefaultGraphExecutor(GraphExecutor):
                 # NOTE (@NiklasRosenstein): (untested hyopthesis) If we do not call remember.done(task) here, it means
                 #       that a started task that depends on another started task will not end unless the second started
                 #       task is done. This could be desirable behaviour.
-                remember.remember(task, set(graph.get_successors(task)))
+                dependants = set(graph.get_successors(task))
+                if dependants:
+                    remember.remember(task, dependants)
             else:
                 if status.is_interrupted():
                     interrupted = True
