@@ -11,3 +11,9 @@ type = "feature"
 description = "Add `Property.required()` and a `help` parameter to `Property.output()`, `Property.default()` and `Property.default_factory()`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/64"
+
+[[entries]]
+id = "4c2eef2a-9e4c-4c0c-b5f9-494097fcc5b3"
+type = "feature"
+description = "Add `Task.set_skip_task()` and `Task.get_skip_task()`"
+author = "@NiklasRosenstein"

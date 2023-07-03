@@ -223,6 +223,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         PropertyContainer.__init__(self)
         self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
         self._outputs: list[Any] = []
+        self.__skip_task = (False, "")
         self.__relationships: list[_Relationship[Address | Task]] = []
 
     def __repr__(self) -> str:
@@ -290,6 +291,22 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
             raise TypeError(
                 f"task_or_selector argument must be Task | Sequence[Task] | str, got {type(task_or_selector).__name__}"
             )
+
+    def get_skip_task(self) -> tuple[bool, str]:
+        """
+        Returns if the task should be skipped, and the reason for skipping it.
+        """
+
+        return self.__skip_task
+
+    def set_skip_task(self, do_skip: bool, *, reason: str) -> None:
+        """
+        Set the task to be skipped in the execution of the task graph. A reason must be attached, which will be output
+        along with the #TaskStatusType.SUCCEEDED status.
+        """
+
+        self.logger.debug("set_skip(%s, reason=%r)", do_skip, reason)
+        self.__skip_task = (do_skip, reason)
 
     # End: Deprecated APIs
 
