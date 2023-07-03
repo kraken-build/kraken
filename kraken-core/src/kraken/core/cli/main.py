@@ -458,6 +458,7 @@ def describe(graph: TaskGraph) -> None:
         print("  Type defined in:", colored(sys.modules[type(task).__module__].__file__ or "???", "cyan"))
         print("  Default:", task.default)
         print("  Selected:", task.selected)
+        # TODO(@NiklasRosenstein): Show task tags
         rels = list(task.get_relationships())
         print(colored("  Relationships", attrs=["bold"]), f"({len(rels)})")
         for rel in rels:
