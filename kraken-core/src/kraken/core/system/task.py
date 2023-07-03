@@ -584,6 +584,8 @@ class BackgroundTask(Task):
     type of task is to spawn sidecar processes which are relied on by other tasks to be available during their
     execution."""
 
+    _started: bool = False
+
     @abc.abstractmethod
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus | None:
         """Start some task or process in the background. Use the *exit_stack* to ensure cleanup of your allocated
@@ -598,11 +600,12 @@ class BackgroundTask(Task):
         except AttributeError:
             pass
         else:
-            logger.warning(
-                'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
-                "as an error during serialization or zombie processes.",
-                self.address,
-            )
+            if self._started:
+                logger.warning(
+                    'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
+                    "as an error during serialization or zombie processes.",
+                    self.address,
+                )
 
     # Task
 
@@ -614,6 +617,7 @@ class BackgroundTask(Task):
                 status = TaskStatus.started()
             elif not status.is_started():
                 self.__exit_stack.close()
+            self._started = status.is_started()
             return status
         except BaseException:
             self.__exit_stack.close()
