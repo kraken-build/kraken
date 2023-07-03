@@ -44,6 +44,8 @@ class DefaultTaskExecutor(TaskExecutor):
             return TaskStatus.failed(f"unhandled exception: {exc}")
 
     def execute_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None:
+        if any(task.get_tags("skip")):
+            raise RuntimeError(f"Tasks that are set to be skipped must not be passed into the task executor: {task!r}")
         done(self._call(task.execute))
 
     def teardown_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None:
@@ -64,14 +66,20 @@ class DefaultGraphExecutor(GraphExecutor):
             for task in tasks:
                 if interrupted:
                     break
-                observer.before_prepare_task(task)
-                status = task.prepare() or TaskStatus.pending()
-                observer.after_prepare_task(task, status)
-                if status.is_pending():
-                    observer.before_execute_task(task, status)
-                    self._task_executor.execute_task(task, partial(execute_done, task))
+
+                skip_tags = task.get_tags("skip")
+                if skip_tags:
+                    status = TaskStatus.skipped("; ".join(t.reason for t in skip_tags))
                 else:
-                    execute_done(task, status)
+                    observer.before_prepare_task(task)
+                    status = task.prepare() or TaskStatus.pending()
+                    observer.after_prepare_task(task, status)
+                    if status.is_pending():
+                        observer.before_execute_task(task, status)
+                        self._task_executor.execute_task(task, partial(execute_done, task))
+                        continue  # Don't call execute_done here
+
+                execute_done(task, status)
 
         def invoke_teardown(tasks: Iterable[Task]) -> None:
             for task in tasks:

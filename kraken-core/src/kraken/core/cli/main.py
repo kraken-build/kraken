@@ -261,11 +261,13 @@ def run(
         graph_options=graph_options,
     )
 
-    # TODO(@NiklasRosenstein): Having the observer mark the excluded tasks as skipped is a hack.
-    #       Can we just mark these tasks as skipped after the graph is loaded (e.g. right here?).
-    context.observer = ColoredDefaultPrintingExecutorObserver(
-        context.resolve_tasks(run_options.exclude_tasks),
-        context.resolve_tasks(run_options.exclude_tasks_subgraph),
+    context.observer = ColoredDefaultPrintingExecutorObserver()
+    graph.mark_tasks_as_skipped(
+        run_options.exclude_tasks or (),
+        run_options.exclude_tasks_subgraph or (),
+        reason="Excluded via CLI",
+        origin="cli",
+        reset=True,
     )
 
     if run_options.skip_build:
@@ -456,6 +458,7 @@ def describe(graph: TaskGraph) -> None:
         print("  Type defined in:", colored(sys.modules[type(task).__module__].__file__ or "???", "cyan"))
         print("  Default:", task.default)
         print("  Selected:", task.selected)
+        # TODO(@NiklasRosenstein): Show task tags
         rels = list(task.get_relationships())
         print(colored("  Relationships", attrs=["bold"]), f"({len(rels)})")
         for rel in rels:

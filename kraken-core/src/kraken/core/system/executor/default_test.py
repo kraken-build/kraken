@@ -1,7 +1,9 @@
 from typing import Generator
 
 from _pytest.capture import CaptureFixture, CaptureResult
+from pytest import raises
 
+from kraken.core.system.executor import GraphExecutorObserver
 from kraken.core.system.executor.default import (
     TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE,
     DefaultGraphExecutor,
@@ -10,7 +12,7 @@ from kraken.core.system.executor.default import (
 )
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
-from kraken.core.system.task import Task
+from kraken.core.system.task import Task, TaskStatus, VoidTask
 
 
 class MyTask(Task):
@@ -234,3 +236,38 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
     assert ":fake_task_d" in result
     assert ":fake_task_e" in result
     assert ":fake_task_f" in result
+
+
+def test__DefaultTaskExecutor__skips_tasks_to_be_skipped(kraken_project: Project) -> None:
+    t1 = kraken_project.task("t1", VoidTask)
+    t1.add_tag("skip", reason="This task must be skipped.")
+    t2 = kraken_project.task("t2", MyTask)
+
+    statuses: list[TaskStatus] = []
+
+    def done(status: TaskStatus) -> None:
+        statuses.append(status)
+
+    with raises(RuntimeError) as excinfo:
+        DefaultTaskExecutor().execute_task(t1, done)
+    assert str(excinfo.value) == f"Tasks that are set to be skipped must not be passed into the task executor: {t1!r}"
+    DefaultTaskExecutor().execute_task(t2, done)
+
+    assert statuses == [TaskStatus.succeeded()]
+
+
+def test__DefaultGraphExecutor__skips_tasks_to_be_skipped(kraken_project: Project) -> None:
+    t1 = kraken_project.task("t1", VoidTask)
+    t1.add_tag("skip", reason="This task must be skipped.")
+    kraken_project.task("t2", MyTask)
+
+    statuses: list[TaskStatus] = []
+
+    class Observer(GraphExecutorObserver):
+        def after_execute_task(self, task: Task, status: TaskStatus) -> None:
+            statuses.append(status)
+
+    executor = DefaultGraphExecutor(DefaultTaskExecutor())
+    executor.execute_graph(TaskGraph(kraken_project.context), Observer())
+
+    assert statuses == [TaskStatus.skipped("This task must be skipped."), TaskStatus.succeeded()]

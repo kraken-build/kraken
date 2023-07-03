@@ -8,25 +8,25 @@ from pathlib import Path
 from kraken.common import flatten, not_none
 from kraken.core import Project, TaskStatus
 
-from kraken.std.docker.util import update_run_commands
+from kraken.std.docker.util.dockerfile import update_run_commands
 
-from . import DockerBuildTask
+from .base_build_task import BaseBuildTask
 
 
-class BuildxBuildTask(DockerBuildTask):
+class BuildxBuildTask(BaseBuildTask):
     """Implements building a Docker image with Buildx."""
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.preprocess_dockerfile.set(True)
 
-    # DockerBuildTask
+    # BaseBuildTask overrides
 
     def _preprocess_dockerfile(self, dockerfile: Path) -> str:
         mount_string = " ".join(f"--mount=type=secret,id={sec}" for sec in self.secrets.get().keys()) + " "
         return update_run_commands(dockerfile.read_text(), prefix=mount_string)
 
-    # Task
+    # Task overrides
 
     def finalize(self) -> None:
         if not self.load.get() and not self.push.get():

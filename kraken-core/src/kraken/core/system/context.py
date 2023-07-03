@@ -212,7 +212,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
     def resolve_tasks(
         self,
-        addresses: Sequence[str | Address] | None,
+        addresses: Sequence[Task | str | Address] | None,
         relative_to: Project | Address | None = None,
         set_selected: bool = False,
     ) -> list[Task]:
@@ -260,6 +260,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         results: list[Task] = []
         space = KrakenAddressSpace(self.root_project)
         for address in addresses:
+            if isinstance(address, Task):
+                results.append(address)
+                continue
             try:
                 results += self._resolve_single_address(Address(address), relative_to, space, set_selected)
             except TaskResolutionException:
