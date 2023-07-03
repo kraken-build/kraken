@@ -1,6 +1,6 @@
 from __future__ import annotations
-from dataclasses import dataclass
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -9,7 +9,7 @@ from kraken.core import Project, Task
 
 from kraken.std.docker.tasks.base_build_task import BaseBuildTask
 from kraken.std.docker.tasks.manifest_tool_push_task import ManifestToolPushTask
-from kraken.std.docker.tasks.run_container_task import RunContainerTask, WaitForProcessTask
+from kraken.std.docker.tasks.run_container_task import RunContainerTask, StopContainerTask, WaitForProcessTask
 
 __all__ = ["build_docker_image", "manifest_tool", "sidecar_container"]
 
@@ -63,9 +63,11 @@ class SidecarContainerRecord:
     workdir: str | None
     entrypoint: str | None
     cwd: Path | None
+    detach: bool
 
     run_task: RunContainerTask
-    wait_task: WaitForProcessTask
+    stop_task: StopContainerTask | None
+    wait_task: WaitForProcessTask | None
 
 
 def sidecar_container(
@@ -78,11 +80,26 @@ def sidecar_container(
     workdir: str | None = None,
     entrypoint: str | None = None,
     cwd: Path | None = None,
+    detach: bool = True,
     project: Project | None = None,
 ) -> RunContainerTask:
+    """
+    Define a Docker container to run in the background. This is useful to define containers that should run in the
+    background and be available for other tasks to connect to. For example, a database container that should be
+    available for a test suite to connect to.
+
+    If *detach* is enabled, the container will keep running in the background even when Kraken exits. It will be
+    restarted if its configuration is updated (i.e. the parameters to this function).
+    """
+
     project = project or Project.current()
+
+    container_name = "kraken.sidecar-container." + (
+        str(project.address).replace(":", ".").strip(".") + "." + name
+    ).strip(".")
+
     task = project.task(f"{name}.start", RunContainerTask)
-    task.container_name = name
+    task.container_name = container_name
     task.image = image
     task.ports = ports
     task.env = env
@@ -91,9 +108,15 @@ def sidecar_container(
     task.entrypoint = entrypoint
     task.cwd = cwd
 
-    wait = project.task(name, WaitForProcessTask)
-    wait.pid = task._pid
-    wait.depends_on(task)
+    if detach:
+        wait = None
+        stop = project.task(f"{name}.stop", StopContainerTask)
+        stop.container_name = container_name
+    else:
+        wait = project.task(name, WaitForProcessTask)
+        wait.pid = task._pid
+        wait.depends_on(task)
+        stop = None
 
     metadata = SidecarContainerRecord(
         name=name,
@@ -104,7 +127,9 @@ def sidecar_container(
         workdir=workdir,
         entrypoint=entrypoint,
         cwd=cwd,
+        detach=detach,
         run_task=task,
+        stop_task=stop,
         wait_task=wait,
     )
     project.metadata.append(metadata)

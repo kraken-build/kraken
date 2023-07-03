@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 import subprocess as sp
 from pathlib import Path
+from typing import Any
 
 from kraken.common import flatten
 
@@ -48,3 +50,51 @@ def docker_load(image_file: Path) -> int:
     command = ["docker", "load", "-i", str(image_file)]
     logger.info("%s", command)
     return sp.call(command)
+
+
+class DockerInspect(dict[str, Any]):
+    def get_status(self) -> str:
+        return self["State"]["Status"]  # type: ignore[no-any-return]
+
+    def get_labels(self) -> dict[str, str]:
+        return self["Config"]["Labels"] or {}
+
+
+def docker_inspect(container_name: str) -> DockerInspect | None:
+    """Inspect a docker container by name."""
+
+    command = ["docker", "container", "inspect", container_name]
+    try:
+        output = sp.check_output(command, text=True, stderr=sp.DEVNULL)
+    except sp.CalledProcessError as e:
+        if e.returncode == 1:
+            return None
+        raise
+
+    return DockerInspect(json.loads(output)[0])
+
+
+def docker_rm(container_name: str, not_exist_ok: bool = False) -> None:
+    command = ["docker", "rm", container_name]
+    try:
+        sp.run(command, check=True, stderr=sp.DEVNULL)
+    except sp.CalledProcessError as e:
+        if e.returncode == 1 and not_exist_ok:
+            return
+        raise
+
+
+def docker_start(container_name: str) -> None:
+    command = ["docker", "start", container_name]
+    sp.run(command, check=True, stderr=sp.DEVNULL)
+
+
+def docker_stop(container_name: str, not_exist_ok: bool = False) -> bool:
+    command = ["docker", "stop", container_name]
+    try:
+        sp.run(command, check=True, stderr=sp.DEVNULL)
+        return True
+    except sp.CalledProcessError as e:
+        if e.returncode == 1 and not_exist_ok:
+            return False
+        raise

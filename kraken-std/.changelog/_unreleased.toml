@@ -17,3 +17,9 @@ type = "breaking change"
 description = "Move Kraken task definitions in `kraken.std.docker` into `kraken.std.docker.tasks` module"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/66"
+
+[[entries]]
+id = "285b0309-45f5-470d-9a51-e0a40052c033"
+type = "feature"
+description = "Add a `sidecar_container()` function to `kraken.std.docker`"
+author = "@NiklasRosenstein"
