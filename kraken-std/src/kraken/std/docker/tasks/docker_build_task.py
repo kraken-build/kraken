@@ -13,7 +13,7 @@ from kraken.std.docker.util.dockerfile import update_run_commands
 from .base_build_task import BaseBuildTask
 
 
-class NativeBuildTask(BaseBuildTask):
+class DockerBuildTask(BaseBuildTask):
     """Implements building a Docker image using the native `docker build` command."""
 
     #: Whether to use Docker Buildkit. Enabled by default.
@@ -33,11 +33,11 @@ class NativeBuildTask(BaseBuildTask):
 
     def finalize(self) -> None:
         if self.cache_repo.get() is not None:
-            self.logger.warning("cache_repo is not supported for NativeBuildTask")
+            self.logger.warning("cache_repo is not supported for DockerBuildTask")
         if self.squash.get() is not None:
-            self.logger.warning("squash is not supported for NativeBuildTask")
+            self.logger.warning("squash is not supported for DockerBuildTask")
         if not self.load.get():
-            self.logger.warning("load is not supported for NativeBuildTask, resulting image will always be loaded")
+            self.logger.warning("load is not supported for DockerBuildTask, resulting image will always be loaded")
         if self.push.get() and not self.tags.get():
             raise ValueError(f"{self}.tags cannot be empty if .push is enabled")
         return super().finalize()

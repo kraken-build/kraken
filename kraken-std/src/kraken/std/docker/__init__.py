@@ -15,7 +15,7 @@ DEFAULT_BUILD_BACKEND = "native"
 BUILD_BACKENDS = {
     "buildx": f"{__name__}.tasks.buildx_build_task.BuildxBuildTask",
     "kaniko": f"{__name__}.tasks.kaniko_build_task.KanikoBuildTask",
-    "native": f"{__name__}.tasks.native_build_task.NativeBuildTask",
+    "native": f"{__name__}.tasks.docker_build_task.DockerBuildTask",
 }
 
 
