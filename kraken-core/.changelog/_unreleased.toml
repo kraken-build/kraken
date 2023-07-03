@@ -17,9 +17,11 @@ id = "4c2eef2a-9e4c-4c0c-b5f9-494097fcc5b3"
 type = "feature"
 description = "Add `Task.add_tag()`, `Task.remove_tag()` and `Task.get_tags()`. A \"skip\" tag can now be added to a task to skip it."
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
 
 [[entries]]
 id = "25f507d1-09ba-4107-9f6f-6217f75b66d5"
 type = "improvement"
 description = "Allow `Task` items in parameter to `Context.resolve_tasks()`"
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
