@@ -147,6 +147,7 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
+
     task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
 

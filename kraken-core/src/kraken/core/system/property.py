@@ -19,8 +19,8 @@ import weakref
 from operator import concat
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
-import deprecated
 
+import deprecated
 from kraken.common import NotSet, Supplier, not_none
 from typeapi import (
     AnnotatedTypeHint,

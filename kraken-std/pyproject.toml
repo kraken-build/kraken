@@ -31,6 +31,7 @@ termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
+mitmproxy = "^9.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -45,7 +46,6 @@ cloudsmith-api = "^1.61.3"
 types-requests = "^2.28.0"
 types-termcolor = "^1.1.5"
 types-Deprecated = "^1.2.9"
-"proxy.py" = "^2.4.3"
 
 [tool.poetry.group.docs]
 optional = true
