@@ -1,5 +1,4 @@
 import errno
-import hashlib
 import json
 import logging
 import os
@@ -9,7 +8,7 @@ import sys
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Callable, Literal, Mapping
+from typing import IO, Any, Callable, Literal, Mapping
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +129,7 @@ class DaemonController:
     class State:
         command: list[str]
         cwd: str
-        env_hash: str
+        env: dict[str, str]
         pid: int
         started_at: float
 
@@ -143,7 +142,26 @@ class DaemonController:
             data = json.loads(self.state_file.read_text())
         except FileNotFoundError:
             return None
-        return self.State(**data)
+        except json.JSONDecodeError:
+            logger.warning("Could not decode Daemon %r state file. Continuing as if it did not exist.", self.name)
+            return None
+        try:
+            return self.State(**data)
+        except TypeError:
+            if "pid" in data and isinstance(data["pid"], int):
+                logger.warning(
+                    "Could not initialize Daemon %r state from payload, but a `pid` field was found. Continuing "
+                    "with a state that does not contain any information besides the `pid`.",
+                    self.name,
+                )
+                return self.State([], os.getcwd(), {}, data["pid"], 0)
+            else:
+                logger.error(
+                    "Could not recover from invalid JSON payload found for Daemon %r state. Continuing as if it "
+                    "did not exist.",
+                    self.name,
+                )
+            return None
 
     def save_state(self, state: State) -> None:
         self.state_file.write_text(json.dumps(asdict(state)))
@@ -171,24 +189,24 @@ class DaemonController:
         if the daemon was started, False if it was already running.
         """
 
-        cwd = cwd.absolute() if cwd else Path.cwd()
-        env = {} if env is None else env
-        stdout = stdout.absolute() if stdout else None
-        stderr = stderr.absolute() if stderr and stderr != "stdout" else stderr
+        if stderr is not None and stderr != "stdout":
+            assert isinstance(stderr, Path), type(stderr)
+            stderr_path = stderr.absolute()
+        else:
+            stderr_path = None
+        stderr_to_stdout = stderr == "stdout"
 
-        env_hasher = hashlib.md5()
-        for key, value in sorted(env.items()):
-            env_hasher.update(key.encode("utf8"))
-            env_hasher.update(value.encode("utf8"))
-        env_hash = env_hasher.hexdigest()
+        cwd = cwd.absolute() if cwd else Path.cwd()
+        env = dict(env.items()) if env else {}
+        stdout = stdout.absolute() if stdout else None
 
         state = self.load_state()
         daemon_alive = bool(state and process_exists(state.pid))
-        if daemon_alive and state.command == command and state.cwd == str(cwd) and env_hash == state.env_hash:
+        if daemon_alive and state and state.command == command and state.cwd == str(cwd) and env == state.env:
             logger.info("Daemon %r is already running (pid: %s)", self.name, state.pid)
             return False
 
-        if daemon_alive:
+        if state and daemon_alive:
             logger.info("Restarting daemon %r.", self.name)
             process_terminate(state.pid)
             self.remove_state()
@@ -197,13 +215,19 @@ class DaemonController:
             logger.info("Starting daemon %r.", self.name)
 
         def start_daemon() -> None:
-            stdout_fp = stdout.open("wb") if stdout else subprocess.DEVNULL
-            stderr_fp = stdout_fp if stderr == "stdout" else stderr.open("wb") if stderr else subprocess.DEVNULL
+            stdout_fp: IO[Any] | int = stdout.open("wb") if stdout else subprocess.DEVNULL
+            if stderr_to_stdout:
+                stderr_fp: IO[Any] | int = stdout_fp
+            elif stderr_path:
+                stderr_fp = stderr_path.open("wb")
+            else:
+                stderr_fp = subprocess.DEVNULL
+
             proc_env = os.environ.copy()
             proc_env.update(env)
             proc = subprocess.Popen(command, cwd=cwd, env=proc_env, stdout=stdout_fp, stderr=stderr_fp)
             logger.info("Daemon %r started (pid: %s)", self.name, proc.pid)
-            state = self.State(command, str(cwd), env_hash, proc.pid, time.time())
+            state = self.State(command, str(cwd), env, proc.pid, time.time())
             self.save_state(state)
 
         pid = spawn_fork(start_daemon)
