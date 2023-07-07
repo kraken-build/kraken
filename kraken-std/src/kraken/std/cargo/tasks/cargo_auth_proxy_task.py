@@ -14,6 +14,7 @@ from kraken.core import BackgroundTask, Property, TaskStatus
 
 from kraken.std.cargo.config import CargoRegistry
 from kraken.std.git.config import dump_gitconfig, load_gitconfig
+from kraken.std.mitm import start_mitmweb_proxy
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +31,6 @@ class CargoAuthProxyTask(BackgroundTask):
     #: A list of the Cargo registries for which to inject credentials for based on matching paths.
     registries: Property[list[CargoRegistry]]
 
-    #: The proxy port.
-    proxy_port: Property[int] = Property.default(8899)
-
     #: The URL of the proxy. This property is only valid and accessible for tasks that immediately directly depend
     #: on this task and will be invalidated at the task teardown.
     proxy_url: Property[str] = Property.output()
@@ -42,10 +40,6 @@ class CargoAuthProxyTask(BackgroundTask):
 
     #: The number of seconds to wait after the proxy started.
     startup_wait_time: Property[float] = Property.default(1.0)
-
-    #: The number of seconds the proxy must be alive at least before terminating it. This is to avoid cryptic error
-    #: messages if the proxy is killed during it's startup time.
-    min_lifetime: Property[float] = Property.default(2.0)
 
     @contextlib.contextmanager
     def _inject_config(self) -> Iterator[None]:
@@ -93,8 +87,6 @@ class CargoAuthProxyTask(BackgroundTask):
     # Task
 
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus:
-        from ..mitm import mitm_auth_proxy
-
         auth: dict[str, tuple[str, str]] = {}
         for registry in self.registries.get():
             if not registry.read_credentials:
@@ -102,24 +94,11 @@ class CargoAuthProxyTask(BackgroundTask):
             host = not_none(urlparse(registry.index).hostname)
             auth[host] = registry.read_credentials
 
-        try:
-            proxy_url, cert_file = exit_stack.enter_context(mitm_auth_proxy(auth=auth, port=self.proxy_port.get()))
-        except FileNotFoundError as exc:
-            return TaskStatus.skipped(
-                f"Could not start proxy ({exc}). This may cause errors when Cargo tries to fetch dependencies. "
-                "Please run `pipx install proxy.py; pipx inject proxy.py certifi`."
-            )
-
+        proxy_url, cert_file = start_mitmweb_proxy(auth=auth)
         self.proxy_url.set(proxy_url)
-        exit_stack.callback(lambda: self.proxy_url.clear())
         self.proxy_cert_file.set(cert_file)
+        exit_stack.callback(lambda: self.proxy_url.clear())
         exit_stack.callback(lambda: self.proxy_cert_file.clear())
-
-        # Make sure the proxy is alive for at least a certain amount of time to avoid a cryptic error message.
-        self._start_time = time.perf_counter()
-        exit_stack.callback(
-            lambda: time.sleep(max(0, self.min_lifetime.get() - (time.perf_counter() - self._start_time)))
-        )
 
         # Give the proxy some time to start up.
         time.sleep(self.startup_wait_time.get())

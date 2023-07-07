@@ -1,0 +1,28 @@
+release-date = "2023-07-07"
+
+[[entries]]
+id = "cfdd846b-6a9b-43f0-aa11-fa54ebcf06f5"
+type = "tests"
+description = "Test `PythonBuildSystem.build()` with `as_version` set for Slap/Poetry/Pdm"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c3a6fd4d-163b-4bf8-9251-30cfc436a3b9"
+type = "improvement"
+description = "Adjust task property definitions to replace `Property.config()` with `Property.default()` and `Property.default_factory()`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/64"
+
+[[entries]]
+id = "15468abe-332f-480d-b287-db44bab5eea7"
+type = "breaking change"
+description = "Move Kraken task definitions in `kraken.std.docker` into `kraken.std.docker.tasks` module"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
+
+[[entries]]
+id = "9e0bffa2-9345-42c1-a33d-f5b86151fbd5"
+type = "improvement"
+description = "Phase out `proxy.py` MITM proxy for Cargo repositories and replace it with `mitmproxy` (https://mitmproxy.org/). Kraken will now start `mitmweb` in the background listening to port `8899` (same as before), while serving the Web Interface on port `8900`. The `mitmweb` process will remain alive over multiple runs of Kraken and restart automatically if its configuration changes (e.g. if the token changes)."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/68"

@@ -1,19 +1,6 @@
 [[entries]]
-id = "cfdd846b-6a9b-43f0-aa11-fa54ebcf06f5"
-type = "tests"
-description = "Test `PythonBuildSystem.build()` with `as_version` set for Slap/Poetry/Pdm"
-author = "@NiklasRosenstein"
-
-[[entries]]
-id = "c3a6fd4d-163b-4bf8-9251-30cfc436a3b9"
+id = "6f2a2347-a6f0-49d7-a1ab-bc28b672eb1f"
 type = "improvement"
-description = "Adjust task property definitions to replace `Property.config()` with `Property.default()` and `Property.default_factory()`"
+description = "Handle `DaemonController` state more defensively."
 author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken-build/pull/64"
-
-[[entries]]
-id = "15468abe-332f-480d-b287-db44bab5eea7"
-type = "breaking change"
-description = "Move Kraken task definitions in `kraken.std.docker` into `kraken.std.docker.tasks` module"
-author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken-build/pull/66"
+pr = "https://github.com/kraken-build/kraken-build/pull/68"

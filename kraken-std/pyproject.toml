@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kraken-std"
-version = "0.27.5"
+version = "0.28.0.dev0"
 description = "The Kraken standard library."
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
@@ -25,12 +25,13 @@ pyaddlicense = "^0.2.1"
 databind-json = "^4.2.5"
 deprecated = "^1.2.13"
 httpx = "^0.23.0"
-kraken-common = "^0.27.5"
-kraken-core = "^0.27.5"
+kraken-common = "^0.28.0.dev0"
+kraken-core = "^0.28.0.dev0"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
 twine = "^4.0.1"
+mitmproxy = "^9.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "*"
@@ -45,7 +46,6 @@ cloudsmith-api = "^1.61.3"
 types-requests = "^2.28.0"
 types-termcolor = "^1.1.5"
 types-Deprecated = "^1.2.9"
-"proxy.py" = "^2.4.3"
 
 [tool.poetry.group.docs]
 optional = true

@@ -1,7 +1,9 @@
+release-date = "2023-07-07"
+
 [[entries]]
 id = "1fd57aac-6ed7-417d-8075-c948f7567194"
-type = "breaking change"
-description = "Remove `Property.config()`"
+type = "deprecation"
+description = "Deprecate `Property.config()`"
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken-build/pull/64"
 
