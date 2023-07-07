@@ -19,6 +19,7 @@ import weakref
 from operator import concat
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
+import deprecated
 
 from kraken.common import NotSet, Supplier, not_none
 from typeapi import (
@@ -139,6 +140,27 @@ class Property(Supplier[T]):
         """Assign the result of this function as a default value to a property to declare it's default factory."""
 
         return PropertyConfig(default_factory=func, help=help)
+
+    @staticmethod
+    @deprecated.deprecated(reason="use Property.required(), .default() or .default_factory() instead")
+    def config(
+        output: bool = False,
+        default: Any | NotSet = NotSet.Value,
+        default_factory: Callable[[], Any] | NotSet = NotSet.Value,
+    ) -> Any:
+        """Assign the result of this function as a default value to a property on the class level of an :class:`Object`
+        subclass to configure it's default value or whether it is an output property. This is an alternative to using
+        a :class:`typing.Annotated` type hint.
+
+        .. code:: Example
+
+            from kraken.core.system.property import Object, Property, config
+
+            class MyObj(Object):
+                a: Property[int] = config(default=42)
+        """
+
+        return PropertyConfig(output, default, default_factory)
 
     def __init__(
         self,
