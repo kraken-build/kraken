@@ -1,0 +1,11 @@
+[[entries]]
+id = "7685036b-ad7e-4373-b3b2-e53d3a8e5794"
+type = "fix"
+description = "The `DaemonController.run()` function now creates the parent directory of the stdout/stderr output files by default."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c716be6f-4d73-41e6-8041-12fafaaca75d"
+type = "fix"
+description = "The `DaemonController.run()` function now creates the parent directory of the stdout/stderr output files by default."
+author = "@NiklasRosenstein"
