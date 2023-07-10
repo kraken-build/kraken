@@ -41,6 +41,7 @@ class PythonSettings:
     tests_directory: Path | None = None
     package_indexes: dict[str, _PackageIndex] = field(default_factory=dict)
     always_use_managed_env: bool = True
+    skip_install_if_venv_exists: bool = True
 
     def get_tests_directory(self) -> Path | None:
         """Returns :attr:`tests_directory` if it is set. If not, it will look for the following directories and
@@ -139,6 +140,7 @@ def python_settings(
     source_directory: str | Path | None = None,
     tests_directory: str | Path | None = None,
     always_use_managed_env: bool | None = None,
+    skip_install_if_venv_exists: bool | None = None,
 ) -> PythonSettings:
     """Read the Python settings for the given or current project and optionally update attributes.
 
@@ -178,5 +180,8 @@ def python_settings(
 
     if always_use_managed_env is not None:
         settings.always_use_managed_env = True
+
+    if skip_install_if_venv_exists is not None:
+        settings.skip_install_if_venv_exists = skip_install_if_venv_exists
 
     return settings

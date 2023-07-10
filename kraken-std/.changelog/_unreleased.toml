@@ -1,0 +1,5 @@
+[[entries]]
+id = "86ef8c7c-a315-4f0c-b773-85c01bd6fddc"
+type = "feature"
+description = "Add `PythonInstallTask.skip_if_venv_exists` property (defaults to true) and `PythonSettings.skip_install_if_venv_exists` flag.;"
+author = "@NiklasRosenstein"

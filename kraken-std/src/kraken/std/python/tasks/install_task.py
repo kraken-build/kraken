@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class InstallTask(Task):
-    build_system: Property[PythonBuildSystem | None]
-    always_use_managed_env: Property[bool]
+    build_system: Property[PythonBuildSystem | None] = Property.default(None)
+    always_use_managed_env: Property[bool] = Property.default(True)
+    skip_if_venv_exists: Property[bool] = Property.default(True)
 
     # Task
 
@@ -42,6 +43,10 @@ class InstallTask(Task):
         if managed_environment.exists() and not managed_environment.always_install():
             if self.selected:
                 return TaskStatus.pending("explicitly selected to run")
+            if self.skip_if_venv_exists.get():
+                return TaskStatus.pending(
+                    "managed environment exists (%s), always install on" % managed_environment.get_path()
+                )
             return TaskStatus.skipped("managed environment exists (%s)" % managed_environment.get_path())
 
         return TaskStatus.pending()
@@ -67,5 +72,6 @@ def install(*, name: str = "python.install", project: Project | None = None) -> 
         task = project.task(name, InstallTask)
         task.build_system = Supplier.of_callable(lambda: python_settings(project).build_system)
         task.always_use_managed_env = Supplier.of_callable(lambda: python_settings(project).always_use_managed_env)
+        task.skip_if_venv_exists = Supplier.of_callable(lambda: python_settings(project).skip_install_if_venv_exists)
 
     return task
