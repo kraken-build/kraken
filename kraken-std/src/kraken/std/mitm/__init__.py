@@ -38,6 +38,15 @@ def start_mitmweb_proxy(auth: Mapping[str, tuple[str, str]], startup_wait_time: 
             str(inject_auth_addon_file),
             "--set",
             "auth=" + json.dumps(auth),
+            # `mitmproxy` buffers the entire response before forwarding it to
+            # the client. This is problematic when e.g. cloning large git repos
+            # via http. As we're not using any filtering mechanism, we can just
+            # stream the bodies through without `mitmproxy` storing them.
+            #
+            # See https://github.com/mitmproxy/mitmproxy/issues/6237 for
+            # context.
+            "--set",
+            "stream_large_bodies=3m",
         ],
         cwd=Path("~").expanduser(),
         stdout=daemon_log_file,

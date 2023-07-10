@@ -1,0 +1,5 @@
+[[entries]]
+id = "3689a241-dd41-402b-a6ca-cddd3823d108"
+type = "fix"
+description = "mitmproxy: Stream HTTP body instead of buffering to completion"
+author = "@wngr"
