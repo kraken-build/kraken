@@ -1,0 +1,5 @@
+[[entries]]
+id = "c7a41306-86e3-4d9b-a70e-59e44dba8506"
+type = "improvement"
+description = "The wrapper does not have an issue with Python 3.11 as the core does due to Dill, so we should allow installing it into 3.11 and newer."
+author = "@NiklasRosenstein"
