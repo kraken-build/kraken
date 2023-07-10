@@ -1,4 +1,4 @@
-__version__ = "0.28.3"
+__version__ = "0.28.4"
 
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
