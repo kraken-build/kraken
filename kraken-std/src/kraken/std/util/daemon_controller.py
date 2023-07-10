@@ -183,6 +183,7 @@ class DaemonController:
         env: Mapping[str, str] | None = None,
         stdout: Path | None = None,
         stderr: Path | None | Literal["stdout"] = "stdout",
+        mkdir: bool = True,
     ) -> bool:
         """
         Ensure that the daemon is running. If the command or cwd changed, the daemon will be restarted. Returns True
@@ -215,10 +216,18 @@ class DaemonController:
             logger.info("Starting daemon %r.", self.name)
 
         def start_daemon() -> None:
-            stdout_fp: IO[Any] | int = stdout.open("wb") if stdout else subprocess.DEVNULL
+            if stdout is not None:
+                if mkdir:
+                    stdout.parent.mkdir(parents=True, exist_ok=True)
+                stdout_fp: IO[Any] | int = stdout.open("wb")
+            else:
+                stdout_fp = subprocess.DEVNULL
+
             if stderr_to_stdout:
                 stderr_fp: IO[Any] | int = stdout_fp
             elif stderr_path:
+                if mkdir:
+                    stderr_path.parent.mkdir(parents=True, exist_ok=True)
                 stderr_fp = stderr_path.open("wb")
             else:
                 stderr_fp = subprocess.DEVNULL
