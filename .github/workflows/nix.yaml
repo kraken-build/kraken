@@ -30,6 +30,7 @@ jobs:
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix build
     - run: echo $(pwd)/result/bin >> $GITHUB_PATH
+    - run: poetry lock --check -C kraken-wrapper # check poetry lock up to date
 
     # Need Poetry and PDM for integration tests.
     - run: pip install pipx
