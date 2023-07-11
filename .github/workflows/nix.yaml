@@ -29,6 +29,7 @@ jobs:
 #        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix build
     - run: export PATH=$(pwd)/result/bin:$PATH
+    - run: echo $PATH
 
     # Need Poetry and PDM for integration tests.
     - run: pip install pipx
