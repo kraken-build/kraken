@@ -22,6 +22,7 @@
         packages = flake-utils.lib.flattenTree rec {
           krakenw = (pkgs.poetry2nix.mkPoetryApplication {
             projectDir = ./kraken-wrapper;
+            preferWheels = true;
           });
           default = krakenw;
         };

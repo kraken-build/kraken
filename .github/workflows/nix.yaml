@@ -1,0 +1,56 @@
+name: "Nix"
+
+on:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
+
+env:
+  COLUMNS: 200
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.10"
+            test-type: integrationTest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v2
+      with: { python-version: "${{ matrix.python-version }}" }
+    - uses: cachix/install-nix-action@v20
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+#   - uses: cachix/cachix-action@v12
+#      with:
+#        name: kraken
+#        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    - run: nix build
+    - run: export PATH=$(pwd)/result/bin:$PATH
+
+    # Need Poetry and PDM for integration tests.
+    - run: pip install pipx
+    - run: pipx install poetry
+    - run: curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -
+
+    # Make sure we have Docker available for the ete-tests.
+    - uses: docker/setup-buildx-action@v2
+
+    - run: cd kraken-std && krakenw -v run ${{ matrix.test-type }} -v
+      env:
+        ARTIFACTORY_CARGO_REPOSITORY: ${{ vars.ARTIFACTORY_CARGO_REPOSITORY }}
+        CLOUDSMITH_CARGO_REPOSITORY: ${{ vars.CLOUDSMITH_CARGO_REPOSITORY }}
+        CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS: |
+          {
+            "api_key": "${{ secrets.CLOUDSMITH_API_KEY }}",
+            "owner": "${{ vars.CLOUDSMITH_OWNER }}",
+            "user": "${{ vars.CLOUDSMITH_USER }}"
+          }
+        ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS: |
+          {
+            "token": "${{ secrets.ARTIFACTORY_TOKEN }}",
+            "url": "${{ vars.ARTIFACTORY_URL }}",
+            "user": "${{ vars.ARTIFACTORY_USER }}"
+          }
