@@ -20,7 +20,7 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.7,<3.12"
 keyring = "^23.8.2"
 kraken-common = "^0.28.4"
 pex = "^2.1.103"
