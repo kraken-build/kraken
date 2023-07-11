@@ -30,7 +30,7 @@ jobs:
     # check poetry lock in sync with pyproject.toml
     - run: poetry lock --check -C kraken-wrapper
 
-    # build the kraken wrapper
+    # build the kraken wrapper
     - uses: cachix/install-nix-action@v20
       with:
         nix_path: nixpkgs=channel:nixos-unstable
