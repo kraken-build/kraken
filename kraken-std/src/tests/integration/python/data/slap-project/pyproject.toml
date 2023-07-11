@@ -28,6 +28,7 @@ flake8 = "*"
 isort = "*"
 mypy = "*"
 pytest = "*"
+pytest-cov = "*"
 
 [tool.slap]
 typed = true
