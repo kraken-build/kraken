@@ -3,8 +3,8 @@ from __future__ import annotations
 import contextlib
 import logging
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 from urllib.parse import urlparse
 
 import tomli

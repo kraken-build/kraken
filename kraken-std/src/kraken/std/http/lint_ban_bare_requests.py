@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import ast
-from typing import Generator
+from collections.abc import Generator
 
 from . import __all__ as WRAPPED_HTTP_FUNCTIONS
 

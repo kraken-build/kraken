@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import importlib
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Iterable, Iterator
 
 
 def iter_modules_recursively(prefix: str, path: Iterable[str | Path]) -> Iterator[str]:

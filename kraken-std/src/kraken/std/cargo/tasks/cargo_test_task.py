@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from .cargo_build_task import CargoBuildTask
 
 
@@ -9,6 +7,6 @@ class CargoTestTask(CargoBuildTask):
 
     description = "Run `cargo test`."
 
-    def get_cargo_command(self, env: Dict[str, str]) -> List[str]:
+    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         super().get_cargo_command(env)
         return ["cargo", "test"] + self.additional_args.get()

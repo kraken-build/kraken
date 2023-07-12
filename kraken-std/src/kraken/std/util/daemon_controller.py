@@ -6,9 +6,10 @@ import signal
 import subprocess
 import sys
 import time
+from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import IO, Any, Callable, Literal, Mapping
+from typing import IO, Any, Literal
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ def spawn_fork(func: Callable[[], Any], detach: bool = True) -> int:
     a daemon (as it will NOT be killed if the original process dies)."""
 
     if not callable(func):
-        raise TypeError("func is of type {} which is not callable".format(type(func).__name__))
+        raise TypeError(f"func is of type {type(func).__name__} which is not callable")
 
     pid = os.fork()
     if pid > 0:

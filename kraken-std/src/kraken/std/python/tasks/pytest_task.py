@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import os
 import shlex
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus

@@ -1,0 +1,6 @@
+[[entries]]
+id = "be1c9b92-8184-4d18-aa21-1b3e91c692f0"
+type = "improvement"
+description = "Enforces 3.10+ type annotation syntaxes using pyupgrade"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/62"

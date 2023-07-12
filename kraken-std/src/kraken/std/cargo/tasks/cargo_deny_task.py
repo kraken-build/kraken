@@ -1,6 +1,6 @@
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from kraken.core import Property, Task, TaskStatus
 

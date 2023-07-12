@@ -3,8 +3,8 @@ from __future__ import annotations
 import contextlib
 import shlex
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 import deprecated
 from kraken.common import flatten
