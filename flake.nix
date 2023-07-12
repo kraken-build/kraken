@@ -31,7 +31,7 @@
       in
       rec {
         packages = flake-utils.lib.flattenTree rec {
-          krakenw = krakenw;
+          inherit krakenw;
           default = krakenw;
         };
       }
