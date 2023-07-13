@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import os
 import shlex
 from collections.abc import Sequence
@@ -10,7 +11,19 @@ from kraken.core import Project, Property, TaskStatus
 
 from .base_task import EnvironmentAwareDispatchTask
 
-# TODO (@NiklasRosenstein): Pytest coverage support
+
+class CoverageFormat(enum.Enum):
+    XML = ("xml", ".xml")
+    HTML = ("html", "_html")
+    JSON = ("json", ".json")
+    LCOV = ("lcov", ".info")
+    ANNOTATE = ("annotate", "_annotate")
+
+    def get_format(self) -> str:
+        return self.value[0]
+
+    def get_suffix(self) -> str:
+        return self.value[1]
 
 
 class PytestTask(EnvironmentAwareDispatchTask):
@@ -22,6 +35,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
     marker: Property[str]
+    coverage: Property[CoverageFormat]
 
     # EnvironmentAwareDispatchTask
 
@@ -42,6 +56,13 @@ class PytestTask(EnvironmentAwareDispatchTask):
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
+        if self.coverage.is_filled():
+            coverage_file = f"coverage{self.coverage.get().get_suffix()}"
+            command += [
+                "--cov-report",
+                f"{self.coverage.get().get_format()}:{str(self.project.build_directory / coverage_file)}",
+                f"--cov={str(self.project.directory / self.settings.source_directory)}",
+            ]
         if self.marker.is_filled():
             command += ["-m", self.marker.get()]
         if self.doctest_modules.get():
@@ -66,6 +87,7 @@ def pytest(
     allow_no_tests: bool = False,
     doctest_modules: bool = True,
     marker: str | None = None,
+    coverage: CoverageFormat | None = None,
 ) -> PytestTask:
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
@@ -74,4 +96,5 @@ def pytest(
     task.allow_no_tests = allow_no_tests
     task.doctest_modules = doctest_modules
     task.marker = marker
+    task.coverage = coverage
     return task

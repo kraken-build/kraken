@@ -4,3 +4,10 @@ type = "improvement"
 description = "Enforces 3.10+ type annotation syntaxes using pyupgrade"
 author = "@Tpt"
 pr = "https://github.com/kraken-build/kraken-build/pull/62"
+
+[[entries]]
+id = "a7af79cd-9622-4074-a25f-d27dcb66ff01"
+type = "improvement"
+description = "Support pytest coverage."
+author = "benjamin.poumarede@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/48"

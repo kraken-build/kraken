@@ -176,3 +176,32 @@ def test__python_pyproject_reads_correct_data(
 
     assert spec.get_name() == project_dir
     assert spec.get_python_version_constraint() == expected_python_version
+
+
+@unittest.mock.patch.dict(os.environ, {})
+def test__python_project_coverage(
+    kraken_ctx: Context,
+    kraken_project: Project,
+) -> None:
+    tempdir = kraken_project.directory
+
+    project_dir = "slap-project"
+    original_dir = Path(__file__).parent / "data" / project_dir
+
+    # Copy the projects to the temporary directory.
+    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
+    logger.info("Loading and executing Kraken project (%s)", tempdir)
+
+    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    local_build_system = python.buildsystem.detect_build_system(tempdir)
+    assert local_build_system is not None
+    assert local_build_system.get_pyproject_reader(pyproject) is not None
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "slap-project"
+
+    python.settings.python_settings(project=kraken_project, build_system=local_build_system)
+    python.pytest(project=kraken_project, coverage=python.CoverageFormat.XML)
+    python.install(project=kraken_project)
+    python.build(project=kraken_project)
+    kraken_ctx.execute([":build", ":test"])
+
+    assert Path(kraken_project.build_directory / "coverage.xml").is_file()
