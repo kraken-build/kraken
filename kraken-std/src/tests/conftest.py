@@ -1,8 +1,8 @@
 import contextlib
 import os
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 

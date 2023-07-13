@@ -2,14 +2,15 @@
 # This module internally calls httpx, but with a custom setup
 
 import ssl
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Iterator, Optional
+from typing import Any
 
 import httpx
 
 __all__ = ["request", "get", "options", "head", "post", "put", "patch", "delete", "stream"]
 
-_CACHED_SYSTEM_CA_LIST: Optional[ssl.SSLContext] = None
+_CACHED_SYSTEM_CA_LIST: ssl.SSLContext | None = None
 
 
 # Caching calls to ssl.create_default_context()

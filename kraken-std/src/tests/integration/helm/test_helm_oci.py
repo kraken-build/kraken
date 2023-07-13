@@ -1,8 +1,8 @@
 import logging
 import tempfile
 import time
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 from kraken.common import not_none

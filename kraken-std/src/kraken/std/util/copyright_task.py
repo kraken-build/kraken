@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from kraken.core import Project, Property
 

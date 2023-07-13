@@ -4,11 +4,12 @@ A simple parser for `.gitignore` files which keeps track of sections of comments
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from io import StringIO
 from itertools import islice
 from os import PathLike
 from pathlib import Path
-from typing import Iterable, Literal, NamedTuple
+from typing import Literal, NamedTuple
 
 
 class GitignoreEntry(str):
