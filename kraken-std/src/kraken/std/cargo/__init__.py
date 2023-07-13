@@ -309,7 +309,6 @@ def cargo_build(
         variables in :attr:`CargoProject.build_env`.
     :param exclude: List of workspace crates to exclude from the build.
     :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalised()}`.
-    :param version: Bump the Cargo.toml version temporarily while building to the given version.
     :param features: List of Cargo features to enable in the build."""
 
     assert mode in ("debug", "release"), repr(mode)
