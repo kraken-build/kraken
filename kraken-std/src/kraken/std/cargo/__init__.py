@@ -325,7 +325,7 @@ def cargo_build(
         additional_args.append("--release")
     if features:
         additional_args.append("--features")
-        # `cargo build`` expects features to be comma separated, in one string.
+        # `cargo build` expects features to be comma separated, in one string.
         # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
         additional_args.append(",".join(features))
 
