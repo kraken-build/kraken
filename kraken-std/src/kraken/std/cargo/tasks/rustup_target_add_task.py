@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess as sp
+from os.path import realpath
 
 from kraken.core import Property, Task, TaskStatus
 
@@ -13,8 +14,11 @@ class RustupTargetAddTask(Task):
 
     def execute(self) -> TaskStatus:
         cargo_path = shutil.which("cargo")
-        if cargo_path is not None and cargo_path.startswith("/nix/"):
-            return TaskStatus.skipped()
+        if cargo_path is not None:
+            cargo_real_path = realpath(cargo_path)
+
+            if cargo_real_path.startswith("/nix/"):
+                return TaskStatus.skipped()
 
         command = ["rustup", "target", "add", self.target.get()]
         result = sp.call(command, cwd=self.project.directory)
