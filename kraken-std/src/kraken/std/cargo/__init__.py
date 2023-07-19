@@ -326,7 +326,7 @@ def cargo_build(
     if features:
         additional_args.append("--features")
         # `cargo build` expects features to be comma separated, in one string.
-        # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
+        # For example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
         additional_args.append(",".join(features))
 
     task = project.task(f"cargoBuild{mode.capitalize()}" if name is None else name, CargoBuildTask, group=group)
