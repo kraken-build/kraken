@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from kraken.std.util.daemon_controller import DaemonController
@@ -24,7 +24,9 @@ mitmproxy_ca_cert_file = Path("~/.mitmproxy/mitmproxy-ca-cert.pem").expanduser()
 inject_auth_addon_file = Path(__file__).parent / "mitm_addon.py"
 
 
-def start_mitmweb_proxy(auth: Mapping[str, tuple[str, str]], startup_wait_time: float = 3.0) -> tuple[str, Path]:
+def start_mitmweb_proxy(
+    auth: Mapping[str, tuple[str, str]], startup_wait_time: float = 3.0, additional_args: Sequence[str] = ()
+) -> tuple[str, Path]:
     controller = DaemonController("kraken.mitmweb", daemon_state_file)
     started = controller.run(
         command=[
@@ -47,6 +49,7 @@ def start_mitmweb_proxy(auth: Mapping[str, tuple[str, str]], startup_wait_time: 
             # context.
             "--set",
             "stream_large_bodies=3m",
+            *additional_args,
         ],
         cwd=Path("~").expanduser(),
         stdout=daemon_log_file,

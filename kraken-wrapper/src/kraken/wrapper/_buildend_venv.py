@@ -18,12 +18,12 @@ logger = logging.getLogger(__name__)
 
 def find_python_interpreter(constraint: str) -> str:
     """
-    Finds a Python interpreter that matches the given constraint.
+    Finds a Python interpreter that matches the given constraint. We rely on the order of candidates returned by
+    #findpython.get_candidates() and return the first matching Python version.
     """
 
     interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
-    interpreters.sort(key=lambda x: x["version"].split("."))
-    for interpreter in reversed(interpreters):
+    for interpreter in interpreters:
         if findpython.match_version_constraint(constraint, interpreter["version"]):
             return interpreter["path"]
 
