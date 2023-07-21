@@ -1,0 +1,5 @@
+[[entries]]
+id = "47223d61-80dc-4f71-a2b8-80c9eddd0107"
+type = "feature"
+description = "fix krakenw nix flake"
+author = "james.baker@helsing.ai"
