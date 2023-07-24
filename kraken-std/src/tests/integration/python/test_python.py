@@ -13,6 +13,7 @@ from kraken.common import not_none
 from kraken.core import Context, Project
 
 from kraken.std import python
+from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
@@ -64,6 +65,8 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
                 "when locking."
             ),
         ),
+        "rust-poetry-project",
+        "rust-pdm-project",
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -152,6 +155,7 @@ M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
         ("poetry-project", PoetryPyprojectHandler, "^3.7"),
         ("slap-project", PoetryPyprojectHandler, "^3.6"),
         ("pdm-project", PdmPyprojectHandler, ">=3.9"),
+        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.7"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})

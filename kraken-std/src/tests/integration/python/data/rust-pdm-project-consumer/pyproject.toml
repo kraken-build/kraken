@@ -1,0 +1,11 @@
+[project]
+name = "rust-pdm-project-consumer"
+version = "0.1.0"
+dependencies = [
+    "rust-pdm-project"
+]
+requires-python = "~=3.7"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"

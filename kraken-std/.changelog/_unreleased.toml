@@ -4,3 +4,10 @@ type = "fix"
 description = "Fixed an issue where cargo managed by nix would not be recognised as such, due to the which command being unable to follow symlinks."
 author = "@ivan-jukic"
 pr = "https://github.com/kraken-build/kraken-build/pull/80"
+
+[[entries]]
+id = "f4ed8c84-d1f6-49c8-a907-d7d26b8ab3ce"
+type = "breaking change"
+description = "Adds support of Maturin+PDM Python projects"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/84"
