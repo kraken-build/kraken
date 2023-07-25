@@ -8,6 +8,6 @@ pr = "https://github.com/kraken-build/kraken-build/pull/80"
 [[entries]]
 id = "400395ef-ae8c-4560-aa0f-922f1ff431bd"
 type = "feature"
-description = "Allows passing features to cargo_build."
+description = "Allows passing features to cargo_build and cargo_test."
 author = "@morosanmihail"
 pr = "https://github.com/kraken-build/kraken-build/pull/77"
