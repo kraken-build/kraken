@@ -443,11 +443,9 @@ def rustup_target_add(
 
 def cargo_generate_deb_package(*, project: Project | None = None, package_name: str):
     project = project or Project.current()
-    task = project.do(
+    return project.do(
         "cargoGenerateDeb",
         CargoGenerateDebPackage,
         package_name=package_name,
         group="publish",
     )
-    task.depends_on(":cargoBuildRelease")
-    return task
