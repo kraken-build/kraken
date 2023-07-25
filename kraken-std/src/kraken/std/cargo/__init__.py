@@ -441,12 +441,12 @@ def rustup_target_add(
     return task
 
 
-def cargo_generate_deb_package(*, package_name: str):
+def cargo_generate_deb_package(*, project: Project | None = None, package_name: str):
     project = project or Project.current()
-    task = project.task(
-        f"cargoGenerateDeb",
+    task = project.do(
+        "cargoGenerateDeb",
         CargoGenerateDebPackage,
+        package_name=package_name,
         group=CARGO_PUBLISH_SUPPORT_GROUP_NAME,
     )
-    task.package_name = package_name
     return task
