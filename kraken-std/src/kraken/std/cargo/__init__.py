@@ -449,4 +449,5 @@ def cargo_generate_deb_package(*, project: Project | None = None, package_name: 
         package_name=package_name,
         group=CARGO_PUBLISH_SUPPORT_GROUP_NAME,
     )
+    task.depends_on(":cargoBuildRelease")
     return task
