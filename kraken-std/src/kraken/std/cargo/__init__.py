@@ -66,7 +66,9 @@ CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 CARGO_PUBLISH_SUPPORT_GROUP_NAME = "cargoPublishSupport"
 
 
-def cargo_config(*, project: Project | None = None, nightly: bool = False) -> CargoConfig:
+def cargo_config(
+    *, project: Project | None = None, nightly: bool = False
+) -> CargoConfig:
     project = project or Project.current()
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
@@ -148,7 +150,9 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
+    task = project.task(
+        "cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
+    )
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
@@ -231,7 +235,9 @@ class CargoFmtTasks:
     format: CargoFmtTask
 
 
-def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> CargoFmtTasks:
+def cargo_fmt(
+    *, all_packages: bool = False, project: Project | None = None
+) -> CargoFmtTasks:
     project = project or Project.current()
     config = project.find_metadata(CargoConfig) or cargo_config(project=project)
     format = project.task("cargoFmt", CargoFmtTask, group="fmt")
@@ -276,7 +282,9 @@ def cargo_bump_version(
 
     project = project or Project.current()
 
-    task = project.task(name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
+    task = project.task(
+        name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
+    )
     task.version = version
     task.revert = revert
     task.registry = registry
@@ -329,7 +337,11 @@ def cargo_build(
         # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
         additional_args.append(",".join(features))
 
-    task = project.task(f"cargoBuild{mode.capitalize()}" if name is None else name, CargoBuildTask, group=group)
+    task = project.task(
+        f"cargoBuild{mode.capitalize()}" if name is None else name,
+        CargoBuildTask,
+        group=group,
+    )
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
@@ -345,6 +357,7 @@ def cargo_test(
     *,
     group: str | None = "test",
     project: Project | None = None,
+    features: list[str] | None = None,
 ) -> CargoTestTask:
     """Creates a task that runs `cargo test`.
 
@@ -355,8 +368,17 @@ def cargo_test(
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
+
+    additional_args = []
+    if features:
+        additional_args.append("--features")
+        # `cargo build` expects features to be comma separated, in one string.
+        # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
+        additional_args.append(",".join(features))
+
     task = project.task("cargoTest", CargoTestTask, group=group)
     task.incremental = incremental
+    task.additional_args = additional_args
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
@@ -390,7 +412,9 @@ def cargo_publish(
     cargo = CargoProject.get_or_create(project)
 
     task = project.task(
-        f"{name}/{package_name}" if package_name is not None else name, CargoPublishTask, group="publish"
+        f"{name}/{package_name}" if package_name is not None else name,
+        CargoPublishTask,
+        group="publish",
     )
     task.registry = Supplier.of_callable(lambda: cargo.registries[registry])
     task.additional_args = list(additional_args)
@@ -411,13 +435,17 @@ def cargo_check_toolchain_version(
 
     project = project or Project.current()
     task = project.task(
-        f"cargoCheckVersion/{minimal_version}", CargoCheckToolchainVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
+        f"cargoCheckVersion/{minimal_version}",
+        CargoCheckToolchainVersionTask,
+        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
     )
     task.minimal_version = minimal_version
     return task
 
 
-def rustup_target_add(target: str, *, group: str | None = None, project: Project | None = None) -> RustupTargetAddTask:
+def rustup_target_add(
+    target: str, *, group: str | None = None, project: Project | None = None
+) -> RustupTargetAddTask:
     """Creates a task that installs a given target for Cargo"""
 
     project = project or Project.current()
