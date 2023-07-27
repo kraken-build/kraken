@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "additional-directories-project"
+version = "0.1.0"
+description = ""
+authors = ["Josh Cowling <josh.cowling@helsing.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+black = "*"
+flake8 = "*"
+isort = "*"
+mypy = "*"
+pycln = "*"
+pylint = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

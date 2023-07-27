@@ -39,6 +39,7 @@ class PythonSettings:
     build_system: PythonBuildSystem | None = None
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
+    additional_directories: list[Path] | None = None
     package_indexes: dict[str, _PackageIndex] = field(default_factory=dict)
     always_use_managed_env: bool = True
     skip_install_if_venv_exists: bool = True
@@ -139,6 +140,7 @@ def python_settings(
     build_system: PythonBuildSystem | None = None,
     source_directory: str | Path | None = None,
     tests_directory: str | Path | None = None,
+    additional_directories: list[str | Path] | None = None,
     always_use_managed_env: bool | None = None,
     skip_install_if_venv_exists: bool | None = None,
 ) -> PythonSettings:
@@ -149,6 +151,8 @@ def python_settings(
         the following values are currently supported: `"poetry"`.
     :param source_directory: The source directory. Defaults to `"src"`.
     :param tests_directory: The tests directory. Automatically determined if left empty.
+    :param additional_directories: Any additional directories containing Python files, e.g. bin/, scripts/, and
+        examples/, to be linted.
     """
 
     project = project or Project.current()
@@ -177,6 +181,11 @@ def python_settings(
 
     if tests_directory is not None:
         settings.tests_directory = Path(tests_directory)
+
+    if additional_directories is not None:
+        settings.additional_directories = [
+            Path(additional_directory) for additional_directory in additional_directories
+        ]
 
     if always_use_managed_env is not None:
         settings.always_use_managed_env = True

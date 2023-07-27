@@ -23,6 +23,8 @@ class PyclnTask(EnvironmentAwareDispatchTask):
     def get_execute_command(self) -> list[str]:
         command = ["pycln", str(self.settings.source_directory)]
         command += self.settings.get_tests_directory_as_args()
+        if self.settings.additional_directories is not None:
+            command += [str(additional_directory) for additional_directory in self.settings.additional_directories]
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():
             command += ["--check", "--diff"]

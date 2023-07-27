@@ -44,6 +44,8 @@ class MypyTask(EnvironmentAwareDispatchTask):
                     tests_dir.relative_to(source_dir)
                 except ValueError:
                     command += [str(tests_dir)]
+        if self.settings.additional_directories is not None:
+            command += [str(additional_directory) for additional_directory in self.settings.additional_directories]
         command += self.additional_args.get()
         return command
 
