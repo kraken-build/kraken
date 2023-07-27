@@ -1,0 +1,6 @@
+[[entries]]
+id = "d8ce6460-a3cc-4b51-acde-978ffa16cf58"
+type = "improvement"
+description = "Added the ability to specify additional directories to run Python linting tasks againt."
+author = "@cowlingjosh"
+pr = "https://github.com/kraken-build/kraken-build/pull/90"
