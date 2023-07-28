@@ -184,7 +184,9 @@ def python_settings(
 
     if additional_directories is not None:
         settings.additional_directories = [
-            Path(additional_directory) for additional_directory in additional_directories
+            path
+            for additional_directory in additional_directories
+            if (path := Path(additional_directory)).exists() and path.is_dir()
         ]
 
     if always_use_managed_env is not None:
