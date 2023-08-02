@@ -321,11 +321,11 @@ def ls(graph: TaskGraph) -> None:
             remaining_width -= 2
             if remaining_width <= 0:
                 remaining_width = width
-            for part in textwrap.wrap(
-                description,
-                remaining_width,
-                subsequent_indent=(width - remaining_width) * " ",
-            ):
+            parts = textwrap.wrap(description, remaining_width)
+            line.append(parts[0]) # the first line is already indented
+            line.append("\n")
+            for part in parts[1:]:
+                line.append((width - remaining_width - 1) * " ")
                 line.append(part)
                 line.append("\n")
             line.pop()
