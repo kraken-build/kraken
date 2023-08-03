@@ -1,0 +1,5 @@
+[[entries]]
+id = "dae6d6a2-31e9-49bd-bd8b-8f5270b78e70"
+type = "feature"
+description = "Allow to pass a custom error message for `cargo_deny`"
+author = "nicolas.vizzari@helsing.ai"

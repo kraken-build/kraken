@@ -9,6 +9,7 @@ class CargoDenyTask(Task):
     description = "Executes cargo deny to verify dependencies."
     checks: Property[Sequence[str]] = Property.default_factory(list)
     config_file: Property[Path]
+    error_message: Property[str | None] = Property.default(None)
 
     def execute(self) -> TaskStatus:
         command = ["cargo", "deny", "check"]
@@ -19,4 +20,11 @@ class CargoDenyTask(Task):
         command.extend(self.checks.get())
 
         result = subprocess.run(command, cwd=self.project.directory)
-        return TaskStatus.from_exit_code(command, result.returncode)
+        if result.returncode == 0:
+            return TaskStatus.succeeded()
+
+        return (
+            TaskStatus.failed(self.error_message.get())
+            if self.error_message.get() is not None
+            else TaskStatus.from_exit_code(command, result.returncode)
+        )
