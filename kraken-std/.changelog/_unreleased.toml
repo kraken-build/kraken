@@ -1,0 +1,6 @@
+[[entries]]
+id = "0aeda29f-7edc-431f-a114-d9792936062f"
+type = "fix"
+description = "Add error message in paramaters of function"
+author = "nicolas.vizzari@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/96"
