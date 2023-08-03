@@ -351,7 +351,7 @@ class Property(Supplier[T]):
     def is_set(self) -> bool:
         """
         Returns #True if the property has been set to a value, #False otherwise. This is different from #is_empty(),
-        because it does not require evaluation of the property value. This method reflects whetehr #set() has been
+        because it does not require evaluation of the property value. This method reflects whether #set() has been
         called with any other value than a #VoidSupplier or a #DeferredSupplier.
         """
 
