@@ -1,0 +1,5 @@
+[[entries]]
+id = "9208f809-56df-4f4e-98e0-2e32a8233dde"
+type = "improvement"
+description = "Wrap error message in a map"
+author = "nicolas.vizzari@helsing.ai"
