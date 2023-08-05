@@ -255,11 +255,5 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
 
 
 class MaturinPdmManagedEnvironment(PDMManagedEnvironment):
-    def install(self, settings: PythonSettings) -> None:
-        super().install(settings)
-        command = ["pdm", "run", "maturin", "develop"]
-        logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
-
     def always_install(self) -> bool:
         return True

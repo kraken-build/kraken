@@ -4,3 +4,10 @@ type = "improvement"
 description = "Wrap error message in a map"
 author = "nicolas.vizzari@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/97"
+
+[[entries]]
+id = "18aae01e-93e2-424b-a51d-39b3f0026729"
+type = "improvement"
+description = "Avoids building the Maturin library twice with PDM"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/99"
