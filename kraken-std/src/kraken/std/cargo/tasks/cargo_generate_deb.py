@@ -37,8 +37,6 @@ class CargoGenerateDebPackage(Task):
         if result != 0:
             return TaskStatus.from_exit_code(command, result)
 
-        out_packages: list[CargoDebianArtifact] = [
-            CargoDebianArtifact(package_name, Path(output_deb))
-        ]
+        out_packages: list[CargoDebianArtifact] = [CargoDebianArtifact(package_name, Path(output_deb))]
         self.out_packages.set(out_packages)
         return TaskStatus.succeeded()
