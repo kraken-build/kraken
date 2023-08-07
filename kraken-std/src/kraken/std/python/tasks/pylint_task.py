@@ -20,8 +20,8 @@ class PylintTask(EnvironmentAwareDispatchTask):
 
     def get_execute_command(self) -> list[str]:
         command = ["pylint", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
-        if self.settings.additional_directories is not None:
-            command += [str(additional_directory) for additional_directory in self.settings.additional_directories]
+        if self.settings.lint_enforced_directories is not None:
+            command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--rcfile", str(self.config_file.get())]
         command += self.additional_args.get()

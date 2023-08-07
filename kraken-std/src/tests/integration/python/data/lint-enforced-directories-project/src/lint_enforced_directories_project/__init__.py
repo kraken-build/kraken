@@ -3,4 +3,4 @@
 
 def main() -> None:
     """Main function"""
-    print("Hello, world from additional-directories-project!")
+    print("Hello, world from lint-enforced-directories-project!")

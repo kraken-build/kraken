@@ -199,7 +199,7 @@ def test__python_project_coverage(
     assert Path(kraken_project.build_directory / "coverage.xml").is_file()
 
 
-def test__python_project_can_lint_additional_directories(kraken_ctx: Context, kraken_project: Project) -> None:
+def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context, kraken_project: Project) -> None:
     tempdir = kraken_project.directory
 
     project_dir = "additional-directories-project"
@@ -208,7 +208,7 @@ def test__python_project_can_lint_additional_directories(kraken_ctx: Context, kr
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    python.settings.python_settings(project=kraken_project, additional_directories=["examples/", "bin/"])
+    python.settings.python_settings(project=kraken_project, lint_enforced_directories=["examples/", "bin/"])
     for linter in ["black", "flake8", "isort", "mypy", "pycln", "pylint"]:
         getattr(python, linter)(project=kraken_project)
 

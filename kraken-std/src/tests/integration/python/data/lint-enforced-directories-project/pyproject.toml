@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "additional-directories-project"
+name = "lint-enforced-directories-project"
 version = "0.1.0"
 description = ""
 authors = ["Josh Cowling <josh.cowling@helsing.ai>"]

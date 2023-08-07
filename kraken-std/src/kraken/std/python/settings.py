@@ -39,7 +39,7 @@ class PythonSettings:
     build_system: PythonBuildSystem | None = None
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
-    additional_directories: list[Path] | None = None
+    lint_enforced_directories: list[Path] | None = None
     package_indexes: dict[str, _PackageIndex] = field(default_factory=dict)
     always_use_managed_env: bool = True
     skip_install_if_venv_exists: bool = True
@@ -140,7 +140,7 @@ def python_settings(
     build_system: PythonBuildSystem | None = None,
     source_directory: str | Path | None = None,
     tests_directory: str | Path | None = None,
-    additional_directories: list[str | Path] | None = None,
+    lint_enforced_directories: list[str | Path] | None = None,
     always_use_managed_env: bool | None = None,
     skip_install_if_venv_exists: bool | None = None,
 ) -> PythonSettings:
@@ -151,8 +151,8 @@ def python_settings(
         the following values are currently supported: `"poetry"`.
     :param source_directory: The source directory. Defaults to `"src"`.
     :param tests_directory: The tests directory. Automatically determined if left empty.
-    :param additional_directories: Any additional directories containing Python files, e.g. bin/, scripts/, and
-        examples/, to be linted.
+    :param lint_enforced_directories: Any extra directories containing Python files, e.g. bin/, scripts/, and
+        examples/, to be linted alongside the source and tests directories.
     """
 
     project = project or Project.current()
@@ -182,19 +182,17 @@ def python_settings(
     if tests_directory is not None:
         settings.tests_directory = Path(tests_directory)
 
-    if additional_directories is not None:
+    if lint_enforced_directories is not None:
         dirs = []
-        for additional_directory in additional_directories:
-            additional_directory_path = Path(additional_directory)
-            if not additional_directory_path.exists():
-                logger.warning(f"skipping specified additional directory {additional_directory} as it does not exist")
-            elif not additional_directory_path.is_dir():
-                logger.warning(
-                    f"skipping specified additional directory {additional_directory} as it is not a directory"
-                )
+        for directory in lint_enforced_directories:
+            directory_path = Path(directory)
+            if not directory_path.exists():
+                logger.warning(f"skipping specified lint enforced directory {directory_path} as it does not exist")
+            elif not directory_path.is_dir():
+                logger.warning(f"skipping specified lint enforced directory {directory_path} as it is not a directory")
             else:
-                dirs.append(additional_directory_path)
-        settings.additional_directories = dirs
+                dirs.append(directory_path)
+        settings.lint_enforced_directories = dirs
 
     if always_use_managed_env is not None:
         settings.always_use_managed_env = True
