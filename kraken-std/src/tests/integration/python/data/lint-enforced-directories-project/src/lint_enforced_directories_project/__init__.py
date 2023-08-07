@@ -1,4 +1,4 @@
-"""Additional Directories Project!"""
+"""Lint Enforced Directories Project!"""
 
 
 def main() -> None:
