@@ -11,3 +11,10 @@ type = "improvement"
 description = "Avoids building the Maturin library twice with PDM"
 author = "@Tpt"
 pr = "https://github.com/kraken-build/kraken-build/pull/99"
+
+[[entries]]
+id = "4e6cd51b-8ada-4eb6-950a-56fca0b4038e"
+type = "improvement"
+description = "Makes PDM integration test mandatory"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/86"

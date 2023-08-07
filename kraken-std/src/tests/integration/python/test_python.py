@@ -55,19 +55,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
 
 @pytest.mark.parametrize(
     "project_dir",
-    [
-        "poetry-project",
-        "slap-project",
-        pytest.param(
-            "pdm-project",
-            marks=pytest.mark.xfail(
-                reason="PDM seems to have an issue with getting the right hash of the package from pypiserver "
-                "when locking."
-            ),
-        ),
-        "rust-poetry-project",
-        "rust-pdm-project",
-    ],
+    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project"],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_install_lint_and_publish(
