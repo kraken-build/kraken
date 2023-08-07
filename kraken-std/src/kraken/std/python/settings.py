@@ -183,11 +183,18 @@ def python_settings(
         settings.tests_directory = Path(tests_directory)
 
     if additional_directories is not None:
-        settings.additional_directories = [
-            path
-            for additional_directory in additional_directories
-            if (path := Path(additional_directory)).exists() and path.is_dir()
-        ]
+        dirs = []
+        for additional_directory in additional_directories:
+            additional_directory_path = Path(additional_directory)
+            if not additional_directory_path.exists():
+                logger.warning(f"skipping specified additional directory {additional_directory} as it does not exist")
+            elif not additional_directory_path.is_dir():
+                logger.warning(
+                    f"skipping specified additional directory {additional_directory} as it is not a directory"
+                )
+            else:
+                dirs.append(additional_directory_path)
+        settings.additional_directories = dirs
 
     if always_use_managed_env is not None:
         settings.always_use_managed_env = True
