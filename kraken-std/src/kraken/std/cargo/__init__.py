@@ -17,8 +17,8 @@ from .tasks.cargo_bump_version_task import CargoBumpVersionTask
 from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
-from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_fmt_task import CargoFmtTask
+from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
 from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
