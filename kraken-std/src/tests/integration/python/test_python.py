@@ -202,7 +202,7 @@ def test__python_project_coverage(
 def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context, kraken_project: Project) -> None:
     tempdir = kraken_project.directory
 
-    project_dir = "additional-directories-project"
+    project_dir = "lint-enforced-directories-project"
     original_dir = Path(__file__).parent / "data" / project_dir
 
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
