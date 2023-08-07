@@ -117,9 +117,14 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         return PoetryPythonBuildSystem(project_directory)
 
     if "maturin" in pyproject_content:
-        from .maturin import MaturinPythonBuildSystem
+        if "[tool.poetry]" in pyproject_content:
+            from .maturin import MaturinPoetryPythonBuildSystem
 
-        return MaturinPythonBuildSystem(project_directory)
+            return MaturinPoetryPythonBuildSystem(project_directory)
+        else:
+            from .maturin import MaturinPdmPythonBuildSystem
+
+            return MaturinPdmPythonBuildSystem(project_directory)
 
     if "pdm" in pyproject_content:
         from .pdm import PDMPythonBuildSystem
