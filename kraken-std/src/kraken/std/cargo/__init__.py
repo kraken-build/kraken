@@ -66,9 +66,7 @@ CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 CARGO_PUBLISH_SUPPORT_GROUP_NAME = "cargoPublishSupport"
 
 
-def cargo_config(
-    *, project: Project | None = None, nightly: bool = False
-) -> CargoConfig:
+def cargo_config(*, project: Project | None = None, nightly: bool = False) -> CargoConfig:
     project = project or Project.current()
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
@@ -150,9 +148,7 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    task = project.task(
-        "cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
-    )
+    task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
@@ -240,9 +236,7 @@ class CargoFmtTasks:
     format: CargoFmtTask
 
 
-def cargo_fmt(
-    *, all_packages: bool = False, project: Project | None = None
-) -> CargoFmtTasks:
+def cargo_fmt(*, all_packages: bool = False, project: Project | None = None) -> CargoFmtTasks:
     project = project or Project.current()
     config = project.find_metadata(CargoConfig) or cargo_config(project=project)
     format = project.task("cargoFmt", CargoFmtTask, group="fmt")
@@ -287,9 +281,7 @@ def cargo_bump_version(
 
     project = project or Project.current()
 
-    task = project.task(
-        name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
-    )
+    task = project.task(name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.version = version
     task.revert = revert
     task.registry = registry
@@ -449,9 +441,7 @@ def cargo_check_toolchain_version(
     return task
 
 
-def rustup_target_add(
-    target: str, *, group: str | None = None, project: Project | None = None
-) -> RustupTargetAddTask:
+def rustup_target_add(target: str, *, group: str | None = None, project: Project | None = None) -> RustupTargetAddTask:
     """Creates a task that installs a given target for Cargo"""
 
     project = project or Project.current()
