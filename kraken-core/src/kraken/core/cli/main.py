@@ -296,7 +296,7 @@ def ls(graph: TaskGraph) -> None:
     if not all_tasks:
         print("no tasks")
         sys.exit(1)
-    longest_name = max(map(len, (str(t.address) for t in all_tasks))) + 1
+    longest_name = max(map(len, (str(t.address) for t in all_tasks)))
 
     print()
     print(colored("Tasks", "blue", attrs=["bold", "underline"]))
@@ -304,32 +304,59 @@ def ls(graph: TaskGraph) -> None:
 
     width = get_terminal_width(120)
 
+    # Because we want to left-indent every line by "  ",
+    # we should treat the terminal as being 2 columns narrower.
+    width -= 2
+
     def _print_task(task: Task) -> None:
-        line = [str(task.address).ljust(longest_name)]
-        remaining_width = width - len(line[0])
+        lines = [str(task.address).ljust(longest_name)]
+        remaining_width = width - len(lines[0])
         if task in goal_tasks:
-            line[0] = colored(line[0], "green")
+            lines[0] = colored(lines[0], "green")
         if task.default:
-            line[0] = colored(line[0], attrs=["bold"])
+            lines[0] = colored(lines[0], attrs=["bold"])
         status = graph.get_status(task)
         if status is not None:
-            line.append(f"[{status_to_text(status)}]")
+            lines[-1] += f" [{status_to_text(status)}]"
             status_length = 2 + len(status_to_text(status, colored=False)) + 1
             remaining_width -= status_length
         description = task.get_description()
         if description:
-            remaining_width -= 2
-            if remaining_width <= 0:
-                remaining_width = width
-            for part in textwrap.wrap(
-                description,
-                remaining_width,
-                subsequent_indent=(width - remaining_width) * " ",
-            ):
-                line.append(part)
-                line.append("\n")
-            line.pop()
-        print("  " + " ".join(line))
+            # Only place the description in its own column if there is
+            # sufficient room that it doesn't become awkward to read.
+            #
+            #  - If at least 48 columns are available, wrap the description.
+            #    48 columns is just wide enough that reading wrapped text isn't
+            #    too painful.
+            #  - If the full description fits in the remaining space, do that.
+            #  - If the full description fits on two wrapped lines, do that.
+            #  - Otherwise, put the description on the next line.
+            if remaining_width > 48 or len(description) < 2 * remaining_width:
+                # This is another column, so add a bit of extra spacing
+                lines[-1] += "  "
+                remaining_width -= 2
+                lead = (width - remaining_width) * " "
+            else:
+                # Use a new line. Still wrap the description so we don't end
+                # up with super-long lines of text, which are hard to follow.
+                remaining_width = 80
+                lines.append("")
+                lead = ""
+
+            # Wrap the description in the remaining space,
+            # and indent lines beyond the first so they line up with the first.
+            parts = textwrap.wrap(description, remaining_width)
+            lines[-1] += parts[0]  # the first line is already indented
+            for part in parts[1:]:
+                lines.append(lead)
+                lines[-1] += part
+
+            # If we decided to use the full line for the description, add some
+            # vertical spacing before the next task to avoid visual clutter.
+            if lead == "":
+                lines.append("")
+
+        print("  " + "\n  ".join(lines))
 
     def sort_key(task: Task) -> str:
         return str(task.address)
