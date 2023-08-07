@@ -136,7 +136,7 @@ class MapSupplier(Supplier[U], Generic[T, U]):
         return f"{self._value}.map({self._func})"
 
     def __eq__(self, other: object) -> bool:
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         assert isinstance(other, MapSupplier)
         return (self._func, self._value) == (other._func, other._value)
@@ -167,7 +167,7 @@ class OnceSupplier(Supplier[T]):
         return f"{self._delegate}.once()"
 
     def __eq__(self, other: object) -> bool:
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         assert isinstance(other, OnceSupplier)
         return (self._delegate,) == (other._delegate,)
@@ -188,7 +188,7 @@ class OfCallableSupplier(Supplier[T]):
         return f"Supplier.of_callable({self._func})"
 
     def __eq__(self, other: object) -> bool:
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         assert isinstance(other, OfCallableSupplier)
         return (self._func, self._derived_from) == (other._func, other._derived_from)
@@ -209,7 +209,7 @@ class OfSupplier(Supplier[T]):
         return f"Supplier.of({self._value})"
 
     def __eq__(self, other: object) -> bool:
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         assert isinstance(other, OfSupplier)
         return (self._value, self._derived_from) == (other._value, other._derived_from)
@@ -236,7 +236,7 @@ class VoidSupplier(Supplier[T]):
         return hash((self._from_exc, self._derived_from))
 
     def __eq__(self, other: object) -> bool:
-        if type(other) != type(self):
+        if type(other) is not type(self):
             return False
         assert isinstance(other, VoidSupplier)
         return (self._from_exc, self._derived_from) == (other._from_exc, other._derived_from)

@@ -212,6 +212,7 @@ def cargo_deny(
     project: Project | None = None,
     checks: Sequence[str] | Supplier[Sequence[str]] = (),
     config_file: Path | Supplier[Path] | None = None,
+    error_message: str | None = None,
 ) -> CargoDenyTask:
     """Adds a task running cargo-deny for cargo projects. This checks different rules on dependencies, such as scanning
     for vulnerabilities, unwanted licences, or custom bans.
@@ -220,13 +221,17 @@ def cargo_deny(
     https://embarkstudios.github.io/cargo-deny/checks/index.html. If not provided, defaults to all of them.
     :param config_file: The configuration file as defined in https://embarkstudios.github.io/cargo-deny/checks/cfg.html
     If not provided defaults to cargo-deny default location.
+    :param error_message: The error message to show if the task fails.
     """
 
     project = project or Project.current()
-    task = project.task("cargoDeny", CargoDenyTask)
-    task.checks = checks
-    task.config_file = config_file
-    return task
+    return project.do(
+        "cargoDeny",
+        CargoDenyTask,
+        checks=checks,
+        config_file=config_file,
+        error_message=error_message,
+    )
 
 
 @dataclasses.dataclass

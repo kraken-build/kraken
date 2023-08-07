@@ -1,0 +1,8 @@
+release-date = "2023-08-03"
+
+[[entries]]
+id = "626f9a26-e6ce-4285-8f05-7dfe1bded22c"
+type = "fix"
+description = "Makes flake8 happy"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/91"

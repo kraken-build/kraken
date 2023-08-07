@@ -44,14 +44,14 @@ def test__Context__resolve_tasks(kraken_ctx: Context, kraken_project: Project) -
     # Search for default tasks...
     # ...in the current project
     default_tasks = kraken_ctx.resolve_tasks([":"])
-    default_voidtasks = [task for task in default_tasks if type(task) == VoidTask]
+    default_voidtasks = [task for task in default_tasks if isinstance(task, VoidTask)]
     assert len(default_voidtasks) == 2
     assert default_voidtasks[0].name == "default1"
     assert default_voidtasks[1].name == "default2"
 
     # ...and in subprojects only
     default_tasks = kraken_ctx.resolve_tasks([":**:"])
-    default_voidtasks = [task for task in default_tasks if type(task) == VoidTask]
+    default_voidtasks = [task for task in default_tasks if isinstance(task, VoidTask)]
     assert len(default_voidtasks) == 1
     assert default_voidtasks[0].name == "subproject_task"
 

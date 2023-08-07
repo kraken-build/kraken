@@ -1,9 +1,23 @@
 [[entries]]
-id = "8dbcf8a4-062f-438d-a8d0-f61122b31ac7"
-type = "fix"
-description = "Fixed an issue where cargo managed by nix would not be recognised as such, due to the which command being unable to follow symlinks."
-author = "@ivan-jukic"
-pr = "https://github.com/kraken-build/kraken-build/pull/80"
+id = "9208f809-56df-4f4e-98e0-2e32a8233dde"
+type = "improvement"
+description = "Wrap error message in a map"
+author = "nicolas.vizzari@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/97"
+
+[[entries]]
+id = "18aae01e-93e2-424b-a51d-39b3f0026729"
+type = "improvement"
+description = "Avoids building the Maturin library twice with PDM"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/99"
+
+[[entries]]
+id = "4e6cd51b-8ada-4eb6-950a-56fca0b4038e"
+type = "improvement"
+description = "Makes PDM integration test mandatory"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/86"
 
 [[entries]]
 id = "400395ef-ae8c-4560-aa0f-922f1ff431bd"

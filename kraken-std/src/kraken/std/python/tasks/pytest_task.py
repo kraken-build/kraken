@@ -61,6 +61,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
             command += [
                 "--cov-report",
                 f"{self.coverage.get().get_format()}:{str(self.project.build_directory / coverage_file)}",
+                "--cov-report",
+                "term",
                 f"--cov={str(self.project.directory / self.settings.source_directory)}",
             ]
         if self.marker.is_filled():
