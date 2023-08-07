@@ -436,7 +436,7 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
     return task
 
 
-def cargo_generate_deb_package(*, project: Project | None = None, package_name: str):
+def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
     project = project or Project.current()
     return project.do(
         "cargoGenerateDeb",
