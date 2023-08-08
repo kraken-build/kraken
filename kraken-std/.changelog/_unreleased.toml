@@ -18,3 +18,10 @@ type = "improvement"
 description = "Makes PDM integration test mandatory"
 author = "@Tpt"
 pr = "https://github.com/kraken-build/kraken-build/pull/86"
+
+[[entries]]
+id = "dd5f5b90-1846-4083-8853-1aff2c99d3f5"
+type = "feature"
+description = "Facilitates the creation of Debian packages from Rust projects."
+author = "@morosanmihail"
+pr = "https://github.com/kraken-build/kraken-build/pull/87"

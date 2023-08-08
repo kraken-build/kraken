@@ -18,6 +18,7 @@ from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
+from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
 from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
@@ -33,6 +34,7 @@ __all__ = [
     "cargo_clippy",
     "cargo_deny",
     "cargo_fmt",
+    "cargo_generate_deb_package",
     "cargo_publish",
     "cargo_registry",
     "cargo_sqlx_migrate",
@@ -313,7 +315,8 @@ def cargo_build(
         variables in :attr:`CargoProject.build_env`.
     :param exclude: List of workspace crates to exclude from the build.
     :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalised()}`.
-    :param version: Bump the Cargo.toml version temporarily while building to the given version."""
+    :param version: Bump the Cargo.toml version temporarily while building to the given version.
+    """
 
     assert mode in ("debug", "release"), repr(mode)
     project = project or Project.current()
@@ -328,7 +331,11 @@ def cargo_build(
     if mode == "release":
         additional_args.append("--release")
 
-    task = project.task(f"cargoBuild{mode.capitalize()}" if name is None else name, CargoBuildTask, group=group)
+    task = project.task(
+        f"cargoBuild{mode.capitalize()}" if name is None else name,
+        CargoBuildTask,
+        group=group,
+    )
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
@@ -389,7 +396,9 @@ def cargo_publish(
     cargo = CargoProject.get_or_create(project)
 
     task = project.task(
-        f"{name}/{package_name}" if package_name is not None else name, CargoPublishTask, group="publish"
+        f"{name}/{package_name}" if package_name is not None else name,
+        CargoPublishTask,
+        group="publish",
     )
     task.registry = Supplier.of_callable(lambda: cargo.registries[registry])
     task.additional_args = list(additional_args)
@@ -410,7 +419,9 @@ def cargo_check_toolchain_version(
 
     project = project or Project.current()
     task = project.task(
-        f"cargoCheckVersion/{minimal_version}", CargoCheckToolchainVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
+        f"cargoCheckVersion/{minimal_version}",
+        CargoCheckToolchainVersionTask,
+        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
     )
     task.minimal_version = minimal_version
     return task
@@ -423,3 +434,12 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
     task = project.task(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group)
     task.target = target
     return task
+
+
+def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
+    project = project or Project.current()
+    return project.do(
+        "cargoGenerateDeb",
+        CargoGenerateDebPackage,
+        package_name=package_name,
+    )
