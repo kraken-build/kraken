@@ -208,7 +208,9 @@ def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context,
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    python.settings.python_settings(project=kraken_project, lint_enforced_directories=["examples/", "bin/"])
+    python.settings.python_settings(
+        project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
+    )
     for linter in ["black", "flake8", "isort", "mypy", "pycln", "pylint"]:
         getattr(python, linter)(project=kraken_project)
 

@@ -39,7 +39,7 @@ class PythonSettings:
     build_system: PythonBuildSystem | None = None
     source_directory: Path = Path("src")
     tests_directory: Path | None = None
-    lint_enforced_directories: list[Path] | None = None
+    lint_enforced_directories: list[Path] = field(default_factory=list)
     package_indexes: dict[str, _PackageIndex] = field(default_factory=dict)
     always_use_managed_env: bool = True
     skip_install_if_venv_exists: bool = True
@@ -187,7 +187,7 @@ def python_settings(
         for directory in lint_enforced_directories:
             directory_path = Path(directory)
             if not directory_path.exists():
-                logger.warning(f"skipping specified lint enforced directory {directory_path} as it does not exist")
+                logger.debug(f"skipping specified lint enforced directory {directory_path} as it does not exist")
             elif not directory_path.is_dir():
                 logger.warning(f"skipping specified lint enforced directory {directory_path} as it is not a directory")
             else:

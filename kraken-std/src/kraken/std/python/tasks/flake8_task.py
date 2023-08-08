@@ -23,8 +23,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
 
     def get_execute_command(self) -> list[str]:
         command = ["flake8", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
-        if self.settings.lint_enforced_directories is not None:
-            command += [str(directory) for directory in self.settings.lint_enforced_directories]
+        command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get().absolute())]
         command += self.additional_args.get()
