@@ -317,7 +317,6 @@ def cargo_build(
     :param exclude: List of workspace crates to exclude from the build.
     :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalised()}`.
     :param features: List of Cargo features to enable in the build."""
-    """
 
     assert mode in ("debug", "release"), repr(mode)
     project = project or Project.current()
