@@ -371,13 +371,13 @@ testing = ["flake8 (<5)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-chec
 
 [[package]]
 name = "kraken-common"
-version = "0.30.4"
+version = "0.31.0"
 description = ""
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "kraken_common-0.30.4-py3-none-any.whl", hash = "sha256:8365541d6d97d41357e14bbf2150e5d2c04e365a613686af1e2efab541694ae4"},
-    {file = "kraken_common-0.30.4.tar.gz", hash = "sha256:e1030231dfc06eadec55c02b1310d14f8069f7c66e84b6e31cb181aa3330ad6f"},
+    {file = "kraken_common-0.31.0-py3-none-any.whl", hash = "sha256:65d49f3d9f905395b435d1af35e3b1754724721514f0febcc7c0c18941bcda72"},
+    {file = "kraken_common-0.31.0.tar.gz", hash = "sha256:67b9c323cea036d6af27b75fe11485e2ba9ab8052a5836d92c0e3cb0247194ae"},
 ]
 
 [package.dependencies]
@@ -852,4 +852,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.7,<3.12"
-content-hash = "9f100f027016c83b91e76f0c554fced82231d59a06f32d7c024d2126acb59b10"
+content-hash = "58bc25f5d56f85931b9bb758d9c51afd0c822f3459c54c2fc1beac9eceb91f20"
