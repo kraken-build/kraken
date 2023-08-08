@@ -13,16 +13,12 @@ class CargoDebianArtifact(LibraryArtifact):
 
 
 class CargoGenerateDebPackage(Task):
-    package_name: Property[str] = Property.default("CargoDebian")
-    skip: Property[bool] = Property.default(False)
-    message: Property[str | None] = Property.default(None)
+    package_name: Property[str]
     out_packages: Property[list[CargoDebianArtifact]] = Property.output()
 
     # Task
 
     def prepare(self) -> TaskStatus:
-        if self.skip.get():
-            return TaskStatus.skipped(self.message.get())
         return TaskStatus.pending()
 
     def execute(self) -> TaskStatus:
