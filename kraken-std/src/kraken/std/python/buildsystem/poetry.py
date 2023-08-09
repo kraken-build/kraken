@@ -216,6 +216,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
                 update_python_version_str_in_source_files(previous_version, package_dir)
 
         return dst_files
+    
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "poetry.lock"
 
 
 class PoetryManagedEnvironment(ManagedEnvironment):

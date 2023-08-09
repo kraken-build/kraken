@@ -193,6 +193,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             pyproject.raw.save()
 
         return dst_files
+    
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "pdm.lock"
 
 
 class PDMManagedEnvironment(ManagedEnvironment):

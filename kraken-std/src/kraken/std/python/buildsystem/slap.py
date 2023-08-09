@@ -74,6 +74,9 @@ class SlapPythonBuildSystem(PythonBuildSystem):
             for src, dst in zip(src_files, dst_files):
                 shutil.move(str(src), dst)
         return dst_files
+    
+    def get_lockfile(self) -> Path | None:
+        return None
 
 
 class SlapManagedEnvironment(ManagedEnvironment):

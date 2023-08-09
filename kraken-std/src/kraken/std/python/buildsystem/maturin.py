@@ -206,6 +206,9 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
 
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         return self._builder.build(output_directory, as_version)
+    
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "poetry.lock"
 
 
 class MaturinPoetryManagedEnvironment(PoetryManagedEnvironment):
@@ -253,6 +256,8 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
     def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
         return self._builder.build(output_directory, as_version)
 
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "pdm.lock"
 
 class MaturinPdmManagedEnvironment(PDMManagedEnvironment):
     def always_install(self) -> bool:
