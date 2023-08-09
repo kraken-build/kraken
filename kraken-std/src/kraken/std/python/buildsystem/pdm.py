@@ -194,6 +194,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
         return dst_files
 
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "pdm.lock"
+
 
 class PDMManagedEnvironment(ManagedEnvironment):
     def __init__(self, project_directory: Path) -> None:

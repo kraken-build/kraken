@@ -217,6 +217,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
         return dst_files
 
+    def get_lockfile(self) -> Path | None:
+        return self.project_directory / "poetry.lock"
+
 
 class PoetryManagedEnvironment(ManagedEnvironment):
     def __init__(self, project_directory: Path) -> None:
