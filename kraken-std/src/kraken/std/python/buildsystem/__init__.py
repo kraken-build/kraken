@@ -72,6 +72,10 @@ class PythonBuildSystem(abc.ABC):
     def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
         """Return an object able to read the pyproject file depending on the build system."""
 
+    @abc.abstractmethod
+    def get_lockfile(self) -> Path | None:
+        """Return the lockfile specific to this buildsystem, or None if not supported."""
+
 
 class ManagedEnvironment(abc.ABC):
     """Abstraction of a managed Python environment."""
