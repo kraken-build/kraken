@@ -4,3 +4,9 @@ type = "improvement"
 description = "Added the ability to specify additional directories to run Python linting tasks againt."
 author = "@cowlingjosh"
 pr = "https://github.com/kraken-build/kraken-build/pull/90"
+
+[[entries]]
+id = "85674b89-1801-46b4-98d5-d3660a21dfff"
+type = "improvement"
+description = "Added get_lockfile() to PythonBuildSystem subclasses as common way to retrieve the lock file"
+author = "alex.waldenmaier@icloud.com"
