@@ -43,7 +43,7 @@ class InstallTask(Task):
         if managed_environment.exists() and not managed_environment.always_install():
             if self.selected:
                 return TaskStatus.pending("explicitly selected to run")
-            if self.skip_if_venv_exists.get():
+            if not self.skip_if_venv_exists.get():
                 return TaskStatus.pending(
                     "managed environment exists (%s), always install on" % managed_environment.get_path()
                 )

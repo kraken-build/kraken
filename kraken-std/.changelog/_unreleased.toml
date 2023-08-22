@@ -11,3 +11,9 @@ type = "improvement"
 description = "Added get_lockfile() to PythonBuildSystem subclasses as common way to retrieve the lock file"
 author = "alex.waldenmaier@icloud.com"
 pr = "https://github.com/kraken-build/kraken-build/pull/101"
+
+[[entries]]
+id = "511f40d2-105c-4de0-a71e-c5d04ffa5d45"
+type = "fix"
+description = "Fixed a bug in Pythons `InstallTask` that would accidentally always cause the install task to run even if that was disabled."
+author = "rosensteinniklas@gmail.com"
