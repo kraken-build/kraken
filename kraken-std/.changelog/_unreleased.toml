@@ -1,0 +1,5 @@
+[[entries]]
+id = "92eb28d0-b0f9-4346-a3dc-d46fa0d0d0cf"
+type = "fix"
+description = "Pyupgrade: support properly relative source and test directories"
+author = "thomas.pellissier-tanon@helsing.ai"

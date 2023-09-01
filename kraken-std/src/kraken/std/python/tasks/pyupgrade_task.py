@@ -97,10 +97,12 @@ def pyupgrade(
     project = project or Project.current()
     settings = python_settings(project)
 
-    directories = [
-        p for p in (*additional_files, settings.source_directory, settings.get_tests_directory()) if p is not None
-    ]
-    files = {f.resolve() for p in directories for f in Path(p).glob("**/*.py")}
+    directories = list(additional_files)
+    directories.append(project.directory / settings.source_directory)
+    test_directory = settings.get_tests_directory()
+    if test_directory is not None:
+        directories.append(project.directory / test_directory)
+    files = {f.resolve() for p in directories for f in p.glob("**/*.py")}
     exclude = [e.resolve() for e in exclude]
     filtered_files = [
         f
