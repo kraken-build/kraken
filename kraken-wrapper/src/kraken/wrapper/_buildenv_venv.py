@@ -83,7 +83,7 @@ class VenvBuildEnv(BuildEnv):
                 )
         else:
             logger.error(
-                "'%s' failed (exit code: %d, command: %d). Check the output above for more information.",
+                "'%s' failed (exit code: %d, command: %s). Check the output above for more information.",
                 operation_name,
                 exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
                 "$ " + " ".join(map(shlex.quote, command)),
