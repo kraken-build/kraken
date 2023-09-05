@@ -1,0 +1,5 @@
+[[entries]]
+id = "23a63044-a0fe-415f-a7a0-d7fc7375c93c"
+type = "improvement"
+description = "Allows to inject env variable in Maturin builds"
+author = "@Tpt"
