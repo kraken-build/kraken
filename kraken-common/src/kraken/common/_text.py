@@ -37,6 +37,25 @@ def inline_text(text: str) -> str:
     return text
 
 
+def mask_string(text: str, start_end_char_count: int = 2) -> str:
+    """Function to mask a string. Smallest string before a single start/end is not masked is 10
+
+    Args:
+        text (str): input string
+        start_end_char_count (int, optional): Number of start/end characters to leave unmasked. Defaults to 2.
+
+    Returns:
+        str: Masked string
+    """
+
+    # If the proportion of unmasked text is more than 22% (4 / 19) of
+    # text to mask, mask the entire string. Also applied for non-sensible start_end_char_count values
+    if start_end_char_count <= 0 or len(text) == 0 or 2 * start_end_char_count / len(text) > 0.22:
+        return "[MASKED]"
+
+    return text[0:start_end_char_count] + "[MASKED]" + text[-start_end_char_count:]
+
+
 class lazy_str:
     """
     Delegates to a function to convert to a string.
