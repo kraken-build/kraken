@@ -182,14 +182,19 @@ def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn
 
 
 def auth_check(auth, args, host, username, password):
-    check_result = "[SKIPPED]"  # Default behaviour
+    check_result = "[SKIPPED]"  # Default
 
     if not args.no_check:
+        # Check the credential now, aiming to return either OK or FAILED, and print warnings as needed
         credential_result = auth.check_credential(host, username, password)
         if credential_result:
             check_result = "[OK]" if credential_result.auth_check_result else "[FAILED]"
+
+            # If there are any hints, output them to the logger as a warning
             if credential_result.hint:
                 logger.warning(host + ": " + credential_result.hint)
+
+            # If verbose, also display the CURL command that people can use plus the first part of the response
             if args.verbose:
                 logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
                 logger.info(
