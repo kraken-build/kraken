@@ -36,6 +36,7 @@ def inline_text(text: str) -> str:
     text = text.replace(marker, "\n\n")
     return text
 
+
 class lazy_str:
     """
     Delegates to a function to convert to a string.
