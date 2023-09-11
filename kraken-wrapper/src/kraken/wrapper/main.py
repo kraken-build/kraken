@@ -180,9 +180,10 @@ def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn
 
     sys.exit(0)
 
+
 def auth_check(auth, args, host, username, password):
     check_result = "[SKIPPED]"  # Default behaviour
-    
+
     if not args.no_check:
         credential_result = auth.check_credential(host, username, password)
         if credential_result:
@@ -192,10 +193,10 @@ def auth_check(auth, args, host, username, password):
             if args.verbose:
                 logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
                 logger.info(
-                            "First 10 lines of response (limited to 1000 chars): %s",
-                            ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
-                        )
-                
+                    "First 10 lines of response (limited to 1000 chars): %s",
+                    ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
+                )
+
     return check_result
 
 

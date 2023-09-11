@@ -1,4 +1,4 @@
-from kraken.common._text import pluralize, mask_string
+from kraken.common._text import pluralize
 
 
 def test__pluralize() -> None:
