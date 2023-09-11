@@ -150,7 +150,6 @@ class AuthOptions:
             help="Show curl queries to use when authenicating hosts",
         )
 
-
     @classmethod
     def collect(cls, args: argparse.Namespace) -> AuthOptions:
         return cls(

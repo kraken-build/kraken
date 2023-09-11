@@ -10,8 +10,6 @@ import keyring.backends.null
 
 from kraken.std import http
 
-import enum
-
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
 
@@ -20,6 +18,7 @@ def type_fqn(x: type[Any] | object) -> str:
     if not isinstance(x, type):
         x = type(x)
     return f"{x.__module__}.{x.__name__}"
+
 
 class AuthModel:
     """Provides an interface to store credentials safely in the system keyring. If keyring backend is available,
@@ -110,53 +109,53 @@ class AuthModel:
             if credentials:
                 result.append(self.CredentialsWithHost(host, *credentials))
         return result
-    
+
     def check_credential(self, host: str, username: str, password: str) -> CredentialCheck:
         if ".jfrog.io" in host:
             # password = "test"
             # Allow the user to override the url that will be used by setting
-            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
-            url_suffix = self._config.get(f"auth", {}).get(host, {}).get("auth_check_url_suffix", "artifactory/api/pypi/python-all/simple/flask/")
+            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
+            url_suffix = (
+                self._config.get("auth", {})
+                .get(host, {})
+                .get("auth_check_url_suffix", "artifactory/api/pypi/python-all/simple/flask/")
+            )
             url = f"https://{host}/{url_suffix}"
             curl_command = f"curl --user '{username}:{password}' {url}"
-            
+
             # Get the result
-            result = http.get(url, auth = (username, password))
+            result = http.get(url, auth=(username, password))
 
             # Build hints
             hints = []
-            
+
             if result.status_code == 401 and "Props authentication" in result.text:
                 hints.append("You may have used an API token rather than an identity token.")
+                hints.append("Your username and/or token may be incorrect.")
+
+            if result.status_code == 401 and "Token principal mismatch" in result.text:
                 hints.append("Your username and/or token may be incorrect.")
 
             if result.status_code == 401 and "Bad credentials" in result.text:
                 hints.append("Your credentials are invalid")
 
-            return self.CredentialCheck(curl_command,
-                                        result.status_code == 200,
-                                        result.text,
-                                        " ".join(hints))
-        
+            return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
+
         if "gitlab." in host:
             # Allow the user to override the url that will be used by setting
-            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
-            url_suffix = self._config.get(f"auth", {}).get(host, {}).get("auth_check_url_suffix", "api/v4/projects")
-            url = f"https://{host}/{url_suffix}?access_token={password}"
-            curl_command = f"curl '{url}'"
-            
+            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
+            url_suffix = self._config.get("auth", {}).get(host, {}).get("auth_check_url_suffix", "api/v4/projects")
+            url = f"https://{host}/{url_suffix}"
+
             # Get the result
-            result = http.get(url)
+            result = http.get(url, params={"access_token": password})
+            curl_command = "curl " + str(result.url)
 
             # Build hints
             hints = []
             if result.status_code == 401:
                 hints.append("Your credentials are invalid")
 
-            return self.CredentialCheck(curl_command,
-                                        result.status_code == 200,
-                                        result.text,
-                                        " ".join(hints))
+            return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
 
         return None
-        
