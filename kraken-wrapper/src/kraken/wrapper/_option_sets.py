@@ -102,6 +102,7 @@ class AuthOptions:
     list: bool
     no_check: bool
     no_mask: bool
+    verbose: bool
 
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser) -> None:
@@ -141,6 +142,13 @@ class AuthOptions:
             action="store_true",
             help="do not mask credentials",
         )
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            default=False,
+            help="Show curl queries to use when authenicating hosts",
+        )
 
 
     @classmethod
@@ -154,4 +162,5 @@ class AuthOptions:
             list=args.list,
             no_check=args.no_check,
             no_mask=args.no_mask,
+            verbose=args.verbose,
         )

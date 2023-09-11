@@ -152,12 +152,27 @@ def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn
     elif args.list:
         if args.remove or args.host or args.username or args.password or args.password_stdin:
             parser.error("incompatible arguments")
+        
+        
         table = AsciiTable()
-        table.headers = ["Host", "Username", "Password"]
+        table.headers = ["Host", "Username", "Password", "Auth check"]
         for host, username, password in auth.list_credentials():
-            table.rows.append((host, username, password))
+            # Auth check
+            check_result = "[SKIPPED]" # Default behaviour
+            if not args.no_check:
+                credential_result = auth.check_credential(host, username, password)
+                if credential_result:
+                    check_result = "[OK]" if credential_result.auth_check_result else "[FAILED]"
+                    if credential_result.hint:
+                        logger.warning(host + ": " + credential_result.hint)
+                    if args.verbose:
+                        logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
+                        logger.info("First 10 lines of response (limited to 1000 chars): %s", ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]))
+
+            table.rows.append((host, username, password if args.no_mask else "[MASKED]", check_result))
         if table.rows:
             table.print()
+        
     elif args.username:
         if args.password_stdin:
             password = sys.stdin.readline().strip()
