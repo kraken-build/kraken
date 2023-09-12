@@ -1,0 +1,5 @@
+[[entries]]
+id = "caa1dcec-f9e2-4131-aa98-d978c5f634c9"
+type = "fix"
+description = "Allow pydoc-markdown to change to 4.x"
+author = "alex.spencer@helsing.ai"
