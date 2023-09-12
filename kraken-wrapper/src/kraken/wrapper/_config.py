@@ -7,7 +7,7 @@ from typing import Any, MutableMapping, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
-from kraken.std import http # type: ignore
+from kraken.std import http
 
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
