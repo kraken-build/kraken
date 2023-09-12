@@ -131,13 +131,12 @@ class AuthOptions:
             help="list configured credentials for the given host",
         )
         parser.add_argument(
-            "-nc",
+            "-s",
             "--no-check",
             action="store_true",
             help="skip checking of auth credentials",
         )
         parser.add_argument(
-            "-nm",
             "--no-mask",
             action="store_true",
             help="do not mask credentials",
