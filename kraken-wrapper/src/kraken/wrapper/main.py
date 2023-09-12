@@ -181,7 +181,7 @@ def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn
     sys.exit(0)
 
 
-def auth_check(auth, args, host, username, password):
+def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, password: str) -> str:
     check_result = "[SKIPPED]"  # Default
 
     if not args.no_check:

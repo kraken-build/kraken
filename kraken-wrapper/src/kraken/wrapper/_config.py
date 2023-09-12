@@ -7,7 +7,6 @@ from typing import Any, MutableMapping, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
-
 from kraken.std import http
 
 logger = logging.getLogger(__name__)
@@ -110,7 +109,7 @@ class AuthModel:
                 result.append(self.CredentialsWithHost(host, *credentials))
         return result
 
-    def check_credential(self, host: str, username: str, password: str) -> CredentialCheck:
+    def check_credential(self, host: str, username: str, password: str) -> CredentialCheck | None:
         if ".jfrog.io" in host:
             # Allow the user to override the url that will be used by setting
             # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
