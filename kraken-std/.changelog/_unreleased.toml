@@ -1,0 +1,5 @@
+[[entries]]
+id = "2268bf44-de8d-4fbd-9f53-7f506a6dbefd"
+type = "deprecation"
+description = "Deprecate http module in std in preference of moving to kraken-common"
+author = "alex.spencer@helsing.ai"
