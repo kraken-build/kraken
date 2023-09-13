@@ -1,20 +1,20 @@
 import contextlib
 import os
 import tempfile
-from collections.abc import Iterator
+import typing
 from pathlib import Path
 
 import pytest
 
 
 @pytest.fixture
-def tempdir() -> Iterator[Path]:
+def tempdir() -> typing.Iterator[Path]:
     with tempfile.TemporaryDirectory() as tempdir:
         yield Path(tempdir)
 
 
 @contextlib.contextmanager
-def chdir_context(path: Path) -> Iterator[None]:
+def chdir_context(path: Path) -> typing.Iterator[None]:
     cwd = os.getcwd()
     os.chdir(path)
     try:
