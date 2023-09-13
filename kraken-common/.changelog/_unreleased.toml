@@ -1,0 +1,5 @@
+[[entries]]
+id = "2f8eeecf-df8f-4d7d-9b38-76297a123371"
+type = "refactor"
+description = "Add http module to common"
+author = "alex.spencer@helsing.ai"

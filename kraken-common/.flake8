@@ -6,3 +6,14 @@ ignore=
     W503,
     # line break after binary operator
     W504,
+
+per-file-ignores =
+    # Our http module wraps httpx, and is the only place where calls to httpx are allowed
+    src/kraken/common/http/__init__.py:KRA001,
+    # This file contains disallowed structures on purpose (it is used to test the linter itself)
+    src/tests/data/http_requests.py:KRA001,KRA002,
+
+[flake8:local-plugins]
+extension =
+	KRA001 = kraken.std.http.lint_ban_bare_requests:BanBareHttpxCalls
+	KRA002 = kraken.std.http.lint_ban_bare_requests:BanBareRequestsCalls
