@@ -15,5 +15,5 @@ per-file-ignores =
 
 [flake8:local-plugins]
 extension =
-	KRA001 = kraken.std.http.lint_ban_bare_requests:BanBareHttpxCalls
-	KRA002 = kraken.std.http.lint_ban_bare_requests:BanBareRequestsCalls
+	KRA001 = kraken.common.http.lint_ban_bare_requests:BanBareHttpxCalls
+	KRA002 = kraken.common.http.lint_ban_bare_requests:BanBareRequestsCalls

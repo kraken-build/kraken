@@ -9,8 +9,8 @@ from urllib.parse import quote, urlparse, urlunparse
 
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
 
-from ._buildenv_venv import VenvBuildEnv
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
+from ._buildenv_venv import VenvBuildEnv
 from ._config import AuthModel
 from ._lockfile import Lockfile
 
