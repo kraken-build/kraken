@@ -62,7 +62,7 @@ flake8 = "flake8 src/"
 fmt = "black src/ && isort src/"
 
 [tool.mypy]
-python_version = "3.6"
+python_version = "3.10"
 explicit_package_bases = true
 mypy_path = ["src"]
 namespace_packages = true
