@@ -107,7 +107,7 @@ def pyupgrade(
     filtered_files = [
         f
         for f in files
-        if not any(_is_relative_to(f, i) for i in exclude) and not any(f.match(p) for p in exclude_patterns)
+        if not any(f.is_relative_to(i) for i in exclude) and not any(f.match(p) for p in exclude_patterns)
     ]
 
     check_task = project.task(f"{name}.check", PyUpgradeCheckTask, group="lint")
@@ -121,12 +121,3 @@ def pyupgrade(
     format_task.python_version = python_version
 
     return PyUpgradeTasks(check_task, format_task)
-
-
-def _is_relative_to(a: Path, b: Path) -> bool:
-    # Polyfill for Python 3.7 and 3.8
-    try:
-        a.relative_to(b)
-        return True
-    except ValueError:
-        return False
