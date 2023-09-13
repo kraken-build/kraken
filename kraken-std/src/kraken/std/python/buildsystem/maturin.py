@@ -61,6 +61,7 @@ class _MaturinBuilder:
         self._project_directory = project_directory
         self._default_build = True
         self._zig_targets: Collection[MaturinZigTarget] = []
+        self._build_env: dict[str, str] = {}
 
     def disable_default_build(self) -> None:
         self._default_build = False
@@ -70,6 +71,9 @@ class _MaturinBuilder:
         :param targets: Collection of MaturinTargets to cross-compile to using zig.
         """
         self._zig_targets = targets
+
+    def add_build_environment_variable(self, key: str, value: str) -> None:
+        self._build_env[key] = value
 
     def build(self, output_directory: Path, as_version: str | None) -> list[Path]:
         # We set the version
@@ -88,10 +92,11 @@ class _MaturinBuilder:
             shutil.rmtree(dist_dir)
 
         # We run the actual build
+        build_env = {**os.environ, **self._build_env}
         if self._default_build:
             command = [self._entry_point, "run", "maturin", "build", "--release"]
             logger.info("%s", command)
-            sp.check_call(command, cwd=self._project_directory)
+            sp.check_call(command, cwd=self._project_directory, env=build_env)
         for target in self._zig_targets:
             command = [
                 self._entry_point,
@@ -109,17 +114,17 @@ class _MaturinBuilder:
                 command.append("--manylinux")
                 command.append("off")
             logger.info("%s", command)
-            env = os.environ.copy()
+            target_build_env = build_env.copy()
             if target.target.endswith("-apple-darwin"):
                 if target.macos_sdk_root is not None:
-                    env["SDKROOT"] = str(target.macos_sdk_root.resolve())
-                elif "SDKROOT" not in env:
+                    target_build_env["SDKROOT"] = str(target.macos_sdk_root.resolve())
+                elif "SDKROOT" not in target_build_env:
                     logger.error(f"No macOS SDKROOT set for the target {target}")
             if target.rustflags is not None:
-                env["RUSTFLAGS"] = target.rustflags
+                target_build_env["RUSTFLAGS"] = target.rustflags
             if target.ld_library_path is not None:
-                env["LD_LIBRARY_PATH"] = target.ld_library_path
-            sp.check_call(command, cwd=self._project_directory, env=env)
+                target_build_env["LD_LIBRARY_PATH"] = target.ld_library_path
+            sp.check_call(command, cwd=self._project_directory, env=target_build_env)
 
         # We get the output files
         src_files = list(dist_dir.iterdir())
