@@ -25,6 +25,7 @@ builddsl = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
 setuptools = "*"
 typing-extensions = ">=3.0.0.0,<4.7.0"  # Upper constraint due to https://github.com/python/typing_extensions/issues/265
+httpx = "^0.23.0"
 
 # Allow older versions for Python 3.6 compatibility.
 tomli = ">=1.0.0,<3.0.0"
