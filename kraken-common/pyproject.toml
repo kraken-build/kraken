@@ -44,6 +44,7 @@ termcolor = "*"
 types-dataclasses = { version = "^0.6.6", python = "<3.7" }
 types-setuptools = "*"
 types-termcolor = "*"
+types-requests = "^2.28.0"
 rich = "^13.4.2"
 
 [tool.slap]
