@@ -1,0 +1,6 @@
+[[entries]]
+id = "18c0a8d4-e6c2-4c7e-9029-84d7416246ed"
+type = "fix"
+description = "Enforces isort and refreshes poetry.lock"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/108"
