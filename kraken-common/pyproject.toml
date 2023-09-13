@@ -20,7 +20,7 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.7,<4.0"
 builddsl = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
 setuptools = "*"

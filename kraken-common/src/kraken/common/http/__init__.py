@@ -1,6 +1,8 @@
 # Perform HTTP requests
 # This module internally calls httpx, but with a custom setup
 
+from __future__ import annotations
+
 import ssl
 from collections.abc import Iterator
 from contextlib import contextmanager
