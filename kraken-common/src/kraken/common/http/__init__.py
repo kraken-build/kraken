@@ -9,8 +9,9 @@ from contextlib import contextmanager
 from typing import Any
 
 import httpx
+from httpx import ReadTimeout
 
-__all__ = ["request", "get", "options", "head", "post", "put", "patch", "delete", "stream"]
+__all__ = ["request", "get", "options", "head", "post", "put", "patch", "delete", "stream", "ReadTimeout"]
 
 _CACHED_SYSTEM_CA_LIST: ssl.SSLContext | None = None
 
