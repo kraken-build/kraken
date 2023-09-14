@@ -6,7 +6,7 @@ from __future__ import annotations
 import ssl
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, ContextManager
+from typing import Any
 
 import httpx
 
@@ -65,5 +65,6 @@ def delete(url: str, **kwargs: Any) -> httpx.Response:
 # Forwarding calls to `stream` would not be accepted as-is by mypy.
 # Let's trick a bit
 @contextmanager
-def stream(url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
-    return httpx.stream(url, verify=_get_system_ca_list(), **kwargs)
+def stream(url: str, **kwargs: Any) -> Iterator[httpx.Response]:
+    with httpx.stream(url, verify=_get_system_ca_list(), **kwargs) as stream:
+        yield stream
