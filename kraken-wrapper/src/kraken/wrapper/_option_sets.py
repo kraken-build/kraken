@@ -100,6 +100,9 @@ class AuthOptions:
     password_stdin: bool
     remove: bool
     list: bool
+    no_check: bool
+    no_mask: bool
+    verbose: bool
 
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser) -> None:
@@ -127,6 +130,24 @@ class AuthOptions:
             action="store_true",
             help="list configured credentials for the given host",
         )
+        parser.add_argument(
+            "-s",
+            "--no-check",
+            action="store_true",
+            help="skip checking of auth credentials",
+        )
+        parser.add_argument(
+            "--no-mask",
+            action="store_true",
+            help="do not mask credentials",
+        )
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            default=False,
+            help="show curl queries to use when authenicating hosts",
+        )
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> AuthOptions:
@@ -137,4 +158,7 @@ class AuthOptions:
             password_stdin=args.password_stdin,
             remove=args.remove,
             list=args.list,
+            no_check=args.no_check,
+            no_mask=args.no_mask,
+            verbose=args.verbose,
         )
