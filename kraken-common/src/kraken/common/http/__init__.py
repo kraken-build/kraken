@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import ssl
-from collections.abc import Iterator
 from typing import Any, ContextManager
 
 import httpx
