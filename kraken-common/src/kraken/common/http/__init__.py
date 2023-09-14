@@ -1,22 +1,17 @@
 # Perform HTTP requests
 # This module internally calls httpx, but with a custom setup
 
+from __future__ import annotations
+
 import ssl
-import warnings
-from collections.abc import Iterator
-from contextlib import contextmanager
-from typing import Any
+from typing import Any, ContextManager
 
 import httpx
+from httpx import ReadTimeout
 
-__all__ = ["request", "get", "options", "head", "post", "put", "patch", "delete", "stream"]
+__all__ = ["request", "get", "options", "head", "post", "put", "patch", "delete", "stream", "ReadTimeout"]
 
 _CACHED_SYSTEM_CA_LIST: ssl.SSLContext | None = None
-
-warnings.warn(
-    "kraken.std.http is deprecated. Use kraken.common.http instead. Future versions will " "remove this module.",
-    DeprecationWarning,
-)
 
 
 # Caching calls to ssl.create_default_context()
@@ -66,9 +61,5 @@ def delete(url: str, **kwargs: Any) -> httpx.Response:
     return httpx.delete(url, verify=_get_system_ca_list(), **kwargs)
 
 
-# Forwarding calls to `stream` would not be accepted as-is by mypy.
-# Let's trick a bit
-@contextmanager
-def stream(url: str, **kwargs: Any) -> Iterator[httpx.Response]:
-    with httpx.stream(url, verify=_get_system_ca_list(), **kwargs) as stream:
-        yield stream
+def stream(url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
+    return httpx.stream(url, verify=_get_system_ca_list(), **kwargs)

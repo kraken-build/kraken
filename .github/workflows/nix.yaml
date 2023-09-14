@@ -28,7 +28,7 @@ jobs:
     - run: curl -sSL https://raw.githubusercontent.com/pdm-project/pdm/main/install-pdm.py | python3 -
 
     # check poetry lock in sync with pyproject.toml
-    - run: poetry lock --check -C kraken-wrapper
+    - run: poetry check --lock -C kraken-wrapper
 
     # build the kraken wrapper
     - uses: cachix/install-nix-action@v22
