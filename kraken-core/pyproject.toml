@@ -11,7 +11,7 @@ license = "MIT"
 name = "kraken-core"
 packages = [{include = "kraken/core", from = "src"}]
 readme = "README.md"
-version = "0.31.2"
+version = "0.31.3"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
@@ -23,7 +23,7 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 python = ">=3.10,<3.11"
 deprecated = "^1.2.13"
 dill = ">=0.3.5,<0.3.6"  # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
-kraken-common = "^0.31.2"
+kraken-common = "^0.31.3"
 networkx = "^3.1"
 nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
