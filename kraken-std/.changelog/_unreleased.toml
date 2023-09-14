@@ -4,3 +4,9 @@ type = "improvement"
 description = "Allows to inject env variable in Maturin builds"
 author = "@Tpt"
 pr = "https://github.com/kraken-build/kraken-build/pull/104"
+
+[[entries]]
+id = "e5ad6dda-58f4-4f5d-bc28-95e24830989e"
+type = "improvement"
+description = "add `mode=max,ignore-error=true` to the `--cache-to=type=registry,...` option created by the `BuildxBuildTask`."
+author = "@NiklasRosenstein"
