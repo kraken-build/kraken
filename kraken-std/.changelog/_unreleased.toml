@@ -11,3 +11,9 @@ type = "improvement"
 description = "Allows to inject env variable in Maturin builds"
 author = "@Tpt"
 pr = "https://github.com/kraken-build/kraken-build/pull/104"
+
+[[entries]]
+id = "26f957a7-c29b-4610-9000-8192aedf8400"
+type = "fix"
+description = "Test if maturin causing build issue for nix"
+author = "alex.spencer@helsing.ai"
