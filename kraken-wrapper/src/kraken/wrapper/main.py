@@ -23,7 +23,6 @@ from kraken.common import (
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
-from kraken.common.http import ReadTimeout
 from termcolor import colored
 
 from . import __version__
@@ -185,24 +184,22 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
     if not args.no_check:
         # Check the credential now, aiming to return either OK or FAILED, and print warnings as needed
-        try:
-            credential_result = auth.check_credential(host, username, password)
-            if credential_result:
-                check_result = "[OK]" if credential_result.auth_check_result else "[FAILED]"
 
-                # If there are any hints, output them to the logger as a warning
-                if credential_result.hint:
-                    logger.warning(host + ": " + credential_result.hint)
+        credential_result = auth.check_credential(host, username, password)
+        if credential_result:
+            check_result = "[OK]" if credential_result.auth_check_result else "[FAILED]"
 
-                # If verbose, also display the CURL command that people can use plus the first part of the response
-                if args.verbose:
-                    logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
-                    logger.info(
-                        "First 10 lines of response (limited to 1000 chars): %s",
-                        ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
-                    )
-        except ReadTimeout:
-            logger.warning("HTTP Timeout when testing credentials")
+            # If there are any hints, output them to the logger as a warning
+            if credential_result.hint:
+                logger.warning(host + ": " + credential_result.hint)
+
+            # If verbose, also display the CURL command that people can use plus the first part of the response
+            if args.verbose:
+                logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
+                logger.info(
+                    "First 10 lines of response (limited to 1000 chars): %s",
+                    ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
+                )
 
     return check_result
 

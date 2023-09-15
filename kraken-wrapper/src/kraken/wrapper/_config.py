@@ -8,6 +8,7 @@ import keyring
 import keyring.backends.fail
 import keyring.backends.null
 from kraken.common import http
+from kraken.common.http import ReadTimeout
 
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
@@ -122,7 +123,11 @@ class AuthModel:
             curl_command = f"curl --user '{username}:{password}' {url}"
 
             # Get the result
-            result = http.get(url, auth=(username, password), timeout=10)
+            try:
+                result = http.get(url, auth=(username, password), timeout=10)
+            except ReadTimeout:
+                logger.warning("HTTP Timeout when testing credentials")
+                return None
 
             # Build hints
             hints = []
@@ -152,7 +157,11 @@ Please check host.auth_check_url_suffix value in {self._path}"""
             url = f"https://{host}/{url_suffix}"
 
             # Get the result
-            result = http.get(url, params={"access_token": password}, timeout=10)
+            try:
+                result = http.get(url, params={"access_token": password}, timeout=10)
+            except ReadTimeout:
+                logger.warning("HTTP Timeout when testing credentials")
+                return None
             curl_command = "curl " + str(result.url)
 
             # Build hints
