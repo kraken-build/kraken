@@ -1,3 +1,6 @@
+import logging
+from typing import Any
+
 import pytest
 
 from kraken.core.system.graph import TaskGraph
@@ -294,3 +297,23 @@ def test__TaskGraph__wait_for_group_finish_before_removing_non_strict_dependenci
 
     graph.set_status(ta2, TaskStatus.failed())
     assert list(graph.ready()) == [tb1]
+
+
+def test__TaskGraph__mark_tasks_as_skipped__does_not_skip_tasks_that_are_required_by_non_skipped_tasks(
+    kraken_project: Project, caplog: Any
+) -> None:
+    a = kraken_project.task("a", VoidTask)
+    b = kraken_project.task("b", VoidTask)
+    c = kraken_project.task("c", VoidTask)
+
+    c.required_by(b, a)
+    b.required_by(a)
+
+    graph = TaskGraph(kraken_project.context)
+
+    # Recursively marking b and its dependencies as skip would mark "c", but it is not marked because
+    # a is not skipped and it requires c as well.
+
+    with caplog.at_level(logging.DEBUG):
+        graph.mark_tasks_as_skipped(recursive_tasks=[b], reason="test", origin="test", reset=True)
+    assert "Did not tag task :c as 'skip' because it is required by another task that is not skipped." in caplog.text

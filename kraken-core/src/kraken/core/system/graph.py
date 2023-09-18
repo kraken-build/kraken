@@ -406,6 +406,7 @@ class TaskGraph(Graph):
         tasks: Sequence[Task | str | Address] = (),
         recursive_tasks: Sequence[Task | str | Address] = (),
         *,
+        unless_required: bool = False,
         reason: str,
         origin: str,
         reset: bool,
@@ -413,6 +414,10 @@ class TaskGraph(Graph):
         """
         Mark all tasks matching the *tasks* or *recursive_tasks* addresses as skipped using a #Task.SkipMarker.
         If *reset* is enabled, all previous markers created with this method will be removed.
+
+        When the *unless_required* parameter is set to `True`, tasks that are depended on in the graph will not
+        be marked as skipped unless these tasks are also marked as skipped. This is set to `True` automatically
+        when entering the recursion for any *recursive_tasks*.
         """
 
         tasks = self.context.resolve_tasks(tasks)
@@ -424,16 +429,30 @@ class TaskGraph(Graph):
                 if tag is not None:
                     task.remove_tag(tag)
 
+            if unless_required:
+                # Check if any tasks that are not marked as skipped require this task.
+                is_required = False
+                for successor in self.get_successors(task):
+                    if not any(successor.get_tags("skip")):
+                        is_required = True
+                if is_required:
+                    logger.debug(
+                        "Did not tag task %s as 'skip' because it is required by another task that is not skipped.",
+                        task.address,
+                    )
+                    continue
+
             task.add_tag("skip", reason=reason, origin=origin)
 
-            if task in recursive_tasks:
-                self.mark_tasks_as_skipped(
-                    [],
-                    self.get_predecessors(task, ignore_groups=False),
-                    reason=reason,
-                    origin=origin,
-                    reset=False,
-                )
+        for task in recursive_tasks:
+            self.mark_tasks_as_skipped(
+                [],
+                self.get_predecessors(task, ignore_groups=False),
+                unless_required=True,
+                reason=reason,
+                origin=origin,
+                reset=False,
+            )
 
     # Graph
 
