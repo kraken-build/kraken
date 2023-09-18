@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "rust-poetry-project-consumer"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.7"
+rust-poetry-project = { version = "0.1.0", source = "local" }
+
+[tool.poetry.dev-dependencies]
+mypy = "^1.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

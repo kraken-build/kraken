@@ -1,0 +1,11 @@
+release-date = "2023-08-08"
+
+[[entries]]
+id = "cb501ed7-e633-4a73-bd0e-0e95bdeeb96d"
+type = "fix"
+description = "Rework task description wrapping"
+author = "jon.gjengset@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/98"
+issues = [
+    "https://github.com/kraken-build/kraken-build/issues/93",
+]

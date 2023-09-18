@@ -25,6 +25,7 @@ class BlackTask(EnvironmentAwareDispatchTask):
     def get_execute_command(self) -> list[str]:
         command = ["black", str(self.settings.source_directory)]
         command += self.settings.get_tests_directory_as_args()
+        command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():
             command += ["--check", "--diff"]

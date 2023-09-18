@@ -1,0 +1,36 @@
+release-date = "2023-08-08"
+
+[[entries]]
+id = "9208f809-56df-4f4e-98e0-2e32a8233dde"
+type = "improvement"
+description = "Wrap error message in a map"
+author = "nicolas.vizzari@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/97"
+
+[[entries]]
+id = "18aae01e-93e2-424b-a51d-39b3f0026729"
+type = "improvement"
+description = "Avoids building the Maturin library twice with PDM"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/99"
+
+[[entries]]
+id = "4e6cd51b-8ada-4eb6-950a-56fca0b4038e"
+type = "improvement"
+description = "Makes PDM integration test mandatory"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/86"
+
+[[entries]]
+id = "dd5f5b90-1846-4083-8853-1aff2c99d3f5"
+type = "feature"
+description = "Facilitates the creation of Debian packages from Rust projects."
+author = "@morosanmihail"
+pr = "https://github.com/kraken-build/kraken-build/pull/87"
+
+[[entries]]
+id = "400395ef-ae8c-4560-aa0f-922f1ff431bd"
+type = "feature"
+description = "Allows passing features to cargo_build and cargo_test."
+author = "@morosanmihail"
+pr = "https://github.com/kraken-build/kraken-build/pull/77"

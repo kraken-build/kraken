@@ -72,6 +72,10 @@ class PythonBuildSystem(abc.ABC):
     def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
         """Return an object able to read the pyproject file depending on the build system."""
 
+    @abc.abstractmethod
+    def get_lockfile(self) -> Path | None:
+        """Return the lockfile specific to this buildsystem, or None if not supported."""
+
 
 class ManagedEnvironment(abc.ABC):
     """Abstraction of a managed Python environment."""
@@ -117,9 +121,14 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         return PoetryPythonBuildSystem(project_directory)
 
     if "maturin" in pyproject_content:
-        from .maturin import MaturinPythonBuildSystem
+        if "[tool.poetry]" in pyproject_content:
+            from .maturin import MaturinPoetryPythonBuildSystem
 
-        return MaturinPythonBuildSystem(project_directory)
+            return MaturinPoetryPythonBuildSystem(project_directory)
+        else:
+            from .maturin import MaturinPdmPythonBuildSystem
+
+            return MaturinPdmPythonBuildSystem(project_directory)
 
     if "pdm" in pyproject_content:
         from .pdm import PDMPythonBuildSystem

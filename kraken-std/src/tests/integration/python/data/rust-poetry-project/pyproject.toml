@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rust-poetry-project"
+version = "0.1.0"
+description = ""
+authors = []
+include = ["target/"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+mypy = "^1.0"
+maturin = { version = "^1.0", extras = ["zig"] }
+
+[build-system]
+requires = ["maturin~=1.0"]
+build-backend = "maturin"
+
+[project]
+name = "rust-poetry-project"
+version = "0.1.0"
+requires-python = ">=3.7"
+dependencies = []

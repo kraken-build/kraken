@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kraken-common"
-version = "0.29.0"
+version = "0.31.3"
 description = ""
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
@@ -20,11 +20,12 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.7,<4.0"
 builddsl = "^1.0.0"
 dataclasses = { version = "^0.6", python = "<3.7" }
 setuptools = "*"
 typing-extensions = ">=3.0.0.0,<4.7.0"  # Upper constraint due to https://github.com/python/typing_extensions/issues/265
+httpx = "^0.23.0"
 
 # Allow older versions for Python 3.6 compatibility.
 tomli = ">=1.0.0,<3.0.0"
@@ -43,6 +44,7 @@ termcolor = "*"
 types-dataclasses = { version = "^0.6.6", python = "<3.7" }
 types-setuptools = "*"
 types-termcolor = "*"
+types-requests = "^2.28.0"
 rich = "^13.4.2"
 
 [tool.slap]
@@ -60,7 +62,7 @@ flake8 = "flake8 src/"
 fmt = "black src/ && isort src/"
 
 [tool.mypy]
-python_version = "3.6"
+python_version = "3.7"
 explicit_package_bases = true
 mypy_path = ["src"]
 namespace_packages = true

@@ -13,6 +13,7 @@ from kraken.common import not_none
 from kraken.core import Context, Project
 
 from kraken.std import python
+from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
@@ -54,17 +55,7 @@ def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> s
 
 @pytest.mark.parametrize(
     "project_dir",
-    [
-        "poetry-project",
-        "slap-project",
-        pytest.param(
-            "pdm-project",
-            marks=pytest.mark.xfail(
-                reason="PDM seems to have an issue with getting the right hash of the package from pypiserver "
-                "when locking."
-            ),
-        ),
-    ],
+    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project"],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_install_lint_and_publish(
@@ -152,6 +143,7 @@ M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
         ("poetry-project", PoetryPyprojectHandler, "^3.7"),
         ("slap-project", PoetryPyprojectHandler, "^3.6"),
         ("pdm-project", PdmPyprojectHandler, ">=3.9"),
+        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.7"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -205,3 +197,21 @@ def test__python_project_coverage(
     kraken_ctx.execute([":build", ":test"])
 
     assert Path(kraken_project.build_directory / "coverage.xml").is_file()
+
+
+def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context, kraken_project: Project) -> None:
+    tempdir = kraken_project.directory
+
+    project_dir = "lint-enforced-directories-project"
+    original_dir = Path(__file__).parent / "data" / project_dir
+
+    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
+    logger.info("Loading and executing Kraken project (%s)", tempdir)
+
+    python.settings.python_settings(
+        project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
+    )
+    for linter in ["black", "flake8", "isort", "mypy", "pycln", "pylint"]:
+        getattr(python, linter)(project=kraken_project)
+
+    kraken_ctx.execute([":lint"])

@@ -131,9 +131,9 @@ def _get_auth_argument_parser(prog: str) -> argparse.ArgumentParser:
     return parser
 
 
-def auth(prog: str, argv: list[str]) -> NoReturn:
+def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn:
     config = TomlConfigFile(DEFAULT_CONFIG_PATH)
-    auth = AuthModel(config, DEFAULT_CONFIG_PATH)
+    auth = AuthModel(config, DEFAULT_CONFIG_PATH, use_keyring_if_available=use_keyring_if_available)
     parser = _get_auth_argument_parser(prog)
     args = AuthOptions.collect(parser.parse_args(argv))
 
@@ -153,9 +153,12 @@ def auth(prog: str, argv: list[str]) -> NoReturn:
         if args.remove or args.host or args.username or args.password or args.password_stdin:
             parser.error("incompatible arguments")
         table = AsciiTable()
-        table.headers = ["Host", "Username", "Password"]
+        table.headers = ["Host", "Username", "Password", "Auth check"]
         for host, username, password in auth.list_credentials():
-            table.rows.append((host, username, password))
+            # Auth check
+            check_result = auth_check(auth, args, host, username, password)
+
+            table.rows.append((host, username, password if args.no_mask else "[MASKED]", check_result))
         if table.rows:
             table.print()
     elif args.username:
@@ -174,6 +177,31 @@ def auth(prog: str, argv: list[str]) -> NoReturn:
         sys.exit(1)
 
     sys.exit(0)
+
+
+def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, password: str) -> str:
+    check_result = "[SKIPPED]"  # Default
+
+    if not args.no_check:
+        # Check the credential now, aiming to return either OK or FAILED, and print warnings as needed
+
+        credential_result = auth.check_credential(host, username, password)
+        if credential_result:
+            check_result = "[OK]" if credential_result.auth_check_result else "[FAILED]"
+
+            # If there are any hints, output them to the logger as a warning
+            if credential_result.hint:
+                logger.warning(host + ": " + credential_result.hint)
+
+            # If verbose, also display the CURL command that people can use plus the first part of the response
+            if args.verbose:
+                logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
+                logger.info(
+                    "First 10 lines of response (limited to 1000 chars): %s",
+                    ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
+                )
+
+    return check_result
 
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
@@ -376,7 +404,7 @@ def main() -> NoReturn:
 
     if cmd in ("a", "auth"):
         # The `auth` comand does not require any current project information, it can be used globally.
-        auth(f"{parser.prog} auth", argv)
+        auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
 
     if cmd in ("list-pythons",):
         list_pythons(f"{parser.prog} list-pythons", argv)
@@ -385,7 +413,12 @@ def main() -> NoReturn:
     # This includes the built-in `lock` command.
     config = TomlConfigFile(DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
-    manager = BuildEnvManager(project.directory / BUILDENV_PATH, AuthModel(config, DEFAULT_CONFIG_PATH))
+    manager = BuildEnvManager(
+        project.directory / BUILDENV_PATH,
+        AuthModel(config, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
+        incremental=env_options.incremental,
+        show_install_logs=env_options.show_install_logs,
+    )
 
     # Execute environment operations before delegating the command.
 
@@ -408,7 +441,7 @@ def main() -> NoReturn:
         _ensure_installed(
             manager,
             project,
-            env_options.reinstall or (os.getenv("KRAKENW_REINSTALL") == "1"),
+            env_options.reinstall,
             env_options.upgrade,
             env_options.use,
         )
