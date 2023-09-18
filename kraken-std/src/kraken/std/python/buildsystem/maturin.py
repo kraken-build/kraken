@@ -196,6 +196,9 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
         """
         self._builder.enable_zig_build(targets)
 
+    def add_build_environment_variable(self, key: str, value: str) -> None:
+        self._builder.add_build_environment_variable(key, value)
+
     # PythonBuildSystem
 
     def get_pyproject_reader(self, pyproject: Pyproject) -> MaturinPoetryPyprojectHandler:
@@ -254,6 +257,9 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
         :param targets: Collection of MaturinTargets to cross-compile to using zig.
         """
         self._builder.enable_zig_build(targets)
+
+    def add_build_environment_variable(self, key: str, value: str) -> None:
+        self._builder.add_build_environment_variable(key, value)
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return MaturinPdmManagedEnvironment(self.project_directory)
