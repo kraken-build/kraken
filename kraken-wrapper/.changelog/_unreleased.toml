@@ -4,3 +4,9 @@ type = "improvement"
 description = "Mask auth password and check validity"
 author = "alex.spencer@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/112"
+
+[[entries]]
+id = "e4006a4d-56b8-4a5a-86f0-0dc85c75f81c"
+type = "fix"
+description = "Update poetry lock to fix nix build"
+author = "alex.spencer@helsing.ai"
