@@ -7,6 +7,8 @@ from typing import Any, MutableMapping, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
+from kraken.common import http
+from kraken.common.http import ReadTimeout
 
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
@@ -30,6 +32,12 @@ class AuthModel:
     class Credentials(NamedTuple):
         username: str
         password: str
+
+    class CredentialCheck(NamedTuple):
+        curl_command: str
+        auth_check_result: bool
+        raw_result: str
+        hint: str
 
     def __init__(self, config: MutableMapping[str, Any], path: Path, use_keyring_if_available: bool) -> None:
         self._config = config
@@ -101,3 +109,66 @@ class AuthModel:
             if credentials:
                 result.append(self.CredentialsWithHost(host, *credentials))
         return result
+
+    def check_credential(self, host: str, username: str, password: str) -> CredentialCheck | None:
+        if ".jfrog.io" in host:
+            # Allow the user to override the url that will be used by setting
+            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
+            url_suffix = (
+                self._config.get("auth", {})
+                .get(host, {})
+                .get("auth_check_url_suffix", "artifactory/api/pypi/python-all/simple/flask/")
+            )
+            url = f"https://{host}/{url_suffix}"
+            curl_command = f"curl --user '{username}:{password}' {url}"
+
+            # Get the result
+            try:
+                result = http.get(url, auth=(username, password), timeout=10)
+            except ReadTimeout:
+                logger.warning("HTTP Timeout when testing credentials")
+                return None
+
+            # Build hints
+            hints = []
+
+            if result.status_code == 401:
+                if "Props authentication" in result.text:
+                    hints.append("You may have used an API token rather than an identity token.")
+                    hints.append("Your username and/or token may be incorrect.")
+                elif "Token principal mismatch" in result.text:
+                    hints.append("Your username and/or token may be incorrect.")
+                elif "Bad credentials" in result.text:
+                    hints.append("Your credentials are invalid")
+                else:
+                    hints.append("Credential check resulted in unknown 401 unauthorised error")
+            elif result.status_code in (404, 302):
+                hints.append(
+                    f"""Authentication URL incorrect (HTTP response {result.status_code}).
+Please check host.auth_check_url_suffix value in {self._path}"""
+                )
+
+            return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
+
+        if "gitlab." in host:
+            # Allow the user to override the url that will be used by setting
+            # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
+            url_suffix = self._config.get("auth", {}).get(host, {}).get("auth_check_url_suffix", "api/v4/projects")
+            url = f"https://{host}/{url_suffix}"
+
+            # Get the result
+            try:
+                result = http.get(url, params={"access_token": password}, timeout=10)
+            except ReadTimeout:
+                logger.warning("HTTP Timeout when testing credentials")
+                return None
+            curl_command = "curl " + str(result.url)
+
+            # Build hints
+            hints = []
+            if result.status_code == 401:
+                hints.append("Your credentials are invalid")
+
+            return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
+
+        return None
