@@ -1,4 +1,11 @@
 [[entries]]
+id = "47223d61-80dc-4f71-a2b8-80c9eddd0107"
+type = "feature"
+description = "fix krakenw nix flake"
+author = "james.baker@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/74"
+
+[[entries]]
 id = "8d233d09-d51e-4cdd-b697-b2db838143e5"
 type = "improvement"
 description = "Mask auth password and check validity"
