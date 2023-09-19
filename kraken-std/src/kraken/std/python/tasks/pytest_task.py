@@ -12,6 +12,13 @@ from kraken.core import Project, Property, TaskStatus
 from .base_task import EnvironmentAwareDispatchTask
 
 
+class LogLevel(enum.Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
+
+
 class CoverageFormat(enum.Enum):
     XML = ("xml", ".xml")
     HTML = ("html", "_html")
@@ -36,6 +43,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     doctest_modules: Property[bool] = Property.default(True)
     marker: Property[str]
     coverage: Property[CoverageFormat]
+    log_level: Property[LogLevel] = Property.default(LogLevel.INFO)
 
     # EnvironmentAwareDispatchTask
 
@@ -55,7 +63,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
             str(self.project.directory / tests_dir),
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
-        command += ["--log-cli-level", "INFO"]
+        command += ["--log-cli-level", self.log_level.value]
         if self.coverage.is_filled():
             coverage_file = f"coverage{self.coverage.get().get_suffix()}"
             command += [
@@ -90,6 +98,7 @@ def pytest(
     doctest_modules: bool = True,
     marker: str | None = None,
     coverage: CoverageFormat | None = None,
+    log_level: LogLevel | None = None,
 ) -> PytestTask:
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
@@ -99,4 +108,5 @@ def pytest(
     task.doctest_modules = doctest_modules
     task.marker = marker
     task.coverage = coverage
+    task.log_level = log_level
     return task
