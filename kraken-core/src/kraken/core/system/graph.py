@@ -435,11 +435,13 @@ class TaskGraph(Graph):
                 for successor in self.get_successors(task):
                     if not any(successor.get_tags("skip")):
                         is_required = True
+                        logger.debug(
+                            "Did not tag task %s as 'skip' because it is required by another task (%s) that is not skipped.",
+                            task.address,
+                            successor.address,
+                        )
+                        break
                 if is_required:
-                    logger.debug(
-                        "Did not tag task %s as 'skip' because it is required by another task that is not skipped.",
-                        task.address,
-                    )
                     continue
 
             task.add_tag("skip", reason=reason, origin=origin)

@@ -316,4 +316,6 @@ def test__TaskGraph__mark_tasks_as_skipped__does_not_skip_tasks_that_are_require
 
     with caplog.at_level(logging.DEBUG):
         graph.mark_tasks_as_skipped(recursive_tasks=[b], reason="test", origin="test", reset=True)
-    assert "Did not tag task :c as 'skip' because it is required by another task that is not skipped." in caplog.text
+    assert (
+        "Did not tag task :c as 'skip' because it is required by another task (:a) that is not skipped." in caplog.text
+    )
