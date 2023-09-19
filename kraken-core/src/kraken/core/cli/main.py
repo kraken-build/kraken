@@ -11,7 +11,6 @@ import pdb
 import sys
 import textwrap
 from functools import partial
-from itertools import chain
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -39,7 +38,7 @@ from kraken.core.system.errors import BuildError, ProjectNotFoundError
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task, TaskStatus
+from kraken.core.system.task import GroupTask, Task
 
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
@@ -380,13 +379,14 @@ def ls(graph: TaskGraph) -> None:
 
 def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
     if exclude_options.exclude_tasks or exclude_options.exclude_tasks_subgraph:
-        # Mark tasks that are excluded as skipped.
-        for task in chain(
+        graph.mark_tasks_as_skipped(
             graph.context.resolve_tasks(exclude_options.exclude_tasks),
             graph.context.resolve_tasks(exclude_options.exclude_tasks_subgraph),
-        ):
-            if not graph.get_status(task):
-                graph.set_status(task, TaskStatus.skipped("excluded by -x/-X"))
+            reason="excluded by -x/-X",
+            origin="cli",
+            reset=True,
+            set_status=True,
+        )
 
     tasks = set(graph.tasks())
 

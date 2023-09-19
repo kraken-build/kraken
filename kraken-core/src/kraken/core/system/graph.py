@@ -11,7 +11,7 @@ from nr.stream import Stream
 
 from kraken.core.address import Address
 from kraken.core.system.executor import Graph
-from kraken.core.system.task import GroupTask, Task, TaskStatus
+from kraken.core.system.task import GroupTask, Task, TaskStatus, TaskTag
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
@@ -406,34 +406,61 @@ class TaskGraph(Graph):
         tasks: Sequence[Task | str | Address] = (),
         recursive_tasks: Sequence[Task | str | Address] = (),
         *,
+        set_status: bool = False,
         reason: str,
         origin: str,
         reset: bool,
     ) -> None:
         """
-        Mark all tasks matching the *tasks* or *recursive_tasks* addresses as skipped using a #Task.SkipMarker.
-        If *reset* is enabled, all previous markers created with this method will be removed.
+        This method adds the `"skip"` tag to all *tasks* and *recursive_tasks*. For the dependencies of the
+        *recursive_tasks*, the tag will only be added if the task in question is not required by another task
+        that is not being skipped.
+
+        :param set_status: Whether to set #TaskStatusType.SKIPPED for tasks in the graph using #set_status().
+        :param reason: A reason to attach to the `"skip"` tag.
+        :param origin: An origin to attach to the `"skip"` tag.
+        :param reset: Enable this to remove the `"skip"` tags of the same *origin* are removed from all mentioned
+            tasks (including transtive dependencies for *recursive_tasks*) the graph first. Note that this does not
+            unset any pre-existing task statuses.
         """
 
         tasks = self.context.resolve_tasks(tasks)
         recursive_tasks = self.context.resolve_tasks(recursive_tasks)
 
-        for task in (*tasks, *recursive_tasks):
+        definitely_skip_tasks = set((*tasks, *recursive_tasks))
+        all_tasks: set[Task] = set()
+
+        # Recursively collect the dependencies of the "recursive_tasks".
+        stack = list(recursive_tasks)
+        while stack:
+            task = stack.pop()
+            all_tasks.add(task)
+            stack.extend(self.get_predecessors(task))
+
+        def get_skip_tag(task: Task) -> TaskTag | None:
+            return next((t for t in task.get_tags("skip") if t.origin == origin), None)
+
+        def get_required_by_unskipped_tasks(task: Task) -> set[Task]:
+            return set(self.get_successors(task)) - all_tasks
+
+        # Sort tasks for consistency, makes tests reliable.
+        for task in sorted(all_tasks, key=lambda t: str(t.address)):
             if reset:
-                tag = next((t for t in task.get_tags("skip") if t.origin == origin), None)
-                if tag is not None:
+                if (tag := get_skip_tag(task)) is not None:
                     task.remove_tag(tag)
 
-            task.add_tag("skip", reason=reason, origin=origin)
-
-            if task in recursive_tasks:
-                self.mark_tasks_as_skipped(
-                    [],
-                    self.get_predecessors(task, ignore_groups=False),
-                    reason=reason,
-                    origin=origin,
-                    reset=False,
+            if task not in definitely_skip_tasks and (required_by := get_required_by_unskipped_tasks(task)):
+                logger.debug(
+                    "Did not tag task %s as 'skip' because it is required by at least one other task "
+                    "that is not skipped (%s)",
+                    task.address,
+                    ", ".join(map(str, (t.address for t in required_by))),
                 )
+                continue
+
+            task.add_tag("skip", reason=reason, origin=origin)
+            if set_status and self.get_status(task) is None:
+                self.set_status(task, TaskStatus.skipped(reason))
 
     # Graph
 

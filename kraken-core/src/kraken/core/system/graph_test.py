@@ -1,3 +1,6 @@
+import logging
+from typing import Any
+
 import pytest
 
 from kraken.core.system.graph import TaskGraph
@@ -294,3 +297,72 @@ def test__TaskGraph__wait_for_group_finish_before_removing_non_strict_dependenci
 
     graph.set_status(ta2, TaskStatus.failed())
     assert list(graph.ready()) == [tb1]
+
+
+def test__TaskGraph__mark_tasks_as_skipped__does_not_skip_task_required_by_another_unskipped_task(
+    kraken_project: Project, caplog: Any
+) -> None:
+    """This test verifies that recursively marking tasks as skipped will not mark tasks that are still required by
+    other tasks that are not skipped."""
+
+    # Set up a graph like this:
+    #
+    # a <-- b
+    # ^__   ^
+    #    \  |
+    #     - c
+    #
+    # When we recursively mark "b" as skipped recursively, we expect that "c" is not marked as skipped because
+    # "a" still requires it.
+
+    a = kraken_project.task("a", VoidTask)
+    b = kraken_project.task("b", VoidTask)
+    c = kraken_project.task("c", VoidTask)
+
+    a.depends_on(b, c)
+    b.depends_on(c)
+
+    graph = TaskGraph(kraken_project.context)
+    with caplog.at_level(logging.DEBUG):
+        graph.mark_tasks_as_skipped(recursive_tasks=[b], reason="test", origin="test", reset=True)
+    assert (
+        "Did not tag task :c as 'skip' because it is required by at least one other task that is not skipped (:a)"
+        in caplog.text
+    )
+
+    assert [t.name for t in a.get_tags("skip")] == []
+    assert [t.name for t in b.get_tags("skip")] == ["skip"]
+    assert [t.name for t in c.get_tags("skip")] == []
+
+
+def test__TaskGraph__mark_tasks_as_skipped__does_skip_task_if_requierd_by_another_skipped_task(
+    kraken_project: Project, caplog: Any
+) -> None:
+    """This test builds a TaskGraph that would have the `mark_tasks_as_skipped()` method pass through a recursively
+    discovered task that depends on another such task, and both should be excluded. The test verifies that both are
+    excluded correctly, rather than the first discovered is not excluded because it has not been passed yet and thus
+    not marked as skipped (so still seeming like it requires the first task)."""
+
+    # Set up a graph like this:
+    #
+    # a <-- b
+    # ^__   ^
+    #    \  |
+    #     - c
+    #
+    # When we recursively mark "a" as skipped, we expect both "b" and "c" to be skipped as well.
+
+    a = kraken_project.task("a", VoidTask)
+    b = kraken_project.task("b", VoidTask)
+    c = kraken_project.task("c", VoidTask)
+
+    a.depends_on(b, c)
+    b.depends_on(c)
+
+    graph = TaskGraph(kraken_project.context)
+    with caplog.at_level(logging.DEBUG):
+        graph.mark_tasks_as_skipped(recursive_tasks=[a], reason="test", origin="test", reset=True)
+
+    assert [t.name for t in a.get_tags("skip")] == ["skip"]
+    assert [t.name for t in b.get_tags("skip")] == ["skip"]
+    assert [t.name for t in c.get_tags("skip")] == ["skip"]
