@@ -112,15 +112,13 @@ def get_candidates(
             if item.name.startswith("python") or item.name == "py":
                 commands.add(item)
 
-    commands_sorted = sorted(commands)
-
     # py and python
-    for command in commands_sorted:
+    for command in commands:
         if command.name in ("py", "python"):
             yield {"path": str(command)}
 
     # pythonX
-    for command in commands_sorted:
+    for command in commands:
         match = re.match(r"python(\d)$", command.name)
         if match:
             yield {
@@ -129,13 +127,13 @@ def get_candidates(
             }
 
     # pythonX.Y
-    for command in commands_sorted:
+    for command in commands:
         match = re.match(r"python(\d\.\d\d?)$", command.name)
         if match:
             yield {"path": str(command), "min_version": f"{match.group(1)}.0"}
 
     # pythonX.Y.Z
-    for command in commands_sorted:
+    for command in commands:
         match = re.match(r"python(\d\.\d\d?\.\d\d?)$", command.name)
         if match:
             yield {"path": str(command), "exact_version": match.group(1)}

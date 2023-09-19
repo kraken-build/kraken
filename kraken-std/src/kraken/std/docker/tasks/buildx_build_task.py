@@ -51,8 +51,8 @@ class BuildxBuildTask(BaseBuildTask):
         command += flatten(["--secret", f"id={k}"] for k in self.secrets.get())
         if self.cache_repo.get():
             # NOTE (@NiklasRosenstein): Buildx does not allow leading underscores, while Kaniko and Artifactory do.
-            command += ["--cache-to", f"type=registry,ref={not_none(self.cache_repo.get())}"]
             command += ["--cache-from", f"type=registry,ref={not_none(self.cache_repo.get())}"]
+            command += ["--cache-to", f"type=registry,ref={not_none(self.cache_repo.get())},mode=max,ignore-error=true"]
         if not self.cache.get():
             command += ["--no-cache"]
         command += flatten(["--tag", t] for t in self.tags.get())

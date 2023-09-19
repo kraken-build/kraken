@@ -44,6 +44,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
                     tests_dir.relative_to(source_dir)
                 except ValueError:
                     command += [str(tests_dir)]
+        command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += self.additional_args.get()
         return command
 

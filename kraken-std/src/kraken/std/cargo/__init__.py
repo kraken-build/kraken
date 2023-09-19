@@ -18,6 +18,7 @@ from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
+from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
 from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
@@ -33,6 +34,7 @@ __all__ = [
     "cargo_clippy",
     "cargo_deny",
     "cargo_fmt",
+    "cargo_generate_deb_package",
     "cargo_publish",
     "cargo_registry",
     "cargo_sqlx_migrate",
@@ -208,6 +210,7 @@ def cargo_deny(
     project: Project | None = None,
     checks: Sequence[str] | Supplier[Sequence[str]] = (),
     config_file: Path | Supplier[Path] | None = None,
+    error_message: str | None = None,
 ) -> CargoDenyTask:
     """Adds a task running cargo-deny for cargo projects. This checks different rules on dependencies, such as scanning
     for vulnerabilities, unwanted licences, or custom bans.
@@ -216,13 +219,17 @@ def cargo_deny(
     https://embarkstudios.github.io/cargo-deny/checks/index.html. If not provided, defaults to all of them.
     :param config_file: The configuration file as defined in https://embarkstudios.github.io/cargo-deny/checks/cfg.html
     If not provided defaults to cargo-deny default location.
+    :param error_message: The error message to show if the task fails.
     """
 
     project = project or Project.current()
-    task = project.task("cargoDeny", CargoDenyTask)
-    task.checks = checks
-    task.config_file = config_file
-    return task
+    return project.do(
+        "cargoDeny",
+        CargoDenyTask,
+        checks=checks,
+        config_file=config_file,
+        error_message=error_message,
+    )
 
 
 @dataclasses.dataclass
@@ -298,6 +305,7 @@ def cargo_build(
     group: str | None = "build",
     name: str | None = None,
     project: Project | None = None,
+    features: list[str] | None = None,
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -308,7 +316,7 @@ def cargo_build(
         variables in :attr:`CargoProject.build_env`.
     :param exclude: List of workspace crates to exclude from the build.
     :param name: The name of the task. If not specified, defaults to `:cargoBuild{mode.capitalised()}`.
-    :param version: Bump the Cargo.toml version temporarily while building to the given version."""
+    :param features: List of Cargo features to enable in the build."""
 
     assert mode in ("debug", "release"), repr(mode)
     project = project or Project.current()
@@ -322,8 +330,17 @@ def cargo_build(
         additional_args.append(crate)
     if mode == "release":
         additional_args.append("--release")
+    if features:
+        additional_args.append("--features")
+        # `cargo build` expects features to be comma separated, in one string.
+        # For example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
+        additional_args.append(",".join(features))
 
-    task = project.task(f"cargoBuild{mode.capitalize()}" if name is None else name, CargoBuildTask, group=group)
+    task = project.task(
+        f"cargoBuild{mode.capitalize()}" if name is None else name,
+        CargoBuildTask,
+        group=group,
+    )
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
@@ -339,18 +356,29 @@ def cargo_test(
     *,
     group: str | None = "test",
     project: Project | None = None,
+    features: list[str] | None = None,
 ) -> CargoTestTask:
     """Creates a task that runs `cargo test`.
 
     :param incremental: Whether to build the tests incrementally or not (with the `--incremental=` option). If not
         specified, the option is not specified and the default behaviour is used.
     :param env: Override variables for the build environment variables. Values in this dictionary override
-        variables in :attr:`CargoProject.build_env`."""
+        variables in :attr:`CargoProject.build_env`.
+    :param features: List of Cargo features to enable in the build."""
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
+
+    additional_args = []
+    if features:
+        additional_args.append("--features")
+        # `cargo build` expects features to be comma separated, in one string.
+        # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
+        additional_args.append(",".join(features))
+
     task = project.task("cargoTest", CargoTestTask, group=group)
     task.incremental = incremental
+    task.additional_args = additional_args
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
     return task
@@ -384,7 +412,9 @@ def cargo_publish(
     cargo = CargoProject.get_or_create(project)
 
     task = project.task(
-        f"{name}/{package_name}" if package_name is not None else name, CargoPublishTask, group="publish"
+        f"{name}/{package_name}" if package_name is not None else name,
+        CargoPublishTask,
+        group="publish",
     )
     task.registry = Supplier.of_callable(lambda: cargo.registries[registry])
     task.additional_args = list(additional_args)
@@ -405,7 +435,9 @@ def cargo_check_toolchain_version(
 
     project = project or Project.current()
     task = project.task(
-        f"cargoCheckVersion/{minimal_version}", CargoCheckToolchainVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME
+        f"cargoCheckVersion/{minimal_version}",
+        CargoCheckToolchainVersionTask,
+        group=CARGO_BUILD_SUPPORT_GROUP_NAME,
     )
     task.minimal_version = minimal_version
     return task
@@ -418,3 +450,12 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
     task = project.task(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group)
     task.target = target
     return task
+
+
+def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
+    project = project or Project.current()
+    return project.do(
+        "cargoGenerateDeb",
+        CargoGenerateDebPackage,
+        package_name=package_name,
+    )
