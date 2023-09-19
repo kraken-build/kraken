@@ -11,7 +11,6 @@ import pdb
 import sys
 import textwrap
 from functools import partial
-from itertools import chain
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -39,7 +38,7 @@ from kraken.core.system.errors import BuildError, ProjectNotFoundError
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task, TaskStatus
+from kraken.core.system.task import GroupTask, Task
 
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
