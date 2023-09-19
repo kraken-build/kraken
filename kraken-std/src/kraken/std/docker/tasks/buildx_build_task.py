@@ -6,7 +6,7 @@ import subprocess as sp
 from pathlib import Path
 
 from kraken.common import flatten, not_none
-from kraken.core import Project, TaskStatus
+from kraken.core import Project, Property, TaskStatus
 
 from kraken.std.docker.util.dockerfile import update_run_commands
 
@@ -15,6 +15,11 @@ from .base_build_task import BaseBuildTask
 
 class BuildxBuildTask(BaseBuildTask):
     """Implements building a Docker image with Buildx."""
+
+    #: Whether to add provenance to the image manifest. Using this option, even when building for a single
+    #: platform, a `list.manifest.json` is pushed instead of a `manifest.json`, which is why we default to
+    #: `False`.
+    provenance: Property[bool] = Property.default(False)
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -66,6 +71,7 @@ class BuildxBuildTask(BaseBuildTask):
             command += ["--output", f"type=tar,dest={self.image_output_file.get()}"]
         if self.load.get():
             command += ["--load"]
+        command += [f"--provenance={'true' if self.provenance.get() else 'false'}"]
 
         # Buildx will take the secret from the environment variables.
         env = os.environ.copy()

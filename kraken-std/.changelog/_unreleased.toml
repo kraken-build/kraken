@@ -1,0 +1,6 @@
+[[entries]]
+id = "287fc520-97c0-4da7-9988-0ced0584bcbf"
+type = "improvement"
+description = "Set `docker buildx build --provenance=false` by default to avoid pushing a list manifest by default."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/118"
