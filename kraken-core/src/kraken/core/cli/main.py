@@ -380,13 +380,14 @@ def ls(graph: TaskGraph) -> None:
 
 def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
     if exclude_options.exclude_tasks or exclude_options.exclude_tasks_subgraph:
-        # Mark tasks that are excluded as skipped.
-        for task in chain(
+        graph.mark_tasks_as_skipped(
             graph.context.resolve_tasks(exclude_options.exclude_tasks),
             graph.context.resolve_tasks(exclude_options.exclude_tasks_subgraph),
-        ):
-            if not graph.get_status(task):
-                graph.set_status(task, TaskStatus.skipped("excluded by -x/-X"))
+            reason="excluded by -x/-X",
+            origin="cli",
+            reset=True,
+            set_status=True,
+        )
 
     tasks = set(graph.tasks())
 

@@ -407,6 +407,7 @@ class TaskGraph(Graph):
         recursive_tasks: Sequence[Task | str | Address] = (),
         *,
         unless_required: bool = False,
+        set_status: bool = False,
         reason: str,
         origin: str,
         reset: bool,
@@ -445,6 +446,8 @@ class TaskGraph(Graph):
                     continue
 
             task.add_tag("skip", reason=reason, origin=origin)
+            if set_status and self.get_status(task) is None:
+                self.set_status(task, TaskStatus.skipped(reason))
 
         for task in recursive_tasks:
             self.mark_tasks_as_skipped(
@@ -454,6 +457,7 @@ class TaskGraph(Graph):
                 reason=reason,
                 origin=origin,
                 reset=False,
+                set_status=set_status,
             )
 
     # Graph
