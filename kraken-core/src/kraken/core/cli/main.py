@@ -13,7 +13,7 @@ import textwrap
 from functools import partial
 from itertools import chain
 from pathlib import Path
-from typing import Any, NoReturn
+from typing import Any, NoReturn, TextIO
 
 from kraken.common import (
     BuildscriptMetadata,
@@ -46,6 +46,24 @@ BUILD_SUPPORT_DIRECTORY = "build-support"
 logger = logging.getLogger(__name__)
 print = partial(builtins.print, flush=True)
 
+class Unbuffered:
+    def __init__(self, stream, file_handle: TextIO):
+       self.stream = stream
+       self.file_handle = file_handle
+    #    self.flush = True
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+        if not self.file_handle.closed:
+            self.file_handle.write(data)
+
+    def flush(self):
+        self.stream.flush()
+        if not self.file_handle.closed:
+            self.file_handle.flush()
+       
+       
 
 class BuildScriptError(Exception):
     """
@@ -283,7 +301,17 @@ def run(
                 sys.exit(1)
 
         try:
-            context.execute(graph)
+            # orig_stdout = sys.stdout
+            # orig_stderr = sys.stderr
+            with open("log_stdout.txt", 'w') as stdout_file_handle, open("log_stderr.txt", 'w') as stderr_file_handle:
+                sys.stdout = Unbuffered(sys.stdout, stdout_file_handle)
+                sys.stderr = Unbuffered(sys.stderr, stderr_file_handle)
+                
+                context.execute(graph)
+
+            # sys.stdout = orig_stdout
+            # sys.stderr = orig_stderr
+            
         except BuildError as exc:
             print()
             print("error:", exc, file=sys.stderr)
