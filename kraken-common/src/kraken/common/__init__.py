@@ -3,6 +3,7 @@ __version__ = "0.31.5"
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
 from ._asciitable import AsciiTable
+from ._auth import CredentialsWithHost
 from ._buildscript import BuildscriptMetadata, BuildscriptMetadataException, buildscript
 from ._date import datetime_to_iso8601, iso8601_to_datetime
 from ._environment import EnvironmentType
@@ -79,4 +80,5 @@ __all__ = [
     "path",
     # supplier
     "Supplier",
+    "CredentialsWithHost",
 ]
