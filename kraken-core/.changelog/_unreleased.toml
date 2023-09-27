@@ -1,0 +1,6 @@
+[[entries]]
+id = "8c211ed2-7488-4a3a-bceb-8688cb9d2830"
+type = "improvement"
+description = "Improve errors that could be raised by the `TaskGraph` when a `not_none()` expectation is not met."
+author = "rosensteinniklas@gmail.com"
+pr = "https://github.com/kraken-build/kraken-build/pull/119"
