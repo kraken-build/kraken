@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 from kraken.common import CredentialsWithHost
-from kraken.core import Project, Property
+from kraken.core import Project
 
 from .tasks import (
     BuffrsBumpVersionTask,
@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 __all__ = ["buffrs_login", "buffrs_publish", "buffrs_bump_version"]
 
 PROTO_REPO = "proto"
+
+PYTHON_BUILD_TASK_NAME = "python.build"
 
 
 def buffrs_login(
@@ -118,7 +120,8 @@ def buffrs_generate(
     name: str = "python.buffrsGenerate",
     project: Project | None = None,
     language: Language,
-    generated_output_dir: Property[str],
+    generated_output_dir: str,
+    **kwargs: Any,
 ) -> BuffrsGenerateTask:
     """Generates code for installed packages with buffrs."""
 
@@ -130,5 +133,8 @@ def buffrs_generate(
         language=language,
         generated_output_dir=generated_output_dir,
     )
+
+    # TODO(alex.spencer) - I'm not sure this is the right place to put this
+    task.required_by(f"{PYTHON_BUILD_TASK_NAME}?")
 
     return task
