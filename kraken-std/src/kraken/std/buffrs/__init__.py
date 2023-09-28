@@ -4,9 +4,16 @@ import logging
 from typing import cast
 
 from kraken.common import CredentialsWithHost
-from kraken.core import Project
+from kraken.core import Project, Property
 
-from .tasks import BuffrsBumpVersionTask, BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask
+from .tasks import (
+    BuffrsBumpVersionTask,
+    BuffrsGenerateTask,
+    BuffrsInstallTask,
+    BuffrsLoginTask,
+    BuffrsPublishTask,
+    Language,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +108,27 @@ def buffrs_publish(
         BuffrsPublishTask,
         artifactory_repository=artifactory_repository,
         group="publish",
+    )
+
+    return task
+
+
+def buffrs_generate(
+    *,
+    name: str = "python.buffrsGenerate",
+    project: Project | None = None,
+    language: Language,
+    generated_output_dir: Property[str],
+) -> BuffrsGenerateTask:
+    """Generates code for installed packages with buffrs."""
+
+    project = project or Project.current()
+
+    task = project.do(
+        "buffrsGenerate",
+        BuffrsGenerateTask,
+        language=language,
+        generated_output_dir=generated_output_dir,
     )
 
     return task
