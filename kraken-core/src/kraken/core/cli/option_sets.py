@@ -122,7 +122,7 @@ class GraphOptions:
             resume=args.resume,
             restart=args.restart,
             no_save=getattr(args, "no_save", True),
-            all=getattr(args, "all", False),
+            all=getattr(args, "all") == "all",
         )
 
 

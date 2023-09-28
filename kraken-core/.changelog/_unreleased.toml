@@ -4,3 +4,10 @@ type = "improvement"
 description = "Improve errors that could be raised by the `TaskGraph` when a `not_none()` expectation is not met."
 author = "rosensteinniklas@gmail.com"
 pr = "https://github.com/kraken-build/kraken-build/pull/119"
+
+[[entries]]
+id = "659e1164-d8d9-40a3-9d4e-4f67b1c2e20e"
+type = "fix"
+description = "Fixed to recompute hash for `Address` after deserialization."
+author = "rosensteinniklas@gmail.com"
+pr = "https://github.com/kraken-build/kraken-build/pull/121"
