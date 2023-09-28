@@ -245,9 +245,11 @@ class Address(metaclass=AddressMeta):
         self._is_absolute, self._is_container, self._elements = self._parse(value)
         self._hash_key: int | None = None
 
-    def __getnewargs__(self) -> tuple[Any, ...]:
-        # For dill to serialize/deserialize the object.
+    def __getstate__(self) -> tuple[str]:
         return (str(self),)
+
+    def __setstate__(self, state: tuple[str]) -> None:
+        Address.__init__(self, state[0])
 
     def __str__(self) -> str:
         """

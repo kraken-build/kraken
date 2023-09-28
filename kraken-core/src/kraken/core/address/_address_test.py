@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dill  # type: ignore[import]
 from pytest import raises
 
 from kraken.core.address import Address
@@ -119,3 +120,64 @@ def test__Address__set_container() -> None:
     assert Address(":a:..").set_container(False) == Address(":a:..")
     assert Address(":a:..:").set_container(True) == Address(":a:..:")
     assert Address(":a:..:").set_container(False) == Address(":a:..")
+
+
+def test__Address__deserialization_is_consistent() -> None:
+    """Tests whether a deserialized address has the same hash as the original one."""
+
+    from kraken.core.address import Address
+
+    addr = Address(":subproject:docker.build.linux-amd64")
+    hash(addr)  # Make sure that the Address._hash_key attribute is initialized
+    assert addr._hash_key is not None
+
+    dumped = dill.dumps(addr)
+
+    # We need to do some shenanigans to simulate the `dill` package deserializing the Address
+    # object as if we were running in a new instance of the interpreter, i.e. with a different
+    # instantiation of the module loaded from disk.
+    #
+    # However, we cannot just use `reload()` as that will have a permanent effect on other tests
+    # and causing them to fail as some parts of the test reference the `Address` class from the
+    # previous instance of the module, and some the new.
+    #
+    # The `localimport` module helps us to temporarily mess with the global interpreter module
+    # state, and restore it after.
+
+    from localimport import localimport
+
+    with localimport("/i/dont/exist") as localimporter:
+        localimporter.disable("kraken.core.address")
+        from kraken.core.address import Address as AddressV2
+
+        assert Address is not AddressV2
+
+        loaded: Address = dill.loads(dumped)
+
+    from kraken.core.address import Address as AddressSameAsV1
+
+    assert Address is AddressSameAsV1
+
+    # Sanity check, the types can't be the same after we reloaded the module. The __eq__() implementation
+    # does an isinstance check for the other comparator, and so it will also fail.
+    assert addr != loaded
+    assert type(addr) is not type(loaded)
+    # NOTE: We can't expect the hash to be consistent between runs of the Python interpreter.
+
+    addr = AddressV2(str(addr))
+    assert addr == loaded
+    assert hash(addr) == hash(loaded)
+    assert type(addr) is type(loaded)
+
+
+def test__Address__deserialize_resets_cached_hash_key() -> None:
+    """The Address class caches its own hash key on first request, this improves the hashing performance as the
+    class is immutable. However, when deserializing the Address class, its hash may be different because of the
+    Python interpreter hash salting and the `Address` class hash also being included in the instance hash."""
+
+    addr = Address(":foo:bar")
+    hash(addr)
+    assert addr._hash_key is not None
+
+    addr = dill.loads(dill.dumps(addr))
+    assert addr._hash_key is None
