@@ -135,6 +135,7 @@ def buffrs_generate(
         BuffrsGenerateTask,
         language=language,
         generated_output_dir=generated_output_dir,
+        group="gen",
     )
 
     # TODO(alex.spencer) - I'm not sure this is the right place to put this - but unsure how to separate it out
