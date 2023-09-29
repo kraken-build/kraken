@@ -67,6 +67,7 @@ def buffrs_bump_version(
 
     return task
 
+CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 
 def buffrs_install(
     *,
@@ -80,18 +81,16 @@ def buffrs_install(
         "buffrsInstall",
         BuffrsInstallTask,
     )
+    
+    # TODO(alex.spencer) - move this over to cargoBuildSupport - how would we get the task reference as this step happens after cargo_project?
+    if task.project.context.root_project == project and CARGO_BUILD_SUPPORT_GROUP_NAME in project.context.root_project.tasks():
+        logger.debug(
+            "%s: %s group found in root project tasks. Adding this task to the root project's groups",
+            task.name,
+            CARGO_BUILD_SUPPORT_GROUP_NAME,
+        )
+        project.context.root_project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)  # Add to the ROOT project
 
-    # if CARGO_BUILD_SUPPORT_GROUP_NAME in project.context.root_project.tasks():
-    #     logger.debug(
-    #         "%s: %s group found in root project tasks. Adding this task to the root project's groups",
-    #         task.name,
-    #         CARGO_BUILD_SUPPORT_GROUP_NAME,
-    #     )
-    #     project.context.root_project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)  # Add to the ROOT project
-
-    # if PYTHON_BUILD_TASK_NAME in project.context.root_project.tasks():
-    #     logger.debug("%s found in root project tasks. Adding this task as a dependancy", PYTHON_BUILD_TASK_NAME)
-    #     task.required_by(f":{PYTHON_BUILD_TASK_NAME}")
 
     return task
 
@@ -117,13 +116,13 @@ def buffrs_publish(
 
 def buffrs_generate(
     *,
-    name: str = "python.buffrsGenerate",
+    name: str,
     project: Project | None = None,
     language: Language,
     generated_output_dir: str,
     **kwargs: Any,
 ) -> BuffrsGenerateTask:
-    """Generates code for installed packages with buffrs."""
+    """Generates code for installed packages with buffrs. Should only be called for python projects that have a Proto.toml file"""
 
     project = project or Project.current()
 
@@ -134,7 +133,8 @@ def buffrs_generate(
         generated_output_dir=generated_output_dir,
     )
 
-    # TODO(alex.spencer) - I'm not sure this is the right place to put this
-    task.required_by(f"{PYTHON_BUILD_TASK_NAME}?")
+    # TODO(alex.spencer) - I'm not sure this is the right place to put this - but unsure how to separate it out
+    # logger.warning(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
+    task.required_by(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
 
     return task
