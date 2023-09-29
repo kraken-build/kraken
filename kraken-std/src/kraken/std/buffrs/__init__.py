@@ -84,7 +84,8 @@ def buffrs_install(
         BuffrsInstallTask,
     )
 
-    # TODO(alex.spencer) - move this over to cargoBuildSupport - how would we get the task reference as this step happens after cargo_project?
+    # TODO(alex.spencer) - move this over to cargoBuildSupport:
+    #  - how would we get the task reference as this step happens after cargo_project?
     if (
         task.project.context.root_project == project
         and CARGO_BUILD_SUPPORT_GROUP_NAME in project.context.root_project.tasks()
@@ -126,7 +127,8 @@ def buffrs_generate(
     generated_output_dir: str,
     **kwargs: Any,
 ) -> BuffrsGenerateTask:
-    """Generates code for installed packages with buffrs. Should only be called for python projects that have a Proto.toml file"""
+    """Generates code for installed packages with buffrs.
+    Should only be called for python projects that have a Proto.toml file"""
 
     project = project or Project.current()
 
@@ -138,7 +140,8 @@ def buffrs_generate(
         group="gen",
     )
 
-    # TODO(alex.spencer) - I'm not sure this is the right place to put this - but unsure how to separate it out
+    # TODO(alex.spencer) - I'm not sure this is the right place to put this:
+    #  - but unsure how to separate it out
     # logger.warning(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
     task.required_by(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
 
