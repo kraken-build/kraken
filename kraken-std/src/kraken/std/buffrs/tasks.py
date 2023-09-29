@@ -119,7 +119,14 @@ class BuffrsGenerateTask(Task):
     generated_output_dir: Property[str]
 
     def execute(self) -> TaskStatus:
-        command = ["buffrs", "generate", "--lang", self.language.get().value, "--out-dir", self.generated_output_dir.get()]
+        command = [
+            "buffrs",
+            "generate",
+            "--lang",
+            self.language.get().value,
+            "--out-dir",
+            self.generated_output_dir.get(),
+        ]
 
         return TaskStatus.from_exit_code(
             command,
