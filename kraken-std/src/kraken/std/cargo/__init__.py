@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Literal
 
 from kraken.common import Supplier
-from kraken.core import Project
+from kraken.core import Project, Task
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
@@ -306,6 +306,7 @@ def cargo_build(
     name: str | None = None,
     project: Project | None = None,
     features: list[str] | None = None,
+    depends_on: Sequence[Task] | None = None,
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -347,6 +348,11 @@ def cargo_build(
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
 
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+
+    if depends_on:
+        for dependency in depends_on:
+            task.depends_on(dependency)
+
     return task
 
 
@@ -357,6 +363,7 @@ def cargo_test(
     group: str | None = "test",
     project: Project | None = None,
     features: list[str] | None = None,
+    depends_on: Sequence[Task] | None = None,
 ) -> CargoTestTask:
     """Creates a task that runs `cargo test`.
 
@@ -381,6 +388,11 @@ def cargo_test(
     task.additional_args = additional_args
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+
+    if depends_on:
+        for dependency in depends_on:
+            task.depends_on(dependency)
+
     return task
 
 

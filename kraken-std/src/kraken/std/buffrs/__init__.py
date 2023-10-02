@@ -138,9 +138,4 @@ def buffrs_generate(
         group="gen",
     )
 
-    # TODO(alex.spencer) - I'm not sure this is the right place to put this:
-    #  - but unsure how to separate it out
-    # logger.warning(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
-    task.required_by(f":{project.name}:{PYTHON_BUILD_TASK_NAME}?")
-
     return task
