@@ -68,7 +68,6 @@ class Package:
     def to_json(self) -> dict[str, str]:
         values = {"type": self.type_, "name": self.name, "version": self.version}
 
-        if self.unhandled is not None:
-            values.update({k: v for k, v in self.unhandled.items() if v is not None})
+        values.update(self.unhandled.items())
 
         return {k: v for k, v in values.items() if v is not None}
