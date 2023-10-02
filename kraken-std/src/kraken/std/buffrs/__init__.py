@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, cast
+from typing import cast
 
 from kraken.common import CredentialsWithHost
 from kraken.core import Project
@@ -121,11 +121,9 @@ def buffrs_publish(
 
 def buffrs_generate(
     *,
-    name: str,
     project: Project | None = None,
     language: Language,
     generated_output_dir: str,
-    **kwargs: Any,
 ) -> BuffrsGenerateTask:
     """Generates code for installed packages with buffrs.
     Should only be called for python projects that have a Proto.toml file"""

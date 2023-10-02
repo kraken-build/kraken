@@ -1,6 +1,6 @@
 [[entries]]
 id = "aa631280-287e-4773-9118-89619e9bd5e7"
 type = "feature"
-description = "Move buffrs login/install/generate to kraken.std"
+description = "Added buffrs login/install/generate to kraken.std"
 author = "alex.spencer@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/120"

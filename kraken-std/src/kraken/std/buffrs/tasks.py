@@ -5,7 +5,6 @@ import enum
 import logging
 import os
 import subprocess as sp
-from urllib.parse import urljoin
 
 from kraken.common import CredentialsWithHost, atomic_file_swap
 from kraken.core import BackgroundTask, Project, Property, Task, TaskStatus
@@ -27,9 +26,8 @@ class BuffrsLoginTask(Task):
 
     def execute(self) -> TaskStatus:
         credentials = self.artifactory_credentials.get()
-        url = urljoin(credentials.host, "/artifactory")
 
-        command = ["buffrs", "login", "--registry", url]
+        command = ["buffrs", "login", "--registry", credentials.host]
 
         return TaskStatus.from_exit_code(
             command,
@@ -80,7 +78,7 @@ class BuffrsBumpVersionTask(BackgroundTask):
         return manifest.to_toml_string()
 
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus | None:
-        project = self.project or Project.current()
+        project = self.project
         content = self._get_updated_proto_toml()
 
         fp = exit_stack.enter_context(atomic_file_swap(project.directory / "Proto.toml", "w", always_revert=True))
