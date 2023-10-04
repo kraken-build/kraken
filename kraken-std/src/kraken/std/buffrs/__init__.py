@@ -17,7 +17,7 @@ from .tasks import (
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["buffrs_login", "buffrs_publish", "buffrs_bump_version"]
+__all__ = ["buffrs_login", "buffrs_publish", "buffrs_bump_version", "buffrs_generate"]
 
 PROTO_REPO = "proto"
 
@@ -83,19 +83,6 @@ def buffrs_install(
         "buffrsInstall",
         BuffrsInstallTask,
     )
-
-    # TODO(alex.spencer) - move this over to cargoBuildSupport:
-    #  - how would we get the task reference as this step happens after cargo_project?
-    if (
-        task.project.context.root_project == project
-        and CARGO_BUILD_SUPPORT_GROUP_NAME in project.context.root_project.tasks()
-    ):
-        logger.debug(
-            "%s: %s group found in root project tasks. Adding this task to the root project's groups",
-            task.name,
-            CARGO_BUILD_SUPPORT_GROUP_NAME,
-        )
-        project.context.root_project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)  # Add to the ROOT project
 
     return task
 
