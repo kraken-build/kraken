@@ -306,7 +306,7 @@ def cargo_build(
     name: str | None = None,
     project: Project | None = None,
     features: list[str] | None = None,
-    depends_on: Sequence[Task] | None = None,
+    depends_on: Sequence[Task] = (),
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -349,9 +349,8 @@ def cargo_build(
 
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
 
-    if depends_on:
-        for dependency in depends_on:
-            task.depends_on(dependency)
+    for dependency in depends_on:
+        task.depends_on(dependency)
 
     return task
 
@@ -363,7 +362,7 @@ def cargo_test(
     group: str | None = "test",
     project: Project | None = None,
     features: list[str] | None = None,
-    depends_on: Sequence[Task] | None = None,
+    depends_on: Sequence[Task] = (),
 ) -> CargoTestTask:
     """Creates a task that runs `cargo test`.
 
@@ -389,9 +388,8 @@ def cargo_test(
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
 
-    if depends_on:
-        for dependency in depends_on:
-            task.depends_on(dependency)
+    for dependency in depends_on:
+        task.depends_on(dependency)
 
     return task
 

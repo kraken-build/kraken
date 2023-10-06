@@ -1,6 +1,6 @@
 [[entries]]
 id = "aa631280-287e-4773-9118-89619e9bd5e7"
 type = "feature"
-description = "Added buffrs login/install/generate to kraken.std"
+description = "Added buffrs login/install/generate to kraken.std. Allow cargo_build to depend on task(s), i.e. buffrs install"
 author = "alex.spencer@helsing.ai"
 pr = "https://github.com/kraken-build/kraken-build/pull/120"
