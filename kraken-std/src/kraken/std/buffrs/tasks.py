@@ -59,10 +59,11 @@ class BuffrsInstallTask(Task):
         )
 
 
-class BuffrsBumpVersionTask(BackgroundTask):
-    """This task bumps the version numbers in `Proto.toml`"""
+class BuffrsPublishTask(BackgroundTask):
+    """This task uses buffrs to publish a new release of the buffrs package."""
 
-    description = 'Bump the version in `Proto.toml` to "%(version)"'
+    description = "Publish a buffrs package"
+    artifactory_repository: Property[str]
     version: Property[str]
 
     def _get_updated_proto_toml(self) -> str:
@@ -88,13 +89,6 @@ class BuffrsBumpVersionTask(BackgroundTask):
         version = self.version.get()
 
         return TaskStatus.started(f"temporarily bump to {version.format()}")
-
-
-class BuffrsPublishTask(Task):
-    """This task uses buffrs to publish a new release of the buffrs package."""
-
-    description = "Publish a buffrs package"
-    artifactory_repository: Property[str]
 
     def execute(self) -> TaskStatus:
         command = ["buffrs", "publish", "--repository", self.artifactory_repository.get(), "--allow-dirty"]

@@ -6,18 +6,11 @@ from typing import cast
 from kraken.common import CredentialsWithHost
 from kraken.core import Project
 
-from .tasks import (
-    BuffrsBumpVersionTask,
-    BuffrsGenerateTask,
-    BuffrsInstallTask,
-    BuffrsLoginTask,
-    BuffrsPublishTask,
-    Language,
-)
+from .tasks import BuffrsGenerateTask, BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask, Language
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["buffrs_login", "buffrs_publish", "buffrs_bump_version", "buffrs_generate"]
+__all__ = ["buffrs_login", "buffrs_publish", "buffrs_generate"]
 
 PROTO_REPO = "proto"
 
@@ -46,28 +39,6 @@ def buffrs_login(
     return task
 
 
-def buffrs_bump_version(
-    *,
-    project: Project | None = None,
-    version: str,
-) -> BuffrsBumpVersionTask:
-    """Creates a task that bumps the version in `Proto.toml`.
-
-    :param version: The version number to bump to.
-    """
-
-    project = project or Project.current()
-
-    task = project.do(
-        "buffrsBumpVersion",
-        BuffrsBumpVersionTask,
-        version=version,
-        group="publish",
-    )
-
-    return task
-
-
 CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
 
 
@@ -91,6 +62,7 @@ def buffrs_publish(
     *,
     project: Project | None = None,
     artifactory_repository: str,
+    version: str,
 ) -> BuffrsPublishTask:
     """Publishes the buffrs package to the repository of the project."""
 
@@ -101,6 +73,7 @@ def buffrs_publish(
         BuffrsPublishTask,
         artifactory_repository=artifactory_repository,
         group="publish",
+        version=version,
     )
 
     return task
