@@ -1,0 +1,6 @@
+[[entries]]
+id = "8011b761-4b58-4c3a-ba34-8099e9a24b88"
+type = "fix"
+description = "Confine buf command to current working directory of project"
+author = "alex.spencer@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/122"

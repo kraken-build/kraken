@@ -10,7 +10,7 @@ class BufFormatTask(Task):
 
     def execute(self) -> TaskStatus | None:
         command = ["buf", "format", "-w"]
-        result = sp.call(command)
+        result = sp.call(command, cwd=self.project.directory / "proto")
 
         return TaskStatus.from_exit_code(command, result)
 
