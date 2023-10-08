@@ -104,6 +104,7 @@ class _MaturinBuilder:
                 "maturin",
                 "build",
                 "--release",
+                "--strip",
                 "--zig",
                 "--target",
                 target.target,
