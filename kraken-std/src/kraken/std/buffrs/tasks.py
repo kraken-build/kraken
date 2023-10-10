@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import contextlib
 import enum
 import logging
 import os
 import subprocess as sp
 
 from kraken.common import CredentialsWithHost, atomic_file_swap
-from kraken.core import BackgroundTask, Project, Property, Task, TaskStatus
+from kraken.core import Project, Property, Task, TaskStatus
 
 from .manifest import BuffrsManifest
 
@@ -59,7 +58,7 @@ class BuffrsInstallTask(Task):
         )
 
 
-class BuffrsPublishTask(BackgroundTask):
+class BuffrsPublishTask(Task):
     """This task uses buffrs to publish a new release of the buffrs package."""
 
     description = "Publish a buffrs package"
@@ -78,29 +77,26 @@ class BuffrsPublishTask(BackgroundTask):
 
         return manifest.to_toml_string()
 
-    def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus | None:
+    def execute(self) -> TaskStatus:
+        command = ["buffrs", "publish", "--repository", self.artifactory_repository.get(), "--allow-dirty"]
         project = self.project
         content = self._get_updated_proto_toml()
 
-        fp = exit_stack.enter_context(atomic_file_swap(project.directory / "Proto.toml", "w", always_revert=True))
-        fp.write(content)
-        fp.close()
+        with atomic_file_swap(project.directory / "Proto.toml", "w", always_revert=True) as atomic_file:
+            atomic_file.write(content)
+            atomic_file.close()
 
-        version = self.version.get()
+            version = self.version.get()
+            logger.info(f"temporarily bumped Proto.toml to {version.format()}")
 
-        return TaskStatus.started(f"temporarily bump to {version.format()}")
-
-    def execute(self) -> TaskStatus:
-        command = ["buffrs", "publish", "--repository", self.artifactory_repository.get(), "--allow-dirty"]
-
-        return TaskStatus.from_exit_code(
-            command,
-            sp.call(
+            return TaskStatus.from_exit_code(
                 command,
-                cwd=self.project.directory,
-                env=os.environ.copy(),
-            ),
-        )
+                sp.call(
+                    command,
+                    cwd=self.project.directory,
+                    env=os.environ.copy(),
+                ),
+            )
 
 
 class BuffrsGenerateTask(Task):
