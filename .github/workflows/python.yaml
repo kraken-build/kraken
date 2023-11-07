@@ -22,6 +22,7 @@ jobs:
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
       with: { python-version: "${{ matrix.python-version }}" }
+    - run: pip install pipx && pipx install poetry pdm
     - run: slap install --link --no-venv-check ${{ matrix.only }}
     - run: slap test ${{ matrix.only }}
 
