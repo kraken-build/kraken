@@ -3,12 +3,15 @@ import logging
 import os
 import shutil
 import tarfile
+import tempfile
 import unittest.mock
 from pathlib import Path
 from typing import TypeVar
+from unittest.mock import patch
 
 import pytest
 import tomli
+from decorator import decorator
 
 from kraken.common import not_none
 from kraken.core import Context, Project
@@ -26,32 +29,44 @@ USER_NAME = "integration-test-user"
 USER_PASS = "password-for-integration-test"
 
 
-@pytest.fixture
-def pypiserver(docker_service_manager: DockerServiceManager, tempdir: Path) -> str:
-    # Create a htpasswd file for the registry.
-    logger.info("Generating htpasswd for Pypiserver")
-    htpasswd_content = not_none(
-        docker_service_manager.run(
-            "httpd:2",
-            entrypoint="htpasswd",
-            args=["-Bbn", USER_NAME, USER_PASS],
-            capture_output=True,
-        )
-    )
-    htpasswd = tempdir / "htpasswd"
-    htpasswd.write_bytes(htpasswd_content)
+@pytest.fixture(scope="session")
+def deactivate_venv() -> None:
+    with patch.dict(os.environ):
+        os.environ.pop("VIRTUAL_ENV", None)
+        os.environ.pop("VIRTUAL_ENV_PROMPT", None)
+        os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "true"
+        yield
 
-    index_url = f"http://localhost:{PYPISERVER_PORT}/simple"
-    docker_service_manager.run(
-        "pypiserver/pypiserver:latest",
-        ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
-        ports=[f"{PYPISERVER_PORT}:8080"],
-        volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
-        detach=True,
-        probe=("GET", index_url),
-    )
-    logger.info("Started local Pypiserver at %s", index_url)
-    return index_url
+
+@pytest.fixture(scope="session")
+def pypiserver(docker_service_manager: DockerServiceManager) -> str:
+    with tempfile.TemporaryDirectory() as _tempdir:
+        tempdir = Path(_tempdir)
+
+        # Create a htpasswd file for the registry.
+        logger.info("Generating htpasswd for Pypiserver")
+        htpasswd_content = not_none(
+            docker_service_manager.run(
+                "httpd:2",
+                entrypoint="htpasswd",
+                args=["-Bbn", USER_NAME, USER_PASS],
+                capture_output=True,
+            )
+        )
+        htpasswd = tempdir / "htpasswd"
+        htpasswd.write_bytes(htpasswd_content)
+
+        index_url = f"http://localhost:{PYPISERVER_PORT}/simple"
+        docker_service_manager.run(
+            "pypiserver/pypiserver:latest",
+            ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
+            ports=[f"{PYPISERVER_PORT}:8080"],
+            volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
+            detach=True,
+            probe=("GET", index_url),
+        )
+        logger.info("Started local Pypiserver at %s", index_url)
+        return index_url
 
 
 @pytest.mark.parametrize(
@@ -64,6 +79,7 @@ def test__python_project_install_lint_and_publish(
     kraken_ctx: Context,
     tempdir: Path,
     pypiserver: str,
+    deactivate_venv: None,
 ) -> None:
     consumer_dir = project_dir + "-consumer"
 
@@ -97,6 +113,7 @@ def test__python_project_install_lint_and_publish(
 def test__python_project_upgrade_python_version_string(
     kraken_ctx: Context,
     kraken_project: Project,
+    deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
 
@@ -152,6 +169,7 @@ def test__python_pyproject_reads_correct_data(
     reader: type[M],
     expected_python_version: str,
     kraken_project: Project,
+    deactivate_venv: None,
 ) -> None:
     # Copy the projects to the temporary directory.
     new_dir = kraken_project.directory / project_dir
@@ -174,6 +192,7 @@ def test__python_pyproject_reads_correct_data(
 def test__python_project_coverage(
     kraken_ctx: Context,
     kraken_project: Project,
+    deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
 
@@ -199,7 +218,11 @@ def test__python_project_coverage(
     assert Path(kraken_project.build_directory / "coverage.xml").is_file()
 
 
-def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context, kraken_project: Project) -> None:
+def test__python_project_can_lint_lint_enforced_directories(
+    kraken_ctx: Context,
+    kraken_project: Project,
+    deactivate_venv: None,
+) -> None:
     tempdir = kraken_project.directory
     original_dir = example_dir("lint-enforced-directories-project")
 

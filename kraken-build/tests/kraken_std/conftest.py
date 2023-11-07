@@ -9,7 +9,7 @@ import pytest
 from tests.kraken_std.util.docker import DockerServiceManager
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def docker_service_manager() -> Iterator[DockerServiceManager]:
     with contextlib.ExitStack() as stack:
         yield DockerServiceManager(stack)
