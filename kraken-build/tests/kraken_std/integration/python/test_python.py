@@ -18,6 +18,7 @@ from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
 from tests.kraken_std.util.docker import DockerServiceManager
+from tests.resources import example_dir
 
 logger = logging.getLogger(__name__)
 PYPISERVER_PORT = 23213
@@ -67,8 +68,8 @@ def test__python_project_install_lint_and_publish(
     consumer_dir = project_dir + "-consumer"
 
     # Copy the projects to the temporary directory.
-    shutil.copytree(Path(__file__).parent / "data" / project_dir, tempdir / project_dir)
-    shutil.copytree(Path(__file__).parent / "data" / consumer_dir, tempdir / consumer_dir)
+    shutil.copytree(example_dir(project_dir), tempdir / project_dir)
+    shutil.copytree(example_dir(consumer_dir), tempdir / consumer_dir)
 
     # TODO (@NiklasRosenstein): Make sure Poetry installs the environment locally so it gets cleaned up
     #       with the temporary directory.
@@ -99,10 +100,9 @@ def test__python_project_upgrade_python_version_string(
 ) -> None:
     tempdir = kraken_project.directory
 
-    project_dir = "version-project"
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
-    original_dir = Path(__file__).parent / "data" / project_dir
+    original_dir = example_dir("version-project")
     project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
@@ -201,9 +201,7 @@ def test__python_project_coverage(
 
 def test__python_project_can_lint_lint_enforced_directories(kraken_ctx: Context, kraken_project: Project) -> None:
     tempdir = kraken_project.directory
-
-    project_dir = "lint-enforced-directories-project"
-    original_dir = Path(__file__).parent / "data" / project_dir
+    original_dir = example_dir("lint-enforced-directories-project")
 
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
