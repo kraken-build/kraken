@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Iterable
 
-import dill  # type: ignore[import]
+import dill  # type: ignore[import-untyped]
 
 from kraken.common import pluralize
 from kraken.core import Context, TaskGraph

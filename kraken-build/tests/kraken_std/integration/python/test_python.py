@@ -17,7 +17,7 @@ from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
-from tests.util.docker import DockerServiceManager
+from tests.kraken_std.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
 PYPISERVER_PORT = 23213
