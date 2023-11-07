@@ -172,7 +172,7 @@ def test__python_pyproject_reads_correct_data(
 ) -> None:
     # Copy the projects to the temporary directory.
     new_dir = kraken_project.directory / project_dir
-    shutil.copytree(Path(__file__).parent / "data" / project_dir, new_dir)
+    shutil.copytree(example_dir(project_dir), new_dir)
 
     pyproject = Pyproject.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
