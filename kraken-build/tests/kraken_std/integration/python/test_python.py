@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 import pytest
 import tomli
-from decorator import decorator
 
 from kraken.common import not_none
 from kraken.core import Context, Project
