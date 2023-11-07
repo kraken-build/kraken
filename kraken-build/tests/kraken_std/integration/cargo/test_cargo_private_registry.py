@@ -45,6 +45,7 @@ from kraken.std.cargo import (
     cargo_registry,
     cargo_sync_config,
 )
+from tests.resources import example_dir
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +74,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
         # Build the library and publish it to Artifactory.
         if repository:
             logger.info(
-                "Publishing data/hello-world-lib to Cargo repository %r (%r)",
+                "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
                 repository.name,
                 repository.index_url,
             )
@@ -81,7 +82,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
             logger.info("Building data/hello-world-lib")
 
         with kraken_ctx() as ctx, kraken_project(ctx) as project1:
-            project1.directory = data_dir / "hello-world-lib"
+            project1.directory = example_dir("cargo-hello-world-lib")
             if repository:
                 cargo_registry(
                     cargo_registry_id,
@@ -113,7 +114,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                     repository.index_url,
                 )
                 with kraken_ctx() as ctx, kraken_project(ctx) as project2:
-                    project2.directory = data_dir / "hello-world-app"
+                    project2.directory = example_dir("cargo-hello-world-app")
                     cargo_toml = project2.directory / "Cargo.toml"
                     cargo_toml.write_text(cargo_toml.read_text().replace("$VERSION", publish_version))
                     cargo_registry(
@@ -128,7 +129,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
 
                 # Running the application should give "Hello from hello-world-lib!".
                 output = sp.check_output(
-                    [data_dir / "hello-world-app" / "target" / "debug" / "hello-world-app"]
+                    [example_dir("cargo-hello-world-app") / "target" / "debug" / "hello-world-app"]
                 ).decode()
                 assert output.strip() == "Hello from hello-world-lib!"
             except BuildError as exc:
