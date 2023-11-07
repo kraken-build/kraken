@@ -1,0 +1,49 @@
+release-date = "2023-09-19"
+
+[[entries]]
+id = "4cea3e6c-d362-441d-99fa-83efacd16689"
+type = "fix"
+description = "Fixed a bug where tasks that are dependencies of another task excluded with the `-X` option (recursive exclude) would be tagged unconditionally to be skipped during execution even if it was still required by another task that is not skipped."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/116"
+component = "core"
+
+[[entries]]
+id = "92eb28d0-b0f9-4346-a3dc-d46fa0d0d0cf"
+type = "fix"
+description = "Pyupgrade: support properly relative source and test directories"
+author = "thomas.pellissier-tanon@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/103"
+component = "std"
+
+[[entries]]
+id = "b2756f0b-6a0a-4ea3-a9fa-d8684d6dfcc0"
+type = "improvement"
+description = "Properly exposes Maturin project builder env variable setter"
+author = "thomas.pellissier-tanon@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/113"
+component = "std"
+
+[[entries]]
+id = "47223d61-80dc-4f71-a2b8-80c9eddd0107"
+type = "improvement"
+description = "Removed krakenw Nix flake"
+author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/74"
+component = "wrapper"
+
+[[entries]]
+id = "8d233d09-d51e-4cdd-b697-b2db838143e5"
+type = "improvement"
+description = "Mask auth password and check validity"
+author = "alex.spencer@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/112"
+component = "wrapper"
+
+[[entries]]
+id = "e4006a4d-56b8-4a5a-86f0-0dc85c75f81c"
+type = "fix"
+description = "Update poetry lock to fix nix build"
+author = "alex.spencer@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/114"
+component = "wrapper"

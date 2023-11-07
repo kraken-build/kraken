@@ -1,7 +1,0 @@
-release-date = "2022-12-11"
-
-[[entries]]
-id = "9ae8fc10-011f-497e-a748-170a8e660960"
-type = "fix"
-description = "Force subproject version bumps ahead of main project, if no root is present"
-author = "@tetigi"

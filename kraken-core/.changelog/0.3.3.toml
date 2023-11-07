@@ -1,7 +1,0 @@
-release-date = "2022-07-19"
-
-[[entries]]
-id = "72290eaf-79cc-4dc5-9457-f1fa8375e720"
-type = "feature"
-description = "add `Project.do(group)` parameter and `TaskResult.from_exit_code()` method"
-author = "@NiklasRosenstein"

@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "83ba2ff3-1a51-4bd1-904b-e3c2d28c632a"
-type = "fix"
-description = "fix kraken_project() again"
-author = "@NiklasRosenstein"

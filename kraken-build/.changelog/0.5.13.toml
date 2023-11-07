@@ -1,0 +1,9 @@
+release-date = "2023-01-23"
+
+[[entries]]
+id = "d794a20f-de7e-4d74-abe4-a641144dff65"
+type = "fix"
+description = "Fix task to check if a file exists and is committed"
+author = "@super-secret-github-user"
+pr = "https://github.com/kraken-build/kraken-std/issues/76"
+component = "std"

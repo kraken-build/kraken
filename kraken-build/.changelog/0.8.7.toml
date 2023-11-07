@@ -1,0 +1,8 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "f7de5f63-5227-4451-bab8-01ac069966e4"
+type = "improvement"
+description = "update RenderFileTask and add CheckFileContentsTsak"
+author = "@NiklasRosenstein"
+component = "core"

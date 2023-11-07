@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "ea9545a6-4def-4e30-8e9c-9970a8a50299"
-type = "fix"
-description = "disable non-transitive build environment installation due to #2"
-author = "@NiklasRosenstein"

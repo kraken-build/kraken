@@ -1,7 +1,0 @@
-release-date = "2022-07-20"
-
-[[entries]]
-id = "845a6374-1525-40a4-8635-9c79bb98d47d"
-type = "feature"
-description = "The `Property` type can now be used with (a union of) any type(s) as long as it is a proper `type` subclass and can be used for type checking"
-author = "@NiklasRosenstein"

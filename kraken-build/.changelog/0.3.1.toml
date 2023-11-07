@@ -1,0 +1,15 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "337bfe83-47f6-45b5-9056-66ea7ac80e47"
+type = "improvement"
+description = "add `Property.output()` static method, removed `kraken.core.testing.kraken_execute()`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "8410406d-b6b7-48ba-b68e-3c2bbedaa5d6"
+type = "breaking change"
+description = "remove `RenderFileTask` and use it from `kraken-core` instead"
+author = "@NiklasRosenstein"
+component = "std"

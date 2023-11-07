@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "03134444-c09f-4223-9797-0e38c075f85e"
-type = "fix"
-description = "fix mention of default build enviroment type in `--use`  option"
-author = "@NiklasRosenstein"

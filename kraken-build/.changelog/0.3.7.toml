@@ -1,0 +1,22 @@
+release-date = "2022-07-23"
+
+[[entries]]
+id = "28cb4c69-901c-4ec6-a1b7-34922bd75f1c"
+type = "breaking change"
+description = "rename `TaskRelationship.before` to `.inverse`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "feaf6775-f913-4d4d-af8b-e170fb355e77"
+type = "feature"
+description = "add `Task.add_relationship()` method"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "2aead0fe-8184-4ff0-b143-575d61309045"
+type = "fix"
+description = "Fix output filename for preprocessed Dockerfile (was previously placed into the project directory instead of the build directory)"
+author = "@NiklasRosenstein"
+component = "std"

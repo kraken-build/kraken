@@ -1,7 +1,0 @@
-release-date = "2022-07-04"
-
-[[entries]]
-id = "b6a6a191-06a9-4a14-a5af-d1dbf0a960c8"
-type = "improvement"
-description = "add `Project.to_path()`"
-author = "@NiklasRosenstein"

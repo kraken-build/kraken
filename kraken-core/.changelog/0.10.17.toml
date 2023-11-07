@@ -1,7 +1,0 @@
-release-date = "2022-12-12"
-
-[[entries]]
-id = "2c263ff8-0618-49b2-a3b5-3b1eebeb1d36"
-type = "fix"
-description = "also remove the relative path concatenation from CheckFileContentsTask"
-author = "@NiklasRosenstein"

@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "c80dcb8a-50ca-483c-9392-c43954ce85eb"
-type = "improvement"
-description = "no longer warn about lock file being outdated when `--upgrade` option is passed"
-author = "@NiklasRosenstein"

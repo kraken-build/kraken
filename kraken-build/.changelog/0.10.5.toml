@@ -1,0 +1,22 @@
+release-date = "2022-09-26"
+
+[[entries]]
+id = "374e8483-3ab3-4624-b8ed-de54c3a21871"
+type = "improvement"
+description = "no longer print the status of Void tasks"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "90264fc1-de7e-4498-88c2-ccb0453a3429"
+type = "fix"
+description = "fix RecursionError when a group was nested in another group. This could happen because of upstream dependency propagation between group members."
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "25a0f75e-cc3f-4c8f-9c6c-242539dcdff9"
+type = "improvement"
+description = "detect dependency cycles and report them"
+author = "@NiklasRosenstein"
+component = "core"

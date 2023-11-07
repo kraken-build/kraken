@@ -1,0 +1,28 @@
+release-date = "2023-01-23"
+
+[[entries]]
+id = "1648a819-292f-4dbf-a3dc-5f45cc4e0c63"
+type = "feature"
+description = "Feature: Add a task for mypy.stubtest"
+author = "@Tpt"
+component = "std"
+
+[[entries]]
+id = "e8714b02-17d0-4edc-a7e0-b8af7780a6ba"
+type = "fix"
+description = "set `PythonSettings.always_use_managed_env=True` by default, which should fix #63 as it ensures the Virtual environment PATH parts are at the front"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-std/issues/63",
+]
+component = "std"
+
+[[entries]]
+id = "9d7eaf80-bb99-40b1-be56-ca9e5cf2901c"
+type = "fix"
+description = "fix Python project installation with Slap if the environment already exists"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-std/issues/65",
+]
+component = "std"

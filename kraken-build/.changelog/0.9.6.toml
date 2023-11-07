@@ -1,0 +1,29 @@
+release-date = "2022-08-31"
+
+[[entries]]
+id = "1540bc19-c285-4bf6-a7e3-b0a065c7690e"
+type = "fix"
+description = "keep transitive dependencies intact when trimming the build graph"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "140ffe72-b88c-41e9-b690-9bd7e8dd841c"
+type = "refactor"
+description = "refactor `TaskGraph` class -- instead of managing multiple states in one class, the `TaskGraph` now only represents one state at a time but has a reference to its previous state via `TaskGraph.parent`. Some methods and parameters have been renamed and `Graph.get_task()` was added"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "c8ab9fbb-e4dd-4b9a-adff-e5cc48c3be82"
+type = "improvement"
+description = "add `-a,--all` option to the `kraken run` command and `kraken query` subcommands (viz already had it but the behaviour was slightly changed; we never show not selected tasks anymore)"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "d6270306-547a-4b08-9509-00e8fe1624e4"
+type = "improvement"
+description = "add `-i,--inactive` option to `kraken query viz` command, this brings back showing inactive tasks that was previously happening with the `-a,--all` flag (but the purpose of the `-a,--all` flag was changed to select all tasks)"
+author = "@NiklasRosenstein"
+component = "core"

@@ -1,7 +1,0 @@
-release-date = "2022-07-06"
-
-[[entries]]
-id = "58f8b9a0-723b-4353-9e5c-da879d30405a"
-type = "fix"
-description = "fix self-referencing relationship introduced by properties derived from another property on the same task"
-author = "@NiklasRosenstein"

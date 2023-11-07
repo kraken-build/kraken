@@ -1,7 +1,0 @@
-release-date = "2022-07-04"
-
-[[entries]]
-id = "973b5316-22e5-4835-abf4-7aae925b2dc1"
-type = "improvement"
-description = "update `docker_build()` to accept `dockerfile` parameter as a string and use `Project.to_path()`"
-author = "@NiklasRosenstein"

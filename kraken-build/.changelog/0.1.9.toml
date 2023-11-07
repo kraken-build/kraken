@@ -1,0 +1,22 @@
+release-date = "2022-07-14"
+
+[[entries]]
+id = "dc714e2b-02dd-4f45-a983-f188c1e91b7d"
+type = "improvement"
+description = "add `native_use_buildkit` option to the `NativeBuildTask` for Docker"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "875405ee-9232-49b3-a93b-e92f4e64d294"
+type = "fix"
+description = "disable Pip fast-deps feature for Pex resolves, can lead to bad resolves"
+author = "@NiklasRosenstein"
+component = "wrapper"
+
+[[entries]]
+id = "d5439c4c-59c4-48ec-a50e-26d1d526389b"
+type = "improvement"
+description = "add support for `KRAKENW_INCREMENTAL` flag"
+author = "@NiklasRosenstein"
+component = "wrapper"

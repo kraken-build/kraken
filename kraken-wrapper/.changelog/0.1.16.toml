@@ -1,7 +1,0 @@
-release-date = "2022-08-16"
-
-[[entries]]
-id = "29fb048d-2839-4646-b3e1-ece78b7f3ff3"
-type = "fix"
-description = "add missing requirement `keyring`"
-author = "@NiklasRosenstein"

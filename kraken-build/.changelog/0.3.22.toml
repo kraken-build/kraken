@@ -1,0 +1,8 @@
+release-date = "2022-09-14"
+
+[[entries]]
+id = "e1db25c7-26c0-4cbc-b9ca-b820b896ddcf"
+type = "feature"
+description = "add `KanikoBuildTask.kaniko_use_compressed_caching`"
+author = "@wtfgecko"
+component = "std"

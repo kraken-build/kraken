@@ -1,0 +1,36 @@
+release-date = "2023-08-03"
+
+[[entries]]
+id = "626f9a26-e6ce-4285-8f05-7dfe1bded22c"
+type = "fix"
+description = "Makes flake8 happy"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/91"
+component = "common"
+
+[[entries]]
+id = "626f9a26-e6ce-4285-8f05-7dfe1bded22c"
+type = "fix"
+description = "Makes flake8 happy"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/91"
+component = "core"
+
+[[entries]]
+id = "e67e8b09-25aa-446b-8902-d9a6b4dcc743"
+type = "fix"
+description = "Correct multi-line description wrapping"
+author = "@jonhoo"
+pr = "https://github.com/kraken-build/kraken-build/pull/94"
+issues = [
+    "https://github.com/kraken-build/kraken-build/issues/93",
+]
+component = "core"
+
+[[entries]]
+id = "9e4eb09a-8dfd-4fb2-85a4-0c9beec3f047"
+type = "improvement"
+description = "Report python coverage in terminal."
+author = "benjamin.poumarede@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/92"
+component = "std"

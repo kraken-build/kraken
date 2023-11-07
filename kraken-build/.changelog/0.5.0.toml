@@ -1,0 +1,36 @@
+release-date = "2022-07-24"
+
+[[entries]]
+id = "ee44a383-b8a4-4236-9cfc-6556ab1f2df2"
+type = "breaking change"
+description = "remove `find_build_script()` and `iter_script_runners()` functions"
+author = "@NiklasRosenstein"
+component = "common"
+
+[[entries]]
+id = "016452c1-def0-41e2-be99-3861eed9493c"
+type = "feature"
+description = "add `ProjectFinder` interface and implementations (`CurrentDirectoryProjectFinder` and `GitAwareProjectFinder`)"
+author = "@NiklasRosenstein"
+component = "common"
+
+[[entries]]
+id = "d98cf5b6-2fda-405a-9dc8-ac9f64994c2f"
+type = "improvement"
+description = "make sure anonymous `Supplier` subclasses are picklable"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "70bf851c-f363-42c2-bec0-6aa1ea426325"
+type = "breaking change"
+description = "revamp `TaskGraph` API"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "fa4b0c52-293b-4ae3-9e43-2cd560b48686"
+type = "improvement"
+description = "migrate to kraken-core 0.11.0 and kraken-common 0.4.0"
+author = "@NiklasRosenstein"
+component = "std"

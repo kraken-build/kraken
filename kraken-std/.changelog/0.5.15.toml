@@ -1,7 +1,0 @@
-release-date = "2023-01-30"
-
-[[entries]]
-id = "a2db438c-1e5d-445a-9958-cf30393df29a"
-type = "fix"
-description = "Fix poetry deps"
-author = "@tetigi"

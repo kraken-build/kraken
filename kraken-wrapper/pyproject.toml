@@ -9,7 +9,7 @@ description = ""
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "kraken/wrapper", from = "src" }]
+packages = []
 classifiers = []
 keywords = []
 
@@ -20,70 +20,4 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.12"
-keyring = "^23.8.2"
-kraken-common = "^0.31.7"
-pex = "^2.1.103"
-setuptools = ">=33.0.0"  # For pkg_resources
-termcolor = "^1.1.0"
-rich = "^13.4.2"
-
-# NOTE(@NiklasRosenstein): Need to pin transitive dependency markdown-it under 3.0 because it dropped Python 3.9
-#       support after that version. Technically this shouldn't be a big issue for runtime, but Mypy checks site
-#       packages and complains about the walrus operator used in it when it checks site-packages.
-#       See also https://github.com/python/mypy/issues/12162
-markdown-it-py = "<3.0.0"
-
-typing-extensions = "<4.7.0"  # Upper constraint due to https://github.com/python/typing_extensions/issues/265
-
-[tool.poetry.dev-dependencies]
-black = "*"
-flake8 = "*"
-isort = "*"
-mypy = "*"
-pytest = "*"
-types-setuptools = "^57.4.18"
-types-termcolor = "^1.1.5"
-
-[tool.poetry.scripts]
-krakenw = "kraken.wrapper.main:main"
-
-[tool.slap]
-typed = true
-
-[tool.slap.test]
-check = "slap check"
-mypy = "dmypy run src/"
-pytest = "pytest tests/ -vv"
-black = "black --check src/ tests/"
-isort = "isort --check-only src/ tests/"
-flake8 = "flake8 src/ tests/"
-
-[tool.slap.run]
-fmt = "black src/ tests/ && isort src/ tests/"
-
-[tool.mypy]
-python_version = "3.7"
-explicit_package_bases = true
-mypy_path = ["src"]
-namespace_packages = true
-pretty = true
-show_error_codes = true
-show_error_context = true
-strict = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-module = "pex.*"
-ignore_missing_imports = true
-
-[tool.isort]
-profile = "black"
-line_length = 120
-combine_as_imports = true
-
-[tool.black]
-line-length = 120
+kraken-build = "0.31.7"

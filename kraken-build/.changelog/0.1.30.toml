@@ -1,0 +1,29 @@
+release-date = "2022-07-28"
+
+[[entries]]
+id = "f6c8106e-c7fa-45e9-8c9f-d18969a4460b"
+type = "fix"
+description = "fix status message returned by `CargoVersionBumpTask.start_background_task()`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "5c93a704-da6f-4323-98d3-f46facae4ba9"
+type = "improvement"
+description = "Add `INFO` log line to `CargoPublishTask.execute()`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "d3fedd13-a647-4fcd-bac6-970b3e63e4c6"
+type = "feature"
+description = "add `CargoClippyTask` and `cargo_clippy()` function"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "1fbdc4a1-999a-4a1f-bb0d-ebda0aa20d4d"
+type = "feature"
+description = "add `cargo_build(incremental)` parameter"
+author = "@NiklasRosenstein"
+component = "std"

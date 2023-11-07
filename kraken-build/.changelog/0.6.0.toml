@@ -1,0 +1,19 @@
+release-date = "2022-07-29"
+
+[[entries]]
+id = "fce0cf7b-aa28-4dd8-93be-95ad14feec89"
+type = "feature"
+description = "Define new interfaces for `Graph`, `GraphExecutor` and `GraphExecutorObserver` and provide default implementations that do not use termcolor, so we can get rid of that dependency in `kraken-core`"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-core/issues/3",
+]
+component = "core"
+
+[[entries]]
+id = "990593e2-b3ba-4721-8c74-e5e9aa5d66f7"
+type = "improvement"
+description = "Add test fixture components, add test for util task and refactor"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/104"
+component = "std"

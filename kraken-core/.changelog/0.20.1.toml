@@ -1,7 +1,0 @@
-release-date = "2023-05-15"
-
-[[entries]]
-id = "5b094100-d0b3-4c65-a78d-dd37980c2ba8"
-type = "improvement"
-description = "Use `kraken.common.supplier.Supplier` instead of `nr.stream.Supplier`, Remove `kraken.core.api` in favor of `kraken.core`"
-author = "niklas.rosenstein@helsing.ai"

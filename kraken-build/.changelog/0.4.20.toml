@@ -1,0 +1,22 @@
+release-date = "2022-12-12"
+
+[[entries]]
+id = "a7a325b2-4724-4a73-882a-d6cd1db712b9"
+type = "fix"
+description = "Fix gitignore and pyproject task to actually treat relative paths relative to the cwd"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "d32a9af2-893d-41e9-8d88-d332f0109677"
+type = "fix"
+description = "Isort, Mypy and Flake8 tasks now pass the config file as an absolute path, they need to do this because they override the CWD for the subprocess"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "87ae251a-d024-497a-a5f5-816be23b80e6"
+type = "fix"
+description = "Fix path for Mypy daemon status file"
+author = "@NiklasRosenstein"
+component = "std"

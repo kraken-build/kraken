@@ -1,0 +1,12 @@
+release-date = "2023-02-12"
+
+[[entries]]
+id = "f14d46bf-be87-4208-af30-9c3a6bd019a3"
+type = "feature"
+description = "Add update task for Cargo"
+author = "@rbyshko"
+pr = "https://github.com/kraken-build/kraken-std/pull/79"
+issues = [
+    "https://github.com/kraken-build/kraken-std/issues/79",
+]
+component = "std"

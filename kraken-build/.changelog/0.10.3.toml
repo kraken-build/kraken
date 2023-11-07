@@ -1,0 +1,15 @@
+release-date = "2022-09-12"
+
+[[entries]]
+id = "cc24bcb1-ed06-4a96-8f68-e5dfce927d31"
+type = "improvement"
+description = "export `TaskSet` class to `kraken.core`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "bfb91f79-b59c-47a7-9d1f-d625b16e0324"
+type = "feature"
+description = "add `TaskSet.add()` and `TaskSet.partitions()`"
+author = "@NiklasRosenstein"
+component = "core"

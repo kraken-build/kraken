@@ -1,0 +1,8 @@
+release-date = "2022-08-02"
+
+[[entries]]
+id = "b7ff1b1b-786a-42c0-b8f6-80805737c4de"
+type = "improvement"
+description = "The Docker `BuildxBuildTask` and `NativeBuildTask` will now update the file to inject the `--mount=type=secret,id=...` instructions such that build secrets can always be accessed."
+author = "@NiklasRosenstein"
+component = "std"

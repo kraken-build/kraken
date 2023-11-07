@@ -1,0 +1,15 @@
+release-date = "2022-07-29"
+
+[[entries]]
+id = "a3e1f7c4-9f6b-4189-a2d9-985ee35f416d"
+type = "improvement"
+description = "declare compatibility with `kraken-core >=0.5.4,<0.7.0`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "10aa3a26-dd30-4b9c-86d2-49abac2e2b28"
+type = "improvement"
+description = "update sccache output and set python warnings to ignore for the `proxy.py` subprocess spawned for Cargo MITM"
+author = "@NiklasRosenstein"
+component = "std"

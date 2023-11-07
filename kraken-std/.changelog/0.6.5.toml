@@ -1,8 +1,0 @@
-release-date = "2023-03-10"
-
-[[entries]]
-id = "9a07c6fd-d2cf-4336-ac19-c650892f2fc6"
-type = "fix"
-description = "only inject for existing registries"
-author = "@tetigi"
-pr = "https://github.com/kraken-build/kraken-std/pull/112"

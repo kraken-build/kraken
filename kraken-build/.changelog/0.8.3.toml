@@ -1,0 +1,24 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "3b12f4c8-b9fa-4aa0-847c-6d70153fcc2a"
+type = "fix"
+description = "fix `kraken.test`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "940b9f50-92a5-4873-bf60-dbf0124781d5"
+type = "improvement"
+description = "Make cargo_deny accept Any kwargs"
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/123"
+component = "std"
+
+[[entries]]
+id = "999676c8-fa07-4d17-8079-e692ba3ce4fd"
+type = "fix"
+description = "Fixed a bug where the `PoetryBuildSystem` would update the `__version__` of source files that are not owned by the current project (for example, in virtual environments)."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-std/pull/127"
+component = "std"

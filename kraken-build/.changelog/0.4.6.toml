@@ -1,0 +1,15 @@
+release-date = "2022-10-15"
+
+[[entries]]
+id = "2ae9265f-3f77-4728-a902-b770927744c5"
+type = "fix"
+description = "Fix error when output directory does not exist for `dist()` when creating a Zip archive"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "9251e861-c44c-4754-b4f8-784192f24171"
+type = "improvement"
+description = "`native` Docker backend now always adds the `--pull` argument to `docker build`"
+author = "@NiklasRosenstein"
+component = "std"

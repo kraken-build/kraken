@@ -1,7 +1,0 @@
-release-date = "2022-08-04"
-
-[[entries]]
-id = "1e0ab6a5-f4e7-45f9-a734-7d0849d1a561"
-type = "improvement"
-description = "add `cargo_bump(version)` parameter"
-author = "@NiklasRosenstein"

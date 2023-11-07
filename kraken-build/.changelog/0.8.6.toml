@@ -1,0 +1,16 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "dd9ef294-02ef-4a5b-bac7-abb1d17dba5a"
+type = "feature"
+description = "add `kraken.util.krakenw` module"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "5ddaac36-f82b-4f35-a907-45a4263ab270"
+type = "feature"
+description = "Support python mono repositories by updating local dependencies with release version"
+author = "fabio.baravalle@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/138"
+component = "std"

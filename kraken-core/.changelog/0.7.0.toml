@@ -1,7 +1,0 @@
-release-date = "2022-08-03"
-
-[[entries]]
-id = "a42def0b-7754-44fd-9695-813cc1b3b8c4"
-type = "feature"
-description = "add `TaskStatusType.INTERRUPTED`, the default executor now stops execution immediately (but it would not understand waiting for any currently running tasks if the TaskRunner is executing them in the background)"
-author = "@NiklasRosenstein"

@@ -1,0 +1,22 @@
+release-date = "2022-07-24"
+
+[[entries]]
+id = "c8a0319a-4030-4f77-96d5-6ce5ac749217"
+type = "breaking change"
+description = "rename `ProjectInfo.path` to `ProjectInfo.script` but we have no consumers of 0.5.0 so we keep this as a patch bump"
+author = "@NiklasRosenstein"
+component = "common"
+
+[[entries]]
+id = "95044b67-64d9-4712-96db-142cf12ccf1a"
+type = "fix"
+description = "Python 3.7 and 3.8 compatibility (removed use of | operator for types)"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "28fbdd0e-9f5c-471e-a6f6-78fc94ab5ba9"
+type = "feature"
+description = "Add `cargo_publish(package_name)` parameter"
+author = "callumPearce"
+component = "std"

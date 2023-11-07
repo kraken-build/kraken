@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "17f93d74-ea19-4821-b0c5-576478c0a8e8"
-type = "fix"
-description = "fix missing import of VizOptions for `kraken q viz` command, fix CheckFileContentsTask"
-author = "@NiklasRosenstein"

@@ -1,0 +1,18 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "e232926e-05d1-4166-a2b1-c35550a2b3a0"
+type = "fix"
+description = "fix interpretation of `KanikoBuildTask.load` property (before it would always load)"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "33e416a0-5c98-420e-867d-c7be861248d6"
+type = "feature"
+description = "Add `krakenw auth` command which can be used to configure credentials for PyPI indexes in the system keychain while the username is stored in `~/.config/krakenw/config.toml`."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-wrapper/issues/1",
+]
+component = "wrapper"

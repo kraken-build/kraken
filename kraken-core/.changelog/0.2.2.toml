@@ -1,7 +1,0 @@
-release-date = "2022-07-06"
-
-[[entries]]
-id = "422f4017-b43d-43d2-8fd0-3fdc534dc4cd"
-type = "fix"
-description = "fix typing of Supplier derived_from args"
-author = "@NiklasRosenstein"

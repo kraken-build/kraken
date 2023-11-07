@@ -1,0 +1,8 @@
+release-date = "2022-07-29"
+
+[[entries]]
+id = "ed0e9062-4f65-4e70-bf69-da25bc0a6a09"
+type = "feature"
+description = "add `PythonIndex.default` field and support passing it to Slap (requires Slap >= 1.6.25), not currently supported for Poetry"
+author = "@NiklasRosenstein"
+component = "std"

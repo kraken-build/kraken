@@ -1,0 +1,8 @@
+release-date = "2022-07-27"
+
+[[entries]]
+id = "303967cf-c7fd-4f55-b4be-0dce4905ad1c"
+type = "improvement"
+description = "`cargo_build(group)` is now optional"
+author = "@NiklasRosenstein"
+component = "std"

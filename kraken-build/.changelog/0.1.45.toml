@@ -1,0 +1,15 @@
+release-date = "2022-08-04"
+
+[[entries]]
+id = "dfc98639-5b0a-4975-8844-eca5329f577c"
+type = "improvement"
+description = "Sort Gitignore paths by default"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "b5866fee-6bec-4913-805a-2f062b5fad6c"
+type = "fix"
+description = "fix case when helm_package() failed because the output files parent dir did not exist"
+author = "@NiklasRosenstein"
+component = "std"

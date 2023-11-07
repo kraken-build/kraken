@@ -1,0 +1,15 @@
+release-date = "2022-09-26"
+
+[[entries]]
+id = "fd8e74d9-cc80-471c-ac73-c7793806fb05"
+type = "feature"
+description = "add propagate_argparse_formatter_to_subparser"
+author = "@NiklasRosenstein"
+component = "common"
+
+[[entries]]
+id = "8e9f4cd7-e56b-460b-958d-0a160e8b9f4d"
+type = "fix"
+description = "take `KRAKEN_CARGO_BUILD_FLAGS` into account for all `CargoBuildTask` implementations (this includes cargo test, cargo fmt, etc.)"
+author = "@NiklasRosenstein"
+component = "std"

@@ -1,0 +1,22 @@
+release-date = "2022-07-14"
+
+[[entries]]
+id = "e6c3641a-5fe5-42ca-9a8f-3df4b85a175d"
+type = "feature"
+description = "add \"native\" docker build backend"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "37451d4c-b06f-441e-9a18-0b258730e3a3"
+type = "feature"
+description = "add `manifest_tool_push` task"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "f88eb46d-3a8d-4743-9030-c97ec9c3b3ee"
+type = "improvement"
+description = "just `krakenw lock` without arguments will not look to ensure build environment consistency (which could cause a reinstall before locking because the lockfile is outdated)"
+author = "@NiklasRosenstein"
+component = "wrapper"

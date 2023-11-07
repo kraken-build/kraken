@@ -1,0 +1,25 @@
+release-date = "2022-07-27"
+
+[[entries]]
+id = "30f9f26a-d6ce-4999-928d-2de27a4287ec"
+type = "improvement"
+description = "allow `not_none(message)` parameter to be a callable"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-common/issues/2",
+]
+component = "common"
+
+[[entries]]
+id = "dba8e7da-7d1f-4c0f-880b-b59060096b22"
+type = "fix"
+description = "make `Supplier.map()` result picklable"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "d85946d3-4038-49e8-a677-db43fefabad2"
+type = "fix"
+description = "Fix: actually log the error"
+author = "@tetigi"
+component = "std"

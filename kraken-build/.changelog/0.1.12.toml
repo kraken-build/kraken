@@ -1,0 +1,36 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "d63edec0-7c4a-4516-9d57-a1f260564fda"
+type = "improvement"
+description = "RenderFileTask no longer tries to call the content supplier in `finalize()`, fix info line on the file being written"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "c3af61ab-bf19-4232-8e81-91a5926fc31a"
+type = "improvement"
+description = "add INFO log for subcommand executed by python `EnvironmentAwareDispatchTask`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "e7dc557e-1699-48be-89f9-1ab0f8e4dde6"
+type = "fix"
+description = "Python `MypyTask` no longer adds the test directory if it is a subdirectory of the source directory, which used to cause an error in Mypy"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "e89c2e20-8d8d-4b92-a8ff-9e63d1a73f96"
+type = "improvement"
+description = "add `MypyTask.python_version` property"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "c80dcb8a-50ca-483c-9392-c43954ce85eb"
+type = "improvement"
+description = "no longer warn about lock file being outdated when `--upgrade` option is passed"
+author = "@NiklasRosenstein"
+component = "wrapper"
