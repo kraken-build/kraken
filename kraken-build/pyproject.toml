@@ -12,7 +12,12 @@ description = ""
 keywords = []
 license = "MIT"
 name = "kraken-build"
-packages = [{include = "kraken/build", from = "src"}]
+packages = [
+  {include = "kraken/common", from = "src"},
+  {include = "kraken/core", from = "src"},
+  {include = "kraken/std", from = "src"},
+  {include = "kraken/wrapper", from = "src"},
+]
 readme = "README.md"
 version = "0.31.7"
 
@@ -139,5 +144,5 @@ line-length = 120
 
 [tool.pytest.ini_options]
 markers = [
-    "integration",
+  "integration",
 ]
