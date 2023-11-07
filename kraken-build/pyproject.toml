@@ -51,7 +51,7 @@ nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
 packaging = "^23.1"
 pex = "^2.1.103"
-python = ">=3.10,<4.0"
+python = ">=3.10,<3.11" # ">=3.10,<4.0" | Can't use 3.11+ because Dill 0.3.8 is not released yet
 rich = "^13.4.2"
 setuptools = ">=33.0.0" # For pkg_resources
 termcolor = "^1.1.0"
