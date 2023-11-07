@@ -9,9 +9,10 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import List, NoReturn
 
+from typing_extensions import Literal
+
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
-from typing_extensions import Literal
 
 from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, BuildEnvError, general_get_installed_distributions
 from ._lockfile import Distribution

@@ -9,15 +9,15 @@ from typing import TypeVar
 
 import pytest
 import tomli
+from tests.util.docker import DockerServiceManager
+
 from kraken.common import not_none
 from kraken.core import Context, Project
-
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
-from tests.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)
 PYPISERVER_PORT = 23213

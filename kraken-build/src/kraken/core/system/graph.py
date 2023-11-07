@@ -4,11 +4,11 @@ import dataclasses
 import logging
 from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, TypeVar, cast
 
-from kraken.common import not_none
 from networkx import DiGraph, restricted_view, transitive_reduction
 from networkx.algorithms import topological_sort
 from nr.stream import Stream
 
+from kraken.common import not_none
 from kraken.core.address import Address
 from kraken.core.system.executor import Graph
 from kraken.core.system.task import GroupTask, Task, TaskStatus, TaskTag

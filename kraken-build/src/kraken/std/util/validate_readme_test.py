@@ -2,7 +2,6 @@ import hashlib
 
 from kraken.core import Project
 from kraken.core.system.task import TaskStatus
-
 from kraken.std.util.validate_readme import ValidateReadmeTask
 
 EXAMPLE_README = """

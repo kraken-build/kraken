@@ -14,7 +14,6 @@ from urllib.parse import quote
 
 from kraken.common import NotSet
 from kraken.core import TaskStatus
-
 from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 
 from . import ManagedEnvironment, PythonBuildSystem

@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from kraken.core import Project
-
 from kraken.std.cargo import cargo_bump_version, cargo_registry
 from kraken.std.cargo.manifest import CargoManifest
 

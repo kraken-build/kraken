@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from kraken.core import Property, Task, TaskStatus
-
 from kraken.std.descriptors.resource import LibraryArtifact
 
 

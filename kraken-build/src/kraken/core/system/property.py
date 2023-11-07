@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Mapping, Sequence, TypeVar, cast
 
 import deprecated
-from kraken.common import NotSet, Supplier, not_none
 from typeapi import (
     AnnotatedTypeHint,
     ClassTypeHint,
@@ -31,6 +30,8 @@ from typeapi import (
     UnionTypeHint,
     get_annotations,
 )
+
+from kraken.common import NotSet, Supplier, not_none
 
 T = TypeVar("T")
 U = TypeVar("U")

@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Literal
 
 from kraken.core import Project
-
 from kraken.std.util.check_file_contents_task import CheckFileContentsTask
 
 from . import tasks

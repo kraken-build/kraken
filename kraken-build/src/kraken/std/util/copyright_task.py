@@ -5,7 +5,6 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from kraken.core import Project, Property
-
 from kraken.std.python.tasks.base_task import EnvironmentAwareDispatchTask
 
 

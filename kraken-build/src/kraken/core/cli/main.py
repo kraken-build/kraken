@@ -14,6 +14,10 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
+from nr.io.graphviz.render import render_to_browser
+from nr.io.graphviz.writer import GraphvizWriter
+from termcolor import colored
+
 from kraken.common import (
     BuildscriptMetadata,
     CurrentDirectoryProjectFinder,
@@ -25,10 +29,6 @@ from kraken.common import (
     propagate_argparse_formatter_to_subparser,
 )
 from kraken.common.pyenv import get_distributions
-from nr.io.graphviz.render import render_to_browser
-from nr.io.graphviz.writer import GraphvizWriter
-from termcolor import colored
-
 from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text

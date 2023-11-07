@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Literal
 
 from kraken.core import Project, Property
-
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
 from kraken.std.util.render_file_task import RenderFileTask
 

@@ -16,7 +16,6 @@ from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
-
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
 from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 from kraken.std.python.settings import PythonSettings

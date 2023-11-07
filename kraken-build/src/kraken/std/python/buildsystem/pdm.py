@@ -13,7 +13,6 @@ from typing import Any
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.core import TaskStatus
-
 from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 

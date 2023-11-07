@@ -5,7 +5,6 @@ from typing import Any
 
 from kraken.common import import_class
 from kraken.core import Project, Task
-
 from kraken.std.docker.tasks.base_build_task import BaseBuildTask
 from kraken.std.docker.tasks.manifest_tool_push_task import ManifestToolPushTask
 

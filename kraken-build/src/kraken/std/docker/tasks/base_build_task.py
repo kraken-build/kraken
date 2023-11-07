@@ -2,7 +2,6 @@ from pathlib import Path
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property, Task
-
 from kraken.std.util.render_file_task import RenderFileTask, render_file
 
 

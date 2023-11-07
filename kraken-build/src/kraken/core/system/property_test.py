@@ -3,10 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
-from kraken.common.supplier import OfSupplier, VoidSupplier
 from pytest import mark, raises
 from typing_extensions import Literal
 
+from kraken.common.supplier import OfSupplier, VoidSupplier
 from kraken.core.system.property import Property, PropertyContainer
 
 

@@ -7,7 +7,6 @@ import time
 from dataclasses import dataclass
 
 from kraken.core import Project, Property, Task, TaskStatus
-
 from kraken.std.cargo.manifest import ArtifactKind, CargoMetadata
 from kraken.std.descriptors.resource import BinaryArtifact, LibraryArtifact
 

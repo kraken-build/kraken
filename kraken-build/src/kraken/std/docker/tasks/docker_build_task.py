@@ -7,7 +7,6 @@ from pathlib import Path
 
 from kraken.common import flatten, not_none
 from kraken.core import Project, Property, TaskStatus
-
 from kraken.std.docker.util.dockerfile import update_run_commands
 
 from .base_build_task import BaseBuildTask

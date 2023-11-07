@@ -3,9 +3,10 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 
-from kraken.core import Project, Property, Task, TaskRelationship
 from twine.commands.upload import upload as twine_upload
 from twine.settings import Settings as TwineSettings
+
+from kraken.core import Project, Property, Task, TaskRelationship
 
 from ..settings import python_settings
 

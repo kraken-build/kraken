@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from kraken.core import Project
-
 from kraken.std.python.pyproject import PackageIndex
 
 from .buildsystem import PythonBuildSystem, detect_build_system

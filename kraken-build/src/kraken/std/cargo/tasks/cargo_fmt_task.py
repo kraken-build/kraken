@@ -5,7 +5,6 @@ import shutil
 import subprocess as sp
 
 from kraken.core import Property, Task, TaskStatus
-
 from kraken.std.cargo.config import CargoConfig
 
 logger = logging.getLogger(__name__)

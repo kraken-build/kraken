@@ -26,9 +26,9 @@ from typing import (
 )
 
 from deprecated import deprecated
-from kraken.common import NotSet, Supplier
 from typing_extensions import Literal
 
+from kraken.common import NotSet, Supplier
 from kraken.core.address import Address
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer

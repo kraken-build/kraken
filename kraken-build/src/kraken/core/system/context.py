@@ -7,10 +7,10 @@ import logging
 from pathlib import Path
 from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Sequence, TypeVar, overload
 
-from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from nr.stream import Stream
 from typing_extensions import TypeAlias
 
+from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError

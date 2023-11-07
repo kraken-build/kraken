@@ -3,7 +3,6 @@ import subprocess
 from pathlib import Path
 
 from kraken.core import Project, TaskStatus
-
 from kraken.std.git.tasks.check_file_task import CheckFileTask
 
 

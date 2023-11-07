@@ -9,9 +9,9 @@ from urllib.parse import urlparse
 
 import tomli
 import tomli_w
+
 from kraken.common import atomic_file_swap, not_none
 from kraken.core import BackgroundTask, Property, TaskStatus
-
 from kraken.std.cargo.config import CargoRegistry
 from kraken.std.git.config import dump_gitconfig, load_gitconfig
 from kraken.std.mitm import start_mitmweb_proxy

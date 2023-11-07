@@ -7,6 +7,7 @@ from typing import Any, MutableMapping, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
+
 from kraken.common import http
 from kraken.common.http import ReadTimeout
 

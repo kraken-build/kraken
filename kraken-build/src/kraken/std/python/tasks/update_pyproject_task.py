@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from kraken.core import Project, Property, TaskStatus
-
 from kraken.std.python.buildsystem import PythonBuildSystem
 from kraken.std.util.render_file_task import RenderFileTask
 

@@ -7,9 +7,10 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterator, List, NoReturn, Sequence
 
-from kraken.common import EnvironmentType, RequirementSpec, lazy_str
 from pex.pex import PEX
 from pex.pex_bootstrapper import bootstrap_pex_env
+
+from kraken.common import EnvironmentType, RequirementSpec, lazy_str
 
 from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, general_get_installed_distributions
 from ._lockfile import Distribution

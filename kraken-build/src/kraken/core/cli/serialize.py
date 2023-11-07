@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Iterable
 
 import dill  # type: ignore[import]
-from kraken.common import pluralize
 
+from kraken.common import pluralize
 from kraken.core import Context, TaskGraph
 
 logger = logging.getLogger(__name__)

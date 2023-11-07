@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 from kraken.core import TaskStatus
-
 from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 
 if TYPE_CHECKING:
