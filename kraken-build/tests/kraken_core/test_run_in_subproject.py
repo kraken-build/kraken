@@ -4,10 +4,10 @@ from textwrap import dedent
 from typing import Iterator, Type
 
 from pytest import mark, raises
-from tests.conftest import chdir_context
 
 from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli.main import main
+from tests.kraken_core.conftest import chdir_context
 
 
 @contextmanager

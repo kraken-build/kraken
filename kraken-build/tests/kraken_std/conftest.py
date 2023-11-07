@@ -5,7 +5,8 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from tests.util.docker import DockerServiceManager
+
+from tests.kraken_std.util.docker import DockerServiceManager
 
 
 @pytest.fixture
