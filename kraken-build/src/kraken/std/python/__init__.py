@@ -1,3 +1,4 @@
+from . import buildsystem
 from .settings import PythonSettings, python_settings
 from .tasks.black_task import BlackTask, black
 from .tasks.build_task import BuildTask, build
@@ -21,6 +22,7 @@ from .version import git_version_to_python_version
 git_version_to_python = git_version_to_python_version
 
 __all__ = [
+    "buildsystem",
     "black",
     "BlackTask",
     "build",

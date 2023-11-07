@@ -194,9 +194,7 @@ def test__python_project_coverage(
     deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
-
-    project_dir = "slap-project"
-    original_dir = Path(__file__).parent / "data" / project_dir
+    original_dir = example_dir("slap-project")
 
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
