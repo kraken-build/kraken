@@ -6,7 +6,7 @@ import tarfile
 import tempfile
 import unittest.mock
 from pathlib import Path
-from typing import TypeVar
+from typing import Iterator, TypeVar
 from unittest.mock import patch
 
 import pytest
@@ -29,7 +29,7 @@ USER_PASS = "password-for-integration-test"
 
 
 @pytest.fixture(scope="session")
-def deactivate_venv() -> None:
+def deactivate_venv() -> Iterator[None]:
     with patch.dict(os.environ):
         os.environ.pop("VIRTUAL_ENV", None)
         os.environ.pop("VIRTUAL_ENV_PROMPT", None)
