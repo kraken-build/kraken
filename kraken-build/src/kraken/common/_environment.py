@@ -1,5 +1,5 @@
 import enum
-from typing import Mapping, MutableMapping
+from collections.abc import Mapping, MutableMapping
 
 KRAKEN_ENVIRONMENT_TYPE_VARIABLE = "_KRAKEN_COMMONS_ENVIRONMENT_TYPE"
 

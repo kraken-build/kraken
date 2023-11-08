@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from pex.pex import PEX
 from pex.pex_builder import CopyMode, Layout as PEXLayout, PEXBuilder

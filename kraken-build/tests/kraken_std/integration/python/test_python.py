@@ -5,8 +5,9 @@ import shutil
 import tarfile
 import tempfile
 import unittest.mock
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Iterator, TypeVar
+from typing import TypeVar
 from unittest.mock import patch
 
 import pytest

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import re
 import warnings
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, Mapping, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
 import builddsl
 from deprecated import deprecated
-from typing_extensions import Literal
 
 from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer

@@ -5,8 +5,9 @@ Implements build script runners.
 import re
 import types
 from abc import ABC, abstractmethod
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Dict, Iterable, NamedTuple, Sequence
+from typing import Any, NamedTuple
 
 import builddsl
 
@@ -40,7 +41,7 @@ class ScriptRunner(ABC):
         raise NotImplementedError(self)
 
     @abstractmethod
-    def execute_script(self, script: Path, scope: Dict[str, Any]) -> None:
+    def execute_script(self, script: Path, scope: dict[str, Any]) -> None:
         raise NotImplementedError(self)
 
     @abstractmethod
@@ -105,7 +106,7 @@ class PythonScriptRunner(ScriptPicker):
     def __init__(self, filenames: Sequence[str] = (".kraken.py",)) -> None:
         super().__init__(filenames)
 
-    def execute_script(self, script: Path, scope: Dict[str, Any]) -> None:
+    def execute_script(self, script: Path, scope: dict[str, Any]) -> None:
         module = types.ModuleType(str(script.parent))
         module.__file__ = str(script)
 
@@ -154,7 +155,7 @@ class BuildDslScriptRunner(ScriptPicker):
     def __init__(self, filenames: Sequence[str] = ("kraken.build", ".kraken.build")) -> None:
         super().__init__(filenames)
 
-    def execute_script(self, script: Path, scope: Dict[str, Any]) -> None:
+    def execute_script(self, script: Path, scope: dict[str, Any]) -> None:
         code = script.read_text()
         scope = {"buildscript": buildscript, **scope}
         builddsl.Closure.from_map(scope).run_code(code, str(script))

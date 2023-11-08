@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import MutableMapping
 from pathlib import Path
-from typing import Any, MutableMapping, NamedTuple
+from typing import Any, NamedTuple
 
 import keyring
 import keyring.backends.fail

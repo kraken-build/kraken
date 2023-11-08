@@ -6,8 +6,9 @@ import datetime
 import json
 import logging
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, List, NoReturn, Sequence
+from typing import Any, NoReturn
 
 from kraken.common import EnvironmentType, NotSet, RequirementSpec, datetime_to_iso8601, iso8601_to_datetime
 
@@ -35,7 +36,7 @@ class BuildEnv(abc.ABC):
         """Return the path to the build environment."""
 
     @abc.abstractmethod
-    def get_installed_distributions(self) -> List[Distribution]:
+    def get_installed_distributions(self) -> list[Distribution]:
         """Return the distributions that are currently installed in the environment."""
 
     @abc.abstractmethod
@@ -43,7 +44,7 @@ class BuildEnv(abc.ABC):
         """Build the environment from the given requirement spec."""
 
     @abc.abstractmethod
-    def dispatch_to_kraken_cli(self, argv: List[str]) -> NoReturn:
+    def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         """Dispatch the kraken cli command in *argv* to the build environment.
 
         :param argv: The arguments to pass to the kraken cli (without the "kraken" command name itself)."""

@@ -1,7 +1,8 @@
 import contextlib
 import importlib
 import sys
-from typing import Iterable, Iterator, Type, TypeVar, overload
+from collections.abc import Iterable, Iterator
+from typing import Type, TypeVar, overload
 
 T = TypeVar("T")
 
@@ -12,7 +13,7 @@ def import_class(fqn: str) -> type:
 
 
 @overload
-def import_class(fqn: str, base_type: Type[T]) -> Type[T]:
+def import_class(fqn: str, base_type: type[T]) -> type[T]:
     ...
 
 

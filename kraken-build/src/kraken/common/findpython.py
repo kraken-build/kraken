@@ -8,8 +8,9 @@ import os
 import re
 import subprocess
 import sys
+from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Iterable, Iterator, Sequence
+from typing import TYPE_CHECKING, ClassVar
 
 from typing_extensions import NotRequired, TypedDict
 
@@ -157,7 +158,7 @@ def get_python_interpreter_version(python_bin: str) -> str:
         subprocess.CalledProcessError: If the command fails.
     """
 
-    output = subprocess.check_output([python_bin, "--version"], stderr=subprocess.STDOUT, universal_newlines=True)
+    output = subprocess.check_output([python_bin, "--version"], stderr=subprocess.STDOUT, text=True)
     match = re.match(r"Python (\d+\.\d+\.\d+)", output)
     if not match:
         raise RuntimeError(f"Could not determine Python version from output: {output}")

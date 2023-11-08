@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import abc
-from typing import TYPE_CHECKING, Iterator
+from collections.abc import Iterator
+from typing import TYPE_CHECKING
 
 from kraken.core.address import Address
 
