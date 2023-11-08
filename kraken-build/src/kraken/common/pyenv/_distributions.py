@@ -6,8 +6,9 @@ import dataclasses
 import json
 import subprocess
 import sys
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any
 
 import pkg_resources
 
@@ -19,11 +20,11 @@ class Distribution:
     name: str
     location: str
     version: str
-    license_name: Optional[str]
-    platform: Optional[str]
-    requires_python: Optional[str]
-    requirements: List[str]
-    extras: Set[str]
+    license_name: str | None
+    platform: str | None
+    requires_python: str | None
+    requirements: list[str]
+    extras: set[str]
 
     @staticmethod
     def from_pkg_resources(dist: pkg_resources.Distribution) -> "Distribution":
@@ -43,17 +44,17 @@ class Distribution:
         )
 
     @staticmethod
-    def from_json(data: Dict[str, Any]) -> "Distribution":
+    def from_json(data: dict[str, Any]) -> "Distribution":
         dist = Distribution(**data)
         dist.extras = set(data["extras"])
         return dist
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         result = {field.name: getattr(self, field.name) for field in dataclasses.fields(self)}
         result["extras"] = list(self.extras)
         return result
 
-    def to_csv_row(self) -> List[Optional[str]]:
+    def to_csv_row(self) -> list[str | None]:
         requirements = "|".join(self.requirements)
         extras = ",".join(self.extras)
         return [
@@ -69,12 +70,12 @@ class Distribution:
 
 
 class DistributionCollector:
-    distributions: Dict[str, Distribution]
+    distributions: dict[str, Distribution]
 
     def __init__(self) -> None:
         self.distributions = {}
 
-    def collect(self, requirement: Union[str, pkg_resources.Requirement], recursive: bool = True) -> Distribution:
+    def collect(self, requirement: str | pkg_resources.Requirement, recursive: bool = True) -> Distribution:
         """Collect the distribution named *dist_name*.
 
         :param requirement: The distribution name or requirement to collect.
@@ -96,17 +97,17 @@ class DistributionCollector:
 
         return dist
 
-    def collect_multiple(self, requirements: Iterable[Union[str, pkg_resources.Requirement]]) -> None:
+    def collect_multiple(self, requirements: Iterable[str | pkg_resources.Requirement]) -> None:
         for requirement in requirements:
             self.collect(requirement)
 
-    def collect_all(self, sys_path: Optional[Iterable[str]] = None) -> None:
+    def collect_all(self, sys_path: Iterable[str] | None = None) -> None:
         for path in sys_path or sys.path:
             for dist in pkg_resources.find_distributions(path):
                 self.distributions[dist.project_name] = Distribution.from_pkg_resources(dist)
 
 
-def get_distributions() -> Dict[str, Distribution]:
+def get_distributions() -> dict[str, Distribution]:
     """Returns all distributions that can be found in the current Python environment."""
 
     collector = DistributionCollector()
@@ -114,7 +115,7 @@ def get_distributions() -> Dict[str, Distribution]:
     return collector.distributions
 
 
-def get_distributions_of(python_bin: Union[str, Path]) -> Dict[str, Distribution]:
+def get_distributions_of(python_bin: str | Path) -> dict[str, Distribution]:
     """Returns all distributions that can be found in the environment of the given Python executable. The Python
     version must have the `setuptools` package installed and be able to execute the code of this library, i.e. it
     must be at least Python 3.6 or higher."""

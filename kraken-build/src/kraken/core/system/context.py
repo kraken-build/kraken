@@ -4,11 +4,11 @@ import collections
 import dataclasses
 import enum
 import logging
+from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Iterable, Iterator, MutableMapping, Sequence, TypeVar, overload
+from typing import Any, ClassVar, TypeAlias, TypeVar, overload
 
 from nr.stream import Stream
-from typing_extensions import TypeAlias
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from kraken.core.address import Address, AddressSpace, resolve_address

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
 from pytest import mark, raises
-from typing_extensions import Literal
 
 from kraken.common.supplier import OfSupplier, VoidSupplier
 from kraken.core.system.property import Property, PropertyContainer
@@ -82,19 +81,19 @@ def test__Property__get_of_type__scalar_no_match() -> None:
 
 
 def test__Property__get_of_type__sequence() -> None:
-    p1 = Property[List[str]](PropertyContainer(), "foo", List[str])
+    p1 = Property[list[str]](PropertyContainer(), "foo", list[str])
     p1.set(["hello", "world"])
     assert p1.get_of_type(str) == ["hello", "world"]
 
 
 def test__Property__get_of_type__sequence_no_match() -> None:
-    p1 = Property[List[str]](PropertyContainer(), "foo", List[str])
+    p1 = Property[list[str]](PropertyContainer(), "foo", list[str])
     p1.set(["hello", "world"])
     assert p1.get_of_type(int) == []
 
 
 def test__Property__get_of_type__sequence_partial_match() -> None:
-    p1 = Property[List[Union[str, int]]](PropertyContainer(), "foo", List[Union[str, int]])
+    p1 = Property[list[Union[str, int]]](PropertyContainer(), "foo", list[Union[str, int]])
     p1.set(["hello", 42, "world"])
     assert p1.get_of_type(int) == [42]
     assert p1.get_of_type(str) == ["hello", "world"]
@@ -145,7 +144,7 @@ def test__Property__property_pointing_to_a_deferred_property_does_not_register_a
 
 
 def test__Property__accepts_tuple() -> None:
-    p1 = Property[Tuple[str, int]](PropertyContainer(), "foo", Tuple[str, int])
+    p1 = Property[tuple[str, int]](PropertyContainer(), "foo", tuple[str, int])
     p1.set(("hello", 42))
     assert p1.get() == ("hello", 42)
     with raises(TypeError):
@@ -154,7 +153,7 @@ def test__Property__accepts_tuple() -> None:
 
 @mark.skip(reason="we don't currently do this level of validaton")
 def test__Property__does_not_accept_tuple_with_wrong_type() -> None:
-    p1 = Property[Tuple[str, int]](PropertyContainer(), "foo", Tuple[str, int])
+    p1 = Property[tuple[str, int]](PropertyContainer(), "foo", tuple[str, int])
     with raises(TypeError):
         p1.set(("hello", "world"))  # type: ignore[arg-type]
 

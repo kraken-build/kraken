@@ -3,10 +3,9 @@ import errno
 import os
 import shutil
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import IO, AnyStr, BinaryIO, ContextManager, Iterator, TextIO, overload
-
-from typing_extensions import Literal
+from typing import IO, AnyStr, BinaryIO, ContextManager, Literal, TextIO, overload
 
 
 @overload

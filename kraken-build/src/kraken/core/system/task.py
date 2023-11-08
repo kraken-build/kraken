@@ -10,23 +10,11 @@ import dataclasses
 import enum
 import logging
 import shlex
+from collections.abc import Collection, Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Collection,
-    ForwardRef,
-    Generic,
-    Iterable,
-    Iterator,
-    Sequence,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
 from deprecated import deprecated
-from typing_extensions import Literal
 
 from kraken.common import NotSet, Supplier
 from kraken.core.address import Address

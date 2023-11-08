@@ -1,5 +1,6 @@
+from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Any, Dict, Iterator, MutableMapping
+from typing import Any, Dict
 
 import tomli
 import tomli_w

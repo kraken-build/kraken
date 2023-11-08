@@ -1,7 +1,7 @@
+from collections.abc import Iterator
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
-from typing import Iterator
 
 import tomli
 from pytest import fixture

@@ -5,8 +5,8 @@ import sys
 import threading
 import time
 import traceback
+from collections.abc import Callable, Iterable
 from functools import partial
-from typing import Callable, Iterable
 
 from kraken.core.address import Address
 from kraken.core.system.executor import Graph, GraphExecutor, GraphExecutorObserver

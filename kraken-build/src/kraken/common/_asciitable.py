@@ -1,5 +1,6 @@
 import re
-from typing import Any, Iterator, List, Sequence, TextIO
+from collections.abc import Iterator, Sequence
+from typing import Any, TextIO
 
 try:
     from termcolor import colored
@@ -33,11 +34,11 @@ class AsciiTable:
     """
 
     #: A list of the header text cells to display at the top of the table.
-    headers: List[str]
+    headers: list[str]
 
     #: A list of rows to display in the table. Note that each row should have at least as many elements as
     #: :attr:`headers`, otherwise you will face an :class:`IndexError` in :meth:`print`.
-    rows: List[Sequence[str]]
+    rows: list[Sequence[str]]
 
     def __init__(self) -> None:
         self.headers = []

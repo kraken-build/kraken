@@ -6,8 +6,9 @@ that makes a single instance of a class available globally (across threads, but 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, ClassVar, Generic, Iterator, TypeVar, cast, overload
+from typing import Any, ClassVar, Generic, TypeVar, cast, overload
 
 from kraken.common import NotSet
 

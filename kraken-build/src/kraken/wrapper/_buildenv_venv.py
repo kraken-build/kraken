@@ -7,9 +7,7 @@ import subprocess
 import sys
 from contextlib import ExitStack
 from pathlib import Path
-from typing import List, NoReturn
-
-from typing_extensions import Literal
+from typing import Literal, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
@@ -46,7 +44,7 @@ class VenvBuildEnv(BuildEnv):
         self._show_pip_logs = show_pip_logs
 
     def _run_command(
-        self, command: List[str], operation_name: str, log_file: Path | None, mode: Literal["a", "w"] = "w"
+        self, command: list[str], operation_name: str, log_file: Path | None, mode: Literal["a", "w"] = "w"
     ) -> None:
         if log_file:
             log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -100,7 +98,7 @@ class VenvBuildEnv(BuildEnv):
     def get_type(self) -> EnvironmentType:
         return EnvironmentType.VENV
 
-    def get_installed_distributions(self) -> List[Distribution]:
+    def get_installed_distributions(self) -> list[Distribution]:
         python = self._venv.get_bin("python")
         return general_get_installed_distributions([str(python), "-c", f"{KRAKEN_MAIN_IMPORT_SNIPPET}\nmain()"])
 
@@ -192,7 +190,7 @@ class VenvBuildEnv(BuildEnv):
             logger.debug("Removing .pth file at %s", pth_file)
             pth_file.unlink()
 
-    def dispatch_to_kraken_cli(self, argv: List[str]) -> NoReturn:
+    def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         python = self._venv.get_bin("python")
         command = [str(python), "-c", f"{KRAKEN_MAIN_IMPORT_SNIPPET}\nmain()", *argv]
         env = os.environ.copy()

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
-from typing import Any, Generic, Iterable, TypeVar
+from typing import Any, Generic, TypeVar
 
 from ._address import Address
 from ._addressable import Addressable

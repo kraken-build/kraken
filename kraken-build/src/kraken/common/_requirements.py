@@ -4,8 +4,9 @@ import dataclasses
 import hashlib
 import logging
 import re
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any
 
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
@@ -35,7 +36,7 @@ class Requirement(abc.ABC):
     name: str  #: The distribution name.
 
     @abc.abstractmethod
-    def to_args(self, base_dir: Path) -> List[str]:
+    def to_args(self, base_dir: Path) -> list[str]:
         """Convert the requirement to Pip args."""
 
         raise NotImplementedError
@@ -51,7 +52,7 @@ class PipRequirement(Requirement):
     def __str__(self) -> str:
         return f"{self.name}{self.spec or ''}"
 
-    def to_args(self, base_dir: Path) -> List[str]:
+    def to_args(self, base_dir: Path) -> list[str]:
         return [str(self)]
 
 
@@ -67,7 +68,7 @@ class LocalRequirement(Requirement):
     def __str__(self) -> str:
         return f"{self.name}@{self.path}"
 
-    def to_args(self, base_dir: Path) -> List[str]:
+    def to_args(self, base_dir: Path) -> list[str]:
         return [str((base_dir / self.path if base_dir else self.path).absolute())]
 
 
@@ -75,11 +76,11 @@ class LocalRequirement(Requirement):
 class RequirementSpec:
     """Represents the requirements for a kraken build script."""
 
-    requirements: Tuple[Requirement, ...]
+    requirements: tuple[Requirement, ...]
     index_url: "str | None" = None
-    extra_index_urls: Tuple[str, ...] = ()
+    extra_index_urls: tuple[str, ...] = ()
     interpreter_constraint: "str | None" = None
-    pythonpath: Tuple[str, ...] = ()
+    pythonpath: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         for req in self.requirements:
@@ -127,7 +128,7 @@ class RequirementSpec:
         )
 
     @staticmethod
-    def from_json(data: Dict[str, Any]) -> "RequirementSpec":
+    def from_json(data: dict[str, Any]) -> "RequirementSpec":
         return RequirementSpec(
             requirements=tuple(parse_requirement(x) for x in data["requirements"]),
             index_url=data.get("index_url"),
@@ -136,8 +137,8 @@ class RequirementSpec:
             pythonpath=tuple(data.get("pythonpath", ())),
         )
 
-    def to_json(self) -> Dict[str, Any]:
-        result: Dict[str, Any] = {"requirements": [str(x) for x in self.requirements], "pythonpath": self.pythonpath}
+    def to_json(self) -> dict[str, Any]:
+        result: dict[str, Any] = {"requirements": [str(x) for x in self.requirements], "pythonpath": self.pythonpath}
         if self.index_url is not None:
             result["index_url"] = self.index_url
         if self.extra_index_urls:
@@ -147,7 +148,7 @@ class RequirementSpec:
         return result
 
     @staticmethod
-    def from_args(args: List[str]) -> "RequirementSpec":
+    def from_args(args: list[str]) -> "RequirementSpec":
         """Parses the arguments using :mod:`argparse` as if they are Pip install arguments.
 
         :raise ValueError: If an invalid argument is encountered."""
@@ -173,7 +174,7 @@ class RequirementSpec:
         base_dir: Path = Path("."),
         with_options: bool = True,
         with_requirements: bool = True,
-    ) -> List[str]:
+    ) -> list[str]:
         """Converts the requirements back to Pip install arguments.
 
         :param base_dir: The base directory that relative :class:`LocalRequirement`s should be considered relative to.

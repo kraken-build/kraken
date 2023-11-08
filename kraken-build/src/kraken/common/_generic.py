@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import enum
-from typing import Callable, Iterable, TypeVar
+from collections.abc import Callable, Iterable
+from typing import TypeVar
 
 __all__ = [
     "flatten",
@@ -20,7 +21,7 @@ def flatten(it: Iterable[Iterable[T]]) -> Iterable[T]:
         yield from item
 
 
-def not_none(v: "T | None", message: str | Callable[[], str] = "expected not-None") -> T:
+def not_none(v: T | None, message: str | Callable[[], str] = "expected not-None") -> T:
     """
     Raise a :class:`RuntimeError` if *v* is `None`, otherwise return *v*.
     """

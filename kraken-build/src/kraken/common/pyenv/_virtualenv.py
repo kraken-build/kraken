@@ -3,8 +3,8 @@
 import dataclasses
 import os
 import subprocess as sp
+from collections.abc import MutableMapping
 from pathlib import Path
-from typing import MutableMapping, Optional
 
 from kraken.common.path import is_relative_to
 
@@ -50,7 +50,7 @@ class VirtualEnvInfo:
         environ["PATH"] = os.pathsep.join(paths)
 
 
-def get_current_venv(environ: MutableMapping[str, str]) -> Optional[VirtualEnvInfo]:
+def get_current_venv(environ: MutableMapping[str, str]) -> VirtualEnvInfo | None:
     """Check the environment variables in *environ* for a `VIRTUAL_ENV` variable."""
 
     venv_path = environ.get("VIRTUAL_ENV")
