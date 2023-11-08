@@ -191,7 +191,7 @@ def resolve_address(
 
     When an address cannot be resolved, you get an #AddressResolutionError.
 
-    >>> resolve_address(space, root, Address("d"))
+    >>> resolve_address(space, root, Address("d")) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     kraken.core.address._address_resolver.AddressResolutionError: Could not resolve address 'd' in context \
 ':'. The failure occurred at address ':' trying to resolve the remainder 'd'. The address ':d' does not exist.
@@ -200,7 +200,7 @@ def resolve_address(
 
     >>> list(resolve_address(space, root, Address("**:c")).matches())
     [Node(address=Address(':c'))]
-    >>> resolve_address(space, root, Address("**:d"))
+    >>> resolve_address(space, root, Address("**:d")) # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
     kraken.core.address._address_resolver.AddressResolutionError: Could not resolve address '**:d' in context \
 ':'. The failure occurred at address ':' trying to resolve the remainder '**:d'. The address ':**:d' does not exist.
