@@ -28,7 +28,7 @@ USER_NAME = "integration-test-user"
 USER_PASS = "password-for-integration-test"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def deactivate_venv() -> Iterator[None]:
     with patch.dict(os.environ), tempfile.TemporaryDirectory() as tempdir:
         pdm_config = Path(tempdir + "/.pdm.toml")
@@ -82,7 +82,6 @@ def test__python_project_install_lint_and_publish(
     kraken_ctx: Context,
     tempdir: Path,
     pypiserver: str,
-    deactivate_venv: None,
 ) -> None:
     consumer_dir = project_dir + "-consumer"
 
@@ -116,7 +115,6 @@ def test__python_project_install_lint_and_publish(
 def test__python_project_upgrade_python_version_string(
     kraken_ctx: Context,
     kraken_project: Project,
-    deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
 
@@ -172,7 +170,6 @@ def test__python_pyproject_reads_correct_data(
     reader: type[M],
     expected_python_version: str,
     kraken_project: Project,
-    deactivate_venv: None,
 ) -> None:
     # Copy the projects to the temporary directory.
     new_dir = kraken_project.directory / project_dir
@@ -195,7 +192,6 @@ def test__python_pyproject_reads_correct_data(
 def test__python_project_coverage(
     kraken_ctx: Context,
     kraken_project: Project,
-    deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
     original_dir = example_dir("slap-project")
@@ -222,7 +218,6 @@ def test__python_project_coverage(
 def test__python_project_can_lint_lint_enforced_directories(
     kraken_ctx: Context,
     kraken_project: Project,
-    deactivate_venv: None,
 ) -> None:
     tempdir = kraken_project.directory
     original_dir = example_dir("lint-enforced-directories-project")
