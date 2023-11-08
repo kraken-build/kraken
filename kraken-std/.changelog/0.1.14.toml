@@ -1,7 +1,0 @@
-release-date = "2022-07-19"
-
-[[entries]]
-id = "e232926e-05d1-4166-a2b1-c35550a2b3a0"
-type = "fix"
-description = "fix interpretation of `KanikoBuildTask.load` property (before it would always load)"
-author = "@NiklasRosenstein"

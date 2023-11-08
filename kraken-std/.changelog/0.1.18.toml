@@ -1,7 +1,0 @@
-release-date = "2022-07-20"
-
-[[entries]]
-id = "6623360f-6899-4242-9fe5-a050791815a5"
-type = "feature"
-description = "add Python `PublishTask.skip_existing`"
-author = "@NiklasRosenstein"

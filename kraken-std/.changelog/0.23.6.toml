@@ -1,8 +1,0 @@
-release-date = "2023-06-08"
-
-[[entries]]
-id = "853795be-4b61-4de1-b24e-e1cbf9b873c6"
-type = "feature"
-description = "can specify ld_library_path for maturin builds"
-author = "james.baker@helsing.ai"
-pr = "https://github.com/kraken-build/kraken-build/pull/36"

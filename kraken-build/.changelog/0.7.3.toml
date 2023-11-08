@@ -1,0 +1,15 @@
+release-date = "2022-08-05"
+
+[[entries]]
+id = "a23c4230-e8b6-42b3-bb9c-6dcdfbe946c7"
+type = "feature"
+description = "add `TaskGraph.tasks(pending)` parameter"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "4f739a01-d9b3-4f2a-aadf-55c678641f2a"
+type = "fix"
+description = "`TaskGraph.set_status()` now correctly resets the required background tasks of all _pending_ tasks, not just the immediate build targets"
+author = "@NiklasRosenstein"
+component = "core"

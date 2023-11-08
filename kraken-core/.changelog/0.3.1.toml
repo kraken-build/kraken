@@ -1,7 +1,0 @@
-release-date = "2022-07-19"
-
-[[entries]]
-id = "337bfe83-47f6-45b5-9056-66ea7ac80e47"
-type = "improvement"
-description = "add `Property.output()` static method, removed `kraken.core.testing.kraken_execute()`"
-author = "@NiklasRosenstein"

@@ -1,8 +1,0 @@
-release-date = "2023-05-12"
-
-[[entries]]
-id = "76c46a02-b451-480d-9639-5a84fbad79e4"
-type = "improvement"
-description = "Show groups marked with `Task.default = True` as `(default group)` in bold yellow, akin to how non-group tasks are shown as `(default task)` in bold blue."
-author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken-core/pull/48"

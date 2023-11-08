@@ -1,8 +1,0 @@
-release-date = "2023-05-12"
-
-[[entries]]
-id = "a59e810f-5011-4f1d-a262-53a0bb5fb720"
-type = "fix"
-description = "Fixed `Project.do()` trying to call `Property.set(None)` when in actuality in that case the `.set()` method should just not be called."
-author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken-core/pull/50"

@@ -1,0 +1,22 @@
+release-date = "2022-07-08"
+
+[[entries]]
+id = "cb9f45e2-6df1-4b86-8d86-a0f5bc6bd243"
+type = "fix"
+description = "implement `kraken.testing` module properly as a Pytest plugin, add a `kraken_execute()` function for executing a build graph from tests"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "42cbe729-c847-4511-863c-984657dea84a"
+type = "improvement"
+description = "use `Task.logger` to report properties that cannot be set by `Object.update()`, this most commonly surfaces when using a `task_factory` in a build script and passing parameters that do not exist on the task"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "3ee32963-ca67-4b94-8df9-22772b97ee20"
+type = "feature"
+description = "add `import_class()` to `kraken.core.utils`"
+author = "@NiklasRosenstein"
+component = "core"

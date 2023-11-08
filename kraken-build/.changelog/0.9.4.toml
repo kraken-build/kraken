@@ -1,0 +1,8 @@
+release-date = "2022-08-25"
+
+[[entries]]
+id = "a263a486-2bac-46dd-9b94-4e8b349e6146"
+type = "fix"
+description = "`RenderFileTask` now creates parent directories of the file to be rendered"
+author = "@NiklasRosenstein"
+component = "core"

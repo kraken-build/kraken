@@ -1,7 +1,0 @@
-release-date = "2023-06-28"
-
-[[entries]]
-id = "97de5e0d-c19c-4804-b66f-13068e92794b"
-type = "fix"
-description = "Fixed `cargo_sqlx_migrate()` and `cargo_sqlx_prepare()` by adding missing parameters that were previously supported with `**kwargs` before `Project.do()` was deprecated."
-author = "@NiklasRosenstein"

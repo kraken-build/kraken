@@ -1,0 +1,9 @@
+release-date = "2023-02-08"
+
+[[entries]]
+id = "04c299cf-56ae-449d-94db-fc2e7aa76f7c"
+type = "improvement"
+description = "adds a nice warning when a Python local dependency is missing"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/87"
+component = "std"

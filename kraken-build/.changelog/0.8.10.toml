@@ -1,0 +1,47 @@
+release-date = "2022-08-12"
+
+[[entries]]
+id = "5f0a1c70-cbae-4f65-ae49-1d1e377d0c6d"
+type = "breaking change"
+description = "remove unused `kraken.core.__main__`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "ba132f16-6e48-4c6f-a01e-4c818f879d87"
+type = "fix"
+description = "fix `NameError` in `kraken query describe`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "796e0584-b400-475d-a8cf-bd0eb4637dc9"
+type = "feature"
+description = "Make descriptions less verbose"
+author = "nicolas.trinquier@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/143"
+component = "std"
+
+[[entries]]
+id = "2e71f17e-50ef-4c49-9130-09ee7a3db66f"
+type = "improvement"
+description = "Always reinstall Maturin build on python.install"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/140"
+component = "std"
+
+[[entries]]
+id = "046c599e-ae05-45b4-9f6b-2899a4e8e927"
+type = "feature"
+description = "Rust: adds a task to install Rustup targets"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/144"
+component = "std"
+
+[[entries]]
+id = "53221f14-bf40-4ce8-b657-4b522d45c725"
+type = "feature"
+description = "Maturin: adds tooling for cross-compilation using zig"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/145"
+component = "std"

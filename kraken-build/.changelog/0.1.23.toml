@@ -1,0 +1,8 @@
+release-date = "2022-07-25"
+
+[[entries]]
+id = "21e674a3-9352-4c4b-8c61-ce60ef2c5df9"
+type = "feature"
+description = "add `manifest_tool()` function"
+author = "@NiklasRosenstein"
+component = "std"

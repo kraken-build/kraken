@@ -1,0 +1,8 @@
+release-date = "2022-12-28"
+
+[[entries]]
+id = "bbb10e4e-b136-472f-990d-1ee8d2eb1493"
+type = "fix"
+description = "Fix: use target-dir from metadata rather than guessing"
+author = "@tetigi"
+component = "std"

@@ -1,7 +1,0 @@
-release-date = "2022-07-06"
-
-[[entries]]
-id = "655ad9e7-87f8-4f68-aaa3-a60ae69f0426"
-type = "breaking change"
-description = "update Helm task parameters and add docstrings"
-author = "@NiklasRosenstein"

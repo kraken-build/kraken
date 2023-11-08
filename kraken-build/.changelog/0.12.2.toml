@@ -1,0 +1,9 @@
+release-date = "2023-05-12"
+
+[[entries]]
+id = "3feea47c-93be-4c0c-9aa5-b93f73290199"
+type = "fix"
+description = "Fix `Property.is_empty()` and `Property.is_filled()` when the property is still in its \"deferred\" state. A deferred property registers as \"empty\", but a property that points to a deffered property propagates the `Property.Deferred` exception."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-core/pull/49"
+component = "core"

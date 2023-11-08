@@ -1,0 +1,9 @@
+release-date = "2023-06-19"
+
+[[entries]]
+id = "849d68fb-bf60-4609-9d71-3e84b98ba0d7"
+type = "improvement"
+description = "Add manifest_path to artifact metadata for Cargo"
+author = "luke.tomlin@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/41"
+component = "std"

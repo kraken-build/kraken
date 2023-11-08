@@ -1,0 +1,8 @@
+release-date = "2022-12-12"
+
+[[entries]]
+id = "9f8e70db-6332-4925-9ae6-799ff0b20082"
+type = "feature"
+description = "add `Project.subproject()` and `.subprojects()` to deprecated `.children()`, add `ProjectHasNoBuildScriptError`, add `Context.load_project(require_buildscript)` parameter"
+author = "@NiklasRosenstein"
+component = "core"

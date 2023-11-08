@@ -1,8 +1,0 @@
-release-date = "2023-03-09"
-
-[[entries]]
-id = "85324e3a-70f4-4ca2-b049-8cfbd05bbacc"
-type = "fix"
-description = "fix issue  where we extract the wrong key for cargo version"
-author = "@tetigi"
-pr = "https://github.com/kraken-build/kraken-std/pull/110"

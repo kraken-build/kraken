@@ -1,7 +1,0 @@
-release-date = "2023-09-04"
-
-[[entries]]
-id = "99d33b26-c517-4e75-82ca-47c24bb51c09"
-type = "fix"
-description = "Fixed log format string when Pip fails to install dependencies."
-author = "@NiklasRosenstein"

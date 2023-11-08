@@ -9,7 +9,7 @@ description = ""
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "kraken/common", from = "src" }]
+packages = []
 classifiers = []
 keywords = []
 
@@ -20,65 +20,4 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4.0"
-builddsl = "^1.0.0"
-dataclasses = { version = "^0.6", python = "<3.7" }
-setuptools = "*"
-typing-extensions = ">=3.0.0.0,<4.7.0"  # Upper constraint due to https://github.com/python/typing_extensions/issues/265
-httpx = "^0.23.0"
-
-# Allow older versions for Python 3.6 compatibility.
-tomli = ">=1.0.0,<3.0.0"
-tomli_w = ">=0.4.0,<2.0.0"
-packaging = "^23.1"
-rich = "^13.4.2"
-
-
-[tool.poetry.dev-dependencies]
-black = "*"
-flake8 = "*"
-isort = "*"
-mypy = "*"
-pytest = "*"
-termcolor = "*"
-types-dataclasses = { version = "^0.6.6", python = "<3.7" }
-types-setuptools = "*"
-types-termcolor = "*"
-types-requests = "^2.28.0"
-rich = "^13.4.2"
-
-[tool.slap]
-typed = true
-
-[tool.slap.test]
-check = "slap check"
-mypy = "dmypy run src/"
-pytest = "pytest -vv"
-black = "black --check src/"
-isort = "isort --check-only src/"
-flake8 = "flake8 src/"
-
-[tool.slap.run]
-fmt = "black src/ && isort src/"
-
-[tool.mypy]
-python_version = "3.7"
-explicit_package_bases = true
-mypy_path = ["src"]
-namespace_packages = true
-pretty = true
-show_error_codes = true
-show_error_context = true
-strict = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
-
-[tool.isort]
-profile = "black"
-line_length = 120
-combine_as_imports = true
-
-[tool.black]
-line-length = 120
+kraken-build = "0.31.7"

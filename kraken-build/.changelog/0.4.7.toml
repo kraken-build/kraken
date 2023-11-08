@@ -1,0 +1,8 @@
+release-date = "2022-10-18"
+
+[[entries]]
+id = "80171b4b-a746-4eaf-88d6-dc662413ca28"
+type = "fix"
+description = "An empty `arcname` parameter in `dist()` was handled like `None`, but is now handled as expected."
+author = "@NiklasRosenstein"
+component = "std"

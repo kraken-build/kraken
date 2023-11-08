@@ -1,0 +1,22 @@
+release-date = "2022-07-20"
+
+[[entries]]
+id = "74a06257-41dd-4809-a259-5b493d2cfcc0"
+type = "feature"
+description = "add `BlackTask.additional_files` and `IsortTask.additional_files`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "00ec24e0-6fb2-4179-858d-98a2eb2b79a0"
+type = "fix"
+description = "fix Python build system now properly moving the distributions instead of just renaming, which fails across file system boundaries"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "5bc09df8-ab0e-4cb4-8282-bab9fa172b1c"
+type = "fix"
+description = "Update handling of `--password-stdin` flag, if this and `--password` is not specified, we will use `getpass()`"
+author = "@NiklasRosenstein"
+component = "wrapper"

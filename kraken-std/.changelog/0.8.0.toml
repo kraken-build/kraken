@@ -1,8 +1,0 @@
-release-date = "2023-03-31"
-
-[[entries]]
-id = "497966ba-13ed-4545-8e2b-9a48c40e6f47"
-type = "improvement"
-description = "Updated .gitignore task to accept configurable parameters"
-author = "luke.bax@talktalk.net"
-pr = "https://github.com/kraken-build/kraken-std/pull/122"

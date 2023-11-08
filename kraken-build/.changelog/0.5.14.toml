@@ -1,0 +1,9 @@
+release-date = "2023-01-29"
+
+[[entries]]
+id = "659aaa74-f375-4c81-bd57-7e2475b66566"
+type = "feature"
+description = "Cargo: Allow to exclude some crates from the workspace when building"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/issues/75"
+component = "std"

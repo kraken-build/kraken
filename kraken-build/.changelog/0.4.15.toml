@@ -1,0 +1,15 @@
+release-date = "2022-12-10"
+
+[[entries]]
+id = "3b3a2872-0721-4aad-bb66-85a92412f201"
+type = "feature"
+description = "Add `cargo_fmt(all_packages)` parameter"
+author = "callumPearce"
+component = "std"
+
+[[entries]]
+id = "01e23a6d-cd8b-4afd-b80a-59c1bafd908b"
+type = "feature"
+description = "Split out libs and bins from cargo build task"
+author = "@tetigi"
+component = "std"

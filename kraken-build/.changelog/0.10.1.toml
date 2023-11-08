@@ -1,0 +1,15 @@
+release-date = "2022-09-11"
+
+[[entries]]
+id = "5577523f-9642-4c3e-a5b0-3415e57c0432"
+type = "breaking change"
+description = "replace `Project.resolve_outputs()` etc. with `TaskSet.select()` and the `TaskSetSelect` class, as well as making `Project.resolve_tasks()` to return a `TaskSet` instead"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "3010041c-8411-4b77-8587-4a3864647606"
+type = "feature"
+description = "update `Supplier.of()` to accept an existing `Supplier`"
+author = "@NiklasRosenstein"
+component = "core"

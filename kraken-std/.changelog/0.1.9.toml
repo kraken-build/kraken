@@ -1,7 +1,0 @@
-release-date = "2022-07-14"
-
-[[entries]]
-id = "dc714e2b-02dd-4f45-a983-f188c1e91b7d"
-type = "improvement"
-description = "add `native_use_buildkit` option to the `NativeBuildTask` for Docker"
-author = "@NiklasRosenstein"

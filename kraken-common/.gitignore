@@ -1,8 +1,0 @@
-/.vscode
-/dist
-/build
-.venv/
-*.egg-info/
-__pycache__/
-poetry.lock
-.dmypy.json

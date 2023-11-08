@@ -1,7 +1,0 @@
-release-date = "2022-12-19"
-
-[[entries]]
-id = "6c5462ff-15eb-4bff-a227-32e58778f619"
-type = "fix"
-description = "add back `TaskRelationship` to `kraken.core.api`"
-author = "@NiklasRosenstein"

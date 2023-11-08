@@ -1,7 +1,0 @@
-release-date = "2022-07-27"
-
-[[entries]]
-id = "dba8e7da-7d1f-4c0f-880b-b59060096b22"
-type = "fix"
-description = "make `Supplier.map()` result picklable"
-author = "@NiklasRosenstein"

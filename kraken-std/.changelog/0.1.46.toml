@@ -1,7 +1,0 @@
-release-date = "2022-08-05"
-
-[[entries]]
-id = "ec05a3fd-ee58-459d-9f2c-0fd7f586c098"
-type = "feature"
-description = "`RenderFileTask` now automatically generates a corresponding check task that is added to the `lint` group"
-author = "@NiklasRosenstein"

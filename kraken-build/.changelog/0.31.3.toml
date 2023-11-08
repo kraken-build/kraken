@@ -1,0 +1,41 @@
+release-date = "2023-09-14"
+
+[[entries]]
+id = "2f8eeecf-df8f-4d7d-9b38-76297a123371"
+type = "refactor"
+description = "Add http module to common"
+author = "alex.spencer@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/109"
+component = "common"
+
+[[entries]]
+id = "2268bf44-de8d-4fbd-9f53-7f506a6dbefd"
+type = "deprecation"
+description = "Deprecate http module in std in preference of moving to kraken-common"
+author = "alex.spencer@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/109"
+component = "std"
+
+[[entries]]
+id = "23a63044-a0fe-415f-a7a0-d7fc7375c93c"
+type = "improvement"
+description = "Allows to inject env variable in Maturin builds"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/104"
+component = "std"
+
+[[entries]]
+id = "e5ad6dda-58f4-4f5d-bc28-95e24830989e"
+type = "improvement"
+description = "add `mode=max,ignore-error=true` to the `--cache-to=type=registry,...` option created by the `BuildxBuildTask`."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/111"
+component = "std"
+
+[[entries]]
+id = "18c0a8d4-e6c2-4c7e-9029-84d7416246ed"
+type = "fix"
+description = "Enforces isort and refreshes poetry.lock"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-build/pull/108"
+component = "wrapper"

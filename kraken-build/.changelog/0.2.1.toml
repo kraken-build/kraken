@@ -1,0 +1,36 @@
+release-date = "2022-07-06"
+
+[[entries]]
+id = "920fe0e8-3852-4df3-820c-1f3595a50863"
+type = "feature"
+description = "install requirements.txt into .build/.lib directory if a .kraken/requirements.txt file exists"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "9dc07eb6-b564-4212-8d0b-f71bee8d42e4"
+type = "feature"
+description = "implement Path value adapters"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "1297f956-619f-4806-a963-5392c82d5c78"
+type = "improvement"
+description = "add derived_from to of_callable(), setdefault() no longer returns a value"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "30e51d71-f012-47e1-bf8a-8cb9139b06f4"
+type = "improvement"
+description = "`krakenw` now prints the `kraken` command that it runs inside the build environment"
+author = "@NiklasRosenstein"
+component = "wrapper"
+
+[[entries]]
+id = "16828c43-0035-4732-b7be-70fc4d3e9868"
+type = "feature"
+description = "`krakenw` now looks for the top-most Kraken build script starting from the current directory and uses that as the Kraken project directory and containing directory for the build directory and build environment."
+author = "@NiklasRosenstein"
+component = "wrapper"

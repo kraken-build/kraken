@@ -1,0 +1,16 @@
+release-date = "2022-08-01"
+
+[[entries]]
+id = "86b5ddbe-af30-4d66-b9e3-7161f75cff4d"
+type = "feature"
+description = "add `Property.setmap()`"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "f3efbfaa-cdd4-40e7-af42-7db4da3e5449"
+type = "fix"
+description = "Fix formatting"
+author = "@cdbrkfxrpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/106"
+component = "std"

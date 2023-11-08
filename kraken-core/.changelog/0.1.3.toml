@@ -1,7 +1,0 @@
-release-date = "2022-07-04"
-
-[[entries]]
-id = "a40eb67d-a8d2-492c-b60a-8b9b7a9890dd"
-type = "feature"
-description = "Add `Project.resolve_tasks()`"
-author = "@NiklasRosenstein"

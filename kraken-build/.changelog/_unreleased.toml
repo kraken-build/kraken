@@ -1,0 +1,6 @@
+[[entries]]
+id = "b883cb8f-a697-488e-868d-c09b2151af44"
+type = "improvement"
+description = "Merge `kraken-common`, `kraken-core`, `kraken-std` and `kraken-wrapper` packages into a single `kraken-build` package."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken/pull/125"

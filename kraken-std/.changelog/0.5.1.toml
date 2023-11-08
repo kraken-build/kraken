@@ -1,7 +1,0 @@
-release-date = "2022-12-14"
-
-[[entries]]
-id = "28fbdd0e-9f5c-471e-a6f6-78fc94ab5ba9"
-type = "feature"
-description = "Add `cargo_publish(package_name)` parameter"
-author = "callumPearce"

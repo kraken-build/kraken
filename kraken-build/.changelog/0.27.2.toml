@@ -1,0 +1,11 @@
+release-date = "2023-06-28"
+
+[[entries]]
+id = "e49a0d26-e098-4199-9b54-897a5ef96916"
+type = "fix"
+description = "Do not sort out `python3.XY` and `python3.XY.AB` binaries when searching for candidates of Python binaries on the system in `kraken.common.findpython.get_candidates()`."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken-build/issues/60",
+]
+component = "common"

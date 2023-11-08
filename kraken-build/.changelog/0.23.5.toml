@@ -1,0 +1,33 @@
+release-date = "2023-06-08"
+
+[[entries]]
+id = "11a29721-dfbc-4875-bdc6-7baffa9390d8"
+type = "fix"
+description = "Re-allow specfiying one or more tasks while also passing the `--all` flag."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/35"
+component = "core"
+
+[[entries]]
+id = "177f1e06-db56-4b25-890f-420b7bbbb66e"
+type = "improvement"
+description = "Add `-x` and `-X` options to the `krakenw q tree` command"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/35"
+component = "core"
+
+[[entries]]
+id = "8db05748-81ea-45a1-92f8-fa693026122d"
+type = "improvement"
+description = "The `krakenw q tree` command now includes the task status, if any (only relevant with the `--resume` flag or the `-x` or `-X` options, otherwise tasks have no status when the tree is printed)"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/35"
+component = "core"
+
+[[entries]]
+id = "9454562d-7a0b-47c9-9d8d-a00fc2b29123"
+type = "improvement"
+description = "Make cargo fmt use the nightly toolchain by default"
+author = "nicolas.vizzari@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-build/pull/34"
+component = "std"

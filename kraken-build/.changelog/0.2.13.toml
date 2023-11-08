@@ -1,0 +1,8 @@
+release-date = "2022-07-13"
+
+[[entries]]
+id = "294bc50e-1a89-4dff-b44c-b7b2d791f833"
+type = "feature"
+description = "add `BuildContext.current()` and `Project.current()` static methods"
+author = "@NiklasRosenstein"
+component = "core"

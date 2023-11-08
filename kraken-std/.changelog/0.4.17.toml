@@ -1,7 +1,0 @@
-release-date = "2022-12-11"
-
-[[entries]]
-id = "d97d9a18-2915-43c6-8e5a-ca0a16713d81"
-type = "fix"
-description = "Fix cargo build artifact paths"
-author = "@tetigi"

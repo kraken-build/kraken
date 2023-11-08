@@ -1,0 +1,9 @@
+release-date = "2023-02-20"
+
+[[entries]]
+id = "94488a92-bde4-4989-9cbf-c54866ecd114"
+type = "feature"
+description = "Adds cargo_check_toolchain_version"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/97"
+component = "std"

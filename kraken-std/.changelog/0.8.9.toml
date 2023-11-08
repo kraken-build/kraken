@@ -1,8 +1,0 @@
-release-date = "2023-04-28"
-
-[[entries]]
-id = "539deb47-b243-47a2-bc94-42504ba97cd7"
-type = "feature"
-description = "Export `cargo_sqlx_prepare`"
-author = "nicolas.trinquier@helsing.ai"
-pr = "https://github.com/kraken-build/kraken-std/pull/142"

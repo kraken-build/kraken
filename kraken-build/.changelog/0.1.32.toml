@@ -1,0 +1,15 @@
+release-date = "2022-07-29"
+
+[[entries]]
+id = "99554b03-23d6-498e-8e3d-a402e9c713d8"
+type = "feature"
+description = "add `kraken.std.sccache` module"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "6a198a9c-0e7b-4b97-8a1a-c4691b262c94"
+type = "feature"
+description = "add `CargoProject.build_env` attribute, `cargo_build(incremental, env)` and `cargo_publish(incremental, env)` args"
+author = "@NiklasRosenstein"
+component = "std"

@@ -1,0 +1,22 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "97a75ab7-16da-4780-ae65-190f10e04bed"
+type = "breaking change"
+description = "Build script can only be called `.kraken.py`, all other alternative names are no longer supported"
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "ad7dad4a-90b1-45ed-9d88-e6d9353bbb3e"
+type = "improvement"
+description = "kraken-core ^0.9.0 compatibility"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "94011e8e-4396-4163-a62b-4c440df82ddc"
+type = "tests"
+description = "improve integration tests for cargo private registries"
+author = "@NiklasRosenstein"
+component = "std"

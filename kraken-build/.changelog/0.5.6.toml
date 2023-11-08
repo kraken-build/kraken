@@ -1,0 +1,15 @@
+release-date = "2022-12-20"
+
+[[entries]]
+id = "7b732c4c-f97d-4174-97af-c7254f295d16"
+type = "improvement"
+description = "update imports from `kraken.core` to use `kraken.core.api`"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "69ea8d59-2a34-4ac2-adc8-6ed64c5477e5"
+type = "improvement"
+description = "bump to `kraken-core ^0.11.5` and update imports"
+author = "@NiklasRosenstein"
+component = "std"

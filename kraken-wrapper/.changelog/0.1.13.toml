@@ -1,7 +1,0 @@
-release-date = "2022-08-13"
-
-[[entries]]
-id = "7dddf643-9a7a-40d0-b044-6802e81d3ead"
-type = "improvement"
-description = "In the `VENV` environment type, do not upgrade Pip if the build env is reused (with `KRAKENW_INCREMENTAL=1`)"
-author = "@NiklasRosenstein"

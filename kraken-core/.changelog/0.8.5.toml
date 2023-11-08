@@ -1,7 +1,0 @@
-release-date = "2022-08-12"
-
-[[entries]]
-id = "3f35cf6a-ab29-48d1-ba6e-e7599d87775b"
-type = "fix"
-description = "another fix for `kraken.test` ~.~"
-author = "@NiklasRosenstein"

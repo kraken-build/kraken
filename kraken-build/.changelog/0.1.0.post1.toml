@@ -1,0 +1,8 @@
+release-date = "2022-07-01"
+
+[[entries]]
+id = "c48a0427-6967-42b5-9e2c-e91ecf3b0862"
+type = "fix"
+description = "reduce networkx requirement for Python 3.7 compatibility, fix lints"
+author = "@NiklasRosenstein"
+component = "core"

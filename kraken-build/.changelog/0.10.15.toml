@@ -1,0 +1,15 @@
+release-date = "2022-12-12"
+
+[[entries]]
+id = "365895d4-76a3-41be-91f3-79ee45426e42"
+type = "fix"
+description = "Fix bug where task resolution tries to equate strings and projects"
+author = "@tetigi"
+component = "core"
+
+[[entries]]
+id = "98b443bd-0454-4908-9edf-1cacb2162107"
+type = "fix"
+description = "The render file task no longer converts relative paths as relative to its owning project; this breaks assumption when inside a subproject. In the root project this change should not have any effect"
+author = "@NiklasRosenstein"
+component = "core"

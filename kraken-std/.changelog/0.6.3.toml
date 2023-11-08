@@ -1,8 +1,0 @@
-release-date = "2023-03-10"
-
-[[entries]]
-id = "3a73a111-fe59-48f6-a155-ce96d7626228"
-type = "fix"
-description = "inject auth credentials into config.toml"
-author = "@tetigi"
-pr = "https://github.com/kraken-build/kraken-std/pull/111"

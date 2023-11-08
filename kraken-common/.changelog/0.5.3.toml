@@ -1,7 +1,0 @@
-release-date = "2023-02-15"
-
-[[entries]]
-id = "62482e19-4c68-4142-aa77-e25401a1ee62"
-type = "improvement"
-description = "Allow disabling `GitAwareProjectFinder` home boundary check."
-author = "@NiklasRosenstein"

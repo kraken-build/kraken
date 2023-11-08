@@ -1,0 +1,32 @@
+release-date = "2022-08-13"
+
+[[entries]]
+id = "3fe0ffbe-5748-4d7a-be49-153a84118501"
+type = "fix"
+description = "Fix resuming from a build state when it contains objects from a module in the `# :: pythonpath` specified in the build script, and fix resuming from multiple build states."
+author = "@NiklasRosenstein"
+component = "core"
+
+[[entries]]
+id = "29a1ace5-d12c-4094-83da-965078257c39"
+type = "improvement"
+description = "Add linting + inplace formatting for protobuf projects"
+author = "mohamed.shire@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/148"
+component = "std"
+
+[[entries]]
+id = "20a1bcd1-46e0-4818-96b5-05de8a131a64"
+type = "feature"
+description = "Maturin now supports RUSTFLAGS, non-manylinux wheels"
+author = "james.baker@helsing.ai"
+pr = "https://github.com/kraken-build/kraken-std/pull/150"
+component = "std"
+
+[[entries]]
+id = "d54734fc-e876-482f-b664-29abf6dee83a"
+type = "fix"
+description = "Maturin cross-compilation: use poetry run"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/147"
+component = "std"

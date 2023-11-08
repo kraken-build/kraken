@@ -1,0 +1,22 @@
+release-date = "2023-05-15"
+
+[[entries]]
+id = "e38c1817-b7f4-430e-962b-bcd826200cb9"
+type = "improvement"
+description = "Move code for `Supplier` from `nr-stream` package to `kraken-common`"
+author = "niklas.rosenstein@helsing.ai"
+component = "common"
+
+[[entries]]
+id = "5b094100-d0b3-4c65-a78d-dd37980c2ba8"
+type = "improvement"
+description = "Use `kraken.common.supplier.Supplier` instead of `nr.stream.Supplier`, Remove `kraken.core.api` in favor of `kraken.core`"
+author = "niklas.rosenstein@helsing.ai"
+component = "core"
+
+[[entries]]
+id = "cfa3781f-d873-46ff-ae6f-ae376793a832"
+type = "improvement"
+description = "Replace imports from `kraken.core.api` with `kraken.core` and imports of `nr.stream.Supplier` with `kraken.common.Supplier`"
+author = "niklas.rosenstein@helsing.ai"
+component = "std"

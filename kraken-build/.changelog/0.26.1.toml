@@ -1,0 +1,8 @@
+release-date = "2023-06-20"
+
+[[entries]]
+id = "4740f67f-e876-4130-b340-8e47edb6ffc4"
+type = "fix"
+description = "Catch potential permission error when inspecting the files on the `PATH` in `kraken.common.findpython.get_candidates()`"
+author = "@NiklasRosenstein"
+component = "common"

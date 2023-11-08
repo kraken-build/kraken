@@ -1,0 +1,40 @@
+release-date = "2023-05-13"
+
+[[entries]]
+id = "ecb1904d-e965-4486-a8ee-dd9a0f0c867d"
+type = "improvement"
+description = "Bump `kraken-core` to `^0.12.4` and `databind.json` to `4.2.5`."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-std/pull/154"
+component = "std"
+
+[[entries]]
+id = "53221f14-bf40-4ce8-b657-4b522d45c725"
+type = "feature"
+description = "Maturin: adds tooling for cross-compilation using zig"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/145"
+component = "std"
+
+[[entries]]
+id = "930c578f-e342-4caf-82ea-aa4982dd316a"
+type = "fix"
+description = "Poetry: strips '(Activated)' from 'poetry env list --full-path' result"
+author = "@Tpt"
+pr = "https://github.com/kraken-build/kraken-std/pull/146"
+component = "std"
+
+[[entries]]
+id = "323b46a0-23a5-4afb-b9be-f4c20a0305b3"
+type = "fix"
+description = "fix `mypy_stubtest` function name (was: `mypy_subtest`)"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-std/pull/153"
+component = "std"
+
+[[entries]]
+id = "cee10c20-3138-4fec-819b-94827f67ae4f"
+type = "improvement"
+description = "When `git describe` fails, we fall back to `0.0.0-N-gSHA` where `N` is the number of commits on `HEAD`."
+author = "@NiklasRosenstein"
+component = "std"

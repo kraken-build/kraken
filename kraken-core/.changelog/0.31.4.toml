@@ -1,8 +1,0 @@
-release-date = "2023-09-19"
-
-[[entries]]
-id = "4cea3e6c-d362-441d-99fa-83efacd16689"
-type = "fix"
-description = "Fixed a bug where tasks that are dependencies of another task excluded with the `-X` option (recursive exclude) would be tagged unconditionally to be skipped during execution even if it was still required by another task that is not skipped."
-author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken-build/pull/116"

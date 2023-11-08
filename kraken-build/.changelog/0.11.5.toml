@@ -1,0 +1,8 @@
+release-date = "2022-12-19"
+
+[[entries]]
+id = "d9e688ed-6d00-4368-a4f3-80b777999e0b"
+type = "improvement"
+description = "add back `BuildError` to `kraken.core.api`"
+author = "@NiklasRosenstein"
+component = "core"

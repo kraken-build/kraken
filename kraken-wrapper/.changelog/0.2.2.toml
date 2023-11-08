@@ -1,7 +1,0 @@
-release-date = "2022-12-19"
-
-[[entries]]
-id = "7702a350-2c93-4ef1-84ba-9cb2432be82d"
-type = "fix"
-description = "running in a build environment of type `VENV` now preprends the environment's `bin` directory to the `PATH` environment variables when Kraken is invoked."
-author = "@NiklasRosenstein"

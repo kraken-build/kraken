@@ -1,0 +1,22 @@
+release-date = "2022-07-19"
+
+[[entries]]
+id = "b8054627-4bdb-4d47-b228-8406cf492844"
+type = "breaking change"
+description = "upgrade to be compatible with `kraken-core ^0.3.0`, add Novella docs and publish to Github actions"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "884e2e86-4e3f-4041-913b-f11a2688dfba"
+type = "fix"
+description = "`VENV` environment type now ensures Pip is up to date in the environment before installing requirements; removed `--use-feature=in-tree-build` flag is it was removed from `20.0.4` to `21.0` and is now the default"
+author = "@NiklasRosenstein"
+component = "wrapper"
+
+[[entries]]
+id = "58a83374-41df-4b1e-aeed-4351e4761bf8"
+type = "improvement"
+description = "print time it took to install the build environmet"
+author = "@NiklasRosenstein"
+component = "wrapper"

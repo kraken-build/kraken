@@ -1,0 +1,29 @@
+release-date = "2022-09-12"
+
+[[entries]]
+id = "203f2835-4820-46ba-989a-7588adc77b8b"
+type = "feature"
+description = "add `kraken.std.descriptors.resource` module"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "22ef039c-2f92-4129-81d7-e84c43c6d78f"
+type = "improvement"
+description = "add `CargoBuildTask.target` property, but currently it is only used for the Task to know which subfolder in `./target` to look into"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "36cf6094-2eb4-4500-b1bc-86cafd86b0e6"
+type = "feature"
+description = "add `CargoBuildTask.out_binaries` property"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "a901faf1-0c44-4f4a-b6a5-515026af07cc"
+type = "feature"
+description = "add `kraken.std.dist` module which provides the `dist()` function to create distributions from the resources provided by other tasks."
+author = "unknown"
+component = "std"

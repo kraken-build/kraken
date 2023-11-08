@@ -1,7 +1,0 @@
-release-date = "2022-09-26"
-
-[[entries]]
-id = "8e9f4cd7-e56b-460b-958d-0a160e8b9f4d"
-type = "fix"
-description = "take `KRAKEN_CARGO_BUILD_FLAGS` into account for all `CargoBuildTask` implementations (this includes cargo test, cargo fmt, etc.)"
-author = "@NiklasRosenstein"

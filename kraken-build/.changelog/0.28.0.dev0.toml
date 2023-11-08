@@ -1,0 +1,64 @@
+release-date = "2023-07-07"
+
+[[entries]]
+id = "1fd57aac-6ed7-417d-8075-c948f7567194"
+type = "deprecation"
+description = "Deprecate `Property.config()`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/64"
+component = "core"
+
+[[entries]]
+id = "2799f865-f670-44ed-981c-1c6d52275f1f"
+type = "feature"
+description = "Add `Property.required()` and a `help` parameter to `Property.output()`, `Property.default()` and `Property.default_factory()`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/64"
+component = "core"
+
+[[entries]]
+id = "4c2eef2a-9e4c-4c0c-b5f9-494097fcc5b3"
+type = "feature"
+description = "Add `Task.add_tag()`, `Task.remove_tag()` and `Task.get_tags()`. A \"skip\" tag can now be added to a task to skip it."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
+component = "core"
+
+[[entries]]
+id = "25f507d1-09ba-4107-9f6f-6217f75b66d5"
+type = "improvement"
+description = "Allow `Task` items in parameter to `Context.resolve_tasks()`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
+component = "core"
+
+[[entries]]
+id = "cfdd846b-6a9b-43f0-aa11-fa54ebcf06f5"
+type = "tests"
+description = "Test `PythonBuildSystem.build()` with `as_version` set for Slap/Poetry/Pdm"
+author = "@NiklasRosenstein"
+component = "std"
+
+[[entries]]
+id = "c3a6fd4d-163b-4bf8-9251-30cfc436a3b9"
+type = "improvement"
+description = "Adjust task property definitions to replace `Property.config()` with `Property.default()` and `Property.default_factory()`"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/64"
+component = "std"
+
+[[entries]]
+id = "15468abe-332f-480d-b287-db44bab5eea7"
+type = "breaking change"
+description = "Move Kraken task definitions in `kraken.std.docker` into `kraken.std.docker.tasks` module"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/66"
+component = "std"
+
+[[entries]]
+id = "9e0bffa2-9345-42c1-a33d-f5b86151fbd5"
+type = "improvement"
+description = "Phase out `proxy.py` MITM proxy for Cargo repositories and replace it with `mitmproxy` (https://mitmproxy.org/). Kraken will now start `mitmweb` in the background listening to port `8899` (same as before), while serving the Web Interface on port `8900`. The `mitmweb` process will remain alive over multiple runs of Kraken and restart automatically if its configuration changes (e.g. if the token changes)."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken-build/pull/68"
+component = "std"

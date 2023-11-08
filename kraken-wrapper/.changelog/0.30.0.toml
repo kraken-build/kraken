@@ -1,8 +1,0 @@
-release-date = "2023-07-31"
-
-[[entries]]
-id = "3e40f75e-abe1-41ad-bac0-e876e7bd397d"
-type = "feature"
-description = "do not unnecessarily sort path"
-author = "james.baker@helsing.ai"
-pr = "https://github.com/kraken-build/kraken-build/pull/83"
