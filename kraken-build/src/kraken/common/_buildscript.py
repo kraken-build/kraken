@@ -114,6 +114,11 @@ def buildscript(
     :class:`BuildscriptMetadataException` instead.
     """
 
+    from kraken.core import Project
+
+    if (project := Project.current()) != project.context.root_project:
+        raise RuntimeError("buildscript() should be called only from the root project")
+
     metadata = BuildscriptMetadata(
         index_url=index_url,
         extra_index_urls=list(extra_index_urls or ()),

@@ -13,6 +13,7 @@ from kraken.common._runner import (
     GitAwareProjectFinder,
     PythonScriptRunner,
 )
+from kraken.core import Project
 
 
 @fixture
@@ -21,7 +22,7 @@ def tempdir() -> Iterator[Path]:
         yield Path(tmpdir)
 
 
-def test__PythonScriptRunner__can_find_and_execute_script(tempdir: Path) -> None:
+def test__PythonScriptRunner__can_find_and_execute_script(tempdir: Path, kraken_project: Project) -> None:
     (tempdir / ".kraken.py").write_text(
         dedent(
             """
@@ -41,7 +42,7 @@ def test__PythonScriptRunner__can_find_and_execute_script(tempdir: Path) -> None
     assert metadata_future.result() == BuildscriptMetadata(requirements=["kraken-std"])
 
 
-def test__BuildDslScriptRunner__can_find_and_execute_script(tempdir: Path) -> None:
+def test__BuildDslScriptRunner__can_find_and_execute_script(tempdir: Path, kraken_project: Project) -> None:
     (tempdir / "kraken.build").write_text(
         dedent(
             """

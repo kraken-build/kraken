@@ -1,7 +1,8 @@
 from kraken.common._buildscript import BuildscriptMetadata, buildscript
+from kraken.core import Project
 
 
-def test_capture_kraken_buildscript() -> None:
+def test_capture_kraken_buildscript(kraken_project: Project) -> None:
     assert buildscript() == BuildscriptMetadata()
     assert buildscript(index_url="http://foo/simple") == BuildscriptMetadata(index_url="http://foo/simple")
     assert buildscript(requirements=["a"]) == BuildscriptMetadata(requirements=["a"])
