@@ -10,6 +10,7 @@ id = "182e6ed5-2642-4153-854a-d4faa1a411f9"
 type = "improvement"
 description = "Calling `buildscript()` from a Kraken project that is not the root project will now raise a `RuntimeError`."
 author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken/pull/130"
 issues = [
     "https://github.com/kraken-build/kraken/issues/124",
 ]
