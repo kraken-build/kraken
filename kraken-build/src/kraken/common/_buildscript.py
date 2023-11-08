@@ -1,9 +1,10 @@
 import enum
+from collections.abc import Callable, Iterator, Sequence
 from concurrent.futures import Future
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from threading import local
-from typing import Any, Callable, Iterator, List, Sequence
+from typing import Any
 
 import builddsl
 
@@ -15,9 +16,9 @@ class BuildscriptMetadata:
     """
 
     index_url: "str | None" = None
-    extra_index_urls: List[str] = field(default_factory=list)
-    requirements: List[str] = field(default_factory=list)
-    additional_sys_paths: List[str] = field(default_factory=list)
+    extra_index_urls: list[str] = field(default_factory=list)
+    requirements: list[str] = field(default_factory=list)
+    additional_sys_paths: list[str] = field(default_factory=list)
 
     def requires(self, requirement: str) -> None:
         self.requirements.append(requirement)

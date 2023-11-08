@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator
 
 from _pytest.capture import CaptureFixture, CaptureResult
 from pytest import raises

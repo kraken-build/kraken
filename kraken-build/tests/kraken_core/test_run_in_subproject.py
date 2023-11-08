@@ -1,7 +1,7 @@
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 from textwrap import dedent
-from typing import Iterator, Type
 
 from pytest import mark, raises
 
@@ -89,7 +89,7 @@ def test__main__run_in_plain_project_from_subdirectory(tempdir: Path, task_selec
     (tempdir / "sub").mkdir()
 
     if is_absolute:
-        expected_error_type: Type[BaseException] = SystemExit
+        expected_error_type: type[BaseException] = SystemExit
     else:
         expected_error_type = AddressResolutionError
 

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Iterable, Iterator, Sequence, TypeVar, cast
+from collections.abc import Iterable, Iterator, Sequence
+from typing import TYPE_CHECKING, TypeVar, cast
 
 from networkx import DiGraph, restricted_view, transitive_reduction
 from networkx.algorithms import topological_sort
@@ -429,7 +430,7 @@ class TaskGraph(Graph):
         tasks = self.context.resolve_tasks(tasks)
         recursive_tasks = self.context.resolve_tasks(recursive_tasks)
 
-        definitely_skip_tasks = set((*tasks, *recursive_tasks))
+        definitely_skip_tasks = {*tasks, *recursive_tasks}
         all_tasks: set[Task] = set()
 
         # Recursively collect the dependencies of the "recursive_tasks".

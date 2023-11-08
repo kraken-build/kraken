@@ -4,8 +4,9 @@ import logging
 import os
 import pprint
 import sys
+from collections.abc import Callable, Iterator, Sequence
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, NoReturn, Sequence
+from typing import Any, NoReturn
 
 from pex.pex import PEX
 from pex.pex_bootstrapper import bootstrap_pex_env
@@ -52,7 +53,7 @@ class PexBuildEnv(BuildEnv):
     def get_type(self) -> EnvironmentType:
         return self._style
 
-    def get_installed_distributions(self) -> List[Distribution]:
+    def get_installed_distributions(self) -> list[Distribution]:
         return general_get_installed_distributions([sys.executable, str(self._path)])
 
     def build(self, requirements: RequirementSpec, transitive: bool) -> None:
@@ -82,11 +83,11 @@ class PexBuildEnv(BuildEnv):
         builder = config.builder(installed)
         builder.build(str(self._path), layout=layout)
 
-    def dispatch_to_kraken_cli(self, argv: List[str]) -> NoReturn:
+    def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         with self.activate():
             import logging
 
-            scope: Dict[str, Any] = {}
+            scope: dict[str, Any] = {}
             exec(KRAKEN_MAIN_IMPORT_SNIPPET, scope)
             main: Callable[[str, Sequence[str]], NoReturn] = scope["main"]
 

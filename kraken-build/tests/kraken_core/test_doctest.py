@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import doctest
 import re
+from collections.abc import Iterator
 from importlib import import_module
 from pathlib import Path
-from typing import Iterator
 
 import pytest
 

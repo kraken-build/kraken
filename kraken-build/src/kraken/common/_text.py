@@ -1,7 +1,7 @@
 import re
 import textwrap
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 from typing_extensions import Protocol
 

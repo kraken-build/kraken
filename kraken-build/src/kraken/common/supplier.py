@@ -3,7 +3,8 @@ calculated lazily and track provenance of such computations. """
 
 
 import abc
-from typing import Any, Callable, Generic, Iterable, List, Sequence, Tuple, TypeVar
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any, Generic, TypeVar
 
 from ._generic import NotSet
 
@@ -75,14 +76,14 @@ class Supplier(Generic[T], abc.ABC):
 
         return OnceSupplier(self)
 
-    def lineage(self) -> Iterable[Tuple["Supplier[Any]", List["Supplier[Any]"]]]:
+    def lineage(self) -> Iterable[tuple["Supplier[Any]", list["Supplier[Any]"]]]:
         """Iterates over all suppliers in the lineage.
 
         Yields:
             A supplier and the suppliers it is derived from.
         """
 
-        stack: List["Supplier[Any]"] = [self]
+        stack: list["Supplier[Any]"] = [self]
         while stack:
             current = stack.pop(0)
             derived_from = list(current.derived_from())

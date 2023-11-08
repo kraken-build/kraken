@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Any, ClassVar, Sequence, TypeAlias
+from typing import Any, ClassVar, TypeAlias
 
 
 class AddressMeta(type):
