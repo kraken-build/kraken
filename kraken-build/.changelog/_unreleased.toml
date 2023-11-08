@@ -4,3 +4,13 @@ type = "improvement"
 description = "Merge `kraken-common`, `kraken-core`, `kraken-std` and `kraken-wrapper` packages into a single `kraken-build` package."
 author = "@NiklasRosenstein"
 pr = "https://github.com/kraken-build/kraken/pull/125"
+
+[[entries]]
+id = "182e6ed5-2642-4153-854a-d4faa1a411f9"
+type = "improvement"
+description = "Calling `buildscript()` from a Kraken project that is not the root project will now raise a `RuntimeError`."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/124",
+]
+component = "common"
