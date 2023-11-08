@@ -9,16 +9,15 @@ buildscript(requirements=["kraken-std"])
 import os
 
 from kraken.core import Project
-
 from kraken.std import python
 from kraken.std.git import git_describe
 
 project = Project.current()
-python.pyupgrade(additional_files=[__file__, project.directory / "examples"], python_version="3.10")
+# python.pyupgrade(additional_files=[__file__], python_version="3.10")
 python.pycln()
-python.black(additional_files=[__file__, project.directory / "examples"])
+python.black(additional_files=[__file__], additional_args=["--config", "pyproject.toml"])
 python.flake8()
-python.isort(additional_files=[__file__, project.directory / "examples"])
+python.isort(additional_files=[__file__])
 python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"])
 python.pytest(ignore_dirs=["src/tests/integration"])
 python.pytest(
