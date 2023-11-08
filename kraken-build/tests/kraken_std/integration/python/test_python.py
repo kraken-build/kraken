@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Iterator, TypeVar
 from unittest.mock import patch
 
+import httpx
 import pytest
 import tomli
 
@@ -30,10 +31,11 @@ USER_PASS = "password-for-integration-test"
 
 @pytest.fixture(scope="session")
 def deactivate_venv() -> Iterator[None]:
-    with patch.dict(os.environ):
+    with patch.dict(os.environ), tempfile.TemporaryDirectory() as tempdir:
         os.environ.pop("VIRTUAL_ENV", None)
         os.environ.pop("VIRTUAL_ENV_PROMPT", None)
         os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "true"
+        os.environ["POETRY_CACHE_DIR"] = tempdir
         yield
 
 
