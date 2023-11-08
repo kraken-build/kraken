@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from pkg_resources import Requirement as ParsedRequirement
+from packaging.requirements import Requirement as ParsedRequirement
 
 from kraken.common import LocalRequirement, PipRequirement, RequirementSpec
 
@@ -100,13 +100,13 @@ def calculate_lockfile(
     # Convert our internal requirements representation to parsed requirements. Local requirements
     # are treated without extras.
     requirements_stack = [
-        ParsedRequirement.parse(str(req) if isinstance(req, PipRequirement) else req.name)
+        ParsedRequirement(str(req) if isinstance(req, PipRequirement) else req.name)
         for req in requirements.requirements
     ]
 
     while requirements_stack:
         package_req = requirements_stack.pop(0)
-        package_name = normalize_package_name(package_req.project_name)
+        package_name = normalize_package_name(package_req.name)
 
         if package_name in pinned:
             # Already collected it.
@@ -121,7 +121,7 @@ def calculate_lockfile(
 
         # Filter the requirements of the distribution down to the ones required according to markers and the
         # current package requirement's extras.
-        for req in map(ParsedRequirement.parse, dist.requirements):
+        for req in map(ParsedRequirement, dist.requirements):
             if not req.marker or any(req.marker.evaluate({"extra": extra}) for extra in package_req.extras):
                 requirements_stack.append(req)
 

@@ -117,7 +117,7 @@ def get_distributions() -> dict[str, Distribution]:
 
 
 def get_distributions_of(python_bin: str | Path) -> dict[str, Distribution]:
-    """Returns all distributions that can be found in the environment of the given Python executable. """
+    """Returns all distributions that can be found in the environment of the given Python executable."""
 
     command = [str(python_bin), __file__, "--json"]
     dists = [Distribution.from_json(json.loads(x)) for x in subprocess.check_output(command).decode().splitlines()]
