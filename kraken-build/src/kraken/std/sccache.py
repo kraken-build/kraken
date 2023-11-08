@@ -108,6 +108,7 @@ class SccacheTask(BackgroundTask):
 
     description = "Start sccache in the background."
     manager: Property[SccacheManager]
+    fail_fast: Property[bool] = Property.default(False)
 
     def start_background_task(self, exit_stack: contextlib.ExitStack) -> TaskStatus:
         manager = self.manager.get()

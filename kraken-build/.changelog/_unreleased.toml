@@ -15,3 +15,13 @@ issues = [
     "https://github.com/kraken-build/kraken/issues/124",
 ]
 component = "common"
+
+[[entries]]
+id = "17e4b133-67c0-40da-ba48-42fb2c13b7b6"
+type = "improvement"
+description = "Remove use of `pkg_resources` and replace it with `importlib.metadata` and `packaging.requirements` instead."
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken/pull/129"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/126",
+]
