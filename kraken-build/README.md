@@ -47,3 +47,24 @@ However, if you really want to try it, you can use the following steps:
 To upgrade a project's lock file, run `krakenw lock --upgrade`. This will upgrade all dependencies to the latest
 available version. If you want to upgrade based on updated constraints in `.kraken.py` without installing from scratch,
 add the `--incremental` flag or set `KRAKENW_INCREMENTAL=1`.
+
+## Development
+
+  [Slap]: https://github.com/NiklasRosenstein/slap
+
+This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to install Kraken for development:
+
+```
+$ slap venv -c --python python3.10
+$ slap install --link
+# If you have the Slap shell magic installed, it will activate the Venv in your shell.
+$ slap venv -a
+```
+
+### Releases
+
+A release must be created by a maintainer that has write access to the `develop` branch. The release process
+is automated using Slap.
+
+    $ slap release -tp <patch|minor|major|x.y.z>
+    $ slap publish
