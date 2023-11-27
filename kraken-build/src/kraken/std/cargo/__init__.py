@@ -158,7 +158,7 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
 
     # The auth proxy injects values into the cargo config, the cargoSyncConfig.check ensures that it reflects
     # the temporary changes that should be made to the config. The check has to run before the auth proxy,
-    # otheerwise it is garuanteed to fail.
+    # otherwise it is guaranteed to fail.
     task.depends_on(":cargoSyncConfig.check?", mode="order-only")
     return task
 

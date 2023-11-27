@@ -25,3 +25,10 @@ pr = "https://github.com/kraken-build/kraken/pull/129"
 issues = [
     "https://github.com/kraken-build/kraken/issues/126",
 ]
+
+[[entries]]
+id = "b883cb8f-a697-488e-868d-a09b2151af44"
+type = "fix"
+description = "Fix a typo in comment."
+author = "@ntrinquier"
+pr = "https://github.com/kraken-build/kraken/pull/132"
