@@ -1,3 +1,5 @@
+<img src="https://github.com/kraken-build/kraken/assets/1318438/2db43261-07ef-44dc-9f95-5d8335f7e0bf" align="center">
+
 # kraken-build
 
 [![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml) |
