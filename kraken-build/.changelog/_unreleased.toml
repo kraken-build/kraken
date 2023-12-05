@@ -25,3 +25,10 @@ pr = "https://github.com/kraken-build/kraken/pull/129"
 issues = [
     "https://github.com/kraken-build/kraken/issues/126",
 ]
+
+[[entries]]
+id = "9116f380-7725-4d2d-872a-ffbc926d80e5"
+type = "improvement"
+description = "Add flag to run all workspace tests"
+author = "@asmello"
+pr = "https://github.com/kraken-build/kraken/pull/135"
