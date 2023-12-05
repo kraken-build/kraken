@@ -363,6 +363,7 @@ def cargo_test(
     project: Project | None = None,
     features: list[str] | None = None,
     depends_on: Sequence[Task] = (),
+    workspace: bool | None = None,
 ) -> CargoTestTask:
     """Creates a task that runs `cargo test`.
 
@@ -370,7 +371,8 @@ def cargo_test(
         specified, the option is not specified and the default behaviour is used.
     :param env: Override variables for the build environment variables. Values in this dictionary override
         variables in :attr:`CargoProject.build_env`.
-    :param features: List of Cargo features to enable in the build."""
+    :param features: List of Cargo features to enable in the build.
+    :param workspace: Run tests in all workspace crates (by default only the default members are selected)."""
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
@@ -381,6 +383,8 @@ def cargo_test(
         # `cargo build` expects features to be comma separated, in one string.
         # for example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
         additional_args.append(",".join(features))
+    if workspace:
+        additional_args.append("--workspace")
 
     task = project.task("cargoTest", CargoTestTask, group=group)
     task.incremental = incremental
