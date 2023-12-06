@@ -43,7 +43,7 @@ def gitignore(
     task = project.task(name, tasks.GitignoreSyncTask, group=group)
     task.file.set(Path(gitignore_file))
     if generated_content is not None:
-        task.generated_content.setmap(lambda x: [*x, *generated_content])  # type: ignore[misc]  # See https://github.com/python/mypy/issues/14891  # noqa: E501
+        task.generated_content.setmap(lambda x: [*x, *generated_content])
     task.gitignore_io_tokens.set(list(gitignore_io_tokens))
     task.gitignore_io_allow_http_request_backfill.set(gitignore_io_allow_http_request_backfill)
     task.where.set(where)
