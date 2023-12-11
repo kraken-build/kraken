@@ -32,3 +32,10 @@ type = "improvement"
 description = "Add flag to run all workspace tests"
 author = "@asmello"
 pr = "https://github.com/kraken-build/kraken/pull/135"
+
+[[entries]]
+id = "a84043a1-5f93-467d-af83-73f7f477f91a"
+type = "fix"
+description = "Accept gitconfig with several occurrences of the same section"
+author = "@qsantos"
+pr = "https://github.com/kraken-build/kraken/pull/136"
