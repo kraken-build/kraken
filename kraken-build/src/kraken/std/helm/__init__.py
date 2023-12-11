@@ -9,7 +9,7 @@ from pathlib import Path
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
 
-from .. import http
+from kraken.common import http
 from . import helmapi
 
 

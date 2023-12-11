@@ -32,3 +32,9 @@ type = "improvement"
 description = "Add flag to run all workspace tests"
 author = "@asmello"
 pr = "https://github.com/kraken-build/kraken/pull/135"
+
+[[entries]]
+id = "90ab0597-03a2-401f-9fba-a78e174fea34"
+type = "breaking change"
+description = "Remove `kraken.std.http` module, use `kraken.common.http` instead"
+author = "niklas.rosenstein@helsing.ai"

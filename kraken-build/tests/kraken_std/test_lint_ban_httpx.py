@@ -1,7 +1,7 @@
 import ast
 from pathlib import Path
 
-from kraken.std.http.lint_ban_bare_requests import BanBareHttpxCalls, BanBareRequestsCalls
+from kraken.common.http.lint_ban_bare_requests import BanBareHttpxCalls, BanBareRequestsCalls
 
 DATA_PATH = Path(__file__).parent / "data"
 
