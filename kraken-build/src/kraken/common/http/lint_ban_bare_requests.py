@@ -11,7 +11,7 @@ HTTPX_ERROR_CODE = "KRA001"
 
 PLAIN_HTTPX_MESSAGE = f"""{HTTPX_ERROR_CODE} using `httpx` directly is disallowed, because it may not play well with
 corporate proxies.
-Use kraken.std.http instead (which wraps calls to httpx).
+Use kraken.common.http instead (which wraps calls to httpx).
 
 See https://github.com/kraken-build/kraken-std/pull/132
 """
@@ -20,7 +20,7 @@ REQUESTS_ERROR_CODE = "KRA002"
 
 PLAIN_REQUESTS_MESSAGE = f"""{REQUESTS_ERROR_CODE} using `requests` directly is disallowed, because it may not play well
 with corporate proxies (unless `pip-system-certs` is installed).
-Use kraken.std.http instead (which wraps calls to httpx).
+Use kraken.common.http instead (which wraps calls to httpx).
 
 See https://github.com/kraken-build/kraken-std/pull/132
 """
@@ -61,7 +61,7 @@ class BareCallsVisitor(ast.NodeVisitor):
 class BanBareCalls:
     """
     Detects occurences of bare httpx or requests function calls.
-    These are discouraged, as using the corresponding calls from the kraken.std.http usually work better
+    These are discouraged, as using the corresponding calls from the kraken.common.http usually work better
     in corporate networks.
     """
 

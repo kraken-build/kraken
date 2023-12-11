@@ -3,7 +3,7 @@
 import httpx
 import requests
 
-from kraken.std import http
+from kraken.common import http
 
 
 def please_dont_do_this_dear() -> None:
