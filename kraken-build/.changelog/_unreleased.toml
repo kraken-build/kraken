@@ -38,3 +38,9 @@ id = "90ab0597-03a2-401f-9fba-a78e174fea34"
 type = "breaking change"
 description = "Remove `kraken.std.http` module, use `kraken.common.http` instead"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "fe0b1f91-f9fa-4b4c-bdb2-b7f683ab8af7"
+type = "tests"
+description = "Add a unit test for a real-world example of a DAG that failed the expected behavior of `TaskGraph.mark_tasks_as_skipped()`."
+author = "niklas.rosenstein@helsing.ai"

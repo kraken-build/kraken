@@ -5,7 +5,7 @@ import pytest
 
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
-from kraken.core.system.task import TaskStatus, VoidTask
+from kraken.core.system.task import GroupTask, TaskStatus, VoidTask
 
 
 def test__TaskGraph__populate(kraken_project: Project) -> None:
@@ -366,3 +366,48 @@ def test__TaskGraph__mark_tasks_as_skipped__does_skip_task_if_requierd_by_anothe
     assert [t.name for t in a.get_tags("skip")] == ["skip"]
     assert [t.name for t in b.get_tags("skip")] == ["skip"]
     assert [t.name for t in c.get_tags("skip")] == ["skip"]
+
+
+def test__TaskGraph__mark_tasks_as_skipped__keep_transitive_required_dependencies_unmarked(
+    kraken_project: Project,
+) -> None:
+    r"""
+    Another scenario for ensuring the correctness of #TaskGraph.mark_tasks_as_skipped().
+
+    ```
+    pyproject.check -> python.test.integration -> python.test
+                   \            ^                 ^
+                    \          /                 /
+                     v        /                 /
+    python.login -> python.install -> python.test.unit
+
+    # Not displayed here: pyproject.check -> python.test.unit
+    ```
+
+    Selecting `python.test` but excluding the subgraph of `python.test.integration` should only exclude that task,
+    because all other tasks are still required by `python.test.unit`.
+    """
+
+    pyproject_check = kraken_project.task("pyproject.check", VoidTask)
+    python_login = kraken_project.task("python.login", VoidTask)
+    python_install = kraken_project.task("python.install", VoidTask)
+    python_test_integration = kraken_project.task("python.test.integration", VoidTask)
+    python_test_unit = kraken_project.task("python.test.unit", VoidTask)
+    python_test = kraken_project.task("python.test", VoidTask)
+
+    python_test.depends_on(python_test_integration, python_test)
+    python_test_integration.depends_on(pyproject_check, python_install)
+    python_test_unit.depends_on(pyproject_check, python_install)
+    python_install.depends_on(pyproject_check, python_login)
+
+    graph = TaskGraph(kraken_project.context)
+    graph.mark_tasks_as_skipped(recursive_tasks=[python_test_integration], reason="test", origin="test", reset=True)
+
+    skipped_tasks = []
+    for task in graph.tasks():
+        if isinstance(task, GroupTask):
+            continue
+        if [t.name for t in task.get_tags("skip")] == ["skip"]:
+            skipped_tasks.append(str(task.address))
+
+    assert skipped_tasks == [":python.test.integration"]
