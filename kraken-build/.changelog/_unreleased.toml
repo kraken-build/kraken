@@ -44,3 +44,9 @@ id = "fe0b1f91-f9fa-4b4c-bdb2-b7f683ab8af7"
 type = "tests"
 description = "Add a unit test for a real-world example of a DAG that failed the expected behavior of `TaskGraph.mark_tasks_as_skipped()`."
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "4c37612d-1831-4f4f-851d-b96e12b5365e"
+type = "fix"
+description = "Replace `Tasks.mark_tasks_as_skipped()` with a simpler implementation that also fixes an issues with second-degree tasks being marked as skipped even if they should not be."
+author = "niklas.rosenstein@helsing.ai"

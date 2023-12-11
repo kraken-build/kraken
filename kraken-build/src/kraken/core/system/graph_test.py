@@ -323,12 +323,7 @@ def test__TaskGraph__mark_tasks_as_skipped__does_not_skip_task_required_by_anoth
     b.depends_on(c)
 
     graph = TaskGraph(kraken_project.context)
-    with caplog.at_level(logging.DEBUG):
-        graph.mark_tasks_as_skipped(recursive_tasks=[b], reason="test", origin="test", reset=True)
-    assert (
-        "Did not tag task :c as 'skip' because it is required by at least one other task that is not skipped (:a)"
-        in caplog.text
-    )
+    graph.mark_tasks_as_skipped(recursive_tasks=[b], reason="test", origin="test", reset=True)
 
     assert [t.name for t in a.get_tags("skip")] == []
     assert [t.name for t in b.get_tags("skip")] == ["skip"]
