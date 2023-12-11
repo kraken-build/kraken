@@ -6,10 +6,9 @@ import dataclasses
 import urllib.parse
 from pathlib import Path
 
-from kraken.common import Supplier
+from kraken.common import Supplier, http
 from kraken.core import Project, Property, Task, TaskStatus
 
-from kraken.common import http
 from . import helmapi
 
 
