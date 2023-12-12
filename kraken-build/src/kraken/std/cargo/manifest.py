@@ -21,9 +21,15 @@ logger = logging.getLogger(__name__)
 class Bin:
     name: str
     path: str
+    _remainder: dict[str, Any]
 
-    def to_json(self) -> dict[str, str]:
-        return {"name": self.name, "path": self.path}
+    def to_json(self) -> dict[str, Any]:
+        return {"name": self.name, "path": self.path, **self._remainder}
+
+    @staticmethod
+    def from_json(data: dict[str, Any]) -> Bin:
+        data = dict(data)
+        return Bin(data.pop("name"), data.pop("path"), _remainder=data)
 
 
 # TODO: Differentiate between lib kinds?
@@ -224,7 +230,7 @@ class CargoManifest:
             Workspace.from_json(data["workspace"]) if "workspace" in data else None,
             Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
             Dependencies.from_json(data["build-dependencies"]) if "build-dependencies" in data else None,
-            [Bin(**x) for x in data.get("bin", [])],
+            [Bin.from_json(x) for x in data.get("bin", [])],
         )
 
     def to_json(self) -> dict[str, Any]:
