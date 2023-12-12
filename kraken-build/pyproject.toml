@@ -19,7 +19,7 @@ packages = [
   {include = "kraken/wrapper", from = "src"},
 ]
 readme = "README.md"
-version = "0.31.7"
+version = "0.32.0"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
