@@ -7,8 +7,7 @@ import time
 
 import httpx
 
-from kraken.common import flatten
-from kraken.common import http
+from kraken.common import flatten, http
 
 logger = logging.getLogger(__name__)
 
