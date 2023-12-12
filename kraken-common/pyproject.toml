@@ -9,7 +9,7 @@ description = ""
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = []
+packages = [{include = "_dummy_kraken_common", from = "src"}]
 classifiers = []
 keywords = []
 
