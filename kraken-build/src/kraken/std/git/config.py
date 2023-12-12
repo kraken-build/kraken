@@ -15,7 +15,7 @@ def load_gitconfig(file: TextIO | Path | str) -> dict[str, dict[str, str]]:
         with file.open() as fp:
             return load_gitconfig(fp)
 
-    parser = configparser.RawConfigParser()
+    parser = configparser.RawConfigParser(strict=False)
     parser.read_file(file)
     result = dict(parser._sections)  # type: ignore[attr-defined]
     for k in result:
