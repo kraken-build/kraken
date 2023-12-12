@@ -65,6 +65,7 @@ id = "4ca698e4-a92a-4fe9-8b55-8a88e5d3f2b6"
 type = "fix"
 description = "Allow extra keys when parsing the Cargo manifest `[bin]` section"
 author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/139"
 issues = [
     "https://github.com/kraken-build/kraken/issues/134",
 ]
