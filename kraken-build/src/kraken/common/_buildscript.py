@@ -116,7 +116,7 @@ def buildscript(
 
     from kraken.core import Project
 
-    if (project := Project.current()) != project.context.root_project:
+    if (project := Project.current(None)) and project != project.context.root_project:
         raise RuntimeError("buildscript() should be called only from the root project")
 
     metadata = BuildscriptMetadata(

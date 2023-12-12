@@ -27,8 +27,35 @@ issues = [
 ]
 
 [[entries]]
-id = "b883cb8f-a697-488e-868d-a09b2151af44"
+id = "9116f380-7725-4d2d-872a-ffbc926d80e5"
+type = "improvement"
+description = "Add flag to run all workspace tests"
+author = "@asmello"
+pr = "https://github.com/kraken-build/kraken/pull/135"
+
+[[entries]]
+id = "a84043a1-5f93-467d-af83-73f7f477f91a"
 type = "fix"
-description = "Fix a typo in comment."
-author = "@ntrinquier"
-pr = "https://github.com/kraken-build/kraken/pull/132"
+description = "Accept gitconfig with several occurrences of the same section"
+author = "@qsantos"
+pr = "https://github.com/kraken-build/kraken/pull/136"
+
+[[entries]]
+id = "90ab0597-03a2-401f-9fba-a78e174fea34"
+type = "breaking change"
+description = "Remove `kraken.std.http` module, use `kraken.common.http` instead"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "fe0b1f91-f9fa-4b4c-bdb2-b7f683ab8af7"
+type = "tests"
+description = "Add a unit test for a real-world example of a DAG that failed the expected behavior of `TaskGraph.mark_tasks_as_skipped()`."
+author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/138"
+
+[[entries]]
+id = "4c37612d-1831-4f4f-851d-b96e12b5365e"
+type = "fix"
+description = "Replace `Tasks.mark_tasks_as_skipped()` with a simpler implementation that also fixes an issues with second-degree tasks being marked as skipped even if they should not be."
+author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/138"

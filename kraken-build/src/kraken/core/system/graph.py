@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Collection, Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from networkx import DiGraph, restricted_view, transitive_reduction
@@ -430,37 +430,56 @@ class TaskGraph(Graph):
         tasks = self.context.resolve_tasks(tasks)
         recursive_tasks = self.context.resolve_tasks(recursive_tasks)
 
-        definitely_skip_tasks = {*tasks, *recursive_tasks}
-        all_tasks: set[Task] = set()
-
-        # Recursively collect the dependencies of the "recursive_tasks".
-        stack = list(recursive_tasks)
-        while stack:
-            task = stack.pop()
-            all_tasks.add(task)
-            stack.extend(self.get_predecessors(task))
-
         def get_skip_tag(task: Task) -> TaskTag | None:
+            """Return the skip tag associated with this mark operation (i.e., "skip" tags of the same origin)."""
+
             return next((t for t in task.get_tags("skip") if t.origin == origin), None)
 
-        def get_required_by_unskipped_tasks(task: Task) -> set[Task]:
-            return set(self.get_successors(task)) - all_tasks
+        def iter_predecessors(tasks: Iterable[Task], blackout: Collection[Task]) -> Iterable[Task]:
+            """
+            Iterate over the predecessors of the given tasks. Skip yielding and recursive iterating over tasks in
+            *blackout*.
+            """
 
-        # Sort tasks for consistency, makes tests reliable.
-        for task in sorted(all_tasks, key=lambda t: str(t.address)):
-            if reset:
-                if (tag := get_skip_tag(task)) is not None:
+            stack = list(tasks)
+            while stack:
+                task = stack.pop()
+                if task not in blackout:
+                    yield task
+                    stack.extend(self.get_predecessors(task))
+
+        # This algorithm works in multiple phases:
+        #
+        # (1) We gather all tasks that are definitely skipped and mark them with the color "red". We are certain
+        #     that these tasks must be skipped because they are either already marked so in the graph, or they are
+        #     tasks mentioned directly in the arguments to this function call.
+        #
+        # (2) We mark the subgraphs (i.e. predecessors) of all recursive_tasks with the color "blue". These are tasks
+        #     that can potentially be skipped as well, but we are not sure yet.
+        #
+        # (3) We walk back through the entire task graph from its leafs, discoloring any "blue" task that we encounter.
+        #     If we encounter a "red" task, we keep it colored and ignore its subgraph.
+
+        red_tasks = {*tasks, *recursive_tasks}
+
+        # Add any already skipped tasks to the red tasks, unless reset=True.
+        for task in self.tasks():
+            if (tag := get_skip_tag(task)) is not None:
+                if reset:
                     task.remove_tag(tag)
+                else:
+                    red_tasks.add(task)
 
-            if task not in definitely_skip_tasks and (required_by := get_required_by_unskipped_tasks(task)):
-                logger.debug(
-                    "Did not tag task %s as 'skip' because it is required by at least one other task "
-                    "that is not skipped (%s)",
-                    task.address,
-                    ", ".join(map(str, (t.address for t in required_by))),
-                )
-                continue
+        # Mark predecessors of the recursive_tasks in blue.
+        blue_tasks: set[Task] = set()
+        for task in iter_predecessors(recursive_tasks, blue_tasks):
+            blue_tasks.add(task)
 
+        # Discolor any blue tasks from the root, ignoring any red tasks.
+        for task in iter_predecessors(self.tasks(goals=True), red_tasks):
+            blue_tasks.discard(task)
+
+        for task in blue_tasks:
             task.add_tag("skip", reason=reason, origin=origin)
             if set_status and self.get_status(task) is None:
                 self.set_status(task, TaskStatus.skipped(reason))
