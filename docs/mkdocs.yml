@@ -1,5 +1,6 @@
 nav:
   - Home: index.md
+  - changelog.md
   - Command-line:
     - cli/index.md
     - kraken: cli/kraken.md
@@ -12,24 +13,17 @@ nav:
     - krakenw: cli/krakenw.md
     - krakenw auth: cli/krakenw-auth.md
     - krakenw list-pythons: cli/krakenw-list-pythons.md
-  - kraken-common:
-    - kraken-common/changelog.md
-  - kraken-core:
-    - kraken-core/index.md
-    - kraken-core/api.md
-    - kraken-core/properties.md
-    - kraken-core/tasks.md
-    - kraken-core/project.md
-    - kraken-core/testing.md
-    - kraken-core/changelog.md
-  - kraken-std:
-    - kraken-std/index.md
-    - kraken-std/changelog.md
-    - kraken-std/cargo.md
-    - kraken-std/docker.md
-    - kraken-std/helm.md
-    - kraken-std/protobuf.md
-    - kraken-std/python.md
+  - kraken-build (core):
+    - kraken-build/core/api.md
+    - kraken-build/core/properties.md
+    - kraken-build/core/tasks.md
+    - kraken-build/core/project.md
+    - kraken-build/core/testing.md
+  - kraken-build (std):
+    - kraken-build/std/cargo.md
+    - kraken-build/std/docker.md
+    - kraken-build/std/helm.md
+    - kraken-build/std/protobuf.md
+    - kraken-build/std/python.md
   - kraken-wrapper:
     - kraken-wrapper/index.md
-    - kraken-wrapper/changelog.md
