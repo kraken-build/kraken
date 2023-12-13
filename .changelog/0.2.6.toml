@@ -1,8 +1,0 @@
-release-date = "2022-07-08"
-
-[[entries]]
-id = "18c02824-a0b1-4d52-8318-136e04ace869"
-type = "feature"
-description = "add `Property.seterror()`"
-author = "@NiklasRosenstein"
-component = "core"

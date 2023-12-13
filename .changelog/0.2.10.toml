@@ -1,8 +1,0 @@
-release-date = "2022-07-09"
-
-[[entries]]
-id = "a756157d-18f1-4228-9eb0-bbad349784cd"
-type = "breaking change"
-description = "no longer accept `kraken.py` in the Project directory as a build script, but instead additionally accept `.kraken.py` and `.kraken.build.py`"
-author = "@NiklasRosenstein"
-component = "core"

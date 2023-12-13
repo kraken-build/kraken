@@ -1,8 +1,0 @@
-release-date = "2022-08-03"
-
-[[entries]]
-id = "d42991c7-d160-4f1f-9ce3-fbd2908e0e32"
-type = "improvement"
-description = "add compatibility with kraken-core ^0.7.0 in addition to ^0.6.2"
-author = "@NiklasRosenstein"
-component = "std"

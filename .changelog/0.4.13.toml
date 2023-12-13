@@ -1,8 +1,0 @@
-release-date = "2022-11-16"
-
-[[entries]]
-id = "4e769070-a29f-4c5a-a739-97d316609061"
-type = "feature"
-description = "Add maturin support"
-author = "@tetigi"
-component = "std"

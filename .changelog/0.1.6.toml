@@ -1,8 +1,0 @@
-release-date = "2022-07-09"
-
-[[entries]]
-id = "4e64bd03-e546-4fb3-b527-962232549002"
-type = "feature"
-description = "Build Cargo integration test for Artifactory and Cloudsmith"
-author = "@NiklasRosenstein"
-component = "std"

@@ -1,8 +1,0 @@
-release-date = "2022-09-12"
-
-[[entries]]
-id = "fc5c45ed-b877-4614-9861-655a3ff56b5e"
-type = "fix"
-description = "only validate existence of Cargo binary artifact after build if the build succeeded"
-author = "@NiklasRosenstein"
-component = "std"

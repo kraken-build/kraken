@@ -1,8 +1,0 @@
-release-date = "2022-09-28"
-
-[[entries]]
-id = "0e8250d1-a36c-433b-99f3-159169dc2870"
-type = "feature"
-description = "Add `Context.listen()` and `Context.trigger()` functions"
-author = "@NiklasRosenstein"
-component = "core"

@@ -1,8 +1,0 @@
-release-date = "2022-08-02"
-
-[[entries]]
-id = "b248b439-fc83-4394-9512-c5bfd77546cc"
-type = "feature"
-description = "add `cargo_test()`"
-author = "@NiklasRosenstein"
-component = "std"

@@ -1,8 +1,0 @@
-release-date = "2022-11-03"
-
-[[entries]]
-id = "70b2f868-cc29-43c1-b4ec-3894af36c8cd"
-type = "fix"
-description = "fix `IndividualDistOptions.arcname` type annotation which must be runtime compatible"
-author = "@NiklasRosenstein"
-component = "std"

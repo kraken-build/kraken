@@ -1,8 +1,0 @@
-release-date = "2022-08-26"
-
-[[entries]]
-id = "09f683c3-6ae6-40a2-88c4-b361dd6dd63d"
-type = "feature"
-description = "add `DockerFileTask.create_preprocessor_task()` and `DockerFileTask.preprocessor_task` as public API"
-author = "@NiklasRosenstein"
-component = "std"

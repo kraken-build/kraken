@@ -1,8 +1,0 @@
-release-date = "2022-12-11"
-
-[[entries]]
-id = "026f0c3f-a72e-4060-aafd-2ff7ea93c281"
-type = "fix"
-description = "Don't fetch deps when fetching project metadata for Cargo"
-author = "@tetigi"
-component = "std"

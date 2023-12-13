@@ -1,8 +1,0 @@
-release-date = "2022-07-13"
-
-[[entries]]
-id = "cc58ab4e-7c92-417c-9170-d7995150b0a5"
-type = "feature"
-description = "add `BuildGraph.__len__()`"
-author = "@NiklasRosenstein"
-component = "core"

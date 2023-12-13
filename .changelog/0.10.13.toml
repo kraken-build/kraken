@@ -1,8 +1,0 @@
-release-date = "2022-12-01"
-
-[[entries]]
-id = "c24894c4-6a8f-4cdd-8f67-f09689180889"
-type = "fix"
-description = "fix state file template name"
-author = "@NiklasRosenstein"
-component = "core"
