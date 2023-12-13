@@ -23,11 +23,11 @@ jobs:
     - run: pip install pipx && pipx install poetry && pipx install pdm
     - run: rustup update
     - run: slap install --link --no-venv-check ${{ matrix.only }}
-    - run: cd kraken-build && kraken run fmt lint test -vv
-    - run: cd kraken-build && kraken q ls
-    - run: cd kraken-build && kraken q tree
-    - run: cd kraken-build && kraken q viz
-    - run: cd kraken-build && kraken q d python.mypy
+    - run: kraken run fmt lint test -vv
+    - run: kraken q ls
+    - run: kraken q tree
+    - run: kraken q viz
+    - run: kraken q d python.mypy
 
   examples-docker-manual:
     runs-on: ubuntu-latest
