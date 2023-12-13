@@ -3,10 +3,6 @@ from pathlib import Path
 from kraken.core import TaskStatus
 import os
 
-buildscript {
-    requirements = ["kraken-std"]
-}
-
 # NOTE(@NiklasRosenstein): BuildDSL support is still experimental in Kraken. Serializing BuildDSL closures
 #       currently fails with 'unable to serialize frame objects', thus you should run this build script with
 #       the `--no-save` option.

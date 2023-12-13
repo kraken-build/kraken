@@ -84,6 +84,7 @@ def configure_project(project: Project) -> None:
 
 
 current = Project.current()
+current.subproject("docs")
 for project in [current.subproject("kraken-build"), current.subproject("kraken-wrapper")]:
     with project.as_current():
         configure_project(project)
