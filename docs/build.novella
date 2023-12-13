@@ -3,6 +3,7 @@ template "mkdocs"
 action "mkdocs-update-config" {
   site_name = "kraken-build"
   update '$.theme.name' set: 'readthedocs'
+  update '$.theme.logo' set: 'assets/logo.png'
 }
 
 action "preprocess-markdown" {
