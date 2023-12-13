@@ -170,7 +170,7 @@ def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn
         elif args.password:
             password = args.password
         else:
-            password = getpass.getpass(f"Password for {args.host}:")
+            password = getpass.getpass(f"Password for {args.host}: ")
         auth.set_credentials(args.host, args.username, password)
         config.save()
     else:
