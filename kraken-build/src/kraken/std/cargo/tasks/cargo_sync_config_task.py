@@ -36,6 +36,7 @@ class CargoSyncConfigTask(RenderFileTask):
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
+        content.setdefault("registry", {})["global-credential-providers"] = ["cargo:token"]
         content.setdefault("registries", {})["crates-io"] = {"protocol": self.crates_io_protocol.get()}
         for registry in self.registries.get():
             content.setdefault("registries", {})[registry.alias] = {"index": registry.index}

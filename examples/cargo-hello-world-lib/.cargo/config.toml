@@ -4,3 +4,8 @@ protocol = "sparse"
 
 [net]
 git-fetch-with-cli = true
+
+[registry]
+global-credential-providers = [
+    "cargo:token",
+]
