@@ -24,12 +24,12 @@ __Requirements__
 Currently, Kraken's OSS components are not very well documented and do not provide a convenient way to get started.
 However, if you really want to try it, you can use the following steps:
 
-1. Install `kraken-build` (e.g. with [Pipx][]) to get access to the `krakenw` command-line tool.
+1. Install `kraken-wrapper` (e.g. with [Pipx][]) to get access to the `krakenw` command-line tool.
 2. Create a `.kraken.py` script in your project's root directory.
 
     ```py
     from kraken.common import buildscript
-    buildscript(requirements=["kraken-build ^0.31.7"])
+    buildscript(requirements=["kraken-build==0.32.3"])
     
     from kraken.std.python import mypy, black, isort
     mypy()

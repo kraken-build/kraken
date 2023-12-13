@@ -16,7 +16,6 @@ packages = [
   {include = "kraken/common", from = "src"},
   {include = "kraken/core", from = "src"},
   {include = "kraken/std", from = "src"},
-  {include = "kraken/wrapper", from = "src"},
 ]
 readme = "README.md"
 version = "0.32.1"
@@ -29,7 +28,6 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.scripts]
 kraken = "kraken.core.cli.main:main"
-krakenw = "kraken.wrapper.main:main"
 
 [tool.poetry.plugins."pytest11"]
 "kraken.core.testing" = "kraken.core.testing"
@@ -44,13 +42,11 @@ dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
 dill = ">=0.3.5,<0.3.6" # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
 httpx = "^0.23.0"
-keyring = "^23.8.2"
 mitmproxy = "^9.0.1"
 networkx = "^3.1"
 nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
 packaging = "^23.1"
-pex = "^2.1.103"
 python = ">=3.10,<3.11" # ">=3.10,<4.0" | Can't use 3.11+ because Dill 0.3.8 is not released yet
 rich = "^13.4.2"
 termcolor = "^1.1.0"
@@ -59,12 +55,6 @@ tomli-w = "^1.0.0"
 twine = "^4.0.1"
 typeapi = "^1.4.3"
 typing-extensions = ">=4.6.0"
-
-# # NOTE(@NiklasRosenstein): Need to pin transitive dependency markdown-it under 3.0 because it dropped Python 3.9
-# #       support after that version. Technically this shouldn't be a big issue for runtime, but Mypy checks site
-# #       packages and complains about the walrus operator used in it when it checks site-packages.
-# #       See also https://github.com/python/mypy/issues/12162
-# markdown-it-py = "<3.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
@@ -93,17 +83,6 @@ pydoc-markdown = "^4.6.0"
 [tool.slap]
 typed = true
 
-[tool.slap.test]
-black = "black --check src/ tests/"
-check = "slap check"
-flake8 = "flake8 src/ tests/"
-isort = "isort --check-only src/ tests/"
-mypy = "dmypy run src/"
-pytest = "pytest tests/ -vv"
-
-[tool.slap.run]
-fmt = "black src/ tests/ && isort src/ tests/ && pycln src/ tests/"
-
 # Linter/Formatter configuration
 # ------------------------------
 
@@ -120,10 +99,6 @@ warn_no_return = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = "pex.*"
 
 [[tool.mypy.overrides]]
 ignore_errors = true

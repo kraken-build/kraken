@@ -11,8 +11,6 @@ from pathlib import Path
 from textwrap import indent
 from typing import NamedTuple, NoReturn
 
-from termcolor import colored
-
 from kraken.common import (
     AsciiTable,
     BuildscriptMetadata,
@@ -25,6 +23,7 @@ from kraken.common import (
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
+from termcolor import colored
 
 from . import __version__
 from ._buildenv import BuildEnvError
@@ -207,7 +206,6 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
     import rich
-
     from kraken.common import findpython
 
     if argv:

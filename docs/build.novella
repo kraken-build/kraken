@@ -8,7 +8,7 @@ action "mkdocs-update-config" {
 
 action "preprocess-markdown" {
   use "pydoc" {
-    loader().search_path = ["../kraken-common/src", "../kraken-core/src", "../kraken-std/src", "../kraken-wrapper/src"]
+    loader().search_path = ["../kraken-build/src", "../kraken-wrapper/src"]
     loader().packages = ["kraken.common", "kraken.core", "kraken.std", "kraken.wrapper"]
   }
 }

@@ -1,0 +1,5 @@
+[[entries]]
+id = "dfd9f707-167a-42db-aa5a-3aae08e3e47f"
+type = "breaking change"
+description = "Move `kraken-wrapper` code back into its own package, remove `kraken-core`, `kraken-common` and `kraken-std` (those are not usually depended on directly at the moment anyway)"
+author = "niklas.rosenstein@helsing.ai"
