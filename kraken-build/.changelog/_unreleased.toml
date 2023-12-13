@@ -4,3 +4,9 @@ type = "breaking change"
 description = "Move `kraken-wrapper` code back into its own package, remove `kraken-core`, `kraken-common` and `kraken-std` (those are not usually depended on directly at the moment anyway)"
 author = "niklas.rosenstein@helsing.ai"
 pr = "https://github.com/kraken-build/kraken/pull/141"
+
+[[entries]]
+id = "09f68fa6-99c2-4113-8c28-d568dcdb9ac2"
+type = "fix"
+description = "Fixed a bug in `--all` option supported by all graph commands (e.g. `kraken run` and the `kraken query` commands) that made the argument not recognized."
+author = "niklas.rosenstein@helsing.ai"
