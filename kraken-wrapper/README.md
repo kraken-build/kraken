@@ -7,6 +7,6 @@ via lock files and executing builds from inside subdirectories.
 
 __Installation__
 
-You need Python 3.10:
+You need Python 3.10 or newer:
 
     $ pipx install kraken-wrapper
