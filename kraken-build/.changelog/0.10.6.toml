@@ -1,8 +1,0 @@
-release-date = "2022-09-27"
-
-[[entries]]
-id = "5d316db2-55b4-4bb8-b45a-44e7b32fe5a6"
-type = "fix"
-description = "Fixed a bug in `TaskGraph.trim()` where inverse relationships to the specified goal tasks did not get recognized."
-author = "@NiklasRosenstein"
-component = "core"

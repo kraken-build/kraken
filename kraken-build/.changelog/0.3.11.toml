@@ -1,8 +1,0 @@
-release-date = "2022-09-08"
-
-[[entries]]
-id = "50888b1e-c9b8-4311-9499-fe7855392a7e"
-type = "fix"
-description = "fix `PoetryPythonBuildSystem`, with Poetry 1.2.0 we must update an existing package source rather than appending one if it has the same name otherwise it complains. Also `poetry env info -p` will not always return a path even if Poetry commands succeed, that is because it may fall back to a virtual environment that is com[atible with the required Python version if the \"main\" Python installation is not."
-author = "@NiklasRosenstein"
-component = "std"

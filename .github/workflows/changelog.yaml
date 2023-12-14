@@ -9,14 +9,14 @@ on:
   pull_request_target: { branches: [ "*" ] }
 
 jobs:
-  changelog-update:
-    name: "Insert Pull Request URL into new changelog entries"
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
-    steps:
-      - uses: actions/checkout@v3
-      - uses: NiklasRosenstein/slap@gha/changelog/update/v2
-        with: { pr-id: '${{ github.event.pull_request.number }}' }
+  # changelog-update:
+  #   name: "Insert Pull Request URL into new changelog entries"
+  #   runs-on: ubuntu-latest
+  #   if: github.event_name == 'pull_request_target'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: NiklasRosenstein/slap@gha/changelog/update/v2
+  #       with: { pr-id: '${{ github.event.pull_request.number }}' }
 
   assert-new-changelog-entries:
     name: "At least one new changelog entry must be added"

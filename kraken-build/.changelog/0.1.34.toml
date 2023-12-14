@@ -1,8 +1,0 @@
-release-date = "2022-07-29"
-
-[[entries]]
-id = "715204a7-7816-4d35-826b-d364a3b1f3ec"
-type = "fix"
-description = "treat PROXY_PY_TIMEOUT as int instead of float (the `proxy --help` default value shows it formatted as a float :sweat_smile:)"
-author = "@NiklasRosenstein"
-component = "std"

@@ -1,8 +1,0 @@
-release-date = "2022-07-13"
-
-[[entries]]
-id = "e71dc765-69ad-488e-a256-d01390fb382b"
-type = "breaking change"
-description = "update `BuildContext.current()` to behave the same as `Project.current()`"
-author = "@NiklasRosenstein"
-component = "core"

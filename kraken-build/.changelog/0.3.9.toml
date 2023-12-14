@@ -1,8 +1,0 @@
-release-date = "2022-08-26"
-
-[[entries]]
-id = "f2a1f897-d673-4ff2-91be-3ea6e361c7e0"
-type = "fix"
-description = "fix Dockerfile preprocessing in `update_run_commands()` to support multi-line `RUN` commands (and add a unit test for it)"
-author = "@NiklasRosenstein"
-component = "std"

@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: slap install --link --no-venv-check ${{ matrix.only }}
-    - run: cd docs && kraken run docsBuild --no-save
+    - run: pipx install kraken-wrapper==0.31.7
+    - run: krakenw run :docs:build --no-save
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v2
       with:

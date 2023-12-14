@@ -1,9 +1,0 @@
-release-date = "2023-04-03"
-
-[[entries]]
-id = "bd51216b-d313-4985-ae76-65810f961395"
-type = "improvement"
-description = "Bump versions for build dependencies"
-author = "nicolas.trinquier@helsing.ai"
-pr = "https://github.com/kraken-build/kraken-std/pull/126"
-component = "std"

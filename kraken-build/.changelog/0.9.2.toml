@@ -1,8 +1,0 @@
-release-date = "2022-08-22"
-
-[[entries]]
-id = "8c20cd29-8ade-4859-91e8-5e5dc8182d49"
-type = "fix"
-description = "fix argument types for `render_file()` (now accepting suppliers instead of properties)"
-author = "@NiklasRosenstein"
-component = "core"
