@@ -17,15 +17,19 @@ def configure_project(project: Project) -> None:
     python.flake8()
     python.isort()
     python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"])
-    python.pytest(ignore_dirs=["src/tests/integration"])
-    python.pytest(
-        name="pytestIntegration",
-        tests_dir="src/tests/integration",
-        ignore_dirs=["src/tests/integration/python/data"],
-        group="integrationTest",
-    )
+
+    if project.directory.joinpath("tests").is_dir():
+        python.pytest(ignore_dirs=["src/tests/integration"])
+    if project.directory.joinpath("tests/integration").is_dir():
+        python.pytest(
+            name="pytestIntegration",
+            tests_dir="src/tests/integration",
+            ignore_dirs=["src/tests/integration/python/data"],
+            group="integrationTest",
+        )
+
     python.install()
-    # python.info()
+    python.info()
 
     (
         python.python_settings()
