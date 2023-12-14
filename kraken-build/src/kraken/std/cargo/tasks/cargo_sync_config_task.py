@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+from subprocess import run
+from sys import stderr
 from typing import Literal
 
 import tomli
@@ -36,10 +38,25 @@ class CargoSyncConfigTask(RenderFileTask):
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
-        content.setdefault("registry", {})["global-credential-providers"] = ["cargo:token"]
+        content.setdefault("registry", {})["global-credential-providers"] = ["cargo:libsecret", "cargo:macos-keychain", "cargo:wincred", "cargo:token"]
         content.setdefault("registries", {})["crates-io"] = {"protocol": self.crates_io_protocol.get()}
         for registry in self.registries.get():
             content.setdefault("registries", {})[registry.alias] = {"index": registry.index}
+            p = run(
+                ["cargo", "login", "--registry", registry.alias],
+                cwd=self.project.directory,
+                capture_output=True,
+                input=registry.publish_token.encode(),
+            )
+            if p.returncode != 0:
+                if p.stderr.endswith(b'\nerror: config.json not found in registry\n'):
+                    # expected error, ignore
+                    pass
+                else:
+                    # unknown error, fail normally
+                    stderr.write(p.stderr.decode())
+                    p.check_returncode()
+
         if self.git_fetch_with_cli.is_filled():
             if self.git_fetch_with_cli.get():
                 content.setdefault("net", {})["git-fetch-with-cli"] = True
