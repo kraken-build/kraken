@@ -25,7 +25,6 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 keyring = "^23.8.2"
 kraken-build = "0.32.3"
 packaging = "^23.1"
-pex = "^2.1.103"
 python = ">=3.10"
 termcolor = "^1.1.0"
 
@@ -61,10 +60,6 @@ warn_no_return = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
-
-[[tool.mypy.overrides]]
-ignore_missing_imports = true
-module = "pex.*"
 
 [tool.isort]
 combine_as_imports = true

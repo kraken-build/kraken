@@ -1,0 +1,5 @@
+[[entries]]
+id = "5dcf8eda-a617-4298-a06f-2119f13b7ed2"
+type = "improvement"
+description = "Remove PEX code from Kraken-wrapper. No one is using that!"
+author = "niklas.rosenstein@helsing.ai"

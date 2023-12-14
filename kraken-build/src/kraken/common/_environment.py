@@ -15,24 +15,8 @@ class EnvironmentType(enum.Enum):
     #: Wrapper, using a virtual environment.
     VENV = 1
 
-    #: Wrapper, using a PEX file.
-    PEX_ZIPAPP = 2
-
-    #: Wrapper, using a packed PEX environment.
-    PEX_PACKED = 3
-
-    #: Wrapper, using a loose PEX environment.
-    PEX_LOOSE = 4
-
     def is_native(self) -> bool:
         return self == EnvironmentType.NATIVE
-
-    def is_pex(self) -> bool:
-        return self in (
-            EnvironmentType.PEX_ZIPAPP,
-            EnvironmentType.PEX_PACKED,
-            EnvironmentType.PEX_LOOSE,
-        )
 
     def is_venv(self) -> bool:
         return self == EnvironmentType.VENV

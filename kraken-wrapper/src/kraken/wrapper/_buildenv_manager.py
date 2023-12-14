@@ -129,17 +129,6 @@ def _get_environment_for_type(
     environment_type: EnvironmentType, base_path: Path, incremental: bool, show_install_logs: bool
 ) -> BuildEnv:
     platform_name = platform.system().lower()
-    if platform_name != "windows":
-        from ._buildenv_pex import PexBuildEnv
-
-        if environment_type in PexBuildEnv.STYLES:
-            if incremental:
-                logger.warning("incremental installation mode not supported for Pex")
-            if show_install_logs:
-                # We could support it if we were to hide the install logs in the first place.
-                logger.warning("`show_install_logs` not supported for Pex")
-            return PexBuildEnv(environment_type, base_path.parent / (base_path.name + ".pex"))
-
     if environment_type == EnvironmentType.VENV:
         return VenvBuildEnv(
             base_path,
