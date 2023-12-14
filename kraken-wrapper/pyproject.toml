@@ -26,7 +26,7 @@ keyring = "^23.8.2"
 kraken-build = "0.32.2"
 packaging = "^23.1"
 pex = "^2.1.103"
-python = "^3.10,<3.11"
+python = ">=3.10"
 termcolor = "^1.1.0"
 
 [tool.poetry.dev-dependencies]

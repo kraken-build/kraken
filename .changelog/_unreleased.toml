@@ -1,0 +1,5 @@
+[[entries]]
+id = "1775239d-6e00-44e0-8b57-26a8c421a245"
+type = "fix"
+description = "Relax Python version constraint for the kraken-wrapper, but we still recommend using Python 3.10 for Kraken because of Dill"
+author = "niklas.rosenstein@helsing.ai"
