@@ -22,7 +22,7 @@ jobs:
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.31.7
+    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.32.4
     - run: rustup update
     - run: krakenw run check lint test
 
