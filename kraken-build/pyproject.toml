@@ -38,9 +38,7 @@ kraken = "kraken.core.cli.main:main"
 [tool.poetry.dependencies]
 builddsl = "^1.0.0"
 databind-json = "^4.2.5"
-dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
-dill = ">=0.3.5,<0.3.6" # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
 httpx = "^0.23.0"
 mitmproxy = "^9.0.1"
 networkx = "^3.1"
@@ -55,6 +53,11 @@ tomli-w = "^1.0.0"
 twine = "^4.0.1"
 typeapi = "^1.4.3"
 typing-extensions = ">=4.6.0"
+
+# We're currently vendoring `dill` as part of the `kraken-build` package due to the maintainers
+# inability to release Dill 0.3.8 for Python 3.11+ support. See https://github.com/uqfoundation/dill/issues/332
+# for more context.
+# dill = ">=0.3.5,<0.3.6"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
