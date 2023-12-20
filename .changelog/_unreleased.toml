@@ -1,0 +1,7 @@
+[[entries]]
+id = "05ed5af2-2314-4291-9e00-8f5e9d3fe66a"
+type = "feature"
+description = "Adds the features key for CargoBuildTask"
+author = "patrick.elsen@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/issues/151"
+component = "std"
