@@ -24,6 +24,7 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.32.4
     - run: rustup update
+    - run: cargo install cargo-hack
     - run: krakenw run check lint test
 
   # kraken-std-integration-test:

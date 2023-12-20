@@ -49,6 +49,7 @@ __Build graph__
 @pydoc kraken.std.cargo.cargo_publish
 @pydoc kraken.std.cargo.cargo_update
 @pydoc kraken.std.cargo.cargo_deny
+@pydoc kraken.std.cargo.cargo_hack
 
 ## Environment variables
 
