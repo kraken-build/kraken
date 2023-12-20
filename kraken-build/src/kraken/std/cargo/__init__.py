@@ -12,7 +12,7 @@ from kraken.core import Project, Task
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
-from .tasks.cargo_build_task import CargoBuildTask
+from .tasks.cargo_build_task import CargoBuildTask, CargoCrateFeatures
 from .tasks.cargo_bump_version_task import CargoBumpVersionTask
 from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
@@ -43,6 +43,7 @@ __all__ = [
     "cargo_update",
     "CargoAuthProxyTask",
     "CargoBuildTask",
+    "CargoCrateFeatures",
     "CargoBumpVersionTask",
     "CargoClippyTask",
     "CargoDenyTask",
@@ -305,7 +306,7 @@ def cargo_build(
     group: str | None = "build",
     name: str | None = None,
     project: Project | None = None,
-    features: list[str] | None = None,
+    features: list[str] | CargoCrateFeatures | None = None,
     depends_on: Sequence[Task] = (),
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
@@ -331,17 +332,20 @@ def cargo_build(
         additional_args.append(crate)
     if mode == "release":
         additional_args.append("--release")
+
+    features_object: CargoCrateFeatures | None = None
     if features:
-        additional_args.append("--features")
-        # `cargo build` expects features to be comma separated, in one string.
-        # For example `cargo build --features abc,efg` instead of `cargo build --features abc efg`.
-        additional_args.append(",".join(features))
+        if isinstance(features, CargoCrateFeatures):
+            features_object = features
+        else:
+            features_object = CargoCrateFeatures(features)
 
     task = project.task(
         f"cargoBuild{mode.capitalize()}" if name is None else name,
         CargoBuildTask,
         group=group,
     )
+    task.features = features_object
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args

@@ -21,6 +21,38 @@ class CargoLibraryArtifact(LibraryArtifact):
     pass
 
 
+class CargoCrateFeatures:
+    """Specify which crate features to build"""
+
+    #: When set to a list of features, only the specified features are built.
+    features: list[str] = list()
+
+    #: When set to False, default features are disabled.
+    default: bool = True
+
+    #: When set to True, all features are enabled.
+    all: bool = False
+
+    def __init__(self, features: list[str] = list(), default: bool = True, all: bool = False):
+        self.features = features
+        self.default = default
+
+    def flags(self) -> list[str]:
+        flags = []
+
+        if self.all:
+            flags.append("--all-features")
+        else:
+            if not self.default:
+                flags.append("--no-default-features")
+
+            if self.features:
+                features = ",".join(self.features)
+                flags.append(f"--features {features}")
+
+        return flags
+
+
 class CargoBuildTask(Task):
     """This task runs `cargo build` using the specified parameters. It will respect the authentication
     credentials configured in :attr:`CargoProjectSettings.auth`."""
@@ -28,6 +60,9 @@ class CargoBuildTask(Task):
     #: The build target (debug or release). If this is anything else, the :attr:`out_binaries` will be set
     #: to an empty list instead of parsed from the Cargo manifest.
     target: Property[str]
+
+    #: Features to enable for this build.
+    features: Property[CargoCrateFeatures] = Property.default(CargoCrateFeatures())
 
     #: Additional arguments to pass to the Cargo command-line.
     additional_args: Property[list[str]] = Property.default_factory(list)
@@ -58,11 +93,14 @@ class CargoBuildTask(Task):
     def get_cargo_command_additional_flags(self) -> list[str]:
         return shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
 
-    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
+    def get_cargo_subcommand(self, env: dict[str, str], subcommand: str) -> list[str]:
         incremental = self.incremental.get()
         if incremental is not None:
             env["CARGO_INCREMENTAL"] = "1" if incremental else "0"
-        return ["cargo", "build"] + self.additional_args.get()
+        return ["cargo", subcommand] + self.additional_args.get() + self.features.get().flags()
+
+    def get_cargo_command(self, env: dict[str, str]) -> list[str]:
+        return self.get_cargo_subcommand(env, "build")
 
     def make_safe(self, args: list[str], env: dict[str, str]) -> None:
         pass
