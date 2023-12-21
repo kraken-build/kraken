@@ -4,3 +4,9 @@ type = "feature"
 description = "Add `workspace`, `all_features` and `deny_warnings` properties to `CargoClippyTask`."
 author = "@tomkarw"
 pr = "https://github.com/kraken-build/kraken/pull/182"
+
+[[entries]]
+id = "31a52a49-8d26-4dd7-a4bc-84fe9fb37c19"
+type = "improvement"
+description = "cargoSyncConfig logins in all cargo registries"
+author = "quentin.santos@helsing.ai"
