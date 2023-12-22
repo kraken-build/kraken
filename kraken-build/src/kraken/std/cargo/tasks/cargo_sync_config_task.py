@@ -38,6 +38,9 @@ class CargoSyncConfigTask(RenderFileTask):
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
+        # It seems like credential provider should be provided in reverse order
+        # of preference. We put cargo:token first, to always use the keyring if
+        # it is available.
         content.setdefault("registry", {})["global-credential-providers"] = [
             "cargo:token",
             "cargo:libsecret",
