@@ -19,6 +19,7 @@ from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_generate_deb import CargoGenerateDebPackage
+from .tasks.cargo_login import CargoLoginTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sqlx_database_create import CargoSqlxDatabaseCreateTask
 from .tasks.cargo_sqlx_database_drop import CargoSqlxDatabaseDropTask
@@ -37,6 +38,7 @@ __all__ = [
     "cargo_deny",
     "cargo_fmt",
     "cargo_generate_deb_package",
+    "cargo_login",
     "cargo_publish",
     "cargo_registry",
     "cargo_sqlx_migrate",
@@ -207,6 +209,24 @@ def cargo_sync_config(
     task.replace = replace
     check_task = task.create_check()
     project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(check_task)
+    return task
+
+
+def cargo_login(
+    *,
+    project: Project | None = None,
+) -> CargoSyncConfigTask:
+    """Creates a task that the :func:`cargo_build` and :func:`cargo_publish`
+    tasks will depend on to login in the Cargo registries"""
+
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    task = project.task("cargoLogin", CargoLoginTask, group="apply")
+    task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+    project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)
+
+    # We need to have the credentials providers set up by cargoSyncConfig
+    task.depends_on(":cargoSyncConfig")
     return task
 
 

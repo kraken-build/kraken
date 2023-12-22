@@ -46,27 +46,7 @@ class CargoSyncConfigTask(RenderFileTask):
         ]
         content.setdefault("registries", {})["crates-io"] = {"protocol": self.crates_io_protocol.get()}
         for registry in self.registries.get():
-            publish_token = registry.publish_token
-            if publish_token is None:
-                continue
             content.setdefault("registries", {})[registry.alias] = {"index": registry.index}
-            p = run(
-                ["cargo", "login", "--registry", registry.alias],
-                cwd=self.project.directory,
-                capture_output=True,
-                input=publish_token.encode(),
-            )
-            if p.returncode != 0:
-                if p.stderr.endswith(b"\nerror: config.json not found in registry\n"):
-                    # This happens when the project's .cargo/config.toml file
-                    # contains a regitry which does not exist (anymore); since
-                    # that means it is not used, we can just skip configuring
-                    # authentication on this registry
-                    pass
-                else:
-                    # unknown error, fail normally
-                    stderr.write(p.stderr.decode())
-                    p.check_returncode()
 
         if self.git_fetch_with_cli.is_filled():
             if self.git_fetch_with_cli.get():
