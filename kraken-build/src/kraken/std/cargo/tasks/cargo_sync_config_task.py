@@ -58,7 +58,10 @@ class CargoSyncConfigTask(RenderFileTask):
             )
             if p.returncode != 0:
                 if p.stderr.endswith(b"\nerror: config.json not found in registry\n"):
-                    # expected error, ignore
+                    # This happens when the project's .cargo/config.toml file
+                    # contains a regitry which does not exist (anymore); since
+                    # that means it is not used, we can just skip configuring
+                    # authentication on this registry
                     pass
                 else:
                     # unknown error, fail normally
