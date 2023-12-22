@@ -216,14 +216,15 @@ def cargo_login(
     *,
     project: Project | None = None,
 ) -> CargoLoginTask:
-    """Creates a task that the :func:`cargo_build` and :func:`cargo_publish`
-    tasks will depend on to login in the Cargo registries"""
+    """Creates a task that will be added to the build and publish support groups
+    to login in the Cargo registries"""
 
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
     task = project.task("cargoLogin", CargoLoginTask, group="apply")
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
     project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)
+    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
 
     # We need to have the credentials providers set up by cargoSyncConfig
     task.depends_on(":cargoSyncConfig")
