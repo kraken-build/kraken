@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from subprocess import run
-from sys import stderr
 from typing import Literal
 
 import tomli

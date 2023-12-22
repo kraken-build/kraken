@@ -215,7 +215,7 @@ def cargo_sync_config(
 def cargo_login(
     *,
     project: Project | None = None,
-) -> CargoSyncConfigTask:
+) -> CargoLoginTask:
     """Creates a task that the :func:`cargo_build` and :func:`cargo_publish`
     tasks will depend on to login in the Cargo registries"""
 

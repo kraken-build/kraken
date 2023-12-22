@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from pathlib import Path
 from subprocess import run
 from sys import stderr
-from typing import Literal
 
-import tomli
-import tomli_w
-
-from kraken.core import Project, Task, Property
+from kraken.core import Property, Task
 
 from ..config import CargoRegistry
 
@@ -19,7 +14,7 @@ class CargoLoginTask(Task):
     #: The registries to insert into the configuration.
     registries: Property[list[CargoRegistry]] = Property.default_factory(list)
 
-    def execute(self) -> str | bytes:
+    def execute(self) -> None:
         for registry in self.registries.get():
             publish_token = registry.publish_token
             if publish_token is None:
