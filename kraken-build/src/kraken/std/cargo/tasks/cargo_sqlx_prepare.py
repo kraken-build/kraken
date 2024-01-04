@@ -8,8 +8,8 @@ from ._cargo_sqlx import CargoBaseSqlxTask
 
 
 class CargoSqlxPrepareTask(CargoBaseSqlxTask):
-    """Using cargo sqlx, generate the sqlx-data.json file for offline mode. If check=True, will verify that the
-    sqlx-data.json file is up-to-date with the current database schema and code queries."""
+    """Generate sqlx's query-*.json files for offline mode using sqlx-cli. If check=True, verify that the query-*.json
+    files are up-to-date with the current database schema and code queries."""
 
     migrations: Property[Path]
     check: Property[bool] = Property.default(False)
@@ -23,5 +23,5 @@ class CargoSqlxPrepareTask(CargoBaseSqlxTask):
 
     def get_description(self) -> str | None:
         if self.check.get():
-            return "Check that sqlx-data.json file is up-to-date with the current database schema and code queries"
-        return "Generate the sqlx-data.json file for offline mode"
+            return "Check that query-*.json files are up-to-date with the current database schema and code queries"
+        return "Generate the query-*.json files for offline mode"
