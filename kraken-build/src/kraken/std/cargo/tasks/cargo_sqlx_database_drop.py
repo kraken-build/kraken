@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from kraken.core import Property, TaskStatus
+from kraken.core import TaskStatus
 
 from ._cargo_sqlx import CargoBaseSqlxTask
 
