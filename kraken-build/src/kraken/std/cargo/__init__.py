@@ -20,6 +20,8 @@ from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_publish_task import CargoPublishTask
+from .tasks.cargo_sqlx_database_create import CargoSqlxDatabaseCreateTask
+from .tasks.cargo_sqlx_database_drop import CargoSqlxDatabaseDropTask
 from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
 from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
@@ -49,6 +51,8 @@ __all__ = [
     "CargoProject",
     "CargoPublishTask",
     "CargoRegistry",
+    "CargoSqlxDatabaseCreateTask",
+    "CargoSqlxDatabaseDropTask",
     "CargoSqlxMigrateTask",
     "CargoSqlxPrepareTask",
     "CargoSyncConfigTask",
@@ -73,6 +77,30 @@ def cargo_config(*, project: Project | None = None, nightly: bool = False) -> Ca
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
     return config
+
+
+def cargo_sqlx_database_create(
+    *,
+    name: str = "sqlxDatabaseCreate",
+    project: Project | None = None,
+    database_url: str | None = None,
+) -> CargoSqlxDatabaseCreateTask:
+    project = project or Project.current()
+    task = project.task(name, CargoSqlxDatabaseCreateTask)
+    task.database_url = database_url
+    return task
+
+
+def cargo_sqlx_database_drop(
+    *,
+    name: str = "sqlxDatabaseDrop",
+    project: Project | None = None,
+    database_url: str | None = None,
+) -> CargoSqlxDatabaseDropTask:
+    project = project or Project.current()
+    task = project.task(name, CargoSqlxDatabaseDropTask)
+    task.database_url = database_url
+    return task
 
 
 def cargo_sqlx_migrate(

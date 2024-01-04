@@ -8,11 +8,14 @@ from kraken.core import Property, Task, TaskStatus
 
 
 class CargoBaseSqlxTask(Task):
+    """Execute an sqlx-cli command. If the database URL is not explicitly passed to the task, the environment variable
+    DATABASE_URL is used."""
+
     base_directory: Property[Path]
     database_url: Property[str]
 
     def _execute_command(self, arguments: list[str]) -> TaskStatus:
-        command = ["cargo", "sqlx", *arguments]
+        command = ["sqlx", *arguments]
         if self.database_url.is_filled():
             command.extend(["--database-url", self.database_url.get()])
 

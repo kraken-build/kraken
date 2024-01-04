@@ -1,0 +1,5 @@
+[[entries]]
+id = "216daa3f-fc5e-487d-989e-6dba8e92ccf7"
+type = "feature"
+description = "Add sqlx database create and drop tasks"
+author = "nicolas.vizzari@helsing.ai"
