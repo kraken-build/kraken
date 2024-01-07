@@ -31,6 +31,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pytest"]
 
     tests_dir: Property[Path]
+    include_dirs: Property[Sequence[Path]] = Property.default(())
     ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
@@ -53,6 +54,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
             "-vv",
             str(self.project.directory / self.settings.source_directory),
             str(self.project.directory / tests_dir),
+            *[str(self.project.directory / path) for path in self.include_dirs.get()],
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
@@ -85,6 +87,7 @@ def pytest(
     group: str = "test",
     project: Project | None = None,
     tests_dir: Path | None = None,
+    include_dirs: Sequence[Path] = (),
     ignore_dirs: Sequence[Path] = (),
     allow_no_tests: bool = False,
     doctest_modules: bool = True,
@@ -94,6 +97,7 @@ def pytest(
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
     task.tests_dir = tests_dir
+    task.include_dirs = include_dirs
     task.ignore_dirs = ignore_dirs
     task.allow_no_tests = allow_no_tests
     task.doctest_modules = doctest_modules
