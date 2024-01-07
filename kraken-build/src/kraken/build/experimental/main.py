@@ -8,6 +8,7 @@ from kraken.build.experimental.rules.goals import BuildGoal, InstallGoal
 
 from kraken.core import Context
 
+import dill  # type: ignore[import-untyped]
 from kraken.build.experimental.rules import RunGoal, get
 from kraken.core.system.target import NamedTarget, Target
 
@@ -36,18 +37,29 @@ def main() -> None:
         sys.exit(1)
 
     context = Context(Path.cwd() / ".build")
-    with context.as_current():
-        context.load_project(Path.cwd())
+    state_file = context.build_directory / "engine-state.pickle"
+    if state_file.exists():
+        logger.info("Loading engine state from %s", state_file)
+        context.rule_engine.executor.set_cache(dill.load(state_file.open("rb")))
 
-        goal_type = goals[args.goal]
-        matched: set[NamedTarget[Target]] = set()
-        for target in context.resolve_tasks(args.target, object_type=NamedTarget):
-            try:
-                # TODO: Adjudicator feature to plan before executing rules, allowing us to inform
-                #       the user when a rule matched before executing it.
-                logger.debug("Attempt get(%s, %s)", goal_type.__name__, type(target.data).__name__)
-                get(goal_type, target.data)
-            except NoMatchingRulesError:
-                logger.debug("no matching rules for target: %s", target.name, exc_info=True)
-            else:
-                matched.add(target)
+    try:
+        with context.as_current():
+            context.load_project(Path.cwd())
+
+            goal_type = goals[args.goal]
+            matched: set[NamedTarget[Target]] = set()
+            for target in context.resolve_tasks(args.target, object_type=NamedTarget):
+                try:
+                    # TODO: Adjudicator feature to plan before executing rules, allowing us to inform
+                    #       the user when a rule matched before executing it.
+                    logger.debug("Attempt get(%s, %s)", goal_type.__name__, type(target.data).__name__)
+                    get(goal_type, target.data)
+                except NoMatchingRulesError:
+                    logger.debug("no matching rules for target: %s", target.name, exc_info=True)
+                else:
+                    matched.add(target)
+
+    finally:
+        logger.info("Saving engine state from %s", state_file)
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+        dill.dump(context.rule_engine.executor.cache(), state_file.open("wb"))

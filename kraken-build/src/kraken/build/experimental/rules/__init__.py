@@ -22,8 +22,15 @@ logger = logging.getLogger(__name__)
 
 
 def build_rule_engine() -> RuleEngine:
+    from kraken.core import Project, Address
+    from pathlib import Path
+
     module_names = [ep.value for ep in entry_points(group="kraken.build.experimental.rules")]
-    return RuleEngine(flatten([collect_rules(module_name) for module_name in module_names]))
+    engine = RuleEngine(flatten([collect_rules(module_name) for module_name in module_names]))
+    engine.hashsupport.register(Project, lambda project: engine.hashsupport(project.address))
+    engine.hashsupport.register(Address, lambda address: engine.hashsupport((address.is_absolute(), address._elements)))
+    engine.hashsupport.register(Path, lambda path: engine.hashsupport((type(path), str(path))))
+    return engine
 
 
 def resolve_dependencies(project: Project, dependencies: Sequence[str], target_type: type[T_Target]) -> list[T_Target]:

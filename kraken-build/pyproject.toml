@@ -83,7 +83,7 @@ types-termcolor = "^1.1.5"
 
 [tool.poetry.group.experimental.dependencies]
 pex = "^2.1.156"
-python-adjudicator = "^0.4.0"
+python-adjudicator = "^0.5.0"
 more-itertools = "^10.1.0"
 importlib-metadata = "^7.0.1"
 

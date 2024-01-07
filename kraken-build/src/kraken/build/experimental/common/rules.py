@@ -8,7 +8,7 @@ from kraken.build.experimental.rules.goals import RunGoal
 logger = logging.getLogger(__name__)
 
 
-@rule()
+@rule(persistent_caching=False)
 def run_executable(executable: Executable) -> RunGoal:
     logger.info("Running executable $ %s %s", executable.path, " ".join(map(shlex.quote, executable.argv)))
     command = [str(executable.path), *executable.argv]

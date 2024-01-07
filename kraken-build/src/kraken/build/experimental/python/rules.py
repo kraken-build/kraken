@@ -78,10 +78,10 @@ def python_app_infer_python_requirements(target: PythonApp) -> PythonRequirement
     if requirements_file is None and lock_file is None and pyproject_toml is None:
         if os.path.isfile(file := str(project.directory / "requirements.txt")):
             requirements_file = file
-        elif os.path.isfile(file := str(project.directory / "poetry.lock")):
-            lock_file = file
-        elif os.path.isfile(file := str(project.directory / "pdm.lock")):
-            lock_file = file
+        # elif os.path.isfile(file := str(project.directory / "poetry.lock")):
+        #     lock_file = file
+        # elif os.path.isfile(file := str(project.directory / "pdm.lock")):
+        #     lock_file = file
         elif os.path.isfile(file := str(project.directory / "pyproject.toml")):
             pyproject_toml = file
 
@@ -97,7 +97,7 @@ def python_app_infer_python_requirements(target: PythonApp) -> PythonRequirement
 
     if lock_file is not None:
         # TODO: Use `poetry export` or `pdm export` to generate a `requirements.txt` file.
-        raise NotImplementedError("Parsing of lock files is not yet implemented.")
+        raise NotImplementedError(f"Parsing of lock files ({lock_file}) is not yet implemented.")
 
     if requirements_file is not None:
         with open(requirements_file) as fp:

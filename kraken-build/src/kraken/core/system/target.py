@@ -23,8 +23,6 @@ T_Target = TypeVar("T_Target", bound="Target", contravariant=True)
 class Target:
     """Base class for target objects. A target _must_ be a frozen dataclass that is hashable."""
 
-    pass
-
 
 class NamedTarget(KrakenObject, Generic[T_Target]):
     """A box that contains a reference to the target object. This is used to store a target by name in a project."""
