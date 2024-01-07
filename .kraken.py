@@ -1,6 +1,6 @@
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-std"])
+buildscript(requirements=["kraken-build>=0.32.6"])
 
 import os
 
