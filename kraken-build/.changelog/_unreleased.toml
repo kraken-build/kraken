@@ -1,0 +1,5 @@
+[[entries]]
+id = "64923afc-d71a-4a6a-bd5b-c31418acdef4"
+type = "improvement"
+description = "Drastically improve the performance of `kraken.common.findpython.get_candidates()` on Windows where you would until now test the entire C:/Windows/System32 folder for executable access."
+author = "@NiklasRosenstein"
