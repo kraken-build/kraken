@@ -29,15 +29,15 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.scripts]
 kraken = "kraken.core.cli.main:main"
-krakenx = "kraken.build.main.cli:main"
+krakenx = "kraken.build.experimental.main.cli:main"
 
 [tool.poetry.plugins."pytest11"]
 "kraken.core.testing" = "kraken.core.testing"
 
 # Informs the modules from which build rules are collected from.
 [tool.poetry.plugins."kraken.build.experimental.rules"]
-common = "kraken.build.common.rules"
-python = "kraken.build.python.rules"
+common = "kraken.build.experimental.common.rules"
+python = "kraken.build.experimental.python.rules"
 
 # Dependencies
 # ------------

@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from typing import Any
-from kraken.build.python.targets import PythonApp, PythonPex, PythonRequirements, PythonSources
+from kraken.build.experimental.python.targets import PythonApp, PythonPex, PythonRequirements, PythonSources
 
 from kraken.core.system.target import NamedTarget
 

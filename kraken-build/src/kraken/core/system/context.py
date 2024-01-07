@@ -117,7 +117,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         self.focus_project: Project | None = None
 
         #: The `rule_engine` property is considered experimental and may change at any time.
-        from kraken.build.rules import build_rule_engine
+        from kraken.build.experimental.rules import build_rule_engine
 
         self.rule_engine = build_rule_engine()
 

@@ -4,11 +4,11 @@ from pathlib import Path
 import sys
 
 from adjudicator import NoMatchingRulesError
-from kraken.build.rules.goals import BuildGoal, InstallGoal
+from kraken.build.experimental.rules.goals import BuildGoal, InstallGoal
 
 from kraken.core import Context
 
-from kraken.build.rules import RunGoal, get
+from kraken.build.experimental.rules import RunGoal, get
 from kraken.core.system.target import NamedTarget, Target
 
 logger = logging.getLogger(__name__)

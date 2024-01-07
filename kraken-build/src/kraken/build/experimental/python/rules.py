@@ -5,9 +5,9 @@ from venv import logger
 
 from more_itertools import flatten
 
-from kraken.build.common.targets import Executable
-from kraken.build.rules import rule, get, resolve_dependencies, InstallGoal, BuildGoal
-from kraken.build.python.targets import (
+from kraken.build.experimental.common.targets import Executable
+from kraken.build.experimental.rules import rule, get, resolve_dependencies, InstallGoal, BuildGoal
+from kraken.build.experimental.python.targets import (
     PythonApp,
     PexRequest,
     PexResult,
