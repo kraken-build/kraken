@@ -19,7 +19,9 @@ def configure_project(project: Project) -> None:
     python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"])
 
     if project.directory.joinpath("tests").is_dir():
-        python.pytest(ignore_dirs=["src/tests/integration"])
+        # Explicit list of test directories, Pytest skips the build directory if not specified explicitly.
+        python.pytest(ignore_dirs=["src/tests/integration"], include_dirs=["src/kraken/build"])
+
     if project.directory.joinpath("tests/integration").is_dir():
         python.pytest(
             name="pytestIntegration",
