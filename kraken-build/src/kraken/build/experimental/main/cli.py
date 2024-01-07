@@ -51,5 +51,3 @@ def main() -> None:
                 logger.debug("no matching rules for target: %s", target.name, exc_info=True)
             else:
                 matched.add(target)
-
-        print("Matched targets:", [str(x.address) for x in matched])
