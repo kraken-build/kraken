@@ -1,4 +1,10 @@
 [[entries]]
+id = "64923afc-d71a-4a6a-bd5b-c31418acdef4"
+type = "improvement"
+description = "Drastically improve the performance of `kraken.common.findpython.get_candidates()` on Windows and WSL where you would until now test the entire C:/Windows/System32 folder for executable access."
+author = "@NiklasRosenstein"
+
+[[entries]]
 id = "f0b6da17-e82e-451b-b919-81529b97cd30"
 type = "feature"
 description = "Add `kraken.build` module which allows importing the current `context` and `project` from a build script as if calling `Context.current()` or `Project.current()`"
