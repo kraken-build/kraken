@@ -54,7 +54,7 @@ class Currentable(CurrentProvider[T]):
     __current: ClassVar[Any | None] = None  # note: ClassVar cannot contain type variables
 
     @contextmanager
-    def as_current(self) -> Iterator[None]:
+    def as_current(self) -> Iterator[T]:
         """
         A context manager that makes the instance *self* available globally to be retrieved with :meth:`current`.
 
@@ -64,7 +64,7 @@ class Currentable(CurrentProvider[T]):
         prev = type(self).__current
         try:
             type(self).__current = self
-            yield
+            yield cast(T, self)
         finally:
             type(self).__current = prev
 
