@@ -3,3 +3,9 @@ id = "03c2043b-e016-400c-900a-6f0844877de0"
 type = "improvement"
 description = "`Currentable.as_current()` now returns self"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c778f849-7552-4bde-ace4-34190fa84c8d"
+type = "feature"
+description = "Add `pytest(include_dirs)` to add additional directories for testing"
+author = "@NiklasRosenstein"
