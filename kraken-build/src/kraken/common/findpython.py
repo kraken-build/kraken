@@ -105,12 +105,14 @@ def get_candidates(
         if not path.is_dir():
             continue
         for item in path.iterdir():
+            if not (item.name.startswith("python") or item.name == "py"):
+                continue
             try:
                 if not item.is_file() or not os.access(item, os.X_OK):
                     continue
             except PermissionError:
                 continue
-            if item.name.startswith("python") or item.name == "py":
+            else:
                 commands.add(item)
 
     # py and python
@@ -158,6 +160,7 @@ def get_python_interpreter_version(python_bin: str) -> str:
         subprocess.CalledProcessError: If the command fails.
     """
 
+    logger.debug("Getting version for Python interpreter %s", python_bin)
     output = subprocess.check_output([python_bin, "--version"], stderr=subprocess.STDOUT, text=True)
     match = re.match(r"Python (\d+\.\d+\.\d+)", output)
     if not match:

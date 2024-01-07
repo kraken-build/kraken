@@ -29,9 +29,15 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.scripts]
 kraken = "kraken.core.cli.main:main"
+krakenx = "kraken.build.main.cli:main"
 
 [tool.poetry.plugins."pytest11"]
 "kraken.core.testing" = "kraken.core.testing"
+
+# Informs the modules from which build rules are collected from.
+[tool.poetry.plugins."kraken.build.experimental.rules"]
+common = "kraken.build.common.rules"
+python = "kraken.build.python.rules"
 
 # Dependencies
 # ------------
@@ -56,6 +62,8 @@ tomli-w = "^1.0.0"
 twine = "^4.0.1"
 typeapi = "^1.4.3"
 typing-extensions = ">=4.6.0"
+importlib-metadata = "^6.8.0"
+more-itertools = "^10.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
@@ -80,6 +88,9 @@ pydoc-markdown = "^4.6.0"
 
 # Slap configuration
 # ------------------
+
+[tool.poetry.extras]
+experimental = ["pex ^2.1.156", "python-adjudicator >=0.4.0,<0.5.0"]
 
 [tool.slap]
 typed = true

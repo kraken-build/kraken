@@ -7,6 +7,7 @@ from kraken.core.system.executor import Graph
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
+from kraken.core.system.target import NamedTarget, Target
 from kraken.core.system.task import (
     BackgroundTask,
     GroupTask,
@@ -26,9 +27,11 @@ __all__ = [
     "ContextEvent",
     "Graph",
     "GroupTask",
+    "NamedTarget",
     "Project",
     "ProjectLoaderError",
     "Property",
+    "Target",
     "Task",
     "TaskGraph",
     "TaskRelationship",
