@@ -1,0 +1,5 @@
+[[entries]]
+id = "f0b6da17-e82e-451b-b919-81529b97cd30"
+type = "feature"
+description = "Add `kraken.build` module which allows importing the current `context` and `project` from a build script as if calling `Context.current()` or `Project.current()`"
+author = "@NiklasRosenstein"

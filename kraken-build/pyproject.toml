@@ -13,6 +13,7 @@ keywords = []
 license = "MIT"
 name = "kraken-build"
 packages = [
+  {include = "kraken/build", from = "src"},
   {include = "kraken/common", from = "src"},
   {include = "kraken/core", from = "src"},
   {include = "kraken/std", from = "src"},
