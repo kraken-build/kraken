@@ -23,9 +23,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("goal", choices=goals.keys())
     parser.add_argument("target", help="The target to apply the goal to.")
+    parser.add_argument("--verbose", "-v", action="store_true")
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s %(name)s] %(message)s")
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format="[%(levelname)s %(name)s] %(message)s",
+    )
 
     if not args.goal:
         parser.print_help()

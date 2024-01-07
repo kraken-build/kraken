@@ -349,7 +349,7 @@ class Context(MetadataContainer, Currentable["Context"]):
             address = relative_to.concat(address).normalize(keep_container=True)
 
         matches = list(resolve_address(space, self.root_project, address).matches())
-        tasks = Stream(matches).of_type(object_type).collect()  # type: ignore[type-abstract]
+        tasks = Stream(matches).of_type(object_type).collect()
 
         if set_selected and issubclass(object_type, Task):
             for task in tasks:

@@ -1,7 +1,8 @@
+import logging
 import os
 import subprocess
+import sys
 import textwrap
-from venv import logger
 
 from more_itertools import flatten
 
@@ -19,6 +20,10 @@ from kraken.build.experimental.python.targets import (
     VenvRequest,
     VenvResult,
 )
+from kraken.core.system.project import Project
+from kraken.std.python.pyproject import PyprojectHandler
+
+logger = logging.getLogger(__name__)
 
 # TODO: Hash function definition into rule inputs in adjudicator module (as to rebuild when the implementation#
 #       changes instead of reusing the cache).
@@ -71,46 +76,37 @@ def python_app_infer_python_requirements(target: PythonApp) -> PythonRequirement
     pyproject_toml = target.pyproject_toml
 
     if requirements_file is None and lock_file is None and pyproject_toml is None:
-        if not os.path.isfile(requirements_file := str(project.directory / "requirements.txt")):
-            requirements_file = None
-        elif not os.path.isfile(lock_file := str(project.directory / "poetry.lock")):
-            lock_file = None
-        elif not os.path.isfile(pyproject_toml := str(project.directory / "pdm.lock")):
-            lock_file = None
-        elif not os.path.isfile(pyproject_toml := str(project.directory / "pyproject.toml")):
-            pyproject_toml = None
+        if os.path.isfile(file := str(project.directory / "requirements.txt")):
+            requirements_file = file
+        elif os.path.isfile(file := str(project.directory / "poetry.lock")):
+            lock_file = file
+        elif os.path.isfile(file := str(project.directory / "pdm.lock")):
+            lock_file = file
+        elif os.path.isfile(file := str(project.directory / "pyproject.toml")):
+            pyproject_toml = file
 
     if requirements_file is None and lock_file is None and pyproject_toml is None:
-        raise ValueError("Missing requirements.txt/poetry.lock/pdm.lock/pyproject.toml file.")
+        raise ValueError(f"Missing requirements.txt/poetry.lock/pdm.lock/pyproject.toml file in {project.directory}.")
 
     requirements: list[str] | None = None
 
     if pyproject_toml is not None:
         # TODO: Read `[project].requirements` or `[tool.poetry.dependencies]`.
-        raise NotImplementedError("Parsing of pyproject.toml files is not yet implemented.")
+        requirements = []
+        logger.warning("Parsing of pyproject.toml files is not yet implemented, coming up with empty requirements")
 
     if lock_file is not None:
         # TODO: Use `poetry export` or `pdm export` to generate a `requirements.txt` file.
         raise NotImplementedError("Parsing of lock files is not yet implemented.")
 
     if requirements_file is not None:
-        with open(requirements_file) as file:
-            requirements = [line.strip() for line in file.readlines() if line.strip() and not line.startswith("#")]
+        with open(requirements_file) as fp:
+            requirements = [line.strip() for line in fp.readlines() if line.strip() and not line.startswith("#")]
 
     assert requirements is not None, "Requirements could not be inferred."
 
     return PythonRequirements(requirements=tuple(requirements))
 
-
-# @rule()
-# def python_app_to_pex_request(app: PythonApp) -> PexRequest:
-#     return PexRequest(
-#         project=app.project,
-#         requirements=get(PythonRequirements, app).requirements,
-#         entry_point=app.entry_point,
-#         binary_out=app.project.build_directory / "dist" / f"{app.name}.pex",
-#         interpreter_constraint=app.interpreter_constraint,
-#     )
 
 @rule()
 def python_app_to_run_request(app: PythonApp) -> Executable:
@@ -133,12 +129,37 @@ def python_app_to_run_request(app: PythonApp) -> Executable:
 
 @rule()
 def python_app_to_venv_request(target: PythonApp) -> VenvRequest:
+
+    # If no interpreter constraint is specified, try to find it from the project's metadata.
+    if target.interpreter_constraint is None:
+        handler = get(PyprojectHandler, target.project)
+        interpreter_constraint = handler.get_python_version_constraint()
+        logger.info("Using interpreter constraint from pyproject: %s", interpreter_constraint)
+    else:
+        interpreter_constraint = target.interpreter_constraint
+
     return VenvRequest(
         project=target.project,
         requirements=get(PythonRequirements, target).requirements,
-        interpreter_constraint=target.interpreter_constraint,
+        interpreter_constraint=interpreter_constraint,
     )
 
+
+@rule()
+def python_app_to_pyproject_handler(project: Project) -> PyprojectHandler:
+    from kraken.std.python.buildsystem import detect_build_system
+    from kraken.std.python.pyproject import Pyproject
+
+    file = project.directory / "pyproject.toml"
+    if not file.exists():
+        raise RuntimeError(f"Could not find pyproject.toml file for project {project}.")
+
+    pyproject = Pyproject.read(file)
+    build_system = detect_build_system(project.directory)
+    if not build_system:
+        raise RuntimeError(f"Could not determine build system for project {project}.")
+
+    return build_system.get_pyproject_reader(pyproject)
 
 ##
 # PythonPex
@@ -152,12 +173,21 @@ def python_pex_to_pex_request(target: PythonPex) -> PexRequest:
         dependencies=target.dependencies,
         target_type=PythonRequirements,
     )
+
+    # If no interpreter constraint is specified, try to find it from the project's metadata.
+    if target.interpreter_constraint is None:
+        handler = get(PyprojectHandler, target.project)
+        interpreter_constraint = handler.get_python_version_constraint()
+        logger.info("Using interpreter constraint from pyproject: %s", interpreter_constraint)
+    else:
+        interpreter_constraint = target.interpreter_constraint
+
     return PexRequest(
         project=target.project,
         requirements=tuple(flatten(req.requirements for req in requirements)),
         entry_point=target.entry_point,
         binary_out=target.project.build_directory / "dist" / f"{target.name}.pex",
-        interpreter_constraint=target.interpreter_constraint,
+        interpreter_constraint=interpreter_constraint,
     )
 
 
@@ -205,6 +235,8 @@ def python_runtime_request(request: PythonRuntimeRequest) -> PythonRuntime:
 def venv_request_install(request: VenvRequest) -> VenvResult:
     """Install a virtual environment."""
 
+    # TODO: Support installing via Poetry/PDM if the project is using that.
+
     # TODO: Allow customizing the installation via CLI arguments, e.g. to select given extras, a particular
     #       interpretered, install into a secondary environment (ultimately allowing the user to install two
     #       separate environments for the same project).
@@ -228,11 +260,10 @@ def venv_request_install(request: VenvRequest) -> VenvResult:
 
     # TODO: Hash requirements to determine if reinstall is necessary.
     # TODO: Add option to pass --upgrade flag to Pip.
-    # TODO: Support installing via Poetry/PDM if the project is using that.
 
     logger.info("Installing requirements into virtual environment: %s", venv_dir)
     python_bin = venv_dir / "bin" / "python"
-    command = [str(python_bin), "-m", "pip", "install", *request.requirements]
+    command = [str(python_bin), "-m", "pip", "install", *request.requirements, "-e", str(request.project.directory)]
     subprocess.run(command, check=True)
 
     return VenvResult(python_bin=python_bin)
@@ -255,12 +286,15 @@ def python_pex_build(request: PexRequest) -> PexResult:
     # TODO: Build an entire PexRequest object and generate the PEX from that to support caching.
 
     command = [
+        sys.executable,
+        "-m",
         "pex",
         "--output-file",
         str(request.binary_out.absolute()),
         "--entry-point",
         request.entry_point,
         *request.requirements,
+        str(request.project.directory),
     ]
 
     if request.interpreter_constraint is not None:
