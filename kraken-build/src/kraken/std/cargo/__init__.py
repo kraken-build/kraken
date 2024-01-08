@@ -251,10 +251,10 @@ def cargo_hack(
     cleanly.
 
     :param features: Method to select the features to test for, possible values
-    are CargoHackFeatures.EACH and CargoHackFeatures.POWERSET.
+        are CargoHackFeatures.EACH and CargoHackFeatures.POWERSET.
     :param action: Action to run for every selected set of features, possible
-    values are CargoHackAction.BUILD, CargoHackAction.CHECK and
-    CargoHackAction.TEST.
+        values are CargoHackAction.BUILD, CargoHackAction.CHECK and
+        CargoHackAction.TEST.
     """
 
     project = project or Project.current()
