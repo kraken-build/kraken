@@ -7,7 +7,7 @@ from kraken.core.system.target import NamedTarget
 
 def python_sources(
     name: str,
-    sources: list[str],
+    sources: Sequence[str],
 ) -> NamedTarget[PythonSources]:
     """Define a target that represents a static list of Python source files."""
 
