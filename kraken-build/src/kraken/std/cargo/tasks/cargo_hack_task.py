@@ -43,6 +43,7 @@ class CargoHackTask(Task):
                 command.append("test")
             case CargoHackAction.BUILD:
                 command.append("build")
+            case _: assert False, f"invalid action={self.action.get()}"
 
         command += self.action_arguments.get()
 
