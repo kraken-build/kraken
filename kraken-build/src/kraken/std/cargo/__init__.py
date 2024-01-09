@@ -240,11 +240,11 @@ def cargo_deny(
 def cargo_hack(
     *,
     project: Project | None = None,
-    features: CargoHackFeatures = CargoHackFeatures.EACH,
-    action: CargoHackAction = CargoHackAction.CHECK,
+    features: CargoHackFeatures | str = CargoHackFeatures.EACH,
+    action: CargoHackAction | str = CargoHackAction.CHECK,
     error_message: str | None = None,
     group: str | None = "test",
-    name: str | None = None,
+    name: str = "cargoHack",
 ) -> CargoHackTask:
     """Adds a task running cargo-hack for cargo projects. This ensures that all
     combinations of the features declared in the Cargo manifests build
@@ -258,11 +258,19 @@ def cargo_hack(
     """
 
     project = project or Project.current()
-    task = project.task(name, CargoHackTask)
-    task.features = features
-    task.action = action
+    task = project.task(name, CargoHackTask, group=group)
+
+    if isinstance(features, CargoHackFeatures):
+        task.features = features
+    else:
+        task.features = CargoHackFeatures[features]
+
+    if isinstance(action, CargoHackAction):
+        task.action = action
+    else:
+        task.action = CargoHackAction[action]
+
     task.error_message = error_message
-    task.group = group
 
     # cargo hack will check the code
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
