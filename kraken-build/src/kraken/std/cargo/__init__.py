@@ -258,14 +258,11 @@ def cargo_hack(
     """
 
     project = project or Project.current()
-    task = project.do(
-        "cargoHack" if name is None else name,
-        CargoHackTask,
-        features=features,
-        action=action,
-        error_message=error_message,
-        group=group,
-    )
+    task = project.task(name, CargoHackTask)
+    task.features = features
+    task.action = action
+    task.error_message = error_message
+    task.group = group
 
     # cargo hack will check the code
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
