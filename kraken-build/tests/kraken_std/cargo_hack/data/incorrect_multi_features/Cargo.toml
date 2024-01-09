@@ -1,0 +1,9 @@
+[package]
+name = "incorrect-multi-features"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+a = []
+b = []
+c = []

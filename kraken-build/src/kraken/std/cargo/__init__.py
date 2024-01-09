@@ -19,6 +19,7 @@ from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
 from .tasks.cargo_generate_deb import CargoGenerateDebPackage
+from .tasks.cargo_hack_task import CargoHackAction, CargoHackFeatures, CargoHackTask
 from .tasks.cargo_publish_task import CargoPublishTask
 from .tasks.cargo_sqlx_database_create import CargoSqlxDatabaseCreateTask
 from .tasks.cargo_sqlx_database_drop import CargoSqlxDatabaseDropTask
@@ -30,24 +31,15 @@ from .tasks.cargo_update_task import CargoUpdateTask
 from .tasks.rustup_target_add_task import RustupTargetAddTask
 
 __all__ = [
-    "cargo_auth_proxy",
-    "cargo_build",
-    "cargo_bump_version",
-    "cargo_clippy",
-    "cargo_deny",
-    "cargo_fmt",
-    "cargo_generate_deb_package",
-    "cargo_publish",
-    "cargo_registry",
-    "cargo_sqlx_migrate",
-    "cargo_sqlx_prepare",
-    "cargo_sync_config",
-    "cargo_update",
     "CargoAuthProxyTask",
     "CargoBuildTask",
     "CargoBumpVersionTask",
+    "CargoCheckToolchainVersionTask",
     "CargoClippyTask",
     "CargoDenyTask",
+    "CargoHackAction",
+    "CargoHackFeatures",
+    "CargoHackTask",
     "CargoProject",
     "CargoPublishTask",
     "CargoRegistry",
@@ -57,10 +49,23 @@ __all__ = [
     "CargoSqlxPrepareTask",
     "CargoSyncConfigTask",
     "CargoTestTask",
-    "cargo_check_toolchain_version",
-    "CargoCheckToolchainVersionTask",
-    "rustup_target_add",
     "RustupTargetAddTask",
+    "cargo_auth_proxy",
+    "cargo_build",
+    "cargo_bump_version",
+    "cargo_check_toolchain_version",
+    "cargo_clippy",
+    "cargo_deny",
+    "cargo_fmt",
+    "cargo_generate_deb_package",
+    "cargo_hack",
+    "cargo_publish",
+    "cargo_registry",
+    "cargo_sqlx_migrate",
+    "cargo_sqlx_prepare",
+    "cargo_sync_config",
+    "cargo_update",
+    "rustup_target_add",
 ]
 
 #: This is the name of a group in every project that contains Cargo tasks to contain the tasks that either support
@@ -258,6 +263,44 @@ def cargo_deny(
         config_file=config_file,
         error_message=error_message,
     )
+
+
+def cargo_hack(
+    *,
+    project: Project | None = None,
+    features: CargoHackFeatures | str = CargoHackFeatures.EACH,
+    action: CargoHackAction | str = CargoHackAction.CHECK,
+    group: str | None = "test",
+    name: str = "cargoHack",
+) -> CargoHackTask:
+    """Adds a task running cargo-hack for cargo projects. This ensures that all
+    combinations of the features declared in the Cargo manifests build
+    cleanly.
+
+    :param features: Method to select the features to test for, possible values
+        are CargoHackFeatures.EACH and CargoHackFeatures.POWERSET.
+    :param action: Action to run for every selected set of features, possible
+        values are CargoHackAction.BUILD, CargoHackAction.CHECK and
+        CargoHackAction.TEST.
+    """
+
+    project = project or Project.current()
+    task = project.task(name, CargoHackTask, group=group)
+
+    if isinstance(features, CargoHackFeatures):
+        task.features = features
+    else:
+        task.features = CargoHackFeatures[features]
+
+    if isinstance(action, CargoHackAction):
+        task.action = action
+    else:
+        task.action = CargoHackAction[action]
+
+    # cargo hack will check the code
+    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
+
+    return task
 
 
 @dataclasses.dataclass

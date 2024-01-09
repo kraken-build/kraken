@@ -1,0 +1,7 @@
+[[entries]]
+id = "6642d066-e8b6-49f5-8d24-f97ddfee34c1"
+type = "feature"
+description = "Adds cargo_hack task for verifying Rust crate feature correctness"
+author = "patrick.elsen@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/issues/144"
+component = "std"
