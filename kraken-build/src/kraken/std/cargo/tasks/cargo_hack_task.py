@@ -44,8 +44,7 @@ class CargoHackTask(Task):
             case CargoHackAction.BUILD:
                 command.append("build")
 
-        for arg in self.action_arguments.get():
-            command.append(arg)
+        command += self.action_arguments.get()
 
         result = subprocess.run(command, cwd=self.project.directory)
         if result.returncode == 0:
