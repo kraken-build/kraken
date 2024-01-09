@@ -242,7 +242,6 @@ def cargo_hack(
     project: Project | None = None,
     features: CargoHackFeatures | str = CargoHackFeatures.EACH,
     action: CargoHackAction | str = CargoHackAction.CHECK,
-    error_message: str | None = None,
     group: str | None = "test",
     name: str = "cargoHack",
 ) -> CargoHackTask:
@@ -269,8 +268,6 @@ def cargo_hack(
         task.action = action
     else:
         task.action = CargoHackAction[action]
-
-    task.error_message = error_message
 
     # cargo hack will check the code
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")

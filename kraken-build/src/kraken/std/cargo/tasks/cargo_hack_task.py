@@ -21,7 +21,6 @@ class CargoHackAction(Enum):
 
 class CargoHackTask(Task):
     description = "Executes cargo hack to verify crate features."
-    error_message: Property[str | None] = Property.default(None)
     features: Property[CargoHackFeatures] = Property.default(CargoHackFeatures.EACH)
     action: Property[CargoHackAction] = Property.default(CargoHackAction.CHECK)
     action_arguments: Property[list[str]] = Property.default_factory(list)
@@ -50,11 +49,4 @@ class CargoHackTask(Task):
         command += self.action_arguments.get()
 
         result = subprocess.run(command, cwd=self.project.directory)
-        if result.returncode == 0:
-            return TaskStatus.succeeded()
-
-        return self.error_message.map(
-            lambda message: TaskStatus.failed(message)
-            if message is not None
-            else TaskStatus.from_exit_code(command, result.returncode)
-        ).get()
+        return TaskStatus.from_exit_code(command, result.returncode)
