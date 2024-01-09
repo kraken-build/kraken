@@ -34,6 +34,7 @@ class CargoHackTask(Task):
                 command.append("--each-feature")
             case CargoHackFeatures.POWERSET:
                 command.append("--feature-powerset")
+            case _: assert False, f"invalid features={self.features.get()}"
 
         match self.action.get():
             case CargoHackAction.CHECK:
