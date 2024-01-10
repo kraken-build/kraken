@@ -21,3 +21,9 @@ issues = [
     "https://github.com/kraken-build/kraken/issues/24",
 ]
 component = "kraken-wrapper"
+
+[[entries]]
+id = "39072640-c6af-4832-b560-c2b6bf1834ac"
+type = "fix"
+description = "Catch `Property.Deferred` exception in `kraken query describe`\n"
+author = "niklas.rosenstein@helsing.ai"

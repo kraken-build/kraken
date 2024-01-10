@@ -498,11 +498,13 @@ def describe(graph: TaskGraph) -> None:
         longest_property_name = max(map(len, type(task).__schema__.keys())) if type(task).__schema__ else 0
         for key in type(task).__schema__:
             prop: Property[Any] = getattr(task, key)
-            print(
-                "".ljust(4),
-                (key + ":").ljust(longest_property_name + 1),
-                f'{colored(prop.get_or("<unset>"), "blue")}',
-            )
+            try:
+                value = str(prop.get())
+            except Property.Empty:
+                value = colored("<unset>", "cyan")
+            except Property.Deferred:
+                value = colored("<deferred>", "yellow")
+            print("".ljust(4), (key + ":").ljust(longest_property_name + 1), value)
         print()
 
 

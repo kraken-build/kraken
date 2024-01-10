@@ -229,7 +229,14 @@ def test__python_project_can_lint_lint_enforced_directories(
     python.settings.python_settings(
         project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
     )
-    for linter in ["black", "flake8", "isort", "mypy", "pycln", "pylint"]:
-        getattr(python, linter)(project=kraken_project)
+    for linter, version in {
+        "black": "23.12.1",
+        "flake8": "6.1.0",
+        "isort": "5.13.2",
+        "mypy": "1.8.0",
+        "pycln": "2.4.0",
+        "pylint": "3.0.3",
+    }.items():
+        getattr(python, linter)(project=kraken_project, version_spec=f"=={version}")
 
     kraken_ctx.execute([":lint"])
