@@ -1,0 +1,5 @@
+[[entries]]
+id = "e70d7845-13ee-42da-9465-2d5509ba7c98"
+type = "improvement"
+description = "Use `--upgrade-deps` option to `python -m venv` instead of calling `pip install --upgrade pip` separately after Venv creation"
+author = "niklas.rosenstein@helsing.ai"

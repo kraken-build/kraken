@@ -148,14 +148,9 @@ class VenvBuildEnv(BuildEnv):
                 )
                 python_origin_bin = sys.executable
 
-            command = [python_origin_bin, "-m", "venv", str(self._path)]
+            command = [python_origin_bin, "-m", "venv", str(self._path), "--upgrade-deps"]
             logger.info("Creating virtual environment at %s", os.path.relpath(self._path))
             self._run_command(command, operation_name="Create virtual environment", log_file=create_log)
-
-            # Upgrade Pip.
-            command = [python_bin, "-m", "pip", "install", "--upgrade", "pip"]
-            logger.info("Upgrading Pip in virtual environment.")
-            self._run_command(command, operation_name="Upgrade Pip", log_file=create_log, mode="a")
 
         else:
             logger.info("Reusing virtual environment at %s", self._path)
