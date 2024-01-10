@@ -4,6 +4,7 @@ from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
+from kraken.std.python.tasks.pex_build import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -23,7 +24,10 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
-        command = ["flake8", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
+        command = [
+            self.flake8_bin.get(),
+            str(self.settings.source_directory),
+        ] + self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get().absolute())]
@@ -32,10 +36,29 @@ class Flake8Task(EnvironmentAwareDispatchTask):
 
 
 def flake8(
-    *, name: str = "python.flake8", project: Project | None = None, config_file: Path | Supplier[Path] | None = None
+    *,
+    name: str = "python.flake8",
+    project: Project | None = None,
+    config_file: Path | Supplier[Path] | None = None,
+    version_spec: str | None = None,
 ) -> Flake8Task:
+    """Creates a task for linting your Python project with Flake8.
+
+    :param version_spec: If specified, the Flake8 tool will be installed as a PEX and does not need to be installed
+        into the Python project's virtual env.
+    """
+
     project = project or Project.current()
+
+    if version_spec is not None:
+        flake8_bin = pex_build(
+            "flake8", requirements=[f"flake8{version_spec}"], console_script="flake8", project=project
+        ).output_file.map(str)
+    else:
+        flake8_bin = Supplier.of("flake8")
+
     task = project.task(name, Flake8Task, group="lint")
+    task.flake8_bin = flake8_bin
     if config_file is not None:
         task.config_file = config_file
     return task

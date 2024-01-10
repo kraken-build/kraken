@@ -49,9 +49,16 @@ def mypy_stubtest(
     ignore_positional_only: bool = False,
     allowlist: Path | None = None,
     mypy_config_file: Path | None = None,
+    mypy_pex_bin: Path | Property[Path] | None = None,
 ) -> MypyStubtestTask:
+    """
+    :param version_spec: If specified, the isort tool will be installed as a PEX and does not need to be installed
+        into the Python project's virtual env.
+    """
+
     project = project or Project.current()
     task = project.task(name, MypyStubtestTask, group="lint")
+    task.mypy_pex_bin = mypy_pex_bin
     task.package = package
     task.ignore_missing_stubs = ignore_missing_stubs
     task.ignore_positional_only = ignore_positional_only

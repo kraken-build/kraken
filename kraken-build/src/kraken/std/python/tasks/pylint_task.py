@@ -5,6 +5,7 @@ from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
+from kraken.std.python.tasks.pex_build import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -37,9 +38,23 @@ def pylint(
     project: Project | None = None,
     config_file: Path | Supplier[Path] | None = None,
     additional_args: Sequence[str] | Property[Sequence[str]] = (),
+    version_spec: str | None = None,
 ) -> PylintTask:
+    """
+    :param version_spec: If specified, the pylint tool will be installed as a PEX and does not need to be installed
+        into the Python project's virtual env.
+    """
+
     project = project or Project.current()
+    if version_spec is not None:
+        pylint_bin = pex_build(
+            "pylint", requirements=[f"pylint{version_spec}"], console_script="pylint", project=project
+        ).output_file.map(str)
+    else:
+        pylint_bin = Supplier.of("pylint")
+
     task = project.task(name, PylintTask, group="lint")
+    task.pylint_bin = pylint_bin
     task.config_file = config_file
     task.additional_args = additional_args
     return task

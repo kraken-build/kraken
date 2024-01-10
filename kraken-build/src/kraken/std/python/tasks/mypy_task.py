@@ -5,6 +5,7 @@ from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
+from kraken.std.python.tasks.pex_build import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -75,9 +76,24 @@ def mypy(
     check_tests: bool = True,
     use_daemon: bool = True,
     python_version: str | Supplier[str] | None = None,
+    version_spec: str | None = None,
 ) -> MypyTask:
+    """
+    :param version_spec: If specified, the Mypy tool will be installed as a PEX and does not need to be installed
+        into the Python project's virtual env.
+    """
+
     project = project or Project.current()
+
+    if version_spec is not None:
+        mypy_pex_bin = pex_build(
+            "mypy", requirements=[f"mypy{version_spec}"], console_script="mypy", project=project
+        ).output_file
+    else:
+        mypy_pex_bin = None
+
     task = project.task(name, MypyTask, group="lint")
+    task.mypy_pex_bin = mypy_pex_bin
     task.config_file = config_file
     task.additional_args = additional_args
     task.check_tests = check_tests

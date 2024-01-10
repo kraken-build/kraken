@@ -3,10 +3,12 @@ import logging
 import shlex
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
-from kraken.core import Property, Task
-from kraken.core.system.task import TaskStatus
+from kraken.core.system.project import Project
+from kraken.core.system.property import Property
+from kraken.core.system.task import Task, TaskStatus
 
 
 class PexBuildTask(Task):
@@ -16,7 +18,7 @@ class PexBuildTask(Task):
     Important: One of :attr:`console_script` and :attr:`entry_point` is required."""
 
     binary_name: Property[str]
-    requirements: Property[list[str]]
+    requirements: Property[Sequence[str]]
     entry_point: Property[str | None] = Property.default(None)
     console_script: Property[str | None] = Property.default(None)
     interpreter_constraint: Property[str | None] = Property.default(None)
@@ -44,9 +46,9 @@ class PexBuildTask(Task):
     def prepare(self) -> TaskStatus | None:
         if not self.entry_point.get() and not self.console_script.get():
             return TaskStatus.failed("One of the `entry_point` or `console_script` properties must be set")
-        self.output_file = self._get_output_file_path()
+        self.output_file = self._get_output_file_path().absolute()
         if self.output_file.get().exists():
-            return TaskStatus.skipped(f"PEX {self.binary_name.get()} ({self.output_file.get()}) already exists")
+            return TaskStatus.skipped(f"PEX `{self.binary_name.get()}` already exists ({self.output_file.get()})")
         return TaskStatus.pending()
 
     def execute(self) -> TaskStatus | None:
@@ -63,13 +65,13 @@ class PexBuildTask(Task):
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
-        return TaskStatus.succeeded(f"PEX {self.binary_name.get()} ({self.output_file.get()}) built successfully")
+        return TaskStatus.succeeded(f"PEX `{self.binary_name.get()}` built successfully ({self.output_file.get()})")
 
 
 def _build_pex(
     *,
     output_file: Path,
-    requirements: list[str],
+    requirements: Sequence[str],
     entry_point: str | None = None,
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
@@ -112,3 +114,19 @@ def _build_pex(
 
     (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, command)))
     subprocess.run(command, check=True)
+
+
+def pex_build(
+    binary_name: str,
+    requirements: Sequence[str],
+    entry_point: str | None = None,
+    console_script: str | None = None,
+    task_name: str | None = None,
+    project: Project | None = None,
+) -> PexBuildTask:
+    task = (project or Project.current()).task(task_name or f"pexBuild.{binary_name}", PexBuildTask)
+    task.binary_name = binary_name
+    task.requirements = requirements
+    task.entry_point = entry_point
+    task.console_script = console_script
+    return task
