@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from pathlib import Path
 
 from kraken.core import Project, Property
@@ -11,6 +12,7 @@ class MypyStubtestTask(EnvironmentAwareDispatchTask):
     description = "Static validation for Python type stubs using Mypy."
     python_dependencies = ["mypy"]
 
+    mypy_pex_bin: Property[Path | None] = Property.default(None)
     package: Property[str]
     ignore_missing_stubs: Property[bool] = Property.default(False)
     ignore_positional_only: Property[bool] = Property.default(False)
@@ -19,8 +21,14 @@ class MypyStubtestTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
-        command = ["python", "-m", "mypy.stubtest", self.package.get()]
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str]:
+        if mypy_pex_bin := self.mypy_pex_bin.get():
+            command = [str(mypy_pex_bin)]
+            # See https://pex.readthedocs.io/en/latest/api/vars.html
+            env["PEX_MODULE"] = "mypy.stubtest"
+        else:
+            command = ["python", "-m", "mypy.stubtest"]
+        command += [self.package.get()]
         if self.ignore_missing_stubs.get():
             command.append("--ignore-missing-stub")
         if self.ignore_positional_only.get():
@@ -41,9 +49,16 @@ def mypy_stubtest(
     ignore_positional_only: bool = False,
     allowlist: Path | None = None,
     mypy_config_file: Path | None = None,
+    mypy_pex_bin: Path | Property[Path] | None = None,
 ) -> MypyStubtestTask:
+    """
+    :param version_spec: If specified, the isort tool will be installed as a PEX and does not need to be installed
+        into the Python project's virtual env.
+    """
+
     project = project or Project.current()
     task = project.task(name, MypyStubtestTask, group="lint")
+    task.mypy_pex_bin = mypy_pex_bin
     task.package = package
     task.ignore_missing_stubs = ignore_missing_stubs
     task.ignore_positional_only = ignore_positional_only

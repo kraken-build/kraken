@@ -1,0 +1,5 @@
+[[entries]]
+id = "4b472d25-2152-41f5-a048-fe28f8078b51"
+type = "feature"
+description = "Add `version_spec` argument to `black()`, `flake8()`, `isort()`, `mypy()`, `pycln()`, `pylint()` and `pyupgrade()` factory functions"
+author = "niklas.rosenstein@helsing.ai"

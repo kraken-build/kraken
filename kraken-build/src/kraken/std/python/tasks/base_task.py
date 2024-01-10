@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import abc
 import logging
 import os
 import shutil
 import subprocess as sp
 from collections.abc import Iterable, MutableMapping
+
+from deprecated import deprecated
 
 from kraken.common.pyenv import VirtualEnvInfo, get_current_venv
 from kraken.core import Project, Task, TaskRelationship, TaskStatus
@@ -36,9 +37,12 @@ class EnvironmentAwareDispatchTask(Task):
 
         yield from super().get_relationships()
 
-    @abc.abstractmethod
+    @deprecated(reason="Implement get_execute_command_v2() instead")
     def get_execute_command(self) -> list[str] | TaskStatus:
-        pass
+        raise NotImplementedError()
+
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
+        raise NotImplementedError()
 
     def handle_exit_code(self, code: int) -> TaskStatus:
         return TaskStatus.from_exit_code(None, code)
@@ -56,10 +60,13 @@ class EnvironmentAwareDispatchTask(Task):
             logger.info("An active virtual environment was found, not activating managed environment")
 
     def execute(self) -> TaskStatus:
-        command = self.get_execute_command()
+        env = os.environ.copy()
+        try:
+            command = self.get_execute_command_v2(env)
+        except NotImplementedError:
+            command = self.get_execute_command()
         if isinstance(command, TaskStatus):
             return command
-        env = os.environ.copy()
         if self.settings.build_system and self.settings.build_system.supports_managed_environments():
             self.activate_managed_environment(self.settings.build_system.get_managed_environment(), env)
         if self.python_dependencies and shutil.which(command[0], path=env.get("PATH")) is None:
