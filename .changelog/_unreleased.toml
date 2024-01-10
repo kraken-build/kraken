@@ -1,0 +1,23 @@
+[[entries]]
+id = "e70d7845-13ee-42da-9465-2d5509ba7c98"
+type = "improvement"
+description = "Use `--upgrade-deps` option to `python -m venv` instead of calling `pip install --upgrade pip` separately after Venv creation"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "9fc53062-4c1c-4f87-a744-9b1f66163c12"
+type = "improvement"
+description = "Accept `str` for `pytest(tests_dir, ignore_dirs, include_dirs)` arguments"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
+
+[[entries]]
+id = "c3445636-093d-427e-8e5e-7c7571cf1dd7"
+type = "improvement"
+description = "Store a `.success.flag` file in the virtual build environment to know if the Virtual environment installation was successful."
+author = "niklas.rosenstein@helsing.ai"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/24",
+]
+component = "kraken-wrapper"
