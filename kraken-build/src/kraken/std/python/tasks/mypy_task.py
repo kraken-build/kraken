@@ -43,7 +43,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
         if mypy_pex_bin:
             # Have mypy pick up the Python executable from the virtual environment that is activated automatically
             # during the execution of this task as this is an "EnvironmentAwareDispatchTask". If we don't supply this
-            # option, MyPy will only know the packages in it's PEX.
+            # option, MyPy will only know the packages in its PEX.
             command += ["--python-executable", "python"]
         if self.config_file.is_filled():
             command += ["--config-file", str(self.config_file.get().absolute())]
