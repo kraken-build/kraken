@@ -5,7 +5,7 @@ from pathlib import Path
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property
-from kraken.std.python.tasks.pex_build import pex_build
+from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 

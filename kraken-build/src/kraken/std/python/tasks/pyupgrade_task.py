@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property, TaskStatus
-from kraken.std.python.tasks.pex_build import pex_build
+from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .. import python_settings
 from .base_task import EnvironmentAwareDispatchTask

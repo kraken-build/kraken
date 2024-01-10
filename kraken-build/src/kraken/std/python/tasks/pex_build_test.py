@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from textwrap import dedent
 
 from kraken.core import Project
-from kraken.std.python.tasks.pex_build import PexBuildTask
+from kraken.std.python.tasks.pex_build_task import PexBuildTask
 
 
 def test__PexBuildTask__install_isort(kraken_project: Project) -> None:
