@@ -14,7 +14,7 @@ env:
 
 jobs:
   selftest:
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, type-cpx21 ]
     steps:
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
@@ -30,7 +30,7 @@ jobs:
     - run: kraken q d python.mypy
 
   examples-docker-manual:
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, type-cpx21 ]
     steps:
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
