@@ -114,9 +114,10 @@ class VenvBuildEnv(BuildEnv):
             safe_rmpath(self._path)
 
         python_bin = str(self._venv.get_bin("python"))
+        success_flag = self._path / ".success.flag"
 
         # If a virtual environment already exists, we should ensure that it matches the given interpreter constraint.
-        if os.path.isfile(python_bin):
+        if os.path.isfile(python_bin) and success_flag.is_file():
             try:
                 current_python_version = findpython.get_python_interpreter_version(python_bin)
             except (subprocess.CalledProcessError, RuntimeError) as e:
@@ -136,6 +137,11 @@ class VenvBuildEnv(BuildEnv):
                     )
                     safe_rmpath(self._path)
 
+        elif not success_flag.is_file():
+            logger.warning("Your virtual build environment appears to be corrupt. It will be recreated")
+            logger.warning("This usually happens by pressing Ctrl+C during its installation.")
+            safe_rmpath(self._path)
+
         if not self._path.exists():
             # Find a Python interpreter that matches the given interpreter constraint.
             if requirements.interpreter_constraint is not None:
@@ -151,6 +157,7 @@ class VenvBuildEnv(BuildEnv):
             command = [python_origin_bin, "-m", "venv", str(self._path), "--upgrade-deps"]
             logger.info("Creating virtual environment at %s", os.path.relpath(self._path))
             self._run_command(command, operation_name="Create virtual environment", log_file=create_log)
+            success_flag.touch()
 
         else:
             logger.info("Reusing virtual environment at %s", self._path)
