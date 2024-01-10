@@ -9,3 +9,9 @@ id = "f0b6da17-e82e-451b-b919-81529b97cd30"
 type = "feature"
 description = "Add `kraken.build` module which allows importing the current `context` and `project` from a build script as if calling `Context.current()` or `Project.current()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "3bcf3259-8bb2-4c3c-83d8-e5fccd187719"
+type = "feature"
+description = "Add a `PexBuildTask` and add support for most Python tooling tasks to defer to an alternative binary (which the DAG builder can use to point to a PEX)"
+author = "niklas.rosenstein@helsing.ai"

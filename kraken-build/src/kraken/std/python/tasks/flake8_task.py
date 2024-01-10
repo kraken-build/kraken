@@ -16,6 +16,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     description = "Lint Python source files with Flake8."
     python_dependencies = ["flake8"]
 
+    flake8_bin: Property[str] = Property.default("flake8")
     config_file: Property[Path]
     additional_args: Property[list[str]] = Property.default_factory(list)
 

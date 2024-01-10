@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import Supplier
@@ -13,6 +13,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
     description = "Static type checking for Python code using Mypy."
     python_dependencies = ["mypy"]
 
+    mypy_pex_bin: Property[Path | None] = Property.default(None)
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
     check_tests: Property[bool] = Property.default(True)
@@ -21,12 +22,28 @@ class MypyTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
-        # TODO (@NiklasRosenstein): Should we somewhere add a task that ensures `.dmypy.json` is in `.gitignore`?
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str]:
+        entry_point = "dmypy" if self.use_daemon.get() else "mypy"
+
+        if mypy_pex_bin := self.mypy_pex_bin.get():
+            # See https://pex.readthedocs.io/en/latest/api/vars.html
+            env["PEX_SCRIPT"] = entry_point
+            command = [str(mypy_pex_bin)]
+        else:
+            command = [entry_point]
+
+        # TODO (@NiklasRosenstein): Should we add a task somewhere that ensures `.dmypy.json` is in `.gitignore`?
         #       Having it in the project directory makes it easier to just stop the daemon if it malfunctions (which
         #       happens regularly but is hard to detect automatically).
+
         status_file = (self.project.directory / ".dmypy.json").absolute()
-        command = ["dmypy", "--status-file", str(status_file), "run", "--"] if self.use_daemon.get() else ["mypy"]
+        if self.use_daemon.get():
+            command += ["--status-file", str(status_file), "run", "--"]
+        if mypy_pex_bin:
+            # Have mypy pick up the Python executable from the virtual environment that is activated automatically
+            # during the execution of this task as this is an "EnvironmentAwareDispatchTask". If we don't supply this
+            # option, MyPy will only know the packages in it's PEX.
+            command += ["--python-executable", "python"]
         if self.config_file.is_filled():
             command += ["--config-file", str(self.config_file.get().absolute())]
         else:

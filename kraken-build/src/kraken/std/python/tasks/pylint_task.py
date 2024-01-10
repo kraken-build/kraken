@@ -13,13 +13,17 @@ class PylintTask(EnvironmentAwareDispatchTask):
     description = "Lint Python source files with Pylint"
     python_dependencies = ["pylint"]
 
+    pylint_bin: Property[str] = Property.default("pylint")
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
-        command = ["pylint", str(self.settings.source_directory)] + self.settings.get_tests_directory_as_args()
+        command = [
+            self.pylint_bin.get(),
+            str(self.settings.source_directory),
+        ] + self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--rcfile", str(self.config_file.get())]

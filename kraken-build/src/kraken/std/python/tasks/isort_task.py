@@ -13,6 +13,7 @@ from .base_task import EnvironmentAwareDispatchTask
 class IsortTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["isort"]
 
+    isort_bin: Property[str] = Property.default("isort")
     check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
     additional_files: Property[Sequence[Path]] = Property.default_factory(list)

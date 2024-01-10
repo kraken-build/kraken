@@ -13,6 +13,7 @@ class PyclnTask(EnvironmentAwareDispatchTask):
 
     python_dependencies = ["pycln"]
 
+    pycln_bin: Property[str] = Property.default("pycln")
     check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
     additional_args: Property[list[str]] = Property.default_factory(list)
@@ -21,7 +22,7 @@ class PyclnTask(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command(self) -> list[str]:
-        command = ["pycln", str(self.settings.source_directory)]
+        command = [self.pycln_bin.get(), str(self.settings.source_directory)]
         command += self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += [str(p) for p in self.additional_files.get()]
