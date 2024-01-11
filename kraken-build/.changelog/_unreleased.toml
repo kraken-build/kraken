@@ -9,3 +9,9 @@ id = "ee333218-60d5-438d-bcec-bee90bf3c2d2"
 type = "improvement"
 description = "Add `PexBuildTask.output_scripts_dir` and `.output_scripts` properties"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "c47a5861-45f1-4d42-b28a-ef725bf363f6"
+type = "feature"
+description = "add `NovellaTask()` and `novella()` factory function to build documentation with [Novella](https://github.com/NiklasRosenstein/novella/)"
+author = "niklas.rosenstein@helsing.ai"
