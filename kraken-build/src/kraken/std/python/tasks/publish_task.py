@@ -57,7 +57,7 @@ class PublishTask(Task):
         safe_command = [x.replace(credentials[1], "MASKED") for x in command] if credentials else command
         self.logger.info("$ %s", safe_command)
 
-        returncode = subprocess.call(safe_command, cwd=self.project.directory)
+        returncode = subprocess.call(command, cwd=self.project.directory)
         return TaskStatus.from_exit_code(safe_command, returncode)
 
 
