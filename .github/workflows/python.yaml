@@ -9,7 +9,7 @@ env:
 
 jobs:
   test:
-    runs-on: [ self-hosted, type-cpx21, image-x86-app-docker-ce ]
+    runs-on: [ self-hosted, type-cpx21 ]
     strategy:
       matrix:
         include:
