@@ -27,3 +27,13 @@ id = "39072640-c6af-4832-b560-c2b6bf1834ac"
 type = "fix"
 description = "Catch `Property.Deferred` exception in `kraken query describe`\n"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "b11c8307-2f40-4990-b933-1f46fef4e2fc"
+type = "improvement"
+description = "Update Python `PublishTask` to use Twine as a PEX, removing the `twine` dependency in `kraken-build` itself, and adding the `--verbose` flag"
+author = "niklas.rosenstein@helsing.ai"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/165",
+]
+component = "kraken-build"
