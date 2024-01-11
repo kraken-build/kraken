@@ -43,6 +43,7 @@ dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
 dill = ">=0.3.5,<0.3.6" # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
 httpx = "^0.23.0"
+keyring = "^23.8.2"
 mitmproxy = "^9.0.1"
 networkx = "^3.1"
 nr-io-graphviz = "^0.1.1"
@@ -54,7 +55,6 @@ rich = "^13.4.2"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
-twine = "^4.0.1"
 typeapi = "^1.4.3"
 typing-extensions = ">=4.6.0"
 
