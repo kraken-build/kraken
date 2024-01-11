@@ -1,0 +1,5 @@
+[[entries]]
+id = "2f2d584f-2a2a-49cc-b265-56e7b1ed3ce9"
+type = "feature"
+description = "Add `GetItemSupplier` and `Supplier.__getitem__()`"
+author = "niklas.rosenstein@helsing.ai"
