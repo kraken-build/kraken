@@ -25,7 +25,8 @@ jobs:
     - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.32.4
     - run: |
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s - -y
-        rustup update
+        echo "PATH=$PATH:$HOME/.cargo/bin" >> $GITHUB_ENV
+    - run: rustup update
     - run: krakenw run check lint test
 
   # kraken-std-integration-test:
