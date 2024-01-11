@@ -18,6 +18,7 @@ jobs:
           # - python-version: "3.11"
           # - python-version: "3.12"
     steps:
+    - run: echo "PATH=$PATH:/home/ubuntu/.cargo/bin:/home/ubuntu/.local/bin" >> $GITHUB_ENV
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4

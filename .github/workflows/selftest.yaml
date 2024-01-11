@@ -16,6 +16,7 @@ jobs:
   selftest:
     runs-on: [ self-hosted, type-cpx21 ]
     steps:
+    - run: echo "PATH=$PATH:/home/ubuntu/.cargo/bin:/home/ubuntu/.local/bin" >> $GITHUB_ENV
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
@@ -32,6 +33,7 @@ jobs:
   examples-docker-manual:
     runs-on: [ self-hosted, type-cpx21 ]
     steps:
+    - run: echo "PATH=$PATH:/home/ubuntu/.cargo/bin:/home/ubuntu/.local/bin" >> $GITHUB_ENV
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
