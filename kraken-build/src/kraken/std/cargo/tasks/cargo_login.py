@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from subprocess import run
-from sys import stderr
 
-from kraken.core import Property, Task
+from kraken.core import Property, Task, TaskStatus
 
 from ..config import CargoRegistry
 
@@ -14,7 +13,7 @@ class CargoLoginTask(Task):
     #: The registries to insert into the configuration.
     registries: Property[list[CargoRegistry]] = Property.default_factory(list)
 
-    def execute(self) -> None:
+    def execute(self) -> TaskStatus:
         for registry in self.registries.get():
             publish_token = registry.publish_token
             if publish_token is None:
@@ -34,6 +33,5 @@ class CargoLoginTask(Task):
                     pass
                 else:
                     # unknown error, fail normally
-                    print(repr(p.stderr))
-                    stderr.write(p.stderr.decode())
-                    p.check_returncode()
+                    return TaskStatus.failed("could not run cargo login")
+        return TaskStatus.succeeded()
