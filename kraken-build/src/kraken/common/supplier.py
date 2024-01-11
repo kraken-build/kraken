@@ -149,7 +149,6 @@ class MapSupplier(Supplier[U], Generic[T, U]):
 
 
 class GetItemSupplier(Supplier[V]):
-
     def __init__(self, key: K, value: Supplier[Mapping[K, V]]) -> None:
         self._key = key
         self._value = value
