@@ -5,6 +5,7 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import Literal
 
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
@@ -20,6 +21,7 @@ class PexBuildTask(Task):
     entry_point: Property[str | None] = Property.default(None)
     console_script: Property[str | None] = Property.default(None)
     interpreter_constraint: Property[str | None] = Property.default(None)
+    venv: Property[Literal["prepend", "append"] | None] = Property.default(None)
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
 
@@ -35,6 +37,7 @@ class PexBuildTask(Task):
                     self.entry_point.get() or "",
                     self.console_script.get() or "",
                     self.interpreter_constraint.get() or "",
+                    self.venv.get() or "",
                     self.pex_binary.map(str).get() or "",
                     self.python.map(str).get() or "",
                 ]
@@ -62,6 +65,7 @@ class PexBuildTask(Task):
                 entry_point=self.entry_point.get(),
                 console_script=self.console_script.get(),
                 interpreter_constraint=self.interpreter_constraint.get(),
+                venv=self.venv.get(),
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
             )
@@ -78,6 +82,7 @@ def _build_pex(
     entry_point: str | None = None,
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
+    venv: Literal["prepend", "append"] | None = None,
     inject_env: Mapping[str, str] | None = None,
     pex_binary: Path | None = None,
     python: Path | None = None,
@@ -110,8 +115,6 @@ def _build_pex(
         "latest",
         "--resolver-version",
         "pip-2020-resolver",
-        "--venv",
-        "prepend",
         "--output-file",
         str(output_file),
         *requirements,
@@ -122,6 +125,8 @@ def _build_pex(
         command += ["--console-script", console_script]
     if interpreter_constraint is not None:
         command += ["--interpreter-constraint", interpreter_constraint]
+    if venv is not None:
+        command += ["--venv", venv]
     for key, value in (inject_env or {}).items():
         command += ["--inject-env", f"{key}={value}"]
 
@@ -135,6 +140,8 @@ def pex_build(
     requirements: Sequence[str],
     entry_point: str | None = None,
     console_script: str | None = None,
+    interpreter_constraint: str | None = None,
+    venv: Literal["prepend", "append"] | None = None,
     task_name: str | None = None,
     project: Project | None = None,
 ) -> PexBuildTask:
@@ -146,4 +153,6 @@ def pex_build(
     task.requirements = requirements
     task.entry_point = entry_point
     task.console_script = console_script
+    task.interpreter_constraint = interpreter_constraint
+    task.venv = venv
     return task

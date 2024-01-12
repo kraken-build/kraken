@@ -41,6 +41,6 @@ component = "kraken-build"
 [[entries]]
 id = "93392dac-89fb-452a-acff-fa41e6d914a6"
 type = "improvement"
-description = "Use latest Pip version and resolver in Pex, and `--venv prepend` to remove our convoluted workaround"
+description = "Use latest Pip version and resolver in Pex, and use `--venv prepend` for Novella"
 author = "niklas.rosenstein@helsing.ai"
 component = "kraken-build"

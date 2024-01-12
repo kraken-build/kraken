@@ -38,7 +38,10 @@ def novella(
 ) -> tuple[NovellaTask, NovellaTask | None]:
     project = project or Project.current()
     novella_bin = pex_build(
-        console_script="novella", requirements=[f"novella{novella_version}", *additional_requirements], project=project
+        console_script="novella",
+        requirements=[f"novella{novella_version}", *additional_requirements],
+        project=project,
+        venv="prepend",
     ).output_file
 
     if docs_dir is not None:
