@@ -33,7 +33,7 @@ jobs:
 
     - run: slap install --link --no-venv-check ${{ matrix.only }}
 
-    - run: kraken run fmt lint test -vv
+    - run: kraken run python.install fmt lint test -vv
     - run: kraken q ls
     - run: kraken q tree
     - run: kraken q viz
