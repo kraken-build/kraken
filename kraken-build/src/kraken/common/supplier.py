@@ -3,13 +3,15 @@ calculated lazily and track provenance of such computations. """
 
 
 import abc
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any, Generic, TypeVar
 
 from ._generic import NotSet
 
 T = TypeVar("T", covariant=True)
 U = TypeVar("U")
+K = TypeVar("K")
+V = TypeVar("V")
 
 
 class Supplier(Generic[T], abc.ABC):
@@ -76,6 +78,9 @@ class Supplier(Generic[T], abc.ABC):
 
         return OnceSupplier(self)
 
+    def __getitem__(self: "Supplier[Mapping[K, V]]", key: K) -> "GetItemSupplier[V]":
+        return GetItemSupplier(key, self)
+
     def lineage(self) -> Iterable[tuple["Supplier[Any]", list["Supplier[Any]"]]]:
         """Iterates over all suppliers in the lineage.
 
@@ -141,6 +146,28 @@ class MapSupplier(Supplier[U], Generic[T, U]):
             return False
         assert isinstance(other, MapSupplier)
         return (self._func, self._value) == (other._func, other._value)
+
+
+class GetItemSupplier(Supplier[V]):
+    def __init__(self, key: K, value: Supplier[Mapping[K, V]]) -> None:
+        self._key = key
+        self._value = value
+
+    def derived_from(self) -> Iterable[Supplier[Any]]:
+        yield self._value
+
+    def get(self) -> V:
+        value = self._value.get()
+        return value[self._key]
+
+    def __repr__(self) -> str:
+        return f"{self._value}[{self._key}]"
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) is not type(self):
+            return False
+        assert isinstance(other, GetItemSupplier)
+        return (self._key, self._value) == (other._key, other._value)
 
 
 class OnceSupplier(Supplier[T]):
