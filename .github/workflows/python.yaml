@@ -31,7 +31,19 @@ jobs:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashfile('.kraken.lock') }}
 
+    - name: Restore Venv
+      uses: actions/cache/restore@v3
+      with:
+        path: .venvs/${{ matrix.python-version }}
+        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
+
     - run: krakenw run check lint test
+
+    - name: Save Venv
+      uses: actions/cache/save@v3
+      with:
+        path: .venvs/${{ matrix.python-version }}
+        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     - name: Save Kraken build cache
       uses: actions/cache/save@v3
