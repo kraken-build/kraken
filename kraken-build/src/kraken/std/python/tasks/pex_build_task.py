@@ -5,8 +5,7 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-
-from pex.pex import PEX  # type: ignore[import-untyped]
+from typing import Literal
 
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
@@ -22,21 +21,12 @@ class PexBuildTask(Task):
     entry_point: Property[str | None] = Property.default(None)
     console_script: Property[str | None] = Property.default(None)
     interpreter_constraint: Property[str | None] = Property.default(None)
+    venv: Property[Literal["prepend", "append"] | None] = Property.default(None)
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
-
-    #: A mapping of all console_script entry points to paths of shell scripts that invoke the PEX using the
-    #: respective script. These scripts set up the PATH in a way that they can automatically call scripts
-    #: from other requirements in the same PEX. You should prefer the console script from this property
-    #: instead of setting the :attr:`console_script` attribute and running the :attr:`output_file` directly
-    #: if your application requires access to the console scripts provided by its other dependencies in the PEX.
-    output_scripts: Property[Mapping[str, Path]] = Property.output()
-
-    #: The directory that contains all `output_scripts`.
-    output_scripts_dir: Property[Path] = Property.output()
 
     def _get_output_file_path(self) -> Path:
         hashsum = hashlib.md5(
@@ -47,6 +37,7 @@ class PexBuildTask(Task):
                     self.entry_point.get() or "",
                     self.console_script.get() or "",
                     self.interpreter_constraint.get() or "",
+                    self.venv.get() or "",
                     self.pex_binary.map(str).get() or "",
                     self.python.map(str).get() or "",
                 ]
@@ -59,44 +50,9 @@ class PexBuildTask(Task):
             / self.binary_name.get()
         ).with_suffix(".pex")
 
-    def _fill_output_scripts(self, create: bool) -> None:
-        """After building the PEX, we expose all of it's `console_script` entry points as shell scripts
-        in a separate directory to support when the PEX expects to call a subprocess of one of the console scripts
-        of its own Python dependencies.
-
-        This function generates shell scripts that serve as proxies for all the console_script entrypoints in the PEX.
-        We need to update the PATH in the shell script because there's no way I can see to append to the PATH in the
-        built PEX file. Technically there's the --venv mode, but it requires the PEX caller to set
-        `PEX_VENV=true PEX_VENV_BIN_PATH=prepend`.
-
-        This function expects that :attr:`output_files` is already set.
-        """
-
-        console_scripts_dir = self.output_file.get().parent / "bin"
-        console_scripts = _get_console_scripts(PEX(str(self.output_file.get())))
-
-        if console_scripts:
-            if create:
-                console_scripts_dir.mkdir(parents=True, exist_ok=True)
-                self.logger.info("Exporting %d console_scripts in PEX to %s", len(console_scripts), console_scripts_dir)
-                for script in console_scripts:
-                    file = console_scripts_dir / script
-                    file.write_text(
-                        f'#!/bin/sh\nPEX_SCRIPT={script} PATH="{console_scripts_dir.absolute()}:$PATH" '
-                        f'"{self.output_file.get().absolute()}" "$@"\n'
-                        "exit $?\n"
-                    )
-                    file.chmod(0o777)
-        elif create:
-            self.logger.info("note: PEX has no console_scripts")
-
-        self.output_scripts_dir = console_scripts_dir
-        self.output_scripts = {script: console_scripts_dir / script for script in console_scripts}
-
     def prepare(self) -> TaskStatus | None:
         self.output_file = self._get_output_file_path().absolute()
         if self.output_file.get().exists():
-            self._fill_output_scripts(create=False)
             return TaskStatus.skipped(f"PEX `{self.binary_name.get()}` already exists ({self.output_file.get()})")
         return TaskStatus.pending()
 
@@ -109,13 +65,13 @@ class PexBuildTask(Task):
                 entry_point=self.entry_point.get(),
                 console_script=self.console_script.get(),
                 interpreter_constraint=self.interpreter_constraint.get(),
+                venv=self.venv.get(),
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
 
-        self._fill_output_scripts(create=True)
         return TaskStatus.succeeded(f"PEX `{self.binary_name.get()}` built successfully ({self.output_file.get()})")
 
 
@@ -126,8 +82,8 @@ def _build_pex(
     entry_point: str | None = None,
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
+    venv: Literal["prepend", "append"] | None = None,
     inject_env: Mapping[str, str] | None = None,
-    venv: bool = False,
     pex_binary: Path | None = None,
     python: Path | None = None,
     log: logging.Logger | None = None,
@@ -155,6 +111,10 @@ def _build_pex(
         ]
 
     command += [
+        "--pip-version",
+        "latest",
+        "--resolver-version",
+        "pip-2020-resolver",
         "--output-file",
         str(output_file),
         *requirements,
@@ -165,22 +125,13 @@ def _build_pex(
         command += ["--console-script", console_script]
     if interpreter_constraint is not None:
         command += ["--interpreter-constraint", interpreter_constraint]
+    if venv is not None:
+        command += ["--venv", venv]
     for key, value in (inject_env or {}).items():
         command += ["--inject-env", f"{key}={value}"]
-    if venv:
-        command += ["--venv"]
 
     (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, command)))
     subprocess.run(command, check=True)
-
-
-def _get_console_scripts(pex: PEX) -> set[str]:
-    """Return all entry points registered under `console_script` for this PEX."""
-
-    result = set()
-    for dist in pex.resolve():
-        result.update(dist.get_entry_map().get("console_scripts", {}).keys())
-    return result
 
 
 def pex_build(
@@ -189,6 +140,8 @@ def pex_build(
     requirements: Sequence[str],
     entry_point: str | None = None,
     console_script: str | None = None,
+    interpreter_constraint: str | None = None,
+    venv: Literal["prepend", "append"] | None = None,
     task_name: str | None = None,
     project: Project | None = None,
 ) -> PexBuildTask:
@@ -200,4 +153,6 @@ def pex_build(
     task.requirements = requirements
     task.entry_point = entry_point
     task.console_script = console_script
+    task.interpreter_constraint = interpreter_constraint
+    task.venv = venv
     return task
