@@ -28,7 +28,7 @@ jobs:
       uses: actions/cache/restore@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}
 
     - run: kraken run fmt lint test -vv
     - run: kraken q ls
@@ -40,7 +40,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}
 
   examples-docker-manual:
     runs-on: ubuntu-latest
@@ -55,7 +55,7 @@ jobs:
       uses: actions/cache/restore@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}
 
     - run: cd examples/docker-manual && kraken run :dockerBuild :sub:helloWorld
 
@@ -63,4 +63,4 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}

@@ -29,7 +29,7 @@ jobs:
       uses: actions/cache/restore@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}
 
     - run: krakenw run check lint test
 
@@ -37,7 +37,7 @@ jobs:
       uses: actions/cache/save@v3
       with:
         path: build
-        key: build-cache:${{ runner.os }}
+        key: build-cache:${{ runner.os }}:{{ hashfile('.kraken.lock') }}
 
   # kraken-std-integration-test:
   #   runs-on: ubuntu-latest
