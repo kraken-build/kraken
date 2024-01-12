@@ -87,8 +87,8 @@ class PexBuildTask(Task):
                         "exit $?\n"
                     )
                     file.chmod(0o777)
-            else:
-                self.logger.info("note: PEX has no console_scripts")
+        elif create:
+            self.logger.info("note: PEX has no console_scripts")
 
         self.output_scripts_dir = console_scripts_dir
         self.output_scripts = {script: console_scripts_dir / script for script in console_scripts}
