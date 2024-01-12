@@ -59,18 +59,48 @@ class PexBuildTask(Task):
             / self.binary_name.get()
         ).with_suffix(".pex")
 
+    def _fill_output_scripts(self, create: bool) -> None:
+        """After building the PEX, we expose all of it's `console_script` entry points as shell scripts
+        in a separate directory to support when the PEX expects to call a subprocess of one of the console scripts
+        of its own Python dependencies.
+
+        This function generates shell scripts that serve as proxies for all the console_script entrypoints in the PEX.
+        We need to update the PATH in the shell script because there's no way I can see to append to the PATH in the
+        built PEX file. Technically there's the --venv mode, but it requires the PEX caller to set
+        `PEX_VENV=true PEX_VENV_BIN_PATH=prepend`.
+
+        This function expects that :attr:`output_files` is already set.
+        """
+
+        console_scripts_dir = self.output_file.get().parent / "bin"
+        console_scripts = _get_console_scripts(PEX(str(self.output_file.get())))
+
+        if console_scripts:
+            if create:
+                console_scripts_dir.mkdir(parents=True, exist_ok=True)
+                self.logger.info("Exporting %d console_scripts in PEX to %s", len(console_scripts), console_scripts_dir)
+                for script in console_scripts:
+                    file = console_scripts_dir / script
+                    file.write_text(
+                        f'#!/bin/sh\nPEX_SCRIPT={script} PATH="{console_scripts_dir.absolute()}:$PATH" '
+                        f'"{self.output_file.get().absolute()}" "$@"\n'
+                        "exit $?\n"
+                    )
+                    file.chmod(0o777)
+            else:
+                self.logger.info("note: PEX has no console_scripts")
+
+        self.output_scripts_dir = console_scripts_dir
+        self.output_scripts = {script: console_scripts_dir / script for script in console_scripts}
+
     def prepare(self) -> TaskStatus | None:
         self.output_file = self._get_output_file_path().absolute()
         if self.output_file.get().exists():
+            self._fill_output_scripts(create=False)
             return TaskStatus.skipped(f"PEX `{self.binary_name.get()}` already exists ({self.output_file.get()})")
         return TaskStatus.pending()
 
     def execute(self) -> TaskStatus | None:
-        # After building the PEX, we expose all of it's `console_script` entry points as shell scripts
-        # in a separate directory to support when the PEX expects to call a subprocess of one of the
-        # console scripts of its own Python dependencies.
-        console_scripts_dir = self.output_file.get().parent / "bin"
-
         try:
             self.output_file.get().parent.mkdir(parents=True, exist_ok=True)
             _build_pex(
@@ -85,31 +115,7 @@ class PexBuildTask(Task):
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
 
-        # Generate shell scripts that serve as proxies for all the console_script entrypoints in the PEX.
-        # We need to update the PATH in the shell script because there's no way I can see to append to the
-        # PATH in the built PEX file. Technically there's the --venv mode, but it requires the PEX caller
-        # to set `PEX_VENV=true PEX_VENV_BIN_PATH=prepend`.
-
-        console_scripts_files = {}
-        console_scripts = _get_console_scripts(PEX(str(self.output_file.get())))
-        if console_scripts:
-            console_scripts_dir.mkdir(parents=True, exist_ok=True)
-            self.logger.info("Exporting %d console_scripts in PEX to %s", len(console_scripts), console_scripts_dir)
-            for script in console_scripts:
-                file = console_scripts_dir / script
-                console_scripts_files[script] = file
-                file.write_text(
-                    f'#!/bin/sh\nPEX_SCRIPT={script} PATH="{console_scripts_dir.absolute()}:$PATH" '
-                    f'"{self.output_file.get().absolute()}" "$@"\n'
-                    "exit $?\n"
-                )
-                file.chmod(0o777)
-        else:
-            self.logger.info("note: PEX has no console_scripts")
-
-        self.output_scripts_dir = console_scripts_dir
-        self.output_scripts = console_scripts_files
-
+        self._fill_output_scripts(create=True)
         return TaskStatus.succeeded(f"PEX `{self.binary_name.get()}` built successfully ({self.output_file.get()})")
 
 
