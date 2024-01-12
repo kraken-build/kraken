@@ -24,10 +24,12 @@ jobs:
     - run: rustup update
     - run: slap install --link --no-venv-check ${{ matrix.only }}
 
-    - name: Restore Kraken build cache
+    - name: Restore cache
       uses: actions/cache/restore@v3
       with:
-        path: build
+        path: |
+          build
+          .venvs
         key: build-cache:${{ runner.os }}:selftest
 
     - run: kraken run fmt lint test -vv
@@ -36,10 +38,12 @@ jobs:
     - run: kraken q viz
     - run: kraken q d python.mypy
 
-    - name: Save Kraken build cache
+    - name: Save cache
       uses: actions/cache/save@v3
       with:
-        path: build
+        path: |
+          build
+          .venvs
         key: build-cache:${{ runner.os }}:selftest
 
   examples-docker-manual:
