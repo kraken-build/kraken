@@ -1,16 +1,14 @@
-from kraken.core import Project
-from docs_helpers import DocsVenvTask, DocsTask
+from kraken.std.docs.tasks.novella import novella
 
-project = Project.current()
-
-docs_venv = project.task("venv", DocsVenvTask)
-docs_venv.directory = project.build_directory / "docs-venev"
-
-docs_build = project.task("_build", DocsTask)
-docs_build.venv = docs_venv.directory
-docs_build.mode = "build"
-project.group("build").add(docs_build)
-
-docs_serve = project.task("serve", DocsTask)
-docs_serve.venv = docs_venv.directory
-docs_serve.mode = "serve"
+novella(
+    novella_version="==0.2.6",
+    additional_requirements=[
+        "mkdocs",
+        "mkdocs-material",
+        "pydoc-markdown==4.8.2",
+        "setuptools",  # Novella/Pydoc-Markdown are using pkg_resources but don't declare setuptools as a dependency
+    ],
+    build_group="build",
+    serve_args=["--serve"],
+    serve_task="serve",
+)

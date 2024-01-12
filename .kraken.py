@@ -1,15 +1,16 @@
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-build>=0.33.0"])
+buildscript(requirements=["kraken-build>=0.33.1"])
 
 import os
 
-from kraken.core import Project
 from kraken.std import python
 from kraken.std.git import git_describe
 
 
-def configure_project(project: Project) -> None:
+def configure_project() -> None:
+    from kraken.build import project
+
     python.pyupgrade(python_version="3.10", version_spec="==3.15.0")
     python.pycln(version_spec="==2.4.0")
 
@@ -89,8 +90,10 @@ def configure_project(project: Project) -> None:
             )
 
 
-current = Project.current()
-current.subproject("docs")
-for project in [current.subproject("kraken-build"), current.subproject("kraken-wrapper")]:
-    with project.as_current():
-        configure_project(project)
+from kraken.build import project
+
+project.subproject("docs")
+
+for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
+    with subproject.as_current():
+        configure_project()
