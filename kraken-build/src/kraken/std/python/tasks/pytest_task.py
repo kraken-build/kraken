@@ -86,9 +86,9 @@ def pytest(
     name: str = "pytest",
     group: str = "test",
     project: Project | None = None,
-    tests_dir: Path | None = None,
-    include_dirs: Sequence[Path] = (),
-    ignore_dirs: Sequence[Path] = (),
+    tests_dir: Path | str | None = None,
+    include_dirs: Sequence[Path | str] = (),
+    ignore_dirs: Sequence[Path | str] = (),
     allow_no_tests: bool = False,
     doctest_modules: bool = True,
     marker: str | None = None,
@@ -96,9 +96,9 @@ def pytest(
 ) -> PytestTask:
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
-    task.tests_dir = tests_dir
-    task.include_dirs = include_dirs
-    task.ignore_dirs = ignore_dirs
+    task.tests_dir = Path(tests_dir) if tests_dir is not None else None
+    task.include_dirs = list(map(Path, include_dirs))
+    task.ignore_dirs = list(map(Path, ignore_dirs))
     task.allow_no_tests = allow_no_tests
     task.doctest_modules = doctest_modules
     task.marker = marker

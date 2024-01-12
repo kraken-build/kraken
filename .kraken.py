@@ -1,6 +1,6 @@
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-build>=0.32.6"])
+buildscript(requirements=["kraken-build>=0.33.0"])
 
 import os
 
@@ -10,13 +10,13 @@ from kraken.std.git import git_describe
 
 
 def configure_project(project: Project) -> None:
-    python.pyupgrade(python_version="3.10")
-    python.pycln()
+    python.pyupgrade(python_version="3.10", version_spec="==3.15.0")
+    python.pycln(version_spec="==2.4.0")
 
-    python.black(additional_args=["--config", "pyproject.toml"])
-    python.flake8()
-    python.isort()
-    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"])
+    python.black(additional_args=["--config", "pyproject.toml"], version_spec="==23.12.1")
+    python.flake8(version_spec="==6.1.0")
+    python.isort(version_spec="==5.13.2")
+    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
 
     if project.directory.joinpath("tests").is_dir():
         # Explicit list of test directories, Pytest skips the build directory if not specified explicitly.

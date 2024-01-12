@@ -1,0 +1,66 @@
+release-date = "2024-01-12"
+
+[[entries]]
+id = "e70d7845-13ee-42da-9465-2d5509ba7c98"
+type = "improvement"
+description = "Use `--upgrade-deps` option to `python -m venv` instead of calling `pip install --upgrade pip` separately after Venv creation"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "9fc53062-4c1c-4f87-a744-9b1f66163c12"
+type = "improvement"
+description = "Accept `str` for `pytest(tests_dir, ignore_dirs, include_dirs)` arguments"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
+
+[[entries]]
+id = "c3445636-093d-427e-8e5e-7c7571cf1dd7"
+type = "improvement"
+description = "Store a `.success.flag` file in the virtual build environment to know if the Virtual environment installation was successful."
+author = "niklas.rosenstein@helsing.ai"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/24",
+]
+component = "kraken-wrapper"
+
+[[entries]]
+id = "39072640-c6af-4832-b560-c2b6bf1834ac"
+type = "fix"
+description = "Catch `Property.Deferred` exception in `kraken query describe`\n"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "b11c8307-2f40-4990-b933-1f46fef4e2fc"
+type = "improvement"
+description = "Update Python `PublishTask` to use Twine as a PEX, removing the `twine` dependency in `kraken-build` itself, and adding the `--verbose` flag"
+author = "niklas.rosenstein@helsing.ai"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/165",
+]
+component = "kraken-build"
+
+[[entries]]
+id = "93392dac-89fb-452a-acff-fa41e6d914a6"
+type = "improvement"
+description = "Use latest Pip version and resolver in Pex, and use `--venv prepend` for Novella"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
+
+[[entries]]
+id = "2f2d584f-2a2a-49cc-b265-56e7b1ed3ce9"
+type = "feature"
+description = "Add `GetItemSupplier` and `Supplier.__getitem__()`"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "ee333218-60d5-438d-bcec-bee90bf3c2d2"
+type = "improvement"
+description = "Add `PexBuildTask.output_scripts_dir` and `.output_scripts` properties"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "c47a5861-45f1-4d42-b28a-ef725bf363f6"
+type = "feature"
+description = "add `NovellaTask()` and `novella()` factory function to build documentation with [Novella](https://github.com/NiklasRosenstein/novella/)"
+author = "niklas.rosenstein@helsing.ai"
