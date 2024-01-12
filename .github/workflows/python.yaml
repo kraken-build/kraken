@@ -34,7 +34,7 @@ jobs:
     - name: Restore Venv
       uses: actions/cache/restore@v3
       with:
-        path: .venvs/${{ matrix.python-version }}
+        path: .venvs/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     # Explicitly mention python.install to ensure that Pip install is rerun.
@@ -43,7 +43,7 @@ jobs:
     - name: Save Venv
       uses: actions/cache/save@v3
       with:
-        path: .venvs/${{ matrix.python-version }}
+        path: .venvs/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     - name: Save Kraken build cache
