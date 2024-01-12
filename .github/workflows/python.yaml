@@ -37,7 +37,8 @@ jobs:
         path: .venvs/${{ matrix.python-version }}
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
-    - run: krakenw run check lint test
+    # Explicitly mention python.install to ensure that Pip install is rerun.
+    - run: krakenw run python.install check lint test
 
     - name: Save Venv
       uses: actions/cache/save@v3

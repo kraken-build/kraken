@@ -22,7 +22,6 @@ jobs:
       with: { python-version: "3.10" }
     - run: pip install pipx && pipx install poetry && pipx install pdm
     - run: rustup update
-    - run: slap install --link --no-venv-check ${{ matrix.only }}
 
     - name: Restore cache
       uses: actions/cache/restore@v3
@@ -31,6 +30,8 @@ jobs:
           build
           .venvs
         key: build-cache:${{ runner.os }}:selftest
+
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
 
     - run: kraken run fmt lint test -vv
     - run: kraken q ls
