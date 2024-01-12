@@ -1,6 +1,6 @@
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-build>=0.33.0"])
+buildscript(requirements=["kraken-build>=0.33.1"])
 
 import os
 
@@ -89,8 +89,10 @@ def configure_project(project: Project) -> None:
             )
 
 
-current = Project.current()
-current.subproject("docs")
-for project in [current.subproject("kraken-build"), current.subproject("kraken-wrapper")]:
-    with project.as_current():
+from kraken.build import project
+
+project.subproject("docs")
+
+for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
+    with subproject.as_current():
         configure_project(project)
