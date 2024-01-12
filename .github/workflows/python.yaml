@@ -24,7 +24,20 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.32.4
     - run: rustup update
+
+    - name: Restore Kraken build cache
+      uses: actions/cache/restore@v3
+      with:
+        path: build
+        key: build-cache:${{ runner.os }}
+
     - run: krakenw run check lint test
+
+    - name: Save Kraken build cache
+      uses: actions/cache/save@v3
+      with:
+        path: build
+        key: build-cache:${{ runner.os }}
 
   # kraken-std-integration-test:
   #   runs-on: ubuntu-latest
