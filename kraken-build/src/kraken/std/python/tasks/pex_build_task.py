@@ -6,7 +6,7 @@ import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from pex.pex import PEX
+from pex.pex import PEX  # type: ignore[import]
 
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
