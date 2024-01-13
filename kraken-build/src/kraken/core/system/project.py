@@ -13,6 +13,7 @@ from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
+from kraken.core.system.target import NamedTarget, T_Target, Target
 from kraken.core.system.task import GroupTask, InlineTask, Task, TaskSet
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         # We store all members that can be referenced by a fully qualified name in the same dictionary to ensure
         # we're not accidentally allocating the same name twice.
-        self._members: dict[str, Task | Project] = {}
+        self._members: dict[str, Task | Project | NamedTarget[Target]] = {}
 
         apply_group = self.group(
             "apply", description="Tasks that perform automatic updates to the project consistency."
@@ -438,7 +439,53 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         return task
 
     ##
-    # Begin: Deprecated APIs
+    # Experimental APIs
+    ##
+
+    def define_target(self, name: str, data: T_Target) -> NamedTarget[T_Target]:
+        """Defines a named target on the project. The name may not collide with any other member of the project."""
+
+        if not isinstance(data, Target):
+            raise TypeError(f"Expected a Target, got {type(data).__name__}")
+
+        if name in self._members:
+            raise ValueError(f"{self} already has a member {name!r}")
+
+        target = NamedTarget(name, self, data)
+        self._members[name] = target  # type: ignore[assignment]
+        return target
+
+    @overload
+    def target(self, name: str) -> NamedTarget[Target]:
+        ...
+
+    @overload
+    def target(self, name: str, type_: type[T_Target]) -> NamedTarget[T_Target]:
+        ...
+
+    def target(self, name: str, type_: type[T_Target] | None = None) -> NamedTarget[Target] | NamedTarget[T_Target]:
+        """Retrieve a target from the project by name."""
+
+        try:
+            target = self._members[name]
+            if not isinstance(target, NamedTarget):
+                raise ValueError(f"{self} has a member {name!r}, but it is not a target (got {type(target).__name__})")
+        except KeyError:
+            raise ValueError(f"{self} has no member {name!r}")
+
+        if type_ is not None:
+            if not isinstance(target.data, type_):
+                raise ValueError(f"{target} is not of type {type_.__name__} (got {type(target.data).__name__})")
+
+        return target
+
+    def targets(self) -> Mapping[str, NamedTarget[Target]]:
+        """Returns a mapping of all targets in the project."""
+
+        return {t.name: t for t in self._members.values() if isinstance(t, NamedTarget)}
+
+    ##
+    # Deprecated APIs
     ##
 
     @property

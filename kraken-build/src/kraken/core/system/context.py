@@ -5,8 +5,9 @@ import dataclasses
 import enum
 import logging
 from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, ClassVar, TypeAlias, TypeVar, overload
+from typing import Any, ClassVar, TypeAlias, TypeVar, cast, overload
 
 from nr.stream import Stream
 
@@ -21,14 +22,17 @@ from kraken.core.system.executor.default import (
     DefaultTaskExecutor,
 )
 from kraken.core.system.graph import TaskGraph
+from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.project import Project
+from kraken.core.system.target import NamedTarget, Target
 from kraken.core.system.task import Task
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
+T_KrakenObject = TypeVar("T_KrakenObject", bound=KrakenObject)
 
 
-class KrakenAddressSpace(AddressSpace["Project | Task"]):
+class KrakenAddressSpace(AddressSpace["Project | Task | NamedTarget[Target]"]):
     """
     Implements the navigation for address resolution in the addressable project and task namespace
     represented by a #Context and its root #Project.
@@ -40,15 +44,20 @@ class KrakenAddressSpace(AddressSpace["Project | Task"]):
     def get_root(self) -> Project:
         return self.root_project
 
-    def get_parent(self, entity: Project | Task) -> Project | None:
-        if isinstance(entity, Task):
-            return entity.project
-        return entity.parent
+    def get_parent(self, entity: Project | Task | NamedTarget[Target]) -> Project | None:
+        match entity:
+            case Task() | NamedTarget():
+                return entity.project
+            case Project():
+                return entity.parent
+            case _:
+                raise TypeError(f"expected Project, Task or NamedTarget, got {type(entity).__name__}")
 
-    def get_children(self, entity: Project | Task) -> Iterable[Project | Task]:
+    def get_children(
+        self, entity: Project | Task | NamedTarget[Target]
+    ) -> Iterable[Project | Task | NamedTarget[Target]]:
         if isinstance(entity, Project):
-            yield from entity.subprojects().values()
-            yield from entity.tasks().values()
+            yield from entity._members.values()
 
 
 class ContextEventType(enum.Enum):
@@ -106,6 +115,11 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
+
+        #: The `rule_engine` property is considered experimental and may change at any time.
+        from kraken.build.experimental.rules import build_rule_engine
+
+        self.rule_engine = build_rule_engine()
 
     @property
     def root_project(self) -> Project:
@@ -210,12 +224,34 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         return project
 
+    @overload
     def resolve_tasks(
         self,
-        addresses: Sequence[Task | str | Address] | None,
+        addresses: Sequence[T_KrakenObject | str | Address] | str | None,
         relative_to: Project | Address | None = None,
         set_selected: bool = False,
     ) -> list[Task]:
+        ...
+
+    @overload
+    def resolve_tasks(
+        self,
+        addresses: Sequence[T_KrakenObject | str | Address] | str | None,
+        relative_to: Project | Address | None = None,
+        set_selected: bool = False,
+        *,
+        object_type: type[T_KrakenObject],
+    ) -> list[T_KrakenObject]:
+        ...
+
+    def resolve_tasks(
+        self,
+        addresses: Sequence[T_KrakenObject | str | Address] | str | None,
+        relative_to: Project | Address | None = None,
+        set_selected: bool = False,
+        *,
+        object_type: type[T_KrakenObject] | None = None,
+    ) -> list[T_KrakenObject] | list[Task]:
         """
         This method finds Kraken tasks by their address, relative to a given project. If no project is
         specified, the address is resolved relative to the root project.
@@ -245,6 +281,13 @@ class Context(MetadataContainer, Currentable["Context"]):
             however, will be marked as selected.
         """
 
+        if isinstance(addresses, str):
+            addresses = [addresses]
+
+        if object_type is None:
+            object_type = Task  # type: ignore[assignment]
+        assert object_type is not None
+
         if not isinstance(relative_to, Address):
             relative_to = relative_to.address if relative_to is not None else Address.ROOT
 
@@ -257,14 +300,16 @@ class Context(MetadataContainer, Currentable["Context"]):
                 "**:",  # All sub-projects (will be "expanded" to their default tasks)
             ]
 
-        results: list[Task] = []
+        results: list[T_KrakenObject] = []
         space = KrakenAddressSpace(self.root_project)
         for address in addresses:
-            if isinstance(address, Task):
+            if isinstance(address, object_type):
                 results.append(address)
                 continue
             try:
-                results += self._resolve_single_address(Address(address), relative_to, space, set_selected)
+                results += self._resolve_single_address(
+                    Address(cast(str | Address, address)), relative_to, space, set_selected, object_type=object_type
+                )
             except TaskResolutionException:
                 if address == "**:":
                     # In case the project has no sub-projects, it is expected not to find any tasks there
@@ -280,7 +325,8 @@ class Context(MetadataContainer, Currentable["Context"]):
         relative_to: Address,
         space: KrakenAddressSpace,
         set_selected: bool,
-    ) -> list[Task]:
+        object_type: type[T_KrakenObject],
+    ) -> list[T_KrakenObject]:
         """
         Resolve a single address in the context.
 
@@ -303,17 +349,24 @@ class Context(MetadataContainer, Currentable["Context"]):
             address = relative_to.concat(address).normalize(keep_container=True)
 
         matches = list(resolve_address(space, self.root_project, address).matches())
-        tasks = Stream(matches).of_type(Task).collect()  # type: ignore[type-abstract]
-        if set_selected:
+        tasks = Stream(matches).of_type(object_type).collect()
+
+        if set_selected and issubclass(object_type, Task):
             for task in tasks:
-                task.selected = True
+                cast(Task, task).selected = True
+
         projects = Stream(matches).of_type(Project).collect()
         if projects:
-            # Using the address of a project means we want to select its default tasks
-            for proj in projects:
-                tasks += [task for task in proj.tasks().values() if task.default]
+            if issubclass(object_type, Task):
+                # Using the address of a project means we want to select its default tasks
+                for proj in projects:
+                    tasks += [task for task in proj.tasks().values() if task.default]  # type: ignore[misc]
+            elif issubclass(object_type, NamedTarget):
+                tasks += [target for proj in projects for target in proj.targets().values()]  # type: ignore[misc]
+
         if not tasks:
             raise TaskResolutionException(f"'{address}' refers to no tasks.")
+
         return tasks
 
     def finalize(self) -> None:
@@ -419,3 +472,10 @@ class Context(MetadataContainer, Currentable["Context"]):
         for listener in listeners:
             # TODO(NiklasRosenstein): Should we catch errors in listeners of letting them propagate?
             listener(ContextEvent(event_type, data))
+
+    # Currentable
+
+    @contextmanager
+    def as_current(self) -> Iterator[Context]:
+        with super().as_current(), self.rule_engine.activate():
+            yield self

@@ -29,16 +29,22 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.scripts]
 kraken = "kraken.core.cli.main:main"
+krakenx = "kraken.build.experimental.main:main"
 
 [tool.poetry.plugins."pytest11"]
 "kraken.core.testing" = "kraken.core.testing"
+
+# Informs the modules from which build rules are collected from.
+[tool.poetry.plugins."kraken.build.experimental.rules"]
+common = "kraken.build.experimental.common.rules"
+python = "kraken.build.experimental.python.rules"
 
 # Dependencies
 # ------------
 
 [tool.poetry.dependencies]
 builddsl = "^1.0.0"
-databind-json = "^4.2.5"
+databind-json = "^4.4.2"
 dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
 dill = ">=0.3.5,<0.3.6" # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
@@ -50,12 +56,12 @@ nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
 packaging = "^23.1"
 pex = "^2.1.156"
-python = ">=3.10"
+python = ">=3.10,<3.11"
 rich = "^13.4.2"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
-typeapi = "^1.4.3"
+typeapi = "^2.1.1"
 typing-extensions = ">=4.6.0"
 
 [tool.poetry.dev-dependencies]
@@ -66,14 +72,14 @@ types-Deprecated = "^1.2.9"
 types-requests = "^2.28.0"
 types-termcolor = "^1.1.5"
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = "*"
-mkdocs-material = "*"
-novella = "0.2.3"
-pydoc-markdown = "^4.6.0"
-
 # Slap configuration
 # ------------------
+
+[tool.poetry.group.experimental.dependencies]
+pex = "^2.1.156"
+python-adjudicator = "^0.5.0"
+more-itertools = "^10.1.0"
+importlib-metadata = "^7.0.1"
 
 [tool.slap]
 typed = true

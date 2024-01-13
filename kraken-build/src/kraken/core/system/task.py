@@ -377,7 +377,9 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         for rel in self.__relationships:
             if isinstance(rel.other_task, Address):
                 try:
-                    resolved_tasks = self.project.context.resolve_tasks([rel.other_task], relative_to=self.project)
+                    resolved_tasks: list[Task] = self.project.context.resolve_tasks(
+                        [rel.other_task], relative_to=self.project
+                    )
                 except ValueError as exc:
                     raise ValueError(f"in task {self.address}: {exc}")
                 for task in resolved_tasks:

@@ -160,6 +160,7 @@ def get_python_interpreter_version(python_bin: str) -> str:
         subprocess.CalledProcessError: If the command fails.
     """
 
+    logger.debug("Getting version for Python interpreter %s", python_bin)
     output = subprocess.check_output([python_bin, "--version"], stderr=subprocess.STDOUT, text=True)
     match = re.match(r"Python (\d+\.\d+\.\d+)", output)
     if not match:
