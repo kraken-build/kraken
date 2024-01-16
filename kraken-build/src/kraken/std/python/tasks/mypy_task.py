@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
+import sys
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
@@ -24,7 +25,12 @@ class MypyTask(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str]:
-        entry_point = "dmypy" if self.use_daemon.get() else "mypy"
+        use_daemon = self.use_daemon.get()
+        if use_daemon and sys.platform.startswith('win32'):
+            use_daemon = False
+            logger.warning("Disable use of mypy daemon due to error in exit code on Windows")
+        
+        entry_point = "dmypy" if use_daemon else "mypy"
 
         if mypy_pex_bin := self.mypy_pex_bin.get():
             # See https://pex.readthedocs.io/en/latest/api/vars.html
@@ -38,7 +44,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
         #       happens regularly but is hard to detect automatically).
 
         status_file = (self.project.directory / ".dmypy.json").absolute()
-        if self.use_daemon.get():
+        if use_daemon:
             command += ["--status-file", str(status_file), "run", "--"]
         if mypy_pex_bin:
             # Have mypy pick up the Python executable from the virtual environment that is activated automatically
