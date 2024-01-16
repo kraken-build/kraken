@@ -77,5 +77,6 @@ class EnvironmentAwareDispatchTask(Task):
                 logger.warning('%s = "*"', dep)
             return TaskStatus.failed("The %s dependencies are missing" % self.python_dependencies)
         logger.info("%s", command)
-        result = sp.call(command, cwd=self.project.directory, env=env)
+        shell = sys.platform.startswith('win32')  # Windows requires shell to find executable in path
+        result = sp.call(command, cwd=self.project.directory, env=env, shell=shell)
         return self.handle_exit_code(result)
