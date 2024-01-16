@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
+import logging
 from pathlib import Path
 import sys
 
@@ -10,6 +11,8 @@ from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
+
+logger = logging.getLogger(__name__)
 
 class MypyTask(EnvironmentAwareDispatchTask):
     description = "Static type checking for Python code using Mypy."
