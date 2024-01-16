@@ -152,9 +152,7 @@ def get_candidates(
     pyenv_versions = (Path(os.getenv('PYENV')) / "versions").expanduser()
     if check_pyenv and pyenv_versions.is_dir():
         for item in pyenv_versions.iterdir():
-            print(item)
             if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
-                print(item)
                 yield {"path": str(item / "python.exe"), "exact_version": item.name}
 
     yield {"path": sys.executable, "exact_version": ".".join(map(str, sys.version_info[:3]))}
