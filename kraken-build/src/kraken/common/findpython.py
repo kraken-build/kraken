@@ -199,7 +199,7 @@ def evaluate_candidates(
         if version is None:
             try:
                 version = get_python_interpreter_version(str(path))
-            except (subprocess.CalledProcessError, RuntimeError):
+            except (subprocess.CalledProcessError, RuntimeError, FileNotFoundError):
                 logger.debug("Failed to get version for Python interpreter %s", path, exc_info=True)
                 continue
             if cache:
