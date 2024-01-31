@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install poetry && pipx install pdm
     - run: rustup update
@@ -68,7 +68,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
     - run: slap install --link --no-venv-check ${{ matrix.only }}
     - run: cd examples/docker-manual && kraken run :dockerBuild :sub:helloWorld

@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with: { python-version: "3.10" }
     - run: slap install --link --no-venv-check ${{ matrix.only }}
     - run: python -m kraken.std.git.gitignore.gitignore_io
