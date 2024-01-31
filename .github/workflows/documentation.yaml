@@ -17,7 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: pipx install kraken-wrapper==0.32.4
+
+    # - run: pipx install kraken-wrapper==0.32.4
+    - uses: actions/setup-python@v5
+      with: { python-version: "${{ matrix.python-version }}" }
+    - run: pip install ./kraken-build
 
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
@@ -25,7 +29,8 @@ jobs:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
 
-    - run: krakenw run :docs:build --no-save
+    # - run: krakenw run mkdocs.build --no-save
+    - run: kraken run mkdocs.build --no-save
 
     - name: Save Kraken build cache
       uses: actions/cache/save@v4
@@ -36,7 +41,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: docs/_site
+        path: build/docs/mkdocs/_site
 
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/develop'
