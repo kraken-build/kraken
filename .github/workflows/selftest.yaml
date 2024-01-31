@@ -16,8 +16,8 @@ jobs:
   selftest:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         include:
           - python-version: "3.10"
           - python-version: "3.11"
@@ -58,8 +58,8 @@ jobs:
   examples-docker-manual:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        fail-fast: false
         include:
           - python-version: "3.10"
           - python-version: "3.11"
