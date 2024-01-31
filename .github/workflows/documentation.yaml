@@ -19,6 +19,7 @@ jobs:
     - uses: NiklasRosenstein/slap@gha/install/v1
 
     - run: pipx install kraken-wrapper==0.33.2
+    - run: pipx install mksync
 
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
@@ -26,6 +27,9 @@ jobs:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
 
+    - run: |
+        cd docs
+        for fn in docs/cli/*.md; do mksync -i $fn; done
     - run: krakenw run mkdocs.build --no-save
 
     - name: Save Kraken build cache
