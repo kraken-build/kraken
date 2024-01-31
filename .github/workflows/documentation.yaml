@@ -20,7 +20,7 @@ jobs:
     - run: pipx install kraken-wrapper==0.32.4
 
     - name: Restore Kraken build cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
@@ -28,7 +28,7 @@ jobs:
     - run: krakenw run :docs:build --no-save
 
     - name: Save Kraken build cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}

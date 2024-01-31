@@ -26,13 +26,13 @@ jobs:
     - run: rustup update
 
     - name: Restore Kraken build cache
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
 
     - name: Restore Venv
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: .venvs/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
@@ -41,13 +41,13 @@ jobs:
     - run: krakenw run python.install check lint test -vv
 
     - name: Save Venv
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: .venvs/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     - name: Save Kraken build cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
