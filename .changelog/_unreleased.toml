@@ -1,0 +1,5 @@
+[[entries]]
+id = "6b59b145-100f-4982-be9d-cbf57d173b74"
+type = "improvement"
+description = "Upgrade Dill to `>=0.3.8,<0.4.0` which added support for Python 3.11+"
+author = "niklas.rosenstein@helsing.ai"
