@@ -10,10 +10,7 @@ Poetry, Cargo or CMake.
 
 __Requirements__
 
-* CPython 3.10 <sup>[1]</sup>
-
-<sup>[1]</sup> Technically compatible with 3.10 and higher, but we can't use 3.11+ until
-[Dill 0.3.8](https://github.com/uqfoundation/dill/issues/595) is released.
+* CPython 3.10+
 
 ## Getting started
 
