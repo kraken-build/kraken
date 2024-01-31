@@ -11,7 +11,7 @@ jobs:
   gitignore-io-up-to-date:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
       with: { python-version: "3.10" }

@@ -15,7 +15,7 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
     - run: pipx install kraken-wrapper==0.32.4
 
