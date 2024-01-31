@@ -15,11 +15,18 @@ env:
 jobs:
   selftest:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - python-version: "3.10"
+          - python-version: "3.11"
+          - python-version: "3.12"
+          - python-version: "3.x"
     steps:
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
-      with: { python-version: "3.10" }
+      with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install poetry && pipx install pdm
     - run: rustup update
 
@@ -49,10 +56,17 @@ jobs:
 
   examples-docker-manual:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - python-version: "3.10"
+          - python-version: "3.11"
+          - python-version: "3.12"
+          - python-version: "3.x"
     steps:
     - uses: actions/checkout@v3
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v4
-      with: { python-version: "3.10" }
+      with: { python-version: "${{ matrix.python-version }}" }
     - run: slap install --link --no-venv-check ${{ matrix.only }}
     - run: cd examples/docker-manual && kraken run :dockerBuild :sub:helloWorld
