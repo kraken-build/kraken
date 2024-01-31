@@ -337,7 +337,8 @@ class Address(metaclass=AddressMeta):
         return not self._is_absolute and not self._elements
 
     def __bool__(self) -> bool:
-        """Returns False if the address is empty, otherwise True.
+        """
+        Returns False if the address is empty, otherwise True.
 
             >>> bool(Address(":a:b"))
             True
