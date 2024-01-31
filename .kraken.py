@@ -92,7 +92,10 @@ def configure_project() -> None:
 
 from kraken.build import project
 
-project.subproject("docs")
+try:
+    project.subproject("docs")
+except ImportError:
+    pass
 
 for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
     with subproject.as_current():
