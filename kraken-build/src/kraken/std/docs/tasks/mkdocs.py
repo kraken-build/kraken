@@ -1,16 +1,16 @@
 """ Build documentation using [MkDocs](https://www.mkdocs.org/). """
 
-from collections.abc import Sequence
 import os
-from pathlib import Path
 import subprocess
-from kraken import build
+from collections.abc import Sequence
+from pathlib import Path
+
 from kraken.core import Project, Property, Task, TaskStatus
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 
 class MkDocsTask(Task):
-    """ Build docs with MkDocs. """
+    """Build docs with MkDocs."""
 
     mkdocs_bin: Property[str] = Property.default("mkdocs")
     mkdocs_root: Property[Path | None] = Property.default(None)

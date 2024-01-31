@@ -8,7 +8,7 @@ from kraken.core import Project, Task, TaskStatus
 
 
 class BufFormatTask(Task):
-    """ Format Protobuf files with `buf`."""
+    """Format Protobuf files with `buf`."""
 
     description = "Format Protobuf files with buf."
 
@@ -20,7 +20,7 @@ class BufFormatTask(Task):
 
 
 class BufLintTask(Task):
-    """ Lint Protobuf files with `buf`."""
+    """Lint Protobuf files with `buf`."""
 
     description = "Lint Protobuf files with buf."
 
@@ -32,12 +32,12 @@ class BufLintTask(Task):
 
 
 def buf_format(*, name: str = "buf.format", project: Project | None = None) -> BufFormatTask:
-    """ Format Protobuf files with `buf`."""
+    """Format Protobuf files with `buf`."""
     project = project or Project.current()
     return project.task(name, BufFormatTask, group="fmt")
 
 
 def buf_lint(*, name: str = "buf.lint", project: Project | None = None) -> BufLintTask:
-    """ Lint Protobuf files with `buf`."""
+    """Lint Protobuf files with `buf`."""
     project = project or Project.current()
     return project.task(name, BufLintTask, group="lint")
