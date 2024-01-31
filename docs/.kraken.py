@@ -1,14 +1,19 @@
-from kraken.std.docs.tasks.novella import novella
+from kraken.std.docs.tasks.mkdocs import mkdocs
 
-novella(
-    novella_version="==0.2.6",
-    additional_requirements=[
-        "mkdocs",
-        "mkdocs-material",
-        "pydoc-markdown==4.8.2",
-        "setuptools",  # Novella/Pydoc-Markdown are using pkg_resources but don't declare setuptools as a dependency
-    ],
-    build_group="build",
-    serve_args=["--serve"],
-    serve_task="serve",
+mkdocs(
+    requirements=["mkdocs==1.5.3", "pymdown-extensions", "mkdocstrings[python]", "mkdocs-material"],
+    watch_files=["../kraken-build/src", "../kraken-wrapper/src"],
 )
+
+# novella(
+#     novella_version="==0.2.6",
+#     additional_requirements=[
+#         "mkdocs",
+#         "mkdocs-material",
+#         "pydoc-markdown==4.8.2",
+#         "setuptools",  # Novella/Pydoc-Markdown are using pkg_resources but don't declare setuptools as a dependency
+#     ],
+#     build_group="build",
+#     serve_args=["--serve"],
+#     serve_task="serve",
+# )

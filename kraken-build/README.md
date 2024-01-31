@@ -1,8 +1,14 @@
+---
+title: Home
+---
+
 # kraken-build
 
 [![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml) |
 [![PyPI version](https://badge.fury.io/py/kraken-build.svg)](https://badge.fury.io/py/kraken-build) |
 [Documentation](https://kraken-build.github.io/kraken/)
+
+![kraken-logo](https://i.imgur.com/Lqjy2zi.png)
 
 Kraken is (not) a build system. It's focus is on the orchestration of high-level tasks, such as organization of your
 repository configuration, code generation, invoking other build systems, etc. It is not a replacement for tools like
