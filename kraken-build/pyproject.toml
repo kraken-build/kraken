@@ -55,7 +55,7 @@ rich = "^13.4.2"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
-typeapi = "^1.4.3"
+typeapi = "^2.0.0"
 typing-extensions = ">=4.6.0"
 
 [tool.poetry.dev-dependencies]
