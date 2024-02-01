@@ -30,6 +30,7 @@ jobs:
     - run: |
         cd docs
         for fn in docs/cli/*.md; do mksync -i $fn; done
+        mksync -i docs/changelog.md
     - run: krakenw run mkdocs.build --no-save
 
     - name: Save Kraken build cache
