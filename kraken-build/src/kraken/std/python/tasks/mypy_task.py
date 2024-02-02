@@ -34,6 +34,8 @@ warn_unused_ignores = true
 
 @dataclass
 class MypyConfig:
+    mypy_path: Sequence[str] = ()
+
     exclude_directories: Sequence[str] = ()
     """ A list of directories to exclude. """
 
@@ -65,7 +67,7 @@ class MypyConfig:
             for key, value in options.items():
                 config.set(section, key, value if isinstance(value, str) else ",".join(value))
 
-        # config.set("mypy", "mypy_path", str(source_directory))
+        config.set("mypy", "mypy_path", ":".join(self.mypy_path))
 
         return config
 
