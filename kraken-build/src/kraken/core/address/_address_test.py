@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import dill
+import dill  # type: ignore[import-untyped]
 from pytest import raises
 
 from kraken.core.address import Address
