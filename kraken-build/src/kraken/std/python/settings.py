@@ -4,9 +4,10 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from nr.stream import Optional
+
 from kraken.core import Project
 from kraken.std.python.pyproject import PackageIndex
-from nr.stream import Optional
 
 from .buildsystem import PythonBuildSystem, detect_build_system
 

@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import dataclasses
-from pathlib import Path
 import re
-from typing import Sequence
+from collections.abc import Sequence
+from pathlib import Path
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property
+from kraken.std.python.settings import python_settings
 from kraken.std.python.tasks.pex_build_task import pex_build
 
-from .base_task import EnvironmentAwareDispatchTask, python_settings
+from .base_task import EnvironmentAwareDispatchTask
 
 
 class PyclnTask(EnvironmentAwareDispatchTask):

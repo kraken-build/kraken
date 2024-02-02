@@ -744,10 +744,12 @@ class TaskSetPartitions:
         return iter(self._ptt)
 
     @overload
-    def __getitem__(self, partition: str) -> Collection[Task]: ...
+    def __getitem__(self, partition: str) -> Collection[Task]:
+        ...
 
     @overload
-    def __getitem__(self, partition: Task) -> Collection[str]: ...
+    def __getitem__(self, partition: Task) -> Collection[str]:
+        ...
 
     def __getitem__(self, partition: str | Task) -> Collection[str] | Collection[Task]:
         if isinstance(partition, str):

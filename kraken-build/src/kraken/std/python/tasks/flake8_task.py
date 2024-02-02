@@ -1,16 +1,15 @@
 from __future__ import annotations
+
+import os
 from collections.abc import Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
-import os
-
 from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
 from kraken.core.system.task import TaskStatus
 from kraken.std.python.settings import python_settings
-from kraken.std.python.tasks.isort_task import IsortConfig
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask

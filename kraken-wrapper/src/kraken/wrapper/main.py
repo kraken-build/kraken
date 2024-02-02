@@ -71,7 +71,12 @@ def _get_argument_parser() -> argparse.ArgumentParser:
     # NOTE (@NiklasRosenstein): If we combine "+" with remainder, we get options passed after the `cmd`
     #       passed directly into `args` without argparse treating it like an option. This is not the case
     #       when using `nargs=1` for `cmd`.
-    parser.add_argument("cmd", nargs="*", metavar="cmd", help="{auth,list-pythons,lock} or a kraken command")
+    parser.add_argument(
+        "cmd",
+        nargs="*",
+        metavar="cmd",
+        help="{auth,list-pythons,lock} or a kraken command",
+    )
     parser.add_argument("args", nargs=argparse.REMAINDER, help="additional arguments")
     return parser
 
@@ -106,13 +111,20 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         extra_distributions.discard("pip")  # We'll always have that in a virtual env.
 
     if extra_distributions:
-        logger.warning("Found extra distributions in your Kraken build enviroment: %s", ", ".join(extra_distributions))
+        logger.warning(
+            "Found extra distributions in your Kraken build enviroment: %s",
+            ", ".join(extra_distributions),
+        )
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
     manager.set_locked(lockfile)
 
-    logger.info("Lock file %s (%s)", "updated" if had_lockfile else "created", os.path.relpath(project.lockfile_path))
+    logger.info(
+        "Lock file %s (%s)",
+        "updated" if had_lockfile else "created",
+        os.path.relpath(project.lockfile_path),
+    )
     sys.exit(0)
 
 
@@ -195,7 +207,11 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
             # If verbose, also display the CURL command that people can use plus the first part of the response
             if args.verbose:
-                logger.info("Checking auth for host %s with command: %s", host, credential_result.curl_command)
+                logger.info(
+                    "Checking auth for host %s with command: %s",
+                    host,
+                    credential_result.curl_command,
+                )
                 logger.info(
                     "First 10 lines of response (limited to 1000 chars): %s",
                     ("\n".join(credential_result.raw_result.split("\n")[0:10])[0:1000]),
@@ -225,11 +241,29 @@ def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
 
     table = AsciiTable()
     table.headers = ["Key", "Source", "Value"]
-    table.rows.append(("Requirements", str(project.requirements_path), project.requirements.to_hash(hash_algorithm)))
+    table.rows.append(
+        (
+            "Requirements",
+            str(project.requirements_path),
+            project.requirements.to_hash(hash_algorithm),
+        )
+    )
     if project.lockfile:
         table.rows.append(("Lockfile", str(project.lockfile_path), "-"))
-        table.rows.append(("  Requirements hash", "", project.lockfile.requirements.to_hash(hash_algorithm)))
-        table.rows.append(("  Pinned hash", "", project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm)))
+        table.rows.append(
+            (
+                "  Requirements hash",
+                "",
+                project.lockfile.requirements.to_hash(hash_algorithm),
+            )
+        )
+        table.rows.append(
+            (
+                "  Pinned hash",
+                "",
+                project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm),
+            )
+        )
     else:
         table.rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
     if manager.exists():
@@ -404,7 +438,11 @@ def main() -> NoReturn:
 
     if cmd in ("a", "auth"):
         # The `auth` comand does not require any current project information, it can be used globally.
-        auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
+        auth(
+            f"{parser.prog} auth",
+            argv,
+            use_keyring_if_available=not env_options.no_keyring,
+        )
 
     if cmd in ("list-pythons",):
         list_pythons(f"{parser.prog} list-pythons", argv)
@@ -415,7 +453,11 @@ def main() -> NoReturn:
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
         project.directory / BUILDENV_PATH,
-        AuthModel(config, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
+        AuthModel(
+            config,
+            DEFAULT_CONFIG_PATH,
+            use_keyring_if_available=not env_options.no_keyring,
+        ),
         incremental=env_options.incremental,
         show_install_logs=env_options.show_install_logs,
     )

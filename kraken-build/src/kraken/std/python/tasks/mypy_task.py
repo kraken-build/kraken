@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import MutableMapping, Sequence
+import re
+from collections.abc import Mapping, MutableMapping, Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass, field
 from pathlib import Path
-import re
-from typing import Mapping
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
@@ -130,10 +129,10 @@ class MypyTask(EnvironmentAwareDispatchTask):
     # Task
 
     def prepare(self) -> TaskStatus | None:
-        config_file = self.config.get()
+        config = self.config.get()
         config_file = self.config_file.get()
-        if config_file is not None and config_file is not None:
-            raise RuntimeError(f"IsortTask.config and .config_file cannot be mixed")
+        if config is not None and config_file is not None:
+            raise RuntimeError("MypyTask.config and .config_file cannot be mixed")
         if config_file is None:
             config = config_file or MypyConfig()
             config_file = self.project.build_directory / self.name / "isort.ini"

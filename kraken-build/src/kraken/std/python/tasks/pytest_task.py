@@ -42,10 +42,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
 
     def get_execute_command(self) -> list[str] | TaskStatus:
         command = ["pytest", "-vv", *self.paths.get()]
-        command += flatten(
-            ["--ignore", str(self.project.directory / path)]
-            for path in self.ignore_dirs.get()
-        )
+        command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
         if self.coverage.is_filled():
             coverage_file = f"coverage{self.coverage.get().get_suffix()}"

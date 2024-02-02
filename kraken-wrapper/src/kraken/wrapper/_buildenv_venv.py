@@ -44,7 +44,11 @@ class VenvBuildEnv(BuildEnv):
         self._show_pip_logs = show_pip_logs
 
     def _run_command(
-        self, command: list[str], operation_name: str, log_file: Path | None, mode: Literal["a", "w"] = "w"
+        self,
+        command: list[str],
+        operation_name: str,
+        log_file: Path | None,
+        mode: Literal["a", "w"] = "w",
     ) -> None:
         if log_file:
             log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -121,7 +125,10 @@ class VenvBuildEnv(BuildEnv):
             try:
                 current_python_version = findpython.get_python_interpreter_version(python_bin)
             except (subprocess.CalledProcessError, RuntimeError) as e:
-                logger.warning("Could not determine the version of the current Python build environment: %s", e)
+                logger.warning(
+                    "Could not determine the version of the current Python build environment: %s",
+                    e,
+                )
                 logger.info("Destroying existing environment at %s", self._path)
                 safe_rmpath(self._path)
             else:
@@ -145,18 +152,32 @@ class VenvBuildEnv(BuildEnv):
         if not self._path.exists():
             # Find a Python interpreter that matches the given interpreter constraint.
             if requirements.interpreter_constraint is not None:
-                logger.info("Using Python interpreter constraint: %s", requirements.interpreter_constraint)
+                logger.info(
+                    "Using Python interpreter constraint: %s",
+                    requirements.interpreter_constraint,
+                )
                 python_origin_bin = find_python_interpreter(requirements.interpreter_constraint)
                 logger.info("Using Python interpreter at %s", python_origin_bin)
             else:
                 logger.info(
-                    "No interpreter constraint specified, using current Python interpreter (%s)", sys.executable
+                    "No interpreter constraint specified, using current Python interpreter (%s)",
+                    sys.executable,
                 )
                 python_origin_bin = sys.executable
 
-            command = [python_origin_bin, "-m", "venv", str(self._path), "--upgrade-deps"]
+            command = [
+                python_origin_bin,
+                "-m",
+                "venv",
+                str(self._path),
+                "--upgrade-deps",
+            ]
             logger.info("Creating virtual environment at %s", os.path.relpath(self._path))
-            self._run_command(command, operation_name="Create virtual environment", log_file=create_log)
+            self._run_command(
+                command,
+                operation_name="Create virtual environment",
+                log_file=create_log,
+            )
             success_flag.touch()
 
         else:
@@ -182,7 +203,11 @@ class VenvBuildEnv(BuildEnv):
         self._run_command(command, operation_name="Install dependencies", log_file=install_log)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.
-        command = [python_bin, "-c", "from sysconfig import get_path; print(get_path('purelib'))"]
+        command = [
+            python_bin,
+            "-c",
+            "from sysconfig import get_path; print(get_path('purelib'))",
+        ]
         site_packages = Path(subprocess.check_output(command).decode().strip())
         pth_file = site_packages / "krakenw.pth"
         if requirements.pythonpath:

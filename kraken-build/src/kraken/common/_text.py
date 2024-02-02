@@ -7,7 +7,8 @@ from typing_extensions import Protocol
 
 
 class SupportsLen(Protocol):
-    def __len__(self) -> int: ...
+    def __len__(self) -> int:
+        ...
 
 
 def pluralize(word: str, count: "int | SupportsLen") -> str:

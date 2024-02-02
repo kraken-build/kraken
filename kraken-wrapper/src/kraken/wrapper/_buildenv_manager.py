@@ -126,7 +126,10 @@ class BuildEnvManager:
 
 
 def _get_environment_for_type(
-    environment_type: EnvironmentType, base_path: Path, incremental: bool, show_install_logs: bool
+    environment_type: EnvironmentType,
+    base_path: Path,
+    incremental: bool,
+    show_install_logs: bool,
 ) -> BuildEnv:
     platform_name = platform.system().lower()
     if environment_type == EnvironmentType.VENV:

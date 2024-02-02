@@ -70,7 +70,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
         config = self.config.get()
         config_file = self.config_file.get()
         if config is not None and config_file is not None:
-            raise RuntimeError(f"IsortTask.config and .config_file cannot be mixed")
+            raise RuntimeError("IsortTask.config and .config_file cannot be mixed")
         if config is not None:
             config_file = self.project.build_directory / self.name / "isort.ini"
             config_file.parent.mkdir(parents=True, exist_ok=True)

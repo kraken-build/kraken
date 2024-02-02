@@ -18,10 +18,12 @@ TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE = "Tasks that were not executed 
 
 class TaskExecutor(abc.ABC):
     @abc.abstractmethod
-    def execute_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None: ...
+    def execute_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None:
+        ...
 
     @abc.abstractmethod
-    def teardown_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None: ...
+    def teardown_task(self, task: Task, done: Callable[[TaskStatus], None]) -> None:
+        ...
 
 
 class DefaultTaskExecutor(TaskExecutor):

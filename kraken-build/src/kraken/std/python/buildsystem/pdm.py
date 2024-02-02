@@ -95,7 +95,9 @@ class PdmPyprojectHandler(PyprojectHandler):
             key=lambda x: (
                 0
                 if x.priority == PackageIndex.Priority.default
-                else 1 if x.priority == PackageIndex.Priority.primary else 2
+                else 1
+                if x.priority == PackageIndex.Priority.primary
+                else 2
             ),
         )
 

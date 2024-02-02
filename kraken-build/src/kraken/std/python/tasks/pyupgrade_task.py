@@ -99,7 +99,7 @@ def pyupgrade(
     exclude_patterns: Collection[str] = (),
     keep_runtime_typing: bool = False,
     python_version: str = "3",
-    paths: Sequence[Path] | None = None,
+    paths: Sequence[str] | None = None,
     version_spec: str | None = None,
 ) -> PyUpgradeTasks:
     """

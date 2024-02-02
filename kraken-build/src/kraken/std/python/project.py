@@ -1,15 +1,14 @@
 """ New-style API and template for defining the tasks for an entire Python project."""
 
-from collections.abc import Sequence
 import logging
-from pathlib import Path
 import re
-from kraken.common.supplier import Supplier
-from kraken.std.python.buildsystem import detect_build_system
-from kraken.std.python.pyproject import PackageIndex
-from kraken.std.python.tasks.mypy_task import MypyConfig
+from collections.abc import Sequence
+from pathlib import Path
+
 from nr.stream import Optional
 
+from kraken.std.python.buildsystem import detect_build_system
+from kraken.std.python.pyproject import PackageIndex
 from kraken.std.python.tasks.pytest_task import CoverageFormat
 
 logger = logging.getLogger(__name__)
@@ -119,20 +118,20 @@ def python_project(
 
     from kraken.build import project
     from kraken.common import not_none
-    from .settings import python_settings
+
+    from .pyproject import Pyproject
+    from .tasks.black_task import BlackConfig, black as black_tasks
+    from .tasks.flake8_task import Flake8Config, flake8 as flake8_tasks
+    from .tasks.info_task import info as info_task
+    from .tasks.install_task import install as install_task
+    from .tasks.isort_task import IsortConfig, isort as isort_tasks
     from .tasks.login_task import login as login_task
+    from .tasks.mypy_task import MypyConfig, mypy as mypy_task
+    from .tasks.pycln_task import pycln as pycln_task
+    from .tasks.pytest_task import pytest as pytest_task
+    from .tasks.pyupgrade_task import pyupgrade as pyupgrade_task
     from .tasks.update_lockfile_task import update_lockfile_task
     from .tasks.update_pyproject_task import update_pyproject_task
-    from .tasks.install_task import install as install_task
-    from .tasks.info_task import info as info_task
-    from .tasks.pyupgrade_task import pyupgrade as pyupgrade_task
-    from .tasks.pycln_task import pycln as pycln_task
-    from .tasks.isort_task import isort as isort_tasks, IsortConfig
-    from .tasks.black_task import black as black_tasks, BlackConfig
-    from .tasks.flake8_task import flake8 as flake8_tasks, Flake8Config
-    from .tasks.mypy_task import mypy as mypy_task, MypyConfig
-    from .tasks.pytest_task import pytest as pytest_task
-    from .pyproject import Pyproject
 
     if additional_lint_directories is None:
         additional_lint_directories = []
@@ -144,11 +143,10 @@ def python_project(
         source_paths.insert(1, tests_directory)
     logger.info("Source paths for Python project %s: %s", project.address, source_paths)
 
-    settings = python_settings()
     build_system = not_none(detect_build_system(project.directory))
     pyproject = Pyproject.read(project.directory / "pyproject.toml")
     handler = build_system.get_pyproject_reader(pyproject)
-    project_version = handler.get_version()
+    # project_version = handler.get_version()
 
     # NOTE(@niklas): This is not entirely correct, but good enough in practice. We assume that for a version range,
     #       the lowest Python version comes first in the version spec. We also need to support Poetry-style semver
@@ -162,21 +160,21 @@ def python_project(
         )
         python_version = "3"
 
-    login = login_task()
-    update_lockfile = update_lockfile_task()
-    update_pyproject = update_pyproject_task()
-    install = install_task()
-    info = info_task(build_system=build_system)
+    login_task()
+    update_lockfile_task()
+    update_pyproject_task()
+    install_task()
+    info_task(build_system=build_system)
 
-    pyupgrade = pyupgrade_task(
+    pyupgrade_task(
         python_version=python_version,
         keep_runtime_typing=pyupgrade_keep_runtime_typing,
         exclude=[Path(x) for x in exclude_lint_directories],
-        paths=[Path(x) for x in source_paths],
+        paths=source_paths,
         version_spec=pyupgrade_version_spec,
     )
 
-    pycln = pycln_task(
+    pycln_task(
         paths=source_paths,
         exclude_directories=exclude_lint_directories,
         remove_all_unused_imports=pycln_remove_all_unused_imports,
@@ -208,7 +206,7 @@ def python_project(
     )
     flake8.depends_on(black.format, isort.format, mode="order-only")
 
-    mypy = mypy_task(
+    mypy_task(
         paths=source_paths,
         config=MypyConfig(
             exclude_directories=exclude_lint_directories,
@@ -226,7 +224,7 @@ def python_project(
     else:
         coverage = None
 
-    pytest = pytest_task(
+    pytest_task(
         paths=source_paths,
         ignore_dirs=pytest_ignore_dirs,
         coverage=coverage,
