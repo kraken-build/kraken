@@ -67,7 +67,8 @@ class MypyConfig:
             for key, value in options.items():
                 config.set(section, key, value if isinstance(value, str) else ",".join(value))
 
-        config.set("mypy", "mypy_path", ":".join(self.mypy_path))
+        if self.mypy_path:
+            config.set("mypy", "mypy_path", ":".join(self.mypy_path))
 
         return config
 
@@ -124,7 +125,6 @@ class MypyTask(EnvironmentAwareDispatchTask):
             command += ["--python-version", self.python_version.get()]
 
         command += [*self.paths.get()]
-        command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += self.additional_args.get()
         return command
 
@@ -136,7 +136,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
         if config is not None and config_file is not None:
             raise RuntimeError("MypyTask.config and .config_file cannot be mixed")
         if config_file is None:
-            config = config_file or MypyConfig()
+            config = config or MypyConfig()
             config_file = self.project.build_directory / self.name / "mypy.ini"
             config_file.parent.mkdir(parents=True, exist_ok=True)
             config.to_file(config_file)
@@ -176,6 +176,8 @@ def mypy(
 
     if paths is None:
         paths = python_settings(project).get_source_paths()
+    if config is None:
+        config = MypyConfig(mypy_path=[str(python_settings(project).source_directory)])
 
     task = project.task(name, MypyTask, group="lint")
     task.mypy_pex_bin = mypy_pex_bin
