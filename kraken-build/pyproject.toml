@@ -100,6 +100,10 @@ ignore_errors = true
 ignore_missing_imports = true
 module = "networkx.*"
 
+[[tool.mypy.overrides]]
+warn_unused_ignores = false
+module = "dill"
+
 [tool.isort]
 combine_as_imports = true
 line_length = 120
