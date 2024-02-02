@@ -135,8 +135,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
         config_file = self.config_file.get()
         if config is not None and config_file is not None:
             raise RuntimeError("MypyTask.config and .config_file cannot be mixed")
-        if config_file is None:
-            config = config or MypyConfig()
+        if config_file is None and config is not None:
             config_file = self.project.build_directory / self.name / "mypy.ini"
             config_file.parent.mkdir(parents=True, exist_ok=True)
             config.to_file(config_file)

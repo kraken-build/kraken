@@ -65,6 +65,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
             "pypiserver/pypiserver:latest",
             ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
             ports=[f"{PYPISERVER_PORT}:8080"],
+            platform="linux/amd64",
             volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
             detach=True,
             probe=("GET", index_url),
