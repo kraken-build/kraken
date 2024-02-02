@@ -140,7 +140,7 @@ class PythonSettings:
         return [
             str(self.source_directory),
             *Optional(self.get_tests_directory())
-            .map(lambda p: [str(p.relative_to(self.project.directory))])
+            .map(lambda p: [str(p.relative_to(self.project.directory) if p.is_absolute() else p)])
             .or_else([]),
             *map(str, self.lint_enforced_directories),
         ]
