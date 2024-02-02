@@ -14,7 +14,7 @@ import tomli_w
 logger = logging.getLogger(__name__)
 
 
-class _PackageIndexPriority(str, Enum):
+class PackageIndexPriority(str, Enum):
     """
     Poetry has a very granular representation of priorities for indices, so we inherit that. The priority
     should to be interpreted in the spirit of its definition in other tools.
@@ -36,7 +36,7 @@ class PackageIndex:
     conflicts with the field value.
     """
 
-    Priority: ClassVar[TypeAlias] = _PackageIndexPriority
+    Priority: ClassVar[TypeAlias] = PackageIndexPriority
 
     #: A name for the package index.
     alias: str

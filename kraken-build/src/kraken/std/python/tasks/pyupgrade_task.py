@@ -30,7 +30,11 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
         return self.run_pyupgrade(self.additional_files.get(), ("--exit-zero-even-if-changed",))
 
     def run_pyupgrade(self, files: Iterable[Path], extra: Iterable[str]) -> list[str]:
-        command = [self.pyupgrade_bin.get(), f"--py{self.python_version.get_or('3').replace('.', '')}-plus", *extra]
+        command = [
+            self.pyupgrade_bin.get(),
+            f"--py{self.python_version.get_or('3').replace('.', '')}-plus",
+            *extra,
+        ]
         if self.keep_runtime_typing.get():
             command.append("--keep-runtime-typing")
         command.extend(str(f) for f in files)
@@ -95,31 +99,33 @@ def pyupgrade(
     exclude_patterns: Collection[str] = (),
     keep_runtime_typing: bool = False,
     python_version: str = "3",
-    additional_files: Sequence[Path] = (),
+    paths: Sequence[Path] | None = None,
     version_spec: str | None = None,
 ) -> PyUpgradeTasks:
     """
-    :param version_spec: If specified, the pyupgrade tool will be installed as a PEX and does not need to be installed
-        into the Python project's virtual env.
+    Args:
+        paths: A list of paths to pass to Pyupgrade. If not specified, the source and test directories from the
+            project's `PythonSettings` are used.
+        version_spec: If specified, the pyupgrade tool will be installed as a PEX and does not need to be installed
+            into the Python project's virtual env.
     """
 
     project = project or Project.current()
 
     if version_spec is not None:
         pyupgrade_bin = pex_build(
-            "pyupgrade", requirements=[f"pyupgrade{version_spec}"], console_script="pyupgrade", project=project
+            "pyupgrade",
+            requirements=[f"pyupgrade{version_spec}"],
+            console_script="pyupgrade",
+            project=project,
         ).output_file.map(str)
     else:
         pyupgrade_bin = Supplier.of("pyupgrade")
 
-    settings = python_settings(project)
+    if paths is None:
+        paths = python_settings(project).get_source_paths()
 
-    directories = list(additional_files)
-    directories.append(project.directory / settings.source_directory)
-    test_directory = settings.get_tests_directory()
-    if test_directory is not None:
-        directories.append(project.directory / test_directory)
-    files = {f.resolve() for p in directories for f in Path(p).glob("**/*.py")}
+    files = {f.resolve() for p in paths for f in Path(p).glob("**/*.py")}
     exclude = [e.resolve() for e in exclude]
     filtered_files = [
         f

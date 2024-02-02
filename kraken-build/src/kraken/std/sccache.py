@@ -89,7 +89,11 @@ class SccacheManager:
 
         env = {"SCCACHE_NO_DAEMON": "1"}
         command = [str(self.bin) if self.bin else "sccache", "--stop-server"]
-        sp.check_call(command, env={**os.environ, **env}, stdout=None if show_stats else sp.DEVNULL)
+        sp.check_call(
+            command,
+            env={**os.environ, **env},
+            stdout=None if show_stats else sp.DEVNULL,
+        )
 
         self._proc.wait(10)
         if self.is_running():

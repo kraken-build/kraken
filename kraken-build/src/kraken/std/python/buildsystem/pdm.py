@@ -92,11 +92,11 @@ class PdmPyprojectHandler(PyprojectHandler):
             )
         indexes = sorted(
             indexes,
-            key=lambda x: 0
-            if x.priority == PackageIndex.Priority.default
-            else 1
-            if x.priority == PackageIndex.Priority.primary
-            else 2,
+            key=lambda x: (
+                0
+                if x.priority == PackageIndex.Priority.default
+                else 1 if x.priority == PackageIndex.Priority.primary else 2
+            ),
         )
 
         for index in indexes:

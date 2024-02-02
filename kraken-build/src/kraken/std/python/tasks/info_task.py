@@ -25,12 +25,29 @@ class InfoTask(Task):
             return TaskStatus.failed(f"Error while getting the version of the current Python interpreter: {error}")
 
         print(
-            colored(f" ---------- {self.build_system.get().name}-managed environment information ----------", "magenta")
+            colored(
+                f" ---------- {self.build_system.get().name}-managed environment information ----------",
+                "magenta",
+            )
         )
-        print(colored("Python version:           ", "cyan"), colored(f"{version.strip()}", "blue"))
-        print(colored("Python path:              ", "cyan"), colored(f"{python_path}", "blue"))
-        print(colored("Virtual environment path: ", "cyan"), colored(f"{virtual_env_path}", "blue"))
-        print(colored(" ------------------------------------------------------------", "magenta"))
+        print(
+            colored("Python version:           ", "cyan"),
+            colored(f"{version.strip()}", "blue"),
+        )
+        print(
+            colored("Python path:              ", "cyan"),
+            colored(f"{python_path}", "blue"),
+        )
+        print(
+            colored("Virtual environment path: ", "cyan"),
+            colored(f"{virtual_env_path}", "blue"),
+        )
+        print(
+            colored(
+                " ------------------------------------------------------------",
+                "magenta",
+            )
+        )
 
         return TaskStatus.succeeded()
 
@@ -47,7 +64,10 @@ class InfoTask(Task):
     def get_python_version(self) -> str:
         """Returns the version of the Python interpreter of the Kraken-managed environment."""
         return subprocess.run(
-            [self.get_python_path(), "--version"], stdout=subprocess.PIPE, shell=False, check=True
+            [self.get_python_path(), "--version"],
+            stdout=subprocess.PIPE,
+            shell=False,
+            check=True,
         ).stdout.decode("utf-8")
 
 

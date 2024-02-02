@@ -64,7 +64,8 @@ class InstallTask(Task):
 def install(*, name: str = "python.install", project: Project | None = None) -> InstallTask:
     """Get or create the `python.install` task for the given project.
 
-    The install task relies on the build system configured in the Python project settings."""
+    The install task relies on the build system configured in the Python project settings.
+    """
 
     project = project or Project.current()
     task = cast(Union[InstallTask, None], project.tasks().get(name))

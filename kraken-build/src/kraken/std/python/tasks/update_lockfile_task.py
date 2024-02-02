@@ -39,7 +39,8 @@ def update_lockfile_task(
 ) -> UpdateLockfileTask:
     """Creates an update task for the given project.
 
-    The update task relies on the build system configured in the Python project settings."""
+    The update task relies on the build system configured in the Python project settings.
+    """
 
     project = project or Project.current()
     task = project.task(name, UpdateLockfileTask, group=group)

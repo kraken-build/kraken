@@ -91,6 +91,7 @@ def configure_project() -> None:
 
 
 from kraken.build import project
+from kraken.std.python.project import python_project
 
 try:
     project.subproject("docs")

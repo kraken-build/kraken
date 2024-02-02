@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
+import re
+from typing import Sequence
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property
 from kraken.std.python.tasks.pex_build_task import pex_build
 
-from .base_task import EnvironmentAwareDispatchTask
+from .base_task import EnvironmentAwareDispatchTask, python_settings
 
 
 class PyclnTask(EnvironmentAwareDispatchTask):
@@ -48,24 +50,52 @@ class PyclnTasks:
     format: PyclnTask
 
 
-def pycln(*, name: str = "python.pycln", project: Project | None = None, version_spec: str | None = None) -> PyclnTasks:
+def pycln(
+    *,
+    name: str = "python.pycln",
+    project: Project | None = None,
+    remove_all_unused_imports: bool = False,
+    paths: Sequence[str] | None = None,
+    exclude_directories: Sequence[str] = (),
+    version_spec: str | None = None,
+) -> PyclnTasks:
     """Creates two pycln tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`.
 
-    :param version_spec: If specified, the pycln tool will be installed as a PEX and does not need to be installed
-        into the Python project's virtual env.
+    Args:
+        paths: A list of paths to pass to Pycln. If not specified, the source and test directories from the project's
+            `PythonSettings` are used.
+        version_spec: If specified, the pycln tool will be installed as a PEX and does not need to be installed
+            into the Python project's virtual env.
     """
 
     project = project or Project.current()
     if version_spec is not None:
         pycln_bin = pex_build(
-            "pycln", requirements=[f"pycln{version_spec}"], console_script="pycln", project=project
+            "pycln",
+            requirements=[f"pycln{version_spec}"],
+            console_script="pycln",
+            project=project,
         ).output_file.map(str)
     else:
         pycln_bin = Supplier.of("pycln")
 
+    if paths is None:
+        paths = python_settings(project).get_source_paths()
+
+    additional_args = [*paths]
+    if remove_all_unused_imports:
+        additional_args.append("--all")
+    for path in exclude_directories:
+        additional_args.extend(["--extend-exclude", re.escape(path.rstrip("/")) + "/.*"])
+
     check_task = project.task(f"{name}.check", PyclnTask, group="lint")
     check_task.pycln_bin = pycln_bin
     check_task.check_only = True
+    check_task.additional_args = additional_args
+
     format_task = project.task(name, PyclnTask, group="fmt")
+    format_task.pycln_bin = pycln_bin
+    format_task.additional_args = additional_args
+
     return PyclnTasks(check_task, format_task)

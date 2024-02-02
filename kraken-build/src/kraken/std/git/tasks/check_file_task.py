@@ -70,9 +70,11 @@ class CheckFileTask(Task):
                 assert False, f"Unknown status: {status}"
 
         return TaskStatus(
-            TaskStatusType.SUCCEEDED
-            if success
-            else (TaskStatusType.WARNING if self.warn_only.get() else TaskStatusType.FAILED),
+            (
+                TaskStatusType.SUCCEEDED
+                if success
+                else (TaskStatusType.WARNING if self.warn_only.get() else TaskStatusType.FAILED)
+            ),
             status.to_description(self.file_to_check.get()),
         )
 

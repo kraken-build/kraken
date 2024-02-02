@@ -2,7 +2,6 @@
 Helper functions to access test resources.
 """
 
-
 from pathlib import Path
 
 

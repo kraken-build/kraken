@@ -8,13 +8,11 @@ T = TypeVar("T")
 
 
 @overload
-def import_class(fqn: str) -> type:
-    ...
+def import_class(fqn: str) -> type: ...
 
 
 @overload
-def import_class(fqn: str, base_type: type[T]) -> type[T]:
-    ...
+def import_class(fqn: str, base_type: type[T]) -> type[T]: ...
 
 
 def import_class(fqn: str, base_type: "Type[T] | None" = None) -> "Type[T] | type":

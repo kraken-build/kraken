@@ -81,7 +81,10 @@ def publish(
         raise ValueError(f"package index {package_index!r} is not defined")
 
     twine_bin = pex_build(
-        "twine", requirements=[f"twine{twine_version}"], console_script="twine", project=project
+        "twine",
+        requirements=[f"twine{twine_version}"],
+        console_script="twine",
+        project=project,
     ).output_file
 
     index = settings.package_indexes[package_index]

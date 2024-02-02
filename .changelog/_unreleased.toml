@@ -1,0 +1,5 @@
+[[entries]]
+id = "fb3fcc4a-a38a-445f-b124-571395b7ac86"
+type = "feature"
+description = "Introduce `kraken.std.python.project.python_project()` function which creates all tasks for a Python project."
+author = "niklas.rosenstein@helsing.ai"
