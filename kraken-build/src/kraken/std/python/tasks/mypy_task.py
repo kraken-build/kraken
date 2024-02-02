@@ -48,7 +48,7 @@ class MypyConfig:
 
     def dump(self) -> ConfigParser:
         config = ConfigParser(inline_comment_prefixes="#;")
-        config.read(MYPY_BASE_CONFIG)
+        config.read_string(MYPY_BASE_CONFIG)
 
         if self.exclude_directories or self.exclude_patterns:
             exclude_patterns = []
@@ -135,7 +135,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
             raise RuntimeError("MypyTask.config and .config_file cannot be mixed")
         if config_file is None:
             config = config_file or MypyConfig()
-            config_file = self.project.build_directory / self.name / "isort.ini"
+            config_file = self.project.build_directory / self.name / "mypy.ini"
             config_file.parent.mkdir(parents=True, exist_ok=True)
             config.to_file(config_file)
         self.__config_file = config_file
