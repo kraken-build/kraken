@@ -9,7 +9,7 @@ env:
 
 jobs:
   test:
-    runs-on: arc-runner-set
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
