@@ -9,10 +9,11 @@ env:
 
 jobs:
   test:
-    runs-on: arc-amd64-small
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
+        runner: [ arc-amd64-small, arc-arm64-small ]
         include:
           - python-version: "3.10"
           - python-version: "3.11"
