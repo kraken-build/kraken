@@ -13,12 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ arc-amd64-small, arc-arm64-small ]
-        include:
-          - python-version: "3.10"
-          - python-version: "3.11"
-          - python-version: "3.12"
-          - python-version: "3.x"
+        runner: ["arc-amd64-small", "arc-arm64-small"]
+        python-version: ["3.10", "3.11", "3.12", "3.x"]
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
