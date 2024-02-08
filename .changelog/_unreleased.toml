@@ -1,5 +1,6 @@
 [[entries]]
 id = "c735fee0-cd87-47a6-8c6f-b52463f0f73e"
 type = "feature"
-description = "Add flags to CargoClippyTask to cover more cases"
+description = "Add `workspace`, `all_features` and `deny_warnings` properties to `CargoClippyTask`."
 author = "@tomkarw"
+pr = "https://github.com/kraken-build/kraken/pull/182"
