@@ -39,7 +39,6 @@ from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.std.cargo import (
     cargo_auth_proxy,
     cargo_build,
-    cargo_bump_version,
     cargo_check_toolchain_version,
     cargo_publish,
     cargo_registry,
@@ -92,8 +91,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
             task = cargo_sync_config()
             task.git_fetch_with_cli.set(True)
             cargo_check_toolchain_version(minimal_version="1.60")
-            cargo_bump_version(version=publish_version)
-            cargo_publish(cargo_registry_id)
+            cargo_publish(cargo_registry_id, version=publish_version)
             if repository:
                 project1.context.execute(["fmt", "lint", "publish"])
             else:

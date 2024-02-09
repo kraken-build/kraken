@@ -13,7 +13,6 @@ from kraken.core import Project, Task
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
-from .tasks.cargo_bump_version_task import CargoBumpVersionTask
 from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
@@ -32,7 +31,6 @@ from .tasks.rustup_target_add_task import RustupTargetAddTask
 __all__ = [
     "cargo_auth_proxy",
     "cargo_build",
-    "cargo_bump_version",
     "cargo_clippy",
     "cargo_deny",
     "cargo_fmt",
@@ -45,7 +43,6 @@ __all__ = [
     "cargo_update",
     "CargoAuthProxyTask",
     "CargoBuildTask",
-    "CargoBumpVersionTask",
     "CargoClippyTask",
     "CargoDenyTask",
     "CargoProject",
@@ -286,43 +283,6 @@ def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:
     task.depends_on(":cargoBuildSupport")
     return task
 
-
-def cargo_bump_version(
-    *,
-    version: str,
-    revert: bool = True,
-    name: str = "cargoBumpVersion",
-    registry: str | None = None,
-    project: Project | None = None,
-    cargo_toml_file: Path = Path("Cargo.toml"),
-) -> CargoBumpVersionTask:
-    """Get or create a task that bumps the version in `Cargo.toml`.
-
-    :param version: The version number to bump to.
-    :param revert: Revert the version number after all direct dependants have run.
-    :param name: The task name. Note that if another task with the same configuration but different name exists,
-        it will not change the name of the task and that task will still be reused.
-    :param group: The group to assign the task to (even if the task is reused)."""
-
-    # This task will write the "current" version (usually taken from git) into Cargo.toml
-    # That is useful at two places
-    #  * at build time (because apps may use env!("CARGO_PKG_VERSION"))
-    #  * at publish time (because the artifact file name is derived from the version)
-
-    project = project or Project.current()
-
-    task = project.task(name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
-    task.version = version
-    task.revert = revert
-    task.registry = registry
-    task.cargo_toml_file = cargo_toml_file
-
-    # project.do() only supports one group, but this task is needed in two groups
-    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
-
-    return task
-
-
 def cargo_build(
     mode: Literal["debug", "release"],
     incremental: bool | None = None,
@@ -437,6 +397,8 @@ def cargo_publish(
     name: str = "cargoPublish",
     package_name: str | None = None,
     project: Project | None = None,
+    version: str | None = None,
+    cargo_toml_file: Path = Path("Cargo.toml"),
 ) -> CargoPublishTask:
     """Creates a task that publishes the create to the specified *registry*.
 
@@ -466,6 +428,8 @@ def cargo_publish(
     task.retry_attempts = retry_attempts
     task.package_name = package_name
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
+    task.version = version
+    task.cargo_toml_file = cargo_toml_file
     task.depends_on(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
     return task
 

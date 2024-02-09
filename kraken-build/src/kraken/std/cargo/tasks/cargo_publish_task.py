@@ -1,8 +1,14 @@
+import contextlib
 import logging
 from pathlib import Path
 
+from typing import Any
+
 from kraken.common import not_none
-from kraken.core import Project, Property
+from kraken.core import Property, Project, TaskStatus
+from kraken.std.cargo import CargoProject
+
+from kraken.common import atomic_file_swap
 
 from ..config import CargoRegistry
 from .cargo_build_task import CargoBuildTask
@@ -27,6 +33,12 @@ class CargoPublishTask(CargoBuildTask):
 
     #: Allow dirty worktree.
     allow_dirty: Property[bool] = Property.default(False)
+
+    #: Version to be bumped up to
+    version: Property[str | None] = Property.default(None)
+
+    #: Cargo.toml which to temporarily bump
+    cargo_toml_file: Property[Path] = Property.default("Config.toml")
 
     def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         super().get_cargo_command(env)
@@ -53,3 +65,48 @@ class CargoPublishTask(CargoBuildTask):
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self._base_command = ["cargo", "publish"]
+
+    def _get_updated_cargo_toml(self, version: str) -> str:
+        from kraken.std.cargo.manifest import CargoManifest
+        manifest = CargoManifest.read(self.cargo_toml_file.get())
+        if manifest.package is None:
+            return manifest.to_toml_string()
+
+        # Cargo does not play nicely with semver metadata (ie. 1.0.1-dev3+abc123)
+        # We replace that to 1.0.1-dev3abc123
+        fixed_version_string = version.replace("+", "")
+        manifest.package.version = fixed_version_string
+        if manifest.workspace and manifest.workspace.package:
+            manifest.workspace.package.version = version
+
+        if self.registry.is_filled():
+            cargo = CargoProject.get_or_create(self.project)
+            registry = self.registry.get()
+            if manifest.dependencies:
+                self._push_version_to_path_deps(fixed_version_string, manifest.dependencies.data, registry.alias)
+            if manifest.build_dependencies:
+                self._push_version_to_path_deps(fixed_version_string, manifest.build_dependencies.data, registry.alias)
+        return manifest.to_toml_string()
+
+    def _push_version_to_path_deps(
+        self, version_string: str, dependencies: dict[str, Any], registry_alias: str
+    ) -> None:
+        """For each dependency in the given dependencies, if the dependency is a `path` dependency, injects the current
+        version and registry (required for publishing - path dependencies cannot be published alone)."""
+        for dep_name in dependencies:
+            dependency = dependencies[dep_name]
+            if isinstance(dependency, dict):
+                if "path" in dependency:
+                    dependency["version"] = f"={version_string}"
+                    dependency["registry"] = registry_alias
+
+    def execute(self) -> TaskStatus:
+        version = self.version.get()
+        if version is not None:
+            content = self._get_updated_cargo_toml(version)
+            with atomic_file_swap(self.cargo_toml_file.get(), "w", always_revert=True) as ctx:
+                ctx.write(content)
+                ctx.close()
+                return super().execute()
+        else:
+            return super().execute()
