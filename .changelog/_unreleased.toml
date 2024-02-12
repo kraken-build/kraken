@@ -4,3 +4,9 @@ type = "feature"
 description = "Add `workspace`, `all_features` and `deny_warnings` properties to `CargoClippyTask`."
 author = "@tomkarw"
 pr = "https://github.com/kraken-build/kraken/pull/182"
+
+[[entries]]
+id = "2df7db61-77d1-4498-abf2-c2f3bc853ec9"
+type = "hygiene"
+description = "Protect against NPE"
+author = "vincent.siles@helsing.ai"
