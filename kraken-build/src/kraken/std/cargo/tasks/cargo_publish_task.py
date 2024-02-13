@@ -68,6 +68,7 @@ class CargoPublishTask(CargoBuildTask):
 
     def _get_updated_cargo_toml(self, version: str) -> str:
         from kraken.std.cargo.manifest import CargoManifest
+
         manifest = CargoManifest.read(self.cargo_toml_file.get())
         if manifest.package is None:
             return manifest.to_toml_string()
@@ -80,7 +81,7 @@ class CargoPublishTask(CargoBuildTask):
             manifest.workspace.package.version = version
 
         if self.registry.is_filled():
-            cargo = CargoProject.get_or_create(self.project)
+            CargoProject.get_or_create(self.project)
             registry = self.registry.get()
             if manifest.dependencies:
                 self._push_version_to_path_deps(fixed_version_string, manifest.dependencies.data, registry.alias)
@@ -101,12 +102,11 @@ class CargoPublishTask(CargoBuildTask):
                     dependency["registry"] = registry_alias
 
     def execute(self) -> TaskStatus:
-        version = self.version.get()
-        if version is not None:
-            content = self._get_updated_cargo_toml(version)
-            with atomic_file_swap(self.cargo_toml_file.get(), "w", always_revert=True) as ctx:
-                ctx.write(content)
-                ctx.close()
-                return super().execute()
-        else:
-            return super().execute()
+        with contextlib.ExitStack() as stack:
+            if (version := self.version.get()) is not None:
+                content = self._get_updated_cargo_toml(version)
+                fp = stack.enter_context(atomic_file_swap(self.cargo_toml_file.get(), "w", always_revert=True))
+                fp.write(content)
+                fp.close()
+            result = super().execute()
+        return result

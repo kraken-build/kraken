@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 from dataclasses import dataclass, fields
 from enum import Enum
@@ -70,7 +71,7 @@ class CargoMetadata:
     target_directory: Path
 
     @classmethod
-    def read(cls, project_dir: Path) -> CargoMetadata:
+    def read(cls, project_dir: Path, from_project_dir: bool = False) -> CargoMetadata:
         cmd = [
             "cargo",
             "metadata",
@@ -79,7 +80,14 @@ class CargoMetadata:
             "--manifest-path",
             str(project_dir / "Cargo.toml"),
         ]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+        # the .cargo/config.toml in user/foo/bar is not picked up when running this command from
+        # user/foo for example. This flag executes the subprocess from the project dir
+        if from_project_dir:
+            cwd = project_dir
+        else:
+            cwd = Path(os.getcwd())
+
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, cwd=cwd)
         if result.returncode != 0:
             logger.error("Stderr: %s", result.stderr)
             logger.error(f"Could not execute `{' '.join(cmd)}`, and thus can't read the cargo metadata.")

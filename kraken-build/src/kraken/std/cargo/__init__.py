@@ -411,7 +411,7 @@ def cargo_publish(
     :param retry_attempts: Retry the publish task if it fails, up to a maximum number of attempts. Sometimes
         cargo publishes can be flakey depending on the destination. Defaults to 0 retries.
     """
-
+    
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
