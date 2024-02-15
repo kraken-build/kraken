@@ -60,6 +60,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
+    - run: slap install --link --no-venv-check
     - run: krakenw --reinstall --use=UV
     - run: krakenw run fmt lint
 
