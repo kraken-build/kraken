@@ -76,6 +76,7 @@ Since `v0.34.0`, Kraken-wrapper also supports the `UV` installer which uses [uv]
 
 1. Set the `KRAKENW_USE=UV` environment variable.
 2. Pass the `--use=UV` option to the `krakenw` command when installing your environment.
+3. Run `krakenw config --installer=UV` to set UV as the default installer in `~/.config/krakenw/config.toml`.
 
 ## Credentials managment
 
