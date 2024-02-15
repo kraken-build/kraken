@@ -1,0 +1,5 @@
+[[entries]]
+id = "8ffbeb02-8063-41c8-b4bc-8550af93df06"
+type = "feature"
+description = "add `krakenw config` command that allows to configure the default installer (VENV or UV)"
+author = "@NiklasRosenstein"

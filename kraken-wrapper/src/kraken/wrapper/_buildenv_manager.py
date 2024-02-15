@@ -66,12 +66,15 @@ class BuildEnvManager:
         requirements: RequirementSpec,
         env_type: EnvironmentType | None = None,
         transitive: bool = True,
+        allow_incremental: bool = True,
     ) -> None:
         """
         :param requirements: The requirements to build the environment with.
         :param env_type: The environment type to use. If not specified, falls back to the last used or default.
         :param transitive: If set to `False`, it indicates that the *requirements* are fully resolved and the
             build environment installer does not need to resolve transitve dependencies.
+        :param allow_incremental: Allow incremental builds if the environment already exists. Set to False if
+            the environment type changes.
         """
 
         if env_type is None:
@@ -87,7 +90,7 @@ class BuildEnvManager:
             pythonpath=requirements.pythonpath,
         )
 
-        env = self.get_environment(env_type)
+        env = self.get_environment(env_type, allow_incremental)
         env.build(requirements, transitive)
         hash_algorithm = self.get_hash_algorithm()
         metadata = BuildEnvMetadata(
@@ -108,11 +111,13 @@ class BuildEnvManager:
         metadata = self._metadata_store.get()
         return metadata.hash_algorithm if metadata else self._default_hash_algorithm
 
-    def get_environment(self, env_type: EnvironmentType | None = None) -> BuildEnv:
+    def get_environment(self, env_type: EnvironmentType | None = None, allow_incremental: bool = True) -> BuildEnv:
         if env_type is None:
             metadata = self._metadata_store.get()
             env_type = self._default_type if metadata is None else metadata.environment_type
-        return _get_environment_for_type(env_type, self._path, self._incremental, self._show_install_logs)
+        return _get_environment_for_type(
+            env_type, self._path, self._incremental and allow_incremental, self._show_install_logs
+        )
 
     def set_locked(self, lockfile: Lockfile) -> None:
         metadata = self._metadata_store.get()
