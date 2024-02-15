@@ -55,6 +55,14 @@ jobs:
           .venvs
         key: build-cache:${{ runner.os }}:selftest
 
+  uv-installer:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: NiklasRosenstein/slap@gha/install/v1
+    - run: krakenw --reinstall --use=UV
+    - run: krakenw run fmt lint
+
   examples-docker-manual:
     runs-on: ubuntu-latest
     strategy:
