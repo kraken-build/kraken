@@ -10,6 +10,7 @@ from urllib.parse import quote, urlparse, urlunparse
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
 
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
+from ._buildenv_uv import UvBuildEnv
 from ._buildenv_venv import VenvBuildEnv
 from ._config import AuthModel
 from ._lockfile import Lockfile
@@ -126,14 +127,24 @@ class BuildEnvManager:
 
 
 def _get_environment_for_type(
-    environment_type: EnvironmentType, base_path: Path, incremental: bool, show_install_logs: bool
+    environment_type: EnvironmentType,
+    base_path: Path,
+    incremental: bool,
+    show_install_logs: bool,
 ) -> BuildEnv:
     platform_name = platform.system().lower()
-    if environment_type == EnvironmentType.VENV:
-        return VenvBuildEnv(
-            base_path,
-            incremental=incremental,
-            show_pip_logs=show_install_logs,
-        )
-    else:
-        raise RuntimeError(f"unsupported environment type {environment_type!r} on platform {platform_name!r}")
+    match environment_type:
+        case EnvironmentType.VENV:
+            return VenvBuildEnv(
+                base_path,
+                incremental=incremental,
+                show_pip_logs=show_install_logs,
+            )
+        case EnvironmentType.UV:
+            return UvBuildEnv(
+                base_path,
+                incremental=incremental,
+                show_pip_logs=show_install_logs,
+            )
+        case _:
+            raise RuntimeError(f"unsupported environment type {environment_type!r} on platform {platform_name!r}")

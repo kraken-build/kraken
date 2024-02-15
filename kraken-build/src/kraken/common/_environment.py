@@ -15,13 +15,11 @@ class EnvironmentType(enum.Enum):
     #: Wrapper, using a virtual environment.
     VENV = 1
 
-    def is_native(self) -> bool:
-        return self == EnvironmentType.NATIVE
-
-    def is_venv(self) -> bool:
-        return self == EnvironmentType.VENV
+    #: Use the new shiny `uv` package manager.
+    UV = 2
 
     def is_wrapped(self) -> bool:
+        """Whether the environment is managed by Kraken-wrapper."""
         return self != EnvironmentType.NATIVE
 
     @staticmethod
