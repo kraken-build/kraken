@@ -28,7 +28,7 @@ from termcolor import colored
 from . import __version__
 from ._buildenv import BuildEnvError
 from ._buildenv_manager import BuildEnvManager
-from ._config import DEFAULT_CONFIG_PATH, AuthModel
+from ._config import DEFAULT_CONFIG_PATH, AuthModel, ConfigModel
 from ._lockfile import Lockfile, calculate_lockfile
 from ._option_sets import AuthOptions, EnvOptions
 
@@ -129,6 +129,29 @@ def _get_auth_argument_parser(prog: str) -> argparse.ArgumentParser:
     )
     AuthOptions.add_to_parser(parser)
     return parser
+
+
+def config_main(prog: str, argv: list[str]) -> NoReturn:
+    """`krakenw config` subcommand."""
+
+    config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
+    config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
+
+    parser = argparse.ArgumentParser(prog=prog)
+    parser.add_argument(
+        "--installer",
+        choices=[x.name for x in EnvironmentType if x.is_wrapped()],
+        help="Set the installer to use for the build environment.",
+    )
+    args = parser.parse_args(argv)
+
+    if args.installer is not None:
+        config.set_default_installer(EnvironmentType[args.installer])
+        config_file.save()
+        sys.exit(0)
+
+    parser.print_usage()
+    sys.exit(1)
 
 
 def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn:
@@ -249,6 +272,7 @@ def _ensure_installed(
     project: Project,
     reinstall: bool,
     upgrade: bool,
+    default_installer: EnvironmentType,
     env_type: EnvironmentType | None = None,
 ) -> None:
     exists = manager.exists()
@@ -256,6 +280,7 @@ def _ensure_installed(
 
     operation: str
     reason: str | None = None
+    allow_incremental = True
 
     if not exists:
         env_type = env_type or env_type or manager.get_environment().get_type()
@@ -274,9 +299,11 @@ def _ensure_installed(
             install = True
             manager.remove()
             operation = "Re-initializing"
-            reason = f"type changed from {current_type.name}"
+            reason = f"type changed from {current_type.name} to {env_type.name}"
+            allow_incremental = False
         elif install and type_changed:
-            reason = f"type changed from {current_type.name}"
+            reason = f"type changed from {current_type.name} to {env_type.name}"
+            allow_incremental = False
 
     if not install and exists:
         metadata = manager.get_metadata()
@@ -313,7 +340,7 @@ def _ensure_installed(
         )
 
         tstart = time.perf_counter()
-        manager.install(source, env_type, transitive)
+        manager.install(source, env_type, transitive, allow_incremental)
         duration = time.perf_counter() - tstart
         logger.info("Operation complete after %.3fs.", duration)
 
@@ -406,16 +433,20 @@ def main() -> NoReturn:
         # The `auth` comand does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
 
+    if cmd in ("config",):
+        config_main(f"{parser.prog} config", argv)
+
     if cmd in ("list-pythons",):
         list_pythons(f"{parser.prog} list-pythons", argv)
 
     # The project details and build environment manager are relevant for any command that we are delegating.
     # This includes the built-in `lock` command.
-    config = TomlConfigFile(DEFAULT_CONFIG_PATH)
+    config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
+    config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
         project.directory / BUILDENV_PATH,
-        AuthModel(config, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
+        AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,
         show_install_logs=env_options.show_install_logs,
     )
@@ -443,6 +474,7 @@ def main() -> NoReturn:
             project,
             env_options.reinstall,
             env_options.upgrade,
+            config.get_default_installer(),
             env_options.use,
         )
 

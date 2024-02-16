@@ -26,6 +26,7 @@ kraken-build = "0.33.2"
 packaging = "^23.1"
 python = ">=3.10"
 termcolor = "^1.1.0"
+uv = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
