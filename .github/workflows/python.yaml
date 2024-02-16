@@ -17,9 +17,7 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.x"]
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
+    - run: python3.10 -m pip install slap-cli
     - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.32.4
     - run: rustup update
 
