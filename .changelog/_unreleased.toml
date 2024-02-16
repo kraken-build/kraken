@@ -1,0 +1,6 @@
+[[entries]]
+id = "e663a548-2495-475d-abf9-62a0b7d0d00b"
+type = "fix"
+description = "Fix warning about corrupt virtual environment also showing when there is no trace of any prior virtual environment"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"

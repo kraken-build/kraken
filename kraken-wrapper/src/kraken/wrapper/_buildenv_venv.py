@@ -177,7 +177,7 @@ class VenvBuildEnv(BuildEnv):
                     )
                     safe_rmpath(self._path)
 
-        elif not success_flag.is_file():
+        elif self._venv.exists() and not success_flag.is_file():
             logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This happens")
             logger.warning("by pressing Ctrl+C during its installation, or if you've recently upgraded kraken-wrapper.")
             safe_rmpath(self._path)
