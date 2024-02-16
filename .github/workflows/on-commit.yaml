@@ -68,15 +68,16 @@ jobs:
   # == Unit tests, linting, and type checking ==
 
   test:
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        runner: ["arc-amd64-small", "arc-arm64-small"]
         python-version: ["3.10", "3.11", "3.12", "3.x"]
     steps:
     - uses: actions/checkout@v4
-    - run: python3.10 -m pip install slap-cli
+    - uses: NiklasRosenstein/slap@gha/install/v1
+    - uses: actions/setup-python@v5
+      with: { python-version: "${{ matrix.python-version }}" }
     - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.34.0 && krakenw config --installer=UV
     - run: rustup update
 
