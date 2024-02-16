@@ -4,3 +4,10 @@ type = "fix"
 description = "Fix warning about corrupt virtual environment also showing when there is no trace of any prior virtual environment"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "daf69f05-c069-4172-9ef3-10219a926f53"
+type = "fix"
+description = "Fix using the default installer as configured with `krakenw config --installer=...`"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
