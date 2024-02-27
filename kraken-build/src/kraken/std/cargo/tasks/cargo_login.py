@@ -33,5 +33,6 @@ class CargoLoginTask(Task):
                     pass
                 else:
                     # unknown error, fail normally
+                    self.logger.error("cargo login failed: %s", p.stderr.decode())
                     return TaskStatus.failed("could not run cargo login")
         return TaskStatus.succeeded()
