@@ -53,6 +53,7 @@ class PyUpgradeCheckTask(PyUpgradeTask):
         # We copy the file because there is no way to make pyupgrade not edit the files
         old_dir = self.settings.project.directory.resolve()
         new_file_for_old_file = {}
+
         with TemporaryDirectory() as new_dir:
             for file in self.additional_files.get():
                 new_file = new_dir / file.resolve().relative_to(old_dir)
@@ -125,7 +126,7 @@ def pyupgrade(
     if paths is None:
         paths = python_settings(project).get_source_paths()
 
-    files = {f.resolve() for p in paths for f in Path(p).glob("**/*.py")}
+    files = {f.resolve() for p in paths for f in Path(project.directory / p).glob("**/*.py")}
     exclude = [e.resolve() for e in exclude]
     filtered_files = [
         f
