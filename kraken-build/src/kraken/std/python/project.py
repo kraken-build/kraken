@@ -227,7 +227,7 @@ def python_project(
     mypy_task(
         paths=source_paths,
         config=MypyConfig(
-            mypy_path=source_directory,
+            mypy_path=[source_directory],
             exclude_directories=exclude_lint_directories,
             global_overrides={},
             module_overrides={},
