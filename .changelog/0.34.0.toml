@@ -1,0 +1,20 @@
+release-date = "2024-02-16"
+
+[[entries]]
+id = "c735fee0-cd87-47a6-8c6f-b52463f0f73e"
+type = "feature"
+description = "Add `workspace`, `all_features` and `deny_warnings` properties to `CargoClippyTask`."
+author = "@tomkarw"
+pr = "https://github.com/kraken-build/kraken/pull/182"
+
+[[entries]]
+id = "2df7db61-77d1-4498-abf2-c2f3bc853ec9"
+type = "hygiene"
+description = "Protect against NPE"
+author = "vincent.siles@helsing.ai"
+
+[[entries]]
+id = "54303490-db52-403a-b02f-cc993a937f9f"
+type = "feature"
+description = "Add support for installing Kraken build environments with `uv` (https://astral.sh/blog/uv)"
+author = "@NiklasRosenstein"

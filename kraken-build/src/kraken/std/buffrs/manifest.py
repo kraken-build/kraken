@@ -27,10 +27,11 @@ class BuffrsManifest:
 
     @classmethod
     def of(cls, path: Path, data: dict[str, Any]) -> BuffrsManifest:
+        package = data.get("package")
         return cls(
             path,
             data,
-            Package.from_json(data["package"]) if "package" in data else None,
+            package=Package.from_json(package) if package is not None else None,
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -68,6 +69,7 @@ class Package:
     def to_json(self) -> dict[str, str]:
         values = {"type": self.type_, "name": self.name, "version": self.version}
 
-        values.update(self.unhandled.items())
+        if self.unhandled is not None:
+            values.update({k: v for k, v in self.unhandled.items() if v is not None})
 
         return {k: v for k, v in values.items() if v is not None}
