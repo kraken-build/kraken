@@ -1,14 +1,11 @@
 import contextlib
 import logging
 from pathlib import Path
-
 from typing import Any
 
-from kraken.common import not_none
-from kraken.core import Property, Project, TaskStatus
+from kraken.common import atomic_file_swap, not_none
+from kraken.core import Project, Property, TaskStatus
 from kraken.std.cargo import CargoProject
-
-from kraken.common import atomic_file_swap
 
 from ..config import CargoRegistry
 from .cargo_build_task import CargoBuildTask

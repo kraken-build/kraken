@@ -22,7 +22,6 @@ Artifactory/Cloudsmith repository Git index every time.
 from __future__ import annotations
 
 import dataclasses
-import json
 import logging
 import os
 import random
@@ -44,8 +43,8 @@ from kraken.std.cargo import (
     cargo_registry,
     cargo_sync_config,
 )
-from tests.resources import example_dir
 from tests.kraken_std.util.docker import DockerServiceManager
+from tests.resources import example_dir
 
 logger = logging.getLogger(__name__)
 
