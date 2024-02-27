@@ -105,10 +105,8 @@ def test__python_project_install_lint_and_publish(
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
     kraken_ctx.load_project(directory=tempdir / consumer_dir)
-
     # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
-
     kraken_ctx.execute([":python.install"])
     # TODO (@NiklasRosenstein): Test importing the consumer project.
 

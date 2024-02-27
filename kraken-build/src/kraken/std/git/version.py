@@ -7,13 +7,17 @@ import subprocess as sp
 from pathlib import Path
 
 
+class NotAGitRepositoryError(Exception):
+    pass
+
+
 def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> str:
     """Describe a repository with tags.
 
     :param path: The directory in which to describe.
     :param tags: Whether to include tags (adds the `--tags` flag).
     :param dirty: Whether to include if the directory tree is dirty (adds the `--dirty` flag).
-    :raise ValueError: If `git describe` failed.
+    :raise NotAGitRepositoryError: If the directory is not a git repository.
     :return: The Git head description.
     """
 
@@ -23,8 +27,11 @@ def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> st
     if dirty:
         command.append("--dirty")
     try:
-        return sp.check_output(command, cwd=path).decode().strip()
-    except sp.CalledProcessError:
+        return sp.check_output(command, cwd=path, stderr=sp.PIPE).decode().strip()
+    except sp.CalledProcessError as exc:
+        stderr = exc.stderr.decode()
+        if "not a git repository" in stderr:
+            raise NotAGitRepositoryError(path)
         count = int(sp.check_output(["git", "rev-list", "HEAD", "--count"], cwd=path).decode().strip())
         short_rev = sp.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=path).decode().strip()
         return f"0.0.0-{count}-g{short_rev}"

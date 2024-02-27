@@ -4,12 +4,16 @@ import logging
 import re
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Literal
 
 from nr.stream import Optional
 
+from kraken.std.git.version import GitVersion, NotAGitRepositoryError, git_describe
 from kraken.std.python.buildsystem import detect_build_system
 from kraken.std.python.pyproject import PackageIndex
+from kraken.std.python.settings import python_settings
 from kraken.std.python.tasks.pytest_task import CoverageFormat
+from kraken.std.python.version import git_version_to_python_version
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +70,8 @@ def python_project(
     additional_lint_directories: Sequence[str] | None = None,
     exclude_lint_directories: Sequence[str] = (),
     line_length: int = 120,
+    enforce_project_version: str | None = None,
+    detect_git_version_build_type: Literal["release", "develop", "branch"] = "develop",
     pyupgrade_keep_runtime_typing: bool = False,
     pycln_remove_all_unused_imports: bool = False,
     pytest_ignore_dirs: Sequence[str] = (),
@@ -105,11 +111,19 @@ def python_project(
             linted and formatted but would otherwise be included via *source_directory*, *tests_directory*
             and *additional_directories*.
         line_length: The line length to assume for all formatters and linters.
+        enforce_project_version: When set, enforces the specified version number for the project when building wheels
+            and publishing them. If not specified, the version number will be derived from the Git repository using
+            `git describe --tags`.
+        detect_git_version_build_type: When specified, this influences the version number that will be automatically
+            generated when `enforce_project_version` is not set. When set to `"release"`, the current commit in
+            the Git repository must have exactly one tag associated with it. When set to `"develop"` (the default),
+            the version number will be derived from the most recent tag and the distance to the current commit. If
+            the current commit is tagged, the version number will be the tag name anyway. When set to `"branch"`, the
+            version number will be derived from the distance to the most recent tag and include the SHA of the commit.
         pyupgrade_keep_runtime_typing: Whether to not replace `typing` type hints. This is required for example
             for projects using Typer as it does not support all modern type hints at runtime.
         pycln_remove_all_unused_imports: Remove all unused imports, including these with side effects.
             For reference, see https://hadialqattan.github.io/pycln/#/?id=-a-all-flag.
-
         flake8_additional_requirements: Additional Python requirements to install alongside Flake8. This should
             be used to add Flake8 plugins.
         flake8_extend_ignore: Flake8 lints to ignore. The default ignores lints that would otherwise conflict with
@@ -121,12 +135,14 @@ def python_project(
 
     from .pyproject import Pyproject
     from .tasks.black_task import BlackConfig, black as black_tasks
+    from .tasks.build_task import build as build_task
     from .tasks.flake8_task import Flake8Config, flake8 as flake8_tasks
     from .tasks.info_task import info as info_task
     from .tasks.install_task import install as install_task
     from .tasks.isort_task import IsortConfig, isort as isort_tasks
     from .tasks.login_task import login as login_task
     from .tasks.mypy_task import MypyConfig, mypy as mypy_task
+    from .tasks.publish_task import publish as publish_task
     from .tasks.pycln_task import pycln as pycln_task
     from .tasks.pytest_task import pytest as pytest_task
     from .tasks.pyupgrade_task import pyupgrade as pyupgrade_task
@@ -233,10 +249,35 @@ def python_project(
         allow_no_tests=True,
     )
 
+    if not enforce_project_version:
+        try:
+            git_version = GitVersion.parse(git_describe(project.directory))
+        except NotAGitRepositoryError:
+            logger.info("No Git repository found in %s, not enforcing a project version", project.directory)
+            enforce_project_version = None
+        else:
+            match detect_git_version_build_type:
+                case "release" | "develop":
+                    if (
+                        detect_git_version_build_type == "release"
+                        and git_version.distance
+                        and git_version.distance.value > 0
+                    ):
+                        raise ValueError(
+                            f"Git version for project {project.directory} is not a release version: {git_version}"
+                        )
+                    enforce_project_version = git_version_to_python_version(git_version)
+                case "branch":
+                    enforce_project_version = git_version_to_python_version(git_version, include_sha=True)
+
+    if enforce_project_version:
+        logger.info("Enforcing version %s for project %s", enforce_project_version, project.directory)
+
+    # Create publish tasks for any package index with publish=True.
+    build = build_task(as_version=enforce_project_version)
+    for index in python_settings().package_indexes.values():
+        if index.publish:
+            publish_task(package_index=index.alias, distributions=build.output_files, interactive=False)
+
     # TODO(@niklas): Support auto-detecting when Mypy stubtests need to be run or
     #       accept arguments for stubtests.
-
-    # version: str | None = None,
-    #     version: The current version number of the package. If not specified, it will be automatically derived
-    #         from Git using `git describe --tags`. Kraken will automatically bump the version number on-disk for
-    #         you for relevant operations so you can keep the version number in your `pyproject.toml` at `0.0.0`.
