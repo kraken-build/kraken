@@ -9,4 +9,4 @@ class CargoTestTask(CargoBuildTask):
 
     def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         super().get_cargo_command(env)
-        return ["cargo", "test"] + self.additional_args.get()
+        return ["cargo", "test"] + self.get_additional_args()

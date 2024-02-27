@@ -44,6 +44,7 @@ class CargoPublishTask(CargoBuildTask):
             raise ValueError(f'registry {registry.alias!r} missing a "publish_token"')
         command = (
             ["cargo", "publish"]
+            + (["--locked"] if self.should_add_locked_flag() else [])
             + self.additional_args.get()
             + ["--registry", registry.alias, "--token", registry.publish_token]
             + ([] if self.verify.get() else ["--no-verify"])

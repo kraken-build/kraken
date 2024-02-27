@@ -5,6 +5,7 @@ import shlex
 import subprocess as sp
 import time
 from dataclasses import dataclass
+from pathlib import Path
 
 from kraken.core import Project, Property, Task, TaskStatus
 from kraken.std.cargo.manifest import ArtifactKind, CargoMetadata
@@ -35,6 +36,11 @@ class CargoBuildTask(Task):
     #: Whether to build incrementally or not.
     incremental: Property[bool | None] = Property.default(None)
 
+    #: Whether to pass --locked to cargo or not.
+    #:
+    #: When set to None, --locked is passed if Cargo.lock exists.
+    locked: Property[bool | None] = Property.default(None)
+
     #: Environment variables for the Cargo command.
     env: Property[dict[str, str]] = Property.default_factory(dict)
 
@@ -61,11 +67,31 @@ class CargoBuildTask(Task):
     def get_cargo_command_additional_flags(self) -> list[str]:
         return shlex.split(os.environ.get("KRAKEN_CARGO_BUILD_FLAGS", ""))
 
+    def should_add_locked_flag(self) -> bool:
+        locked = self.locked.get()
+        if locked is None:
+            # pass --locked if we have a lock file
+            # since we may be in a workspace member, we need to search up!
+            for parent in (Path.cwd() / "Cargo.toml").parents:
+                if (parent / "Cargo.lock").exists():
+                    return True
+        elif locked:
+            # if locked is True, we should *always* pass --locked.
+            # the expectation is that the command will fail w/o Cargo.lock.
+            return True
+        return False
+
+    def get_additional_args(self) -> list[str]:
+        args = self.additional_args.get()
+        if "--locked" not in args and self.should_add_locked_flag():
+            args = ["--locked", *args]
+        return args
+
     def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         incremental = self.incremental.get()
         if incremental is not None:
             env["CARGO_INCREMENTAL"] = "1" if incremental else "0"
-        return ["cargo", "build"] + self.additional_args.get()
+        return ["cargo", "build"] + self.get_additional_args()
 
     def make_safe(self, args: list[str], env: dict[str, str]) -> None:
         pass
