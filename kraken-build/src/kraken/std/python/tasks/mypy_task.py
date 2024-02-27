@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import logging
 import re
+import sys
 from collections.abc import Mapping, MutableMapping, Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass, field
-import sys
 from pathlib import Path
 
 from kraken.common import Supplier
