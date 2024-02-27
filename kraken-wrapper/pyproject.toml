@@ -30,7 +30,7 @@ uv = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.10.1"
-flake8 = "^6.1.0"
+flake8 = "^7.0.0"
 isort = "^5.12.0"
 mypy = "^1.6.1"
 pycln = "^2.1.3"
