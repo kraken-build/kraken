@@ -9,4 +9,11 @@ id = "ebe30d77-1206-4437-8aa2-7373e9335926"
 type = "improvement"
 description = "Improve Windows support in `krakenw` by supporting the `PYENV` env-var and using the right `pyhon.exe` path on Windows"
 author = "@NiklasRosenstein"
-component = "krakenw"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "a8200c89-b05a-46ce-895c-c4a4f5a736a6"
+type = "fix"
+description = "Do not use `dmypy` on Windows"
+author = "@NiklasRosenstein"
+component = "kraken-build"
