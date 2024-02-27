@@ -42,7 +42,7 @@ databind-json = "^4.2.5"
 dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
 dill = ">=0.3.8,<0.4.0"
-httpx = "^0.26.0"
+httpx = "^0.27.0"
 keyring = "^24.0.0"
 mitmproxy = "^10.0.0"
 networkx = "^3.1"
