@@ -1,4 +1,5 @@
 from kraken.common import buildscript
+from kraken.std.python.project import python_project
 
 buildscript(requirements=["kraken-build>=0.33.2"])
 
@@ -99,4 +100,5 @@ except ImportError:
 
 for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
     with subproject.as_current():
-        configure_project()
+        python_project(black_version_spec="==23.12.1", isort_version_spec="==5.13.2")
+        # configure_project()
