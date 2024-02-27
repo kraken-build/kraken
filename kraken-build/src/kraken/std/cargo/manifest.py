@@ -80,7 +80,8 @@ class CargoMetadata:
             str(project_dir / "Cargo.toml"),
         ]
         if locked is None:
-            for parent in (project_dir / "Cargo.toml").absolute().parents:
+            project_dir = project_dir.absolute()
+            for parent in [project_dir, *project_dir.parents]:
                 if (parent / "Cargo.lock").exists():
                     cmd.append("--locked")
                     break
