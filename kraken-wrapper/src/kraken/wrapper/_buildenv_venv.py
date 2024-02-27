@@ -49,6 +49,7 @@ class VenvBuildEnv(BuildEnv):
         operation_name: str,
         log_file: Path | None,
         mode: Literal["a", "w"] = "w",
+        env: dict[str, str] | None = None,
     ) -> None:
         if log_file:
             log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -64,7 +65,7 @@ class VenvBuildEnv(BuildEnv):
                 fp = None
                 offset = 0
             try:
-                subprocess.check_call(command, stdout=fp, stderr=fp)
+                subprocess.check_call(command, stdout=fp, stderr=fp, env=env)
                 return
             except (subprocess.CalledProcessError, FileNotFoundError) as e:
                 exc = e
@@ -93,6 +94,41 @@ class VenvBuildEnv(BuildEnv):
             )
 
         raise BuildEnvError(f"The command {command} failed.") from exc
+
+    def _get_create_venv_command(self, python_bin: Path, path: Path) -> list[str]:
+        """Returns the command to create a virtual environment."""
+        return [str(python_bin), "-m", "venv", str(path), "--upgrade-deps"]
+
+    def _get_install_command(self, venv_dir: Path, requirements: RequirementSpec, env: dict[str, str]) -> list[str]:
+        """Return sthe command to install the given requirements into the virtual environment."""
+        python_bin = venv_dir / "bin" / "python"
+        command = [
+            str(python_bin),
+            "-m",
+            "pip",
+            "install",
+            "--disable-pip-version-check",
+            "--no-python-version-warning",
+            "--no-input",
+        ]
+        # Must enable transitive resolution because lock files are not currently cross platform (see kraken-wrapper#2).
+        # if not transitive:
+        #     command += ["--no-deps"]
+        command += requirements.to_args()
+        return command
+
+    def _install_pythonpath(self, venv_dir: Path, pythonpath: list[str]) -> None:
+        """Install the given pythonpath into the virtual environment."""
+        python_bin = venv_dir / "bin" / "python"
+        command = [str(python_bin), "-c", "from sysconfig import get_path; print(get_path('purelib'))"]
+        site_packages = Path(subprocess.check_output(command).decode().strip())
+        pth_file = site_packages / "krakenw.pth"
+        if pythonpath:
+            logger.debug("Writing .pth file at %s", pth_file)
+            pth_file.write_text("\n".join(str(Path(path).absolute()) for path in pythonpath))
+        elif pth_file.is_file():
+            logger.debug("Removing .pth file at %s", pth_file)
+            pth_file.unlink()
 
     # BuildEnv
 
@@ -144,7 +180,7 @@ class VenvBuildEnv(BuildEnv):
                     )
                     safe_rmpath(self._path)
 
-        elif not success_flag.is_file():
+        elif self._venv.exists() and not success_flag.is_file():
             logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This happens")
             logger.warning("by pressing Ctrl+C during its installation, or if you've recently upgraded kraken-wrapper.")
             safe_rmpath(self._path)
@@ -165,13 +201,7 @@ class VenvBuildEnv(BuildEnv):
                 )
                 python_origin_bin = sys.executable
 
-            command = [
-                python_origin_bin,
-                "-m",
-                "venv",
-                str(self._path),
-                "--upgrade-deps",
-            ]
+            command = self._get_create_venv_command(Path(python_origin_bin), self._path)
             logger.info("Creating virtual environment at %s", os.path.relpath(self._path))
             self._run_command(
                 command,
@@ -184,38 +214,14 @@ class VenvBuildEnv(BuildEnv):
             logger.info("Reusing virtual environment at %s", self._path)
 
         # Install requirements.
-        command = [
-            python_bin,
-            "-m",
-            "pip",
-            "install",
-            "--disable-pip-version-check",
-            "--no-python-version-warning",
-            "--no-input",
-        ]
-        # Must enable transitive resolution because lock files are not currently cross platform (see kraken-wrapper#2).
-        # if not transitive:
-        #     command += ["--no-deps"]
-        # TODO (@NiklasRosenstein): Handle requirements interpreter constraint (see kraken-wrapper#5).
-        command += requirements.to_args()
+        env = os.environ.copy()
+        command = self._get_install_command(self._path, requirements, env)
         logger.info("Installing dependencies.")
         logger.debug("Installing into build environment with Pip: %s", " ".join(command))
-        self._run_command(command, operation_name="Install dependencies", log_file=install_log)
+        self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.
-        command = [
-            python_bin,
-            "-c",
-            "from sysconfig import get_path; print(get_path('purelib'))",
-        ]
-        site_packages = Path(subprocess.check_output(command).decode().strip())
-        pth_file = site_packages / "krakenw.pth"
-        if requirements.pythonpath:
-            logger.debug("Writing .pth file at %s", pth_file)
-            pth_file.write_text("\n".join(str(Path(path).absolute()) for path in requirements.pythonpath))
-        elif pth_file.is_file():
-            logger.debug("Removing .pth file at %s", pth_file)
-            pth_file.unlink()
+        self._install_pythonpath(self._path, list(requirements.pythonpath))
 
     def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         python = self._venv.get_bin("python")

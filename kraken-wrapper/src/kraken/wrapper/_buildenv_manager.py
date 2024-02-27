@@ -10,6 +10,7 @@ from urllib.parse import quote, urlparse, urlunparse
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
 
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
+from ._buildenv_uv import UvBuildEnv
 from ._buildenv_venv import VenvBuildEnv
 from ._config import AuthModel
 from ._lockfile import Lockfile
@@ -65,12 +66,15 @@ class BuildEnvManager:
         requirements: RequirementSpec,
         env_type: EnvironmentType | None = None,
         transitive: bool = True,
+        allow_incremental: bool = True,
     ) -> None:
         """
         :param requirements: The requirements to build the environment with.
         :param env_type: The environment type to use. If not specified, falls back to the last used or default.
         :param transitive: If set to `False`, it indicates that the *requirements* are fully resolved and the
             build environment installer does not need to resolve transitve dependencies.
+        :param allow_incremental: Allow incremental builds if the environment already exists. Set to False if
+            the environment type changes.
         """
 
         if env_type is None:
@@ -86,7 +90,7 @@ class BuildEnvManager:
             pythonpath=requirements.pythonpath,
         )
 
-        env = self.get_environment(env_type)
+        env = self.get_environment(env_type, allow_incremental)
         env.build(requirements, transitive)
         hash_algorithm = self.get_hash_algorithm()
         metadata = BuildEnvMetadata(
@@ -107,11 +111,13 @@ class BuildEnvManager:
         metadata = self._metadata_store.get()
         return metadata.hash_algorithm if metadata else self._default_hash_algorithm
 
-    def get_environment(self, env_type: EnvironmentType | None = None) -> BuildEnv:
+    def get_environment(self, env_type: EnvironmentType | None = None, allow_incremental: bool = True) -> BuildEnv:
         if env_type is None:
             metadata = self._metadata_store.get()
             env_type = self._default_type if metadata is None else metadata.environment_type
-        return _get_environment_for_type(env_type, self._path, self._incremental, self._show_install_logs)
+        return _get_environment_for_type(
+            env_type, self._path, self._incremental and allow_incremental, self._show_install_logs
+        )
 
     def set_locked(self, lockfile: Lockfile) -> None:
         metadata = self._metadata_store.get()
@@ -132,11 +138,18 @@ def _get_environment_for_type(
     show_install_logs: bool,
 ) -> BuildEnv:
     platform_name = platform.system().lower()
-    if environment_type == EnvironmentType.VENV:
-        return VenvBuildEnv(
-            base_path,
-            incremental=incremental,
-            show_pip_logs=show_install_logs,
-        )
-    else:
-        raise RuntimeError(f"unsupported environment type {environment_type!r} on platform {platform_name!r}")
+    match environment_type:
+        case EnvironmentType.VENV:
+            return VenvBuildEnv(
+                base_path,
+                incremental=incremental,
+                show_pip_logs=show_install_logs,
+            )
+        case EnvironmentType.UV:
+            return UvBuildEnv(
+                base_path,
+                incremental=incremental,
+                show_pip_logs=show_install_logs,
+            )
+        case _:
+            raise RuntimeError(f"unsupported environment type {environment_type!r} on platform {platform_name!r}")

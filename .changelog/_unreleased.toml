@@ -1,4 +1,36 @@
 [[entries]]
+id = "67c15e74-a142-482f-9d2e-972a50161129"
+type = "feature"
+description = "Make Rust builds respect Cargo.lock when present"
+author = "jon.gjengset@helsing.ai"
+
+[[entries]]
+id = "ebe30d77-1206-4437-8aa2-7373e9335926"
+type = "improvement"
+description = "Improve Windows support in `krakenw` by supporting the `PYENV` env-var and using the right `pyhon.exe` path on Windows"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "a8200c89-b05a-46ce-895c-c4a4f5a736a6"
+type = "fix"
+description = "Do not use `dmypy` on Windows"
+author = "@NiklasRosenstein"
+component = "kraken-build"
+
+[[entries]]
+id = "db65bd12-a9d1-472c-a38b-6f889cdda683"
+type = "improvement"
+description = "Move bump version into publish"
+author = "colin.mikolajczak@helsing.ai"
+
+[[entries]]
+id = "31a52a49-8d26-4dd7-a4bc-84fe9fb37c19"
+type = "improvement"
+description = "Add task to login in all cargo registries"
+author = "quentin.santos@helsing.ai"
+
+[[entries]]
 id = "fb3fcc4a-a38a-445f-b124-571395b7ac86"
 type = "feature"
 description = "Introduce `kraken.std.python.project.python_project()` function which creates all tasks for a Python project."

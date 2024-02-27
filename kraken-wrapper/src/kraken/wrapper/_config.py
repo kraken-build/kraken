@@ -8,7 +8,7 @@ from typing import Any, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
-from kraken.common import http
+from kraken.common import EnvironmentType, http
 from kraken.common.http import ReadTimeout
 
 logger = logging.getLogger(__name__)
@@ -182,3 +182,22 @@ Please check host.auth_check_url_suffix value in {self._path}"""
             return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
 
         return None
+
+
+class ConfigModel:
+    def __init__(self, config: MutableMapping[str, Any], path: Path) -> None:
+        self._config = config
+        self._path = path
+
+    def set_default_installer(self, env_type: EnvironmentType) -> None:
+        self._config["default_installer"] = env_type.name
+        logger.info("saving default_installer=%r in %s", env_type.name, self._path)
+
+    def get_default_installer(self) -> EnvironmentType:
+        default = EnvironmentType.VENV
+        if value := self._config.get("default_installer"):
+            try:
+                return EnvironmentType[value]
+            except KeyError:
+                logger.warning("invalid default_installer: %r, falling back to %r", value, default.name)
+        return default
