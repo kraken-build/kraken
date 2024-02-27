@@ -25,6 +25,7 @@ cargo_registry(
 )
 cargo_auth_proxy()
 cargo_sync_config()
+cargo_login()
 cargo_build("debug")
 cargo_build("release")
 cargo_publish("artifactory")

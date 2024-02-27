@@ -272,7 +272,6 @@ def _ensure_installed(
     project: Project,
     reinstall: bool,
     upgrade: bool,
-    default_installer: EnvironmentType,
     env_type: EnvironmentType | None = None,
 ) -> None:
     exists = manager.exists()
@@ -332,11 +331,12 @@ def _ensure_installed(
 
         env_type = env_type or manager.get_environment().get_type()
         logger.info(
-            "%s build environment from %s (%s)%s",
+            "%s build environment from %s (%s)%s using installer %s.",
             operation,
             source_name,
             os.path.relpath(source_file),
             f" ({reason})" if reason else "",
+            env_type.name,
         )
 
         tstart = time.perf_counter()
@@ -449,6 +449,7 @@ def main() -> NoReturn:
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,
         show_install_logs=env_options.show_install_logs,
+        default_type=config.get_default_installer(),
     )
 
     # Execute environment operations before delegating the command.
@@ -474,7 +475,6 @@ def main() -> NoReturn:
             project,
             env_options.reinstall,
             env_options.upgrade,
-            config.get_default_installer(),
             env_options.use,
         )
 
