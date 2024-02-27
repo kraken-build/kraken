@@ -1,23 +1,4 @@
-"""This test is an end-to-end test to publish and consume crates from Artifactory/Cloudsmith. It performs the
-following steps:
-
-* Create a temporary Cargo repository in Artifactory/Cloudsmith
-* Publish the `data/hello-world-lib` using the :func:`cargo_publish()` task
-* Consume the just published library in `data/hello-world-app` using the :func:`cargo_build()` task
-
-Without injecting the HTTP basic authentication credentials into the Cargo publish and build steps, we
-expect the publish and/or build step to fail.
-
-The test runs in a new temporary `CARGO_HOME` directory to ensure that Cargo has to freshly fetch the
-Artifactory/Cloudsmith repository Git index every time.
-
-!!! note
-
-    This integration tests requires live remote repository credentials with enough permissions to create and delete
-    repositories and to create a new user with access to the repository. If we get setting up an actual Artifactory
-    or Cloudsmith instance within the tests, it would be very nice, but until then we need to inject these credentials
-    in CI via an environment variable. Unless the environment variable is present, the test will be skipped.
-"""
+"""This test is an end-to-end test to publish and consume crates from a private Cargo registry."""
 
 from __future__ import annotations
 
@@ -70,7 +51,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
     logger.info("==== Publish version is %s", publish_version)
 
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
-        # Build the library and publish it to Artifactory.
+        # Build the library and publish it to the registry.
         if repository:
             logger.info(
                 "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
