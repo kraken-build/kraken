@@ -68,7 +68,7 @@ jobs:
   # == Unit tests, linting, and type checking ==
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
