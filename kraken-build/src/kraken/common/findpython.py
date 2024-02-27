@@ -143,17 +143,20 @@ def get_candidates(
 
     # pyenv
     pyenv_versions = Path("~/.pyenv/versions").expanduser()
+    checked_pyenv = False
     if check_pyenv and pyenv_versions.is_dir():
+        checked_pyenv = True
         for item in pyenv_versions.iterdir():
             if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
                 yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
 
     # pyenv (Windows)
-    pyenv_versions = (Path(os.getenv('PYENV')) / "versions").expanduser()
-    if check_pyenv and pyenv_versions.is_dir():
-        for item in pyenv_versions.iterdir():
-            if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
-                yield {"path": str(item / "python.exe"), "exact_version": item.name}
+    if not checked_pyenv and (pyenv := os.getenv("PYENV")):
+        pyenv_versions = Path(pyenv).expanduser().joinpath("versions")
+        if check_pyenv and pyenv_versions.is_dir():
+            for item in pyenv_versions.iterdir():
+                if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
+                    yield {"path": str(item / "python.exe"), "exact_version": item.name}
 
     yield {"path": sys.executable, "exact_version": ".".join(map(str, sys.version_info[:3]))}
 

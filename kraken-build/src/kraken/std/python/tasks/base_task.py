@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import subprocess as sp
+import sys
 from collections.abc import Iterable, MutableMapping
 
 from deprecated import deprecated
@@ -77,6 +78,6 @@ class EnvironmentAwareDispatchTask(Task):
                 logger.warning('%s = "*"', dep)
             return TaskStatus.failed("The %s dependencies are missing" % self.python_dependencies)
         logger.info("%s", command)
-        shell = sys.platform.startswith('win32')  # Windows requires shell to find executable in path
+        shell = sys.platform.startswith("win32")  # Windows requires shell to find executable in path
         result = sp.call(command, cwd=self.project.directory, env=env, shell=shell)
         return self.handle_exit_code(result)

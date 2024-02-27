@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import MutableMapping, Sequence
 import logging
-from pathlib import Path
 import sys
+from collections.abc import MutableMapping, Sequence
+from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
@@ -11,8 +11,8 @@ from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
-
 logger = logging.getLogger(__name__)
+
 
 class MypyTask(EnvironmentAwareDispatchTask):
     description = "Static type checking for Python code using Mypy."
@@ -29,10 +29,10 @@ class MypyTask(EnvironmentAwareDispatchTask):
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str]:
         use_daemon = self.use_daemon.get()
-        if use_daemon and sys.platform.startswith('win32'):
+        if use_daemon and sys.platform.startswith("win32"):
             use_daemon = False
             logger.warning("Disable use of mypy daemon due to error in exit code on Windows")
-        
+
         entry_point = "dmypy" if use_daemon else "mypy"
 
         if mypy_pex_bin := self.mypy_pex_bin.get():
