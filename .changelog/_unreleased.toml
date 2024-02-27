@@ -23,3 +23,9 @@ id = "db65bd12-a9d1-472c-a38b-6f889cdda683"
 type = "improvement"
 description = "Move bump version into publish"
 author = "colin.mikolajczak@helsing.ai"
+
+[[entries]]
+id = "31a52a49-8d26-4dd7-a4bc-84fe9fb37c19"
+type = "improvement"
+description = "Add task to login in all cargo registries"
+author = "quentin.santos@helsing.ai"
