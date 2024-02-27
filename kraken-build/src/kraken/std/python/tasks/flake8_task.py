@@ -17,6 +17,7 @@ from .base_task import EnvironmentAwareDispatchTask
 
 @dataclass
 class Flake8Config:
+    max_line_length: int
     extend_ignore: Sequence[str]
     exclude: Sequence[str]
 
@@ -38,6 +39,7 @@ class Flake8Config:
 
         config = ConfigParser()
         config.add_section(flake8_section)
+        config.set(flake8_section, "max-line-length", str(self.max_line_length))
         config.set(flake8_section, "extend-ignore", ",".join(self.extend_ignore))
         config.set(flake8_section, "exclude", ",".join(exclude))
 

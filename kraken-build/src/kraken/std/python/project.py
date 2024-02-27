@@ -216,7 +216,9 @@ def python_project(
 
     flake8 = flake8_tasks(
         paths=source_paths,
-        config=Flake8Config(extend_ignore=flake8_extend_ignore, exclude=exclude_lint_directories),
+        config=Flake8Config(
+            max_line_length=line_length, extend_ignore=flake8_extend_ignore, exclude=exclude_lint_directories
+        ),
         version_spec=flake8_version_spec,
         additional_requirements=flake8_additional_requirements,
     )

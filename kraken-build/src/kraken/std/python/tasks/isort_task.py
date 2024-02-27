@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
@@ -56,6 +57,15 @@ class IsortTask(EnvironmentAwareDispatchTask):
             command += ["--check-only", "--diff"]
         if self.__config_file:
             command += ["--settings-file", str(self.__config_file)]
+
+        # When running isort from a PEX binary, we have to point it explicitly at the virtual env
+        # and source directories to ensure it knows what imports are first, second and third party.
+        if venv := os.getenv("VIRTUAL_ENV"):
+            command += ["--virtual-env", venv]
+        settings = python_settings(project=self.project)
+        for path in filter(None, [settings.source_directory, settings.get_tests_directory()]):
+            command += ["--src", str(path)]
+
         return command
 
     # Task
@@ -72,7 +82,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
         if config is not None and config_file is not None:
             raise RuntimeError("IsortTask.config and .config_file cannot be mixed")
         if config is not None:
-            config_file = self.project.build_directory / self.name / "isort.ini"
+            config_file = self.project.build_directory.absolute() / self.name / "isort.ini"
             config_file.parent.mkdir(parents=True, exist_ok=True)
             config.to_file(config_file)
         self.__config_file = config_file
