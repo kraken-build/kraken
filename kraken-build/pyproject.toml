@@ -60,7 +60,7 @@ typing-extensions = ">=4.6.0"
 
 [tool.poetry.dev-dependencies]
 localimport = "^1.7.6"
-pyartifactory = "^1.10.0"
+pyartifactory = "^2.0.0"
 pytest = ">=6.0.0"
 types-Deprecated = "^1.2.9"
 types-requests = "^2.28.0"
