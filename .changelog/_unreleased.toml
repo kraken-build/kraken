@@ -3,3 +3,10 @@ id = "67c15e74-a142-482f-9d2e-972a50161129"
 type = "feature"
 description = "Make Rust builds respect Cargo.lock when present"
 author = "jon.gjengset@helsing.ai"
+
+[[entries]]
+id = "ebe30d77-1206-4437-8aa2-7373e9335926"
+type = "improvement"
+description = "Improve Windows support in `krakenw` by supporting the `PYENV` env-var and using the right `pyhon.exe` path on Windows"
+author = "@NiklasRosenstein"
+component = "krakenw"
