@@ -1,29 +1,80 @@
+site_name: Kraken
+repo_url: https://github.com/kraken-build/kraken
+repo_name: kraken-build/kraken
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: green
+  # features:
+  #   - navigation.tabs
+
+hooks:
+  - mksync-hook.py
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [../kraken-build/src, ../kraken-wrapper/src]
+          options:
+            heading_level: 3
+            show_root_heading: true
+            show_root_full_path: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            separate_signature: true
+            show_signature_annotations: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
 nav:
-  - Home: index.md
+  - index.md
   - changelog.md
+  - Concepts:
+    - concepts/tasks.md
+    - concepts/properties.md
+    - concepts/testing.md
+  - Language support:
+    - lang/cargo.md
+    - lang/docker.md
+    - lang/helm.md
+    - lang/protobuf.md
+    - lang/python.md
+  - API Documentation:
+    - api/kraken.build.md
+    - api/kraken.common.md
+    - api/kraken.core.md
+    - api/kraken.std.buffrs.md
+    - api/kraken.std.cargo.md
+    - api/kraken.std.descriptors.resource.md
+    - api/kraken.std.dist.md
+    - api/kraken.std.docs.md
+    - api/kraken.std.git.md
+    - api/kraken.std.helm.md
+    - api/kraken.std.mitm.md
+    - api/kraken.std.protobuf.md
+    - api/kraken.std.python.md
+    - api/kraken.std.sccache.md
+    - api/kraken.std.util.md
   - Command-line:
-    - cli/index.md
-    - kraken: cli/kraken.md
-    - kraken query: cli/kraken-query.md
-    - kraken query describe: cli/kraken-query-describe.md
-    - kraken query env: cli/kraken-query-env.md
-    - kraken query ls: cli/kraken-query-ls.md
-    - kraken query visualize: cli/kraken-query-visualize.md
-    - kraken run: cli/kraken-run.md
-    - krakenw: cli/krakenw.md
-    - krakenw auth: cli/krakenw-auth.md
-    - krakenw list-pythons: cli/krakenw-list-pythons.md
-  - kraken-build (core):
-    - kraken-build/core/api.md
-    - kraken-build/core/properties.md
-    - kraken-build/core/tasks.md
-    - kraken-build/core/project.md
-    - kraken-build/core/testing.md
-  - kraken-build (std):
-    - kraken-build/std/cargo.md
-    - kraken-build/std/docker.md
-    - kraken-build/std/helm.md
-    - kraken-build/std/protobuf.md
-    - kraken-build/std/python.md
-  - kraken-wrapper:
-    - kraken-wrapper/index.md
+    - cli/kraken-query-describe.md
+    - cli/kraken-query-env.md
+    - cli/kraken-query-ls.md
+    - cli/kraken-query-tree.md
+    - cli/kraken-query-visualize.md
+    - cli/kraken-query.md
+    - cli/kraken-run.md
+    - cli/kraken.md
+  - krakenw.md

@@ -70,7 +70,7 @@ class CargoMetadata:
     target_directory: Path
 
     @classmethod
-    def read(cls, project_dir: Path) -> CargoMetadata:
+    def read(cls, project_dir: Path, locked: bool | None = None) -> CargoMetadata:
         cmd = [
             "cargo",
             "metadata",
@@ -79,6 +79,16 @@ class CargoMetadata:
             "--manifest-path",
             str(project_dir / "Cargo.toml"),
         ]
+        if locked is None:
+            project_dir = project_dir.absolute()
+            for parent in [project_dir, *project_dir.parents]:
+                if (parent / "Cargo.lock").exists():
+                    cmd.append("--locked")
+                    break
+        elif locked:
+            # if locked is True, we should *always* pass --locked.
+            # the expectation is that the command will fail w/o Cargo.lock.
+            cmd.append("--locked")
         result = subprocess.run(cmd, stdout=subprocess.PIPE)
         if result.returncode != 0:
             logger.error("Stderr: %s", result.stderr)

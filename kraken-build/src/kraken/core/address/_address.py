@@ -50,8 +50,8 @@ class Element:
         """
         Returns `True` if the element represents the current project (`.`).
 
-        >>> Address.Element('.').is_current()
-        True
+            >>> Address.Element('.').is_current()
+            True
         """
 
         return self.value == self.CURRENT
@@ -60,8 +60,8 @@ class Element:
         """
         Returns `True` if the element represents the parent project (`..`).
 
-        >>> Address.Element('..').is_parent()
-        True
+            >>> Address.Element('..').is_parent()
+            True
         """
 
         return self.value == self.PARENT
@@ -72,12 +72,12 @@ class Element:
         are not concrete have zero or more matches by asterisk (wildcards) in the #value or if #fallible is
         enabled.
 
-        >>> Address.Element("test").is_concrete()
-        True
-        >>> Address.Element("test*").is_concrete()
-        False
-        >>> Address.Element("test", fallible=True).is_concrete()
-        False
+            >>> Address.Element("test").is_concrete()
+            True
+            >>> Address.Element("test*").is_concrete()
+            False
+            >>> Address.Element("test", fallible=True).is_concrete()
+            False
         """
 
         return not (self.fallible or "*" in self.value)
@@ -91,13 +91,13 @@ class Element:
         Creates an element from a string. #fallible is set depending on whether *value* is trailed by a
         question mark.
 
-        >>> Address.Element.of("test")
-        Address.Element(value='test', fallible=False)
-        >>> Address.Element.of("test?")
-        Address.Element(value='test', fallible=True)
-        >>> Address.Element.of("test??")
-        Traceback (most recent call last):
-        ValueError: invalid address element: 'test??'
+            >>> Address.Element.of("test")
+            Address.Element(value='test', fallible=False)
+            >>> Address.Element.of("test?")
+            Address.Element(value='test', fallible=True)
+            >>> Address.Element.of("test??")
+            Traceback (most recent call last):
+            ValueError: invalid address element: 'test??'
         """
 
         fallible = False
@@ -120,10 +120,10 @@ class Address(metaclass=AddressMeta):
     used to match any number of levels (aka. recursive wildcard). A trailing question mark on each element is allowed
     to permit that address resolution fails at that element.
 
-    >>> Address(":a?:b").elements
-    [Address.Element(value='a', fallible=True), Address.Element(value='b', fallible=False)]
-    >>> Address("a:..:b").normalize()
-    Address('b')
+        >>> Address(":a?:b").elements
+        [Address.Element(value='a', fallible=True), Address.Element(value='b', fallible=False)]
+        >>> Address("a:..:b").normalize()
+        Address('b')
     """
 
     SEPARATOR: ClassVar[str] = ":"
@@ -199,8 +199,8 @@ class Address(metaclass=AddressMeta):
         :param is_absolute: Whether the address is absolute (starts with `:`)
         :param elements: The address elements.
 
-        >>> Address.create(True, False, [Address.Element("a", fallible=True), Address.Element("b")])
-        Address(':a?:b')
+            >>> Address.create(True, False, [Address.Element("a", fallible=True), Address.Element("b")])
+            Address(':a?:b')
         """
 
         obj = object.__new__(cls)
@@ -225,21 +225,21 @@ class Address(metaclass=AddressMeta):
     def __init__(self, value: str | Sequence[str] | Address) -> None:
         """Create a new Address from a string, sequence of strings or Address.
 
-        >>> Address(":a:b")
-        Address(':a:b')
-        >>> Address(":a:b".split(":"))
-        Address(':a:b')
-        >>> Address(["", "a", "b"])
-        Address(':a:b')
+            >>> Address(":a:b")
+            Address(':a:b')
+            >>> Address(":a:b".split(":"))
+            Address(':a:b')
+            >>> Address(["", "a", "b"])
+            Address(':a:b')
 
         Address objects are immutable and are not copied by the constructor (this is implemented via the
         meta class).
 
-        >>> a = Address(':a')
-        >>> a is Address(a)
-        True
+            >>> a = Address(':a')
+            >>> a is Address(a)
+            True
 
-        Use #Address.create() to construct a new address object from a list of #Address.Element.
+        Use `Address.create()` to construct a new address object from a list of `Address.Element`.
         """
 
         assert not isinstance(value, Address)
@@ -254,10 +254,10 @@ class Address(metaclass=AddressMeta):
 
     def __str__(self) -> str:
         """
-        Returns the string format of the address. Use the #Address constructor to parse it back into an address.
+        Returns the string format of the address. Use the `Address` constructor to parse it back into an address.
 
-        >>> str(Address(":a:b"))
-        ':a:b'
+            >>> str(Address(":a:b"))
+            ':a:b'
         """
 
         value = Address.SEPARATOR.join(str(x) for x in self._elements)
@@ -270,8 +270,10 @@ class Address(metaclass=AddressMeta):
 
     def __repr__(self) -> str:
         """
-        >>> repr(Address(":a?:b*"))
-        "Address(':a?:b*')"
+        Example:
+
+            >>> repr(Address(":a?:b*"))
+            "Address(':a?:b*')"
         """
 
         return f"Address({str(self)!r})"
@@ -310,8 +312,8 @@ class Address(metaclass=AddressMeta):
         """
         Returns the _nth_ element in the address.
 
-        >>> Address(":a:b")[1]
-        Address.Element(value='b', fallible=False)
+            >>> Address(":a:b")[1]
+            Address.Element(value='b', fallible=False)
         """
 
         return self._elements[element_index]
@@ -320,27 +322,28 @@ class Address(metaclass=AddressMeta):
         """
         Returns `True` if the address is empty. The empty state is the only invalid state of an address.
 
-        >>> Address("").is_empty()
-        True
-        >>> Address("a").is_empty()
-        False
-        >>> bool(Address(""))
-        False
-        >>> bool(Address("a"))
-        True
-        >>> Address.EMPTY == Address("")
-        True
+            >>> Address("").is_empty()
+            True
+            >>> Address("a").is_empty()
+            False
+            >>> bool(Address(""))
+            False
+            >>> bool(Address("a"))
+            True
+            >>> Address.EMPTY == Address("")
+            True
         """
 
         return not self._is_absolute and not self._elements
 
     def __bool__(self) -> bool:
-        """Returns False if the address is empty, otherwise True.
+        """
+        Returns False if the address is empty, otherwise True.
 
-        >>> bool(Address(":a:b"))
-        True
-        >>> bool(Address(""))
-        False
+            >>> bool(Address(":a:b"))
+            True
+            >>> bool(Address(""))
+            False
         """
 
         return not self.is_empty()
@@ -349,12 +352,12 @@ class Address(metaclass=AddressMeta):
         """
         Returns `True` if the address is absolute.
 
-        >>> Address(":a").is_absolute()
-        True
-        >>> Address("a").is_absolute()
-        False
-        >>> Address("").is_absolute()
-        False
+            >>> Address(":a").is_absolute()
+            True
+            >>> Address("a").is_absolute()
+            False
+            >>> Address("").is_absolute()
+            False
         """
 
         return self._is_absolute
@@ -363,14 +366,14 @@ class Address(metaclass=AddressMeta):
         """
         Returns `True` if the address is the root address (`:`).
 
-        >>> Address(":").is_root()
-        True
-        >>> Address(":a").is_root()
-        False
-        >>> Address("a").is_root()
-        False
-        >>> Address("").is_root()
-        False
+            >>> Address(":").is_root()
+            True
+            >>> Address(":a").is_root()
+            False
+            >>> Address("a").is_root()
+            False
+            >>> Address("").is_root()
+            False
         """
         return self._is_absolute and not self._elements
 
@@ -379,14 +382,14 @@ class Address(metaclass=AddressMeta):
         Returns `True` if this is a concrete address. A concrete address is one that is absolute and
         has no globbing elements (see #Address.Element.is_globbing()).
 
-        >>> Address(":a:b").is_concrete()
-        True
-        >>> Address("a:b").is_concrete()
-        False
-        >>> Address(":*:b").is_concrete()
-        False
-        >>> Address(":a:b?").is_concrete()
-        False
+            >>> Address(":a:b").is_concrete()
+            True
+            >>> Address("a:b").is_concrete()
+            False
+            >>> Address(":*:b").is_concrete()
+            False
+            >>> Address(":a:b?").is_concrete()
+            False
         """
 
         return self._is_absolute and all(x.is_concrete() for x in self._elements)
@@ -395,10 +398,10 @@ class Address(metaclass=AddressMeta):
         """
         Returns `True` if this is a container address, that is, if it ends with a separator.
 
-        >>> Address(":a:b").is_container()
-        False
-        >>> Address(":a:b:").is_container()
-        True
+            >>> Address(":a:b").is_container()
+            False
+            >>> Address(":a:b:").is_container()
+            True
         """
 
         return self._is_container
@@ -409,34 +412,34 @@ class Address(metaclass=AddressMeta):
         is not a container address. Use #set_container() after #normalize() to make it a container address, or pass
         `True` to the *keep_container* argument to keep the container state.
 
-        >>> Address("").normalize()
-        Address('.')
-        >>> Address("").normalize(keep_container=True)
-        Address('.')
-        >>> Address(".").normalize()
-        Address('.')
-        >>> Address(".").normalize(keep_container=True)
-        Address('.')
-        >>> Address(".:").normalize()
-        Address('.')
-        >>> Address(".:").normalize(keep_container=True)
-        Address('.:')
-        >>> Address(":a:.:b").normalize()
-        Address(':a:b')
-        >>> Address(":a:.:b").normalize(keep_container=True)
-        Address(':a:b')
-        >>> Address(":a:..:b").normalize()
-        Address(':b')
-        >>> Address("..:.:b").normalize()
-        Address('..:b')
-        >>> Address("..:.:b").normalize(keep_container=True)
-        Address('..:b')
-        >>> Address("a:b:").normalize()
-        Address('a:b')
-        >>> Address("a:b:").normalize(keep_container=True)
-        Address('a:b:')
-        >>> Address("a:b:.").normalize(keep_container=True)
-        Address('a:b')
+            >>> Address("").normalize()
+            Address('.')
+            >>> Address("").normalize(keep_container=True)
+            Address('.')
+            >>> Address(".").normalize()
+            Address('.')
+            >>> Address(".").normalize(keep_container=True)
+            Address('.')
+            >>> Address(".:").normalize()
+            Address('.')
+            >>> Address(".:").normalize(keep_container=True)
+            Address('.:')
+            >>> Address(":a:.:b").normalize()
+            Address(':a:b')
+            >>> Address(":a:.:b").normalize(keep_container=True)
+            Address(':a:b')
+            >>> Address(":a:..:b").normalize()
+            Address(':b')
+            >>> Address("..:.:b").normalize()
+            Address('..:b')
+            >>> Address("..:.:b").normalize(keep_container=True)
+            Address('..:b')
+            >>> Address("a:b:").normalize()
+            Address('a:b')
+            >>> Address("a:b:").normalize(keep_container=True)
+            Address('a:b:')
+            >>> Address("a:b:.").normalize(keep_container=True)
+            Address('a:b')
         """
 
         elements: list[Address.Element] = []
@@ -457,12 +460,12 @@ class Address(metaclass=AddressMeta):
         """
         Concatenate two addresses. If *address* is absolute, return *address*.
 
-        >>> Address(":a").concat("b:c")
-        Address(':a:b:c')
-        >>> Address(":a").concat(Address(":b"))
-        Address(':b')
-        >>> Address(":a").concat(Address("."))
-        Address(':a:.')
+            >>> Address(":a").concat("b:c")
+            Address(':a:b:c')
+            >>> Address(":a").concat(Address(":b"))
+            Address(':b')
+            >>> Address(":a").concat(Address("."))
+            Address(':a:.')
         """
 
         if isinstance(address, str):
@@ -475,10 +478,10 @@ class Address(metaclass=AddressMeta):
         """
         Return a new address with one element appended.
 
-        >>> Address(":").append("a")
-        Address(':a')
-        >>> Address(":a:.").append(".")
-        Address(':a:.:.')
+            >>> Address(":").append("a")
+            Address(':a')
+            >>> Address(":a:.").append(".")
+            Address(':a:.:.')
         """
 
         if isinstance(element, str):
@@ -492,22 +495,22 @@ class Address(metaclass=AddressMeta):
         whether the string representation of the address is followed by a colon (`:`). This status is irrelevant
         for the root address, as it is always a container.
 
-        >>> Address(":a").set_container(True)
-        Address(':a:')
-        >>> Address(":a:").set_container(False)
-        Address(':a')
+            >>> Address(":a").set_container(True)
+            Address(':a:')
+            >>> Address(":a:").set_container(False)
+            Address(':a')
 
         Attempting to set the container status to `False` for the root address will raise a #ValueError. Attempting
         to set any container status to the empty address will also raise a #ValueError.
 
-        >>> Address(":").set_container(True)
-        Address(':')
-        >>> Address(":").set_container(False)
-        Traceback (most recent call last):
-        ValueError: Cannot set container status to False for root address
-        >>> Address("").set_container(True)
-        Traceback (most recent call last):
-        ValueError: Cannot set container status for empty address
+            >>> Address(":").set_container(True)
+            Address(':')
+            >>> Address(":").set_container(False)
+            Traceback (most recent call last):
+            ValueError: Cannot set container status to False for root address
+            >>> Address("").set_container(True)
+            Traceback (most recent call last):
+            ValueError: Cannot set container status for empty address
         """
 
         if self.is_root():
@@ -524,16 +527,16 @@ class Address(metaclass=AddressMeta):
         Returns the value of the last element in the Address. If the address has no elements, which is
         the case for the root address or an empty address, a #ValueError will be raised.
 
-        >>> Address(":a:b").name
-        'b'
-        >>> Address("a:b?").name
-        'b'
-        >>> Address(":").name
-        Traceback (most recent call last):
-        ValueError: Address(':') has no elements, and thus no name
-        >>> Address("").name
-        Traceback (most recent call last):
-        ValueError: Address('') has no elements, and thus no name
+            >>> Address(":a:b").name
+            'b'
+            >>> Address("a:b?").name
+            'b'
+            >>> Address(":").name
+            Traceback (most recent call last):
+            ValueError: Address(':') has no elements, and thus no name
+            >>> Address("").name
+            Traceback (most recent call last):
+            ValueError: Address('') has no elements, and thus no name
         """
 
         if not self._elements:
@@ -546,12 +549,12 @@ class Address(metaclass=AddressMeta):
         Returns the individual elements of the address. Note that you should also check #is_absolute() to
         understand whether the elements are to be interpreted relative or absolute.
 
-        >>> Address(":").elements
-        []
-        >>> Address(":a:b").elements
-        [Address.Element(value='a', fallible=False), Address.Element(value='b', fallible=False)]
-        >>> Address(":a:b").elements == Address("a:b").elements
-        True
+            >>> Address(":").elements
+            []
+            >>> Address(":a:b").elements
+            [Address.Element(value='a', fallible=False), Address.Element(value='b', fallible=False)]
+            >>> Address(":a:b").elements == Address("a:b").elements
+            True
         """
 
         return self._elements
@@ -561,34 +564,34 @@ class Address(metaclass=AddressMeta):
         """
         Returns the parent address.
 
-        >>> Address(":a:b").parent
-        Address(':a')
-        >>> Address(":a").parent
-        Address(':')
-        >>> Address("a").parent
-        Address('.')
-        >>> Address(".").parent
-        Address('..')
-        >>> Address("..").parent
-        Address('..:..')
+            >>> Address(":a:b").parent
+            Address(':a')
+            >>> Address(":a").parent
+            Address(':')
+            >>> Address("a").parent
+            Address('.')
+            >>> Address(".").parent
+            Address('..')
+            >>> Address("..").parent
+            Address('..:..')
 
         The container status of the address is perserved.
 
-        >>> Address(":a:b").parent
-        Address(':a')
-        >>> Address(":a:b:").parent
-        Address(':a:')
+            >>> Address(":a:b").parent
+            Address(':a')
+            >>> Address(":a:b:").parent
+            Address(':a:')
 
-        Use the #set_container() method to change the container status.
+        Use the `set_container()` method to change the container status.
 
         The root and empty address have no parent.
 
-        >>> Address(":").parent
-        Traceback (most recent call last):
-        ValueError: Root address has no parent
-        >>> Address("").parent
-        Traceback (most recent call last):
-        ValueError: Empty address has no parent
+            >>> Address(":").parent
+            Traceback (most recent call last):
+            ValueError: Root address has no parent
+            >>> Address("").parent
+            Traceback (most recent call last):
+            ValueError: Empty address has no parent
         """
 
         if self._is_absolute and not self._elements:

@@ -19,7 +19,7 @@ packages = [
   {include = "kraken/std", from = "src"},
 ]
 readme = "README.md"
-version = "0.33.1"
+version = "0.34.1"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
@@ -41,10 +41,10 @@ builddsl = "^1.0.0"
 databind-json = "^4.2.5"
 dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
-dill = ">=0.3.5,<0.3.6" # Waiting for Dill 0.3.7 for 3.11 compatibiltiy, see https://github.com/uqfoundation/dill/issues/332
-httpx = "^0.23.0"
-keyring = "^23.8.2"
-mitmproxy = "^9.0.1"
+dill = ">=0.3.8,<0.4.0"
+httpx = "^0.26.0"
+keyring = "^24.0.0"
+mitmproxy = "^10.0.0"
 networkx = "^3.1"
 nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
@@ -55,7 +55,7 @@ rich = "^13.4.2"
 termcolor = "^1.1.0"
 tomli = "^2.0.1"
 tomli-w = "^1.0.0"
-typeapi = "^1.4.3"
+typeapi = "^2.0.0"
 typing-extensions = ">=4.6.0"
 
 [tool.poetry.dev-dependencies]
@@ -69,7 +69,7 @@ types-termcolor = "^1.1.5"
 [tool.poetry.group.docs.dependencies]
 mkdocs = "*"
 mkdocs-material = "*"
-novella = "0.2.3"
+novella = "0.2.6"
 pydoc-markdown = "^4.6.0"
 
 # Slap configuration

@@ -25,8 +25,19 @@ inject_auth_addon_file = Path(__file__).parent / "mitm_addon.py"
 
 
 def start_mitmweb_proxy(
-    auth: Mapping[str, tuple[str, str]], startup_wait_time: float = 3.0, additional_args: Sequence[str] = ()
+    auth: Mapping[str, tuple[str, str]],
+    startup_wait_time: float = 3.0,
+    additional_args: Sequence[str] = (),
 ) -> tuple[str, Path]:
+    """
+    Ensure that a `mitmweb` process with the given *auth* configuration and *additional_args* is running. If a
+    process is already running that doens't match the spec, it will be stopped and a new one will be started.
+
+    Note:
+        This process is managed globally and the state is stored under `~/.mitmproxy`. Switching between projects
+        that require a different configuration will stop and start the proxy constantly.
+    """
+
     controller = DaemonController("kraken.mitmweb", daemon_state_file)
     started = controller.run(
         command=[

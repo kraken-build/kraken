@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+      "config:recommended"
+  ],
+  "packageRules": [
+      {
+          "groupName": "docs requirements",
+          "matchPackagePatterns": ["*"],
+          "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
+      },
+      {
+          "groupName": "minor and patch updates",
+          "matchPackagePatterns": ["*"],
+          "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
+      }
+  ]
+}

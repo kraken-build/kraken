@@ -1,0 +1,13 @@
+release-date = "2024-01-31"
+
+[[entries]]
+id = "6b59b145-100f-4982-be9d-cbf57d173b74"
+type = "improvement"
+description = "Upgrade Dill to `>=0.3.8,<0.4.0` which added support for Python 3.11+"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "8d0c6515-3a9a-4ae0-a838-a507cfe15291"
+type = "feature"
+description = "add `kraken.std.docs.mkdocs.mkdocs()`"
+author = "niklas.rosenstein@helsing.ai"
