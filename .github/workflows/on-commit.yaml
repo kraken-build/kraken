@@ -12,7 +12,7 @@ jobs:
   # == Validate data embedded in the Kraken standard library ==
 
   gitignore-io-up-to-date:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
@@ -25,7 +25,7 @@ jobs:
   # == Documentation ==
 
   documentation:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     permissions:
       contents: read
       pages: write
@@ -111,7 +111,7 @@ jobs:
   # == Try running Kraken as defined in the kraken.yaml file ==
 
   selftest:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
@@ -153,7 +153,7 @@ jobs:
         key: build-cache:${{ runner.os }}:selftest
 
   uv-installer:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
@@ -162,7 +162,7 @@ jobs:
     - run: krakenw run fmt lint
 
   examples-docker-manual:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
