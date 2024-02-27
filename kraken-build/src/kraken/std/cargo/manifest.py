@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 from dataclasses import dataclass, fields
 from enum import Enum
@@ -70,7 +71,7 @@ class CargoMetadata:
     target_directory: Path
 
     @classmethod
-    def read(cls, project_dir: Path, locked: bool | None = None) -> CargoMetadata:
+    def read(cls, project_dir: Path, from_project_dir: bool = False, locked: bool | None = None) -> CargoMetadata:
         cmd = [
             "cargo",
             "metadata",
@@ -79,17 +80,28 @@ class CargoMetadata:
             "--manifest-path",
             str(project_dir / "Cargo.toml"),
         ]
+
+        # the .cargo/config.toml in user/foo/bar is not picked up when running this command from
+        # user/foo for example. This flag executes the subprocess from the project dir
+        if from_project_dir:
+            cwd = project_dir
+        else:
+            cwd = Path(os.getcwd())
+
         if locked is None:
+            # Append `--locked` if a Cargo.lock file is found in the project directory or any of its parents.
             project_dir = project_dir.absolute()
             for parent in [project_dir, *project_dir.parents]:
                 if (parent / "Cargo.lock").exists():
                     cmd.append("--locked")
                     break
         elif locked:
-            # if locked is True, we should *always* pass --locked.
-            # the expectation is that the command will fail w/o Cargo.lock.
+            # If locked is True, we should *always* pass --locked. The expectation is that the command will
+            # fail w/o a Cargo.lock file.
             cmd.append("--locked")
-        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, cwd=cwd)
+
         if result.returncode != 0:
             logger.error("Stderr: %s", result.stderr)
             logger.error(f"Could not execute `{' '.join(cmd)}`, and thus can't read the cargo metadata.")

@@ -3,3 +3,9 @@ id = "67c15e74-a142-482f-9d2e-972a50161129"
 type = "feature"
 description = "Make Rust builds respect Cargo.lock when present"
 author = "jon.gjengset@helsing.ai"
+
+[[entries]]
+id = "db65bd12-a9d1-472c-a38b-6f889cdda683"
+type = "improvement"
+description = "Move bump version into publish"
+author = "colin.mikolajczak@helsing.ai"

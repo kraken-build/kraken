@@ -53,6 +53,9 @@ class CargoBuildTask(Task):
     #: An output property for the Cargo libraries that are being produced by this build.
     out_libraries: Property[list[CargoLibraryArtifact]] = Property.output()
 
+    #: Flag indicating if we should execute this command from the project directory
+    from_project_dir: Property[bool] = Property.default(False)
+
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
 
@@ -107,7 +110,7 @@ class CargoBuildTask(Task):
         if self.target.get_or(None) in ("debug", "release"):
             # Expose the output binaries that are produced by this task.
             # We only expect a binary to be built if the target is debug or release.
-            manifest = CargoMetadata.read(self.project.directory)
+            manifest = CargoMetadata.read(self.project.directory, self.from_project_dir.get())
             target_dir = manifest.target_directory / self.target.get()
             for artifact in manifest.artifacts:
                 # Rust binaries have an extensionless name whereas libraries are prefixed with "lib" and suffixed with
