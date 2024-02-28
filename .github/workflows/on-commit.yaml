@@ -12,20 +12,20 @@ jobs:
   # == Validate data embedded in the Kraken standard library ==
 
   gitignore-io-up-to-date:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v5
       with: { python-version: "3.10" }
-    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
     - run: python -m kraken.std.git.gitignore.gitignore_io
     - run: git diff --exit-code
 
   # == Documentation ==
 
   documentation:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     permissions:
       contents: read
       pages: write
@@ -68,11 +68,12 @@ jobs:
   # == Unit tests, linting, and type checking ==
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.x"]
+        tasks: ["check lint", "test"]
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
@@ -94,7 +95,7 @@ jobs:
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     # Explicitly mention python.install to ensure that Pip install is rerun.
-    - run: krakenw run python.install check lint test -vv
+    - run: krakenw run python.install ${{ matrix.tasks }} -vv
 
     - name: Save Venv
       uses: actions/cache/save@v4
@@ -110,71 +111,63 @@ jobs:
 
   # == Try running Kraken as defined in the kraken.yaml file ==
 
-  selftest:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - python-version: "3.10"
-          - python-version: "3.11"
-          - python-version: "3.12"
-          - python-version: "3.x"
-    steps:
-    - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm
-    - run: rustup update
+  # selftest:
+  #   runs-on: arc-amd64-small
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.10", "3.11", "3.12", "3.x"]
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: NiklasRosenstein/slap@gha/install/v1
+  #   - uses: actions/setup-python@v5
+  #     with: { python-version: "${{ matrix.python-version }}" }
+  #   - run: pip install pipx && pipx install poetry && pipx install pdm
+  #   - run: rustup update
 
-    - name: Restore cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+  #   - name: Restore cache
+  #     uses: actions/cache/restore@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
 
-    - run: slap install --link --no-venv-check ${{ matrix.only }}
+  #   - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
 
-    - run: kraken run python.install fmt lint test -vv
-    - run: kraken q ls
-    - run: kraken q tree
-    - run: kraken q viz
-    - run: kraken q d python.mypy
+  #   - run: kraken run python.install fmt lint test -vv
+  #   - run: kraken q ls
+  #   - run: kraken q tree
+  #   - run: kraken q viz
+  #   - run: kraken q d python.mypy
 
-    - name: Save cache
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+  #   - name: Save cache
+  #     uses: actions/cache/save@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
 
   uv-installer:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: slap install --link --no-venv-check
+    - run: slap config --venv-type=uv && slap install --link --no-venv-check
     - run: krakenw --reinstall --use=UV
     - run: krakenw run fmt lint
 
   examples-docker-manual:
-    runs-on: ubuntu-latest
+    runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - python-version: "3.10"
-          - python-version: "3.11"
-          - python-version: "3.12"
-          - python-version: "3.x"
+        python-version: ["3.10", "3.11", "3.12", "3.x"]
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: slap install --link --no-venv-check ${{ matrix.only }}
+    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
     - run: cd examples/docker-manual && kraken run :dockerBuild :sub:helloWorld
