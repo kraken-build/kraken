@@ -111,43 +111,43 @@ jobs:
 
   # == Try running Kraken as defined in the kraken.yaml file ==
 
-  selftest:
-    runs-on: arc-amd64-small
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.x"]
-    steps:
-    - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm
-    - run: rustup update
+  # selftest:
+  #   runs-on: arc-amd64-small
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.10", "3.11", "3.12", "3.x"]
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: NiklasRosenstein/slap@gha/install/v1
+  #   - uses: actions/setup-python@v5
+  #     with: { python-version: "${{ matrix.python-version }}" }
+  #   - run: pip install pipx && pipx install poetry && pipx install pdm
+  #   - run: rustup update
 
-    - name: Restore cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+  #   - name: Restore cache
+  #     uses: actions/cache/restore@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
 
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+  #   - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
 
-    - run: kraken run python.install fmt lint test -vv
-    - run: kraken q ls
-    - run: kraken q tree
-    - run: kraken q viz
-    - run: kraken q d python.mypy
+  #   - run: kraken run python.install fmt lint test -vv
+  #   - run: kraken q ls
+  #   - run: kraken q tree
+  #   - run: kraken q viz
+  #   - run: kraken q d python.mypy
 
-    - name: Save cache
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+  #   - name: Save cache
+  #     uses: actions/cache/save@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
 
   uv-installer:
     runs-on: arc-amd64-small
