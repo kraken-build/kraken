@@ -7,7 +7,7 @@ import subprocess
 import sys
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Literal, NoReturn
+from typing import ClassVar, Literal, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
@@ -36,6 +36,8 @@ class VenvBuildEnv(BuildEnv):
     """
     Installs the Kraken build environment into a Python virtual environment.
     """
+
+    INSTALLER_NAME: ClassVar[str] = "Pip"
 
     def __init__(self, path: Path, incremental: bool = False, show_pip_logs: bool = False) -> None:
         self._path = path
@@ -217,7 +219,7 @@ class VenvBuildEnv(BuildEnv):
         env = os.environ.copy()
         command = self._get_install_command(self._path, requirements, env)
         logger.info("Installing dependencies.")
-        logger.debug("Installing into build environment with Pip: %s", " ".join(command))
+        logger.debug("Installing into build environment with %s: %s", self.INSTALLER_NAME, " ".join(command))
         self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.
