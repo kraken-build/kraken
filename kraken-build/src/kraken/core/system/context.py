@@ -379,12 +379,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         self.executor.execute_graph(graph, self.observer)
 
         if not graph.is_complete():
-            failed_tasks = list(graph.tasks(failed=True))
-            if len(failed_tasks) == 1:
-                message = f'task "{failed_tasks[0].address}" failed'
-            else:
-                message = "tasks " + ", ".join(f'"{task.address}"' for task in failed_tasks) + " failed"
-            raise BuildError(message)
+            raise BuildError(list(graph.tasks(failed=True)))
 
     @overload
     def listen(

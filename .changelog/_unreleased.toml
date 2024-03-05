@@ -29,3 +29,17 @@ id = "31a52a49-8d26-4dd7-a4bc-84fe9fb37c19"
 type = "improvement"
 description = "Add task to login in all cargo registries"
 author = "quentin.santos@helsing.ai"
+
+[[entries]]
+id = "bc4f2e14-e52b-48ba-b0f3-c1b6210e1682"
+type = "fix"
+description = "Fix passing the actual list of tasks to `BuildError` and turn `BuildError.failed_tasks` into `Set[Task]` from `Set[str]`"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
+
+[[entries]]
+id = "dd66c076-e8c7-4680-8036-3f30be3c911b"
+type = "feature"
+description = "Add shellcheck capabilities"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
