@@ -36,3 +36,10 @@ type = "fix"
 description = "Fix passing the actual list of tasks to `BuildError` and turn `BuildError.failed_tasks` into `Set[Task]` from `Set[str]`"
 author = "niklas.rosenstein@helsing.ai"
 component = "kraken-build"
+
+[[entries]]
+id = "dd66c076-e8c7-4680-8036-3f30be3c911b"
+type = "feature"
+description = "Add shellcheck capabilities"
+author = "niklas.rosenstein@helsing.ai"
+component = "kraken-build"
