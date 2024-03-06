@@ -1,0 +1,6 @@
+[[entries]]
+id = "a2bf2942-29a7-406f-a771-ebdca0051148"
+type = "improvement"
+description = "Use `tomlkit` instead of `tomli`/`tomli-w` packages to read/write Pyproject; this preserves comments in the `pyproject.toml`"
+author = "@NiklasRosenstein"
+component = "kraken-build"

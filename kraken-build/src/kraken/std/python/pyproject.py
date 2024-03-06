@@ -8,8 +8,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
 
-import tomli
-import tomli_w
+import tomlkit
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +65,22 @@ class Pyproject(dict[str, Any]):
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
-        return cls(None, tomli.loads(text))
+        return cls(None, tomlkit.parse(text))
 
     @classmethod
-    def read(cls, path: Path) -> Pyproject:
+    def read(cls, path: Path)    -> Pyproject:
         with path.open("rb") as fp:
-            return cls(path, tomli.load(fp))
+            return cls(path, tomlkit.load(fp))
 
     def save(self, path: Path | None = None) -> None:
         path = path or self.path
         if not path:
             raise RuntimeError("No path to save to")
         with path.open("wb") as fp:
-            tomli_w.dump(self, fp)
+            tomlkit.dump(self, fp)
 
     def to_toml_string(self) -> str:
-        return tomli_w.dumps(self)
+        return tomlkit.dumps(self)
 
 
 class PyprojectHandler(ABC):
