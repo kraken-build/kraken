@@ -8,7 +8,7 @@ from typing import Literal
 
 from nr.stream import Optional
 
-from kraken.std.git.version import GitVersion, NotAGitRepositoryError, git_describe
+from kraken.std.git.version import EmptyGitRepositoryError, GitVersion, NotAGitRepositoryError, git_describe
 from kraken.std.python.buildsystem import detect_build_system
 from kraken.std.python.pyproject import PackageIndex
 from kraken.std.python.settings import python_settings
@@ -256,6 +256,9 @@ def python_project(
             git_version = GitVersion.parse(git_describe(project.directory))
         except NotAGitRepositoryError:
             logger.info("No Git repository found in %s, not enforcing a project version", project.directory)
+            enforce_project_version = None
+        except EmptyGitRepositoryError:
+            logger.info("Empty Git repository found in %s, not enforcing a project version", project.directory)
             enforce_project_version = None
         else:
             match detect_git_version_build_type:

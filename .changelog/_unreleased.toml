@@ -55,3 +55,9 @@ type = "feature"
 description = "Add shellcheck capabilities"
 author = "niklas.rosenstein@helsing.ai"
 component = "kraken-build"
+
+[[entries]]
+id = "4cb0fe80-d359-4302-8893-c0fd62bf0631"
+type = "improvement"
+description = "Raise `EmptyGitRepositoryError` and `NotAGitRepositoryError` respectively in `git_describe()`"
+author = "@NiklasRosenstein"

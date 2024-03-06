@@ -11,6 +11,10 @@ class NotAGitRepositoryError(Exception):
     pass
 
 
+class EmptyGitRepositoryError(Exception):
+    pass
+
+
 def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> str:
     """Describe a repository with tags.
 
@@ -32,9 +36,14 @@ def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> st
         stderr = exc.stderr.decode()
         if "not a git repository" in stderr:
             raise NotAGitRepositoryError(path)
-        count = int(sp.check_output(["git", "rev-list", "HEAD", "--count"], cwd=path).decode().strip())
-        short_rev = sp.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=path).decode().strip()
-        return f"0.0.0-{count}-g{short_rev}"
+    try:
+        count = int(sp.check_output(["git", "rev-list", "HEAD", "--count"], stderr=sp.PIPE, cwd=path).decode().strip())
+    except sp.CalledProcessError as exc:
+        stderr = exc.stderr.decode()
+        if "unknown revision" in stderr:
+            raise EmptyGitRepositoryError(path)
+    short_rev = sp.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=path).decode().strip()
+    return f"0.0.0-{count}-g{short_rev}"
 
 
 @dataclasses.dataclass
