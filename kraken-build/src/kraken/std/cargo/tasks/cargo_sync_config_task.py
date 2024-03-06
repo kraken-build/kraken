@@ -24,7 +24,7 @@ class CargoSyncConfigTask(RenderFileTask):
     #: The global-credential-providers to set in the config. If not set, the config won't be touched. The providers
     #: must be specified in reverse order of precedence. Read more about credential providers here:
     #: https://doc.rust-lang.org/cargo/reference/registry-authentication.html
-    global_config_providers: Property[Sequence[str]]
+    global_credential_providers: Property[Sequence[str]] = Property.default(["cargo:token"])
 
     #: The registries to insert into the configuration.
     registries: Property[list[CargoRegistry]] = Property.default_factory(list)
@@ -42,12 +42,12 @@ class CargoSyncConfigTask(RenderFileTask):
 
     def get_file_contents(self, file: Path) -> str | bytes:
         content = tomli.loads(file.read_text()) if not self.replace.get() and file.exists() else {}
-        if self.global_config_providers.is_set():
-            if self.global_config_providers.get() is None:
+        if self.global_credential_providers.is_set():
+            if self.global_credential_providers.get() is None:
                 content.setdefault("registry", {}).pop("global-credential-providers", None)
             else:
                 content.setdefault("registry", {})["global-credential-providers"] = list(
-                    self.global_config_providers.get()
+                    self.global_credential_providers.get()
                 )
         content.setdefault("registries", {})["crates-io"] = {"protocol": self.crates_io_protocol.get()}
         for registry in self.registries.get():
