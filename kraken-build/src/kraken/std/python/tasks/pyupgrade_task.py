@@ -146,4 +146,7 @@ def pyupgrade(
     format_task.keep_runtime_typing = keep_runtime_typing
     format_task.python_version = python_version
 
+    # When we run both, it makes no sense to run the check task before the format task.
+    check_task.depends_on(format_task, mode="order-only")
+
     return PyUpgradeTasks(check_task, format_task)

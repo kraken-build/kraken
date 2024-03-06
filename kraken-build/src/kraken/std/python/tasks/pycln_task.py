@@ -99,4 +99,7 @@ def pycln(
     format_task.pycln_bin = pycln_bin
     format_task.additional_args = additional_args
 
+    # When we run both, it makes no sense to run the check task before the format task.
+    check_task.depends_on(format_task, mode="order-only")
+
     return PyclnTasks(check_task, format_task)

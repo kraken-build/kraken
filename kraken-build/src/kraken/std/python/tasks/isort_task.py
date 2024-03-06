@@ -140,4 +140,7 @@ def isort(
     format_task.config_file = config_file
     format_task.paths = paths
 
+    # When we run both, it makes no sense to run the check task before the format task.
+    check_task.depends_on(format_task, mode="order-only")
+
     return IsortTasks(check_task, format_task)
