@@ -1,0 +1,7 @@
+release-date = "2024-03-06"
+
+[[entries]]
+id = "4e37b514-e766-4068-bd33-63eded59d8fc"
+type = "fix"
+description = "Set `cargo:token` by default (fix regression introduced in #213)"
+author = "niklas.rosenstein@helsing.ai"
