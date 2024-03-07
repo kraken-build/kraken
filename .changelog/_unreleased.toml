@@ -1,0 +1,5 @@
+[[entries]]
+id = "adc17a2c-58fc-48e5-a476-2bcfccb26a21"
+type = "fix"
+description = "Do not fail when building the same PEX file twice"
+author = "@Tpt"

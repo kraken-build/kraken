@@ -11,6 +11,8 @@ from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
 
+logger = logging.getLogger(__name__)
+
 
 class PexBuildTask(Task):
     """Build a PEX (Python EXecutable) from a Python requirement spec. Useful to install CLIs from PyPI. The PEX
@@ -147,8 +149,22 @@ def pex_build(
 ) -> PexBuildTask:
     assert binary_name or console_script, "binary_name or console_script must be set"
     binary_name = binary_name or console_script
+    project = project or Project.current()
+    task_name = task_name or f"pexBuild.{binary_name}"
 
-    task = (project or Project.current()).task(task_name or f"pexBuild.{binary_name}", PexBuildTask)
+    existing_task = project.tasks().get(task_name, None)
+    if (
+        isinstance(existing_task, PexBuildTask)
+        and existing_task.binary_name.get() == binary_name
+        and existing_task.requirements.get() == requirements
+        and existing_task.entry_point.get() == entry_point
+        and existing_task.console_script.get() == console_script
+        and existing_task.interpreter_constraint.get() == interpreter_constraint
+        and existing_task.venv.get() == venv
+    ):
+        return existing_task
+
+    task = project.task(task_name, PexBuildTask)
     task.binary_name = binary_name
     task.requirements = requirements
     task.entry_point = entry_point
