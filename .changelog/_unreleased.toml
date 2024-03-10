@@ -3,3 +3,9 @@ id = "d9440e6f-b19b-4b49-bad4-dc7860228cf8"
 type = "improvement"
 description = "Add order-only dependencies between check and format tasks created for Python projects"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "84e8fb46-7aef-4dfc-b4ec-5ad507c82544"
+type = "improvement"
+description = "`build_docker_image(dockerfile)` now treats the path relative to the current project"
+author = "@NiklasRosenstein"

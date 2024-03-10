@@ -80,7 +80,7 @@ def python_project(
     black_version_spec: str = ">=24.1.1,<25.0.0",
     flake8_version_spec: str = ">=7.0.0,<8.0.0",
     flake8_additional_requirements: Sequence[str] = (),
-    flake8_extend_ignore: Sequence[str] = ("W503", "W504", "E203", "E704"),
+    flake8_extend_ignore: Sequence[str] = ("W503", "W504", "E203", "E704", "E701"),
     mypy_version_spec: str = ">=1.8.0,<2.0.0",
     pycln_version_spec: str = ">=2.4.0,<3.0.0",
     pyupgrade_version_spec: str = ">=3.15.0,<4.0.0",
