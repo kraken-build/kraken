@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import abc
+import contextlib
 import logging
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
 from kraken.core import TaskStatus
+from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
 from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 
 if TYPE_CHECKING:
@@ -21,6 +24,7 @@ class PythonBuildSystem(abc.ABC):
     """Abstraction of a Python build system."""
 
     name: ClassVar[str]
+    project_directory: Path
 
     @abc.abstractmethod
     def supports_managed_environments(self) -> bool:
@@ -59,12 +63,56 @@ class PythonBuildSystem(abc.ABC):
 
         raise NotImplementedError
 
+    @contextlib.contextmanager
+    def bump_version(self, version: str) -> Iterator[None]:
+        """Set the version of the project temporarily.
+
+        The default implementation bumps the version number in the `pyproject.toml` using `get_pyproject_reader()`
+        as well as in the source files in the packages provided by the `PyprojectHandler.get_packages()`.
+        """
+
+        # Save the previous version of the pyproject.toml.
+        pyproject_toml = self.project_directory / "pyproject.toml"
+
+        revert_files: dict[Path, str] = {}
+        revert_files[pyproject_toml] = pyproject_toml.read_text()
+
+        # Bump the in-source version number.
+        pyproject = self.get_pyproject_reader(Pyproject.read(pyproject_toml))
+        try:
+            pyproject.set_path_dependencies_to_version(version)
+        except NotImplementedError:
+            pass
+        pyproject.set_version(version)
+        pyproject.raw.save()
+
+        sum_replaced = 0
+        for package in pyproject.get_packages():
+            package_dir = self.project_directory / (package.from_ or "") / package.include
+            for path, n_replaced in update_python_version_str_in_source_files(version, package_dir):
+                sum_replaced += n_replaced
+                revert_files[path] = path.read_text()
+
+            print(
+                f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
+                f"{package_dir.relative_to(self.project_directory)} to {version}",
+            )
+
+        print("Modified files:")
+        for path in sorted(revert_files):
+            print("  -", path)
+
+        try:
+            yield
+        finally:
+            for path, content in revert_files.items():
+                path.write_text(content)
+
     @abc.abstractmethod
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
+    def build(self, output_directory: Path) -> list[Path]:
         """Build one or more distributions of the project managed by this build system.
 
         :param output_directory: The directory where the distributions should be placed.
-        :param as_version: A version number for the built distributions.
         """
 
     @abc.abstractmethod

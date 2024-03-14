@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
 
-import tomli
-import tomli_w
+import tomlkit
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +65,22 @@ class Pyproject(dict[str, Any]):
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
-        return cls(None, tomli.loads(text))
+        return cls(None, tomlkit.parse(text))
 
     @classmethod
     def read(cls, path: Path) -> Pyproject:
         with path.open("rb") as fp:
-            return cls(path, tomli.load(fp))
+            return cls(path, tomlkit.load(fp))
 
     def save(self, path: Path | None = None) -> None:
         path = path or self.path
         if not path:
             raise RuntimeError("No path to save to")
-        with path.open("wb") as fp:
-            tomli_w.dump(self, fp)
+        with path.open("w") as fp:
+            tomlkit.dump(self, fp)
 
     def to_toml_string(self) -> str:
-        return tomli_w.dumps(self)
+        return tomlkit.dumps(self)
 
 
 class PyprojectHandler(ABC):
@@ -162,3 +161,12 @@ class PyprojectHandler(ABC):
         """
 
         raise NotImplementedError("%s.set_path_dependencies_to_version()" % type(self).__name__)
+
+    @dataclass(frozen=True)
+    class Package:
+        include: str
+        from_: str | None = None
+
+    @abstractmethod
+    def get_packages(self) -> list[Package]:
+        pass
