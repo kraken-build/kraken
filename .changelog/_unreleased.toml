@@ -6,6 +6,12 @@ author = "@NiklasRosenstein"
 component = "kraken-build"
 
 [[entries]]
+id = "adc17a2c-58fc-48e5-a476-2bcfccb26a21"
+type = "fix"
+description = "Do not fail when building the same PEX file twice"
+author = "@Tpt"
+
+[[entries]]
 id = "654174ac-b3d2-476a-b761-e65c8f4dd8a5"
 type = "fix"
 description = "Fixed an issue where when the DaemonController fails to start the daemon process, the fork of the Kraken process continues, resulting in two copies of the process trying to run to completion, e.g. executing tasks from this point on."
