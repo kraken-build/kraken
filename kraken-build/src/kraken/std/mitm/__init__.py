@@ -27,6 +27,7 @@ inject_auth_addon_file = Path(__file__).parent / "mitm_addon.py"
 def start_mitmweb_proxy(
     auth: Mapping[str, tuple[str, str]],
     startup_wait_time: float = 3.0,
+    mitmweb_bin: str = "mitmweb",
     additional_args: Sequence[str] = (),
 ) -> tuple[str, Path]:
     """
@@ -41,7 +42,7 @@ def start_mitmweb_proxy(
     controller = DaemonController("kraken.mitmweb", daemon_state_file)
     started = controller.run(
         command=[
-            "mitmweb",
+            mitmweb_bin,
             "--no-web-open-browser",
             "--web-port",
             str(mitmweb_ui_port),
@@ -71,6 +72,11 @@ def start_mitmweb_proxy(
         time.sleep(startup_wait_time)
         if not controller.is_alive():
             raise RuntimeError("The mitmweb proxy failed to start. Check its logs at %s" % daemon_log_file)
+        print("mitmweb was started successfully")
+    else:
+        print("mitmweb already running")
+    print(f"proxy available at http://localhost:{mitmweb_port}")
+    print(f"web ui available at http://localhost:{mitmweb_ui_port}")
     return f"localhost:{mitmweb_port}", mitmproxy_ca_cert_file
 
 
