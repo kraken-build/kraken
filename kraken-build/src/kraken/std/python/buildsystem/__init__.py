@@ -93,10 +93,12 @@ class PythonBuildSystem(abc.ABC):
                 sum_replaced += n_replaced
                 revert_files[path] = path.read_text()
 
-        print(
-            f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
-            f"{package_dir.relative_to(self.project_directory)} to {version}",
-        )
+            print(
+                f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
+                f"{package_dir.relative_to(self.project_directory)} to {version}",
+            )
+
+        print("Modified files:")
         for path in sorted(revert_files):
             print("  -", path)
 
