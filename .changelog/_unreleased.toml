@@ -1,0 +1,5 @@
+[[entries]]
+id = "670a651f-b0d2-4d1a-881e-94a70c885749"
+type = "feature"
+description = "Add `pex_set_default_index_url()` function"
+author = "niklas.rosenstein@helsing.ai"
