@@ -38,7 +38,7 @@ class BuildTask(Task):
 
         with contextlib.ExitStack() as stack:
             if as_version := self.as_version.get():
-                stack.push(build_system.bump_version(as_version))
+                stack.enter_context(build_system.bump_version(as_version))
             self.output_files.set(build_system.build(output_directory))
 
         return TaskStatus.succeeded()
