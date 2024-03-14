@@ -22,3 +22,9 @@ id = "7d1ec411-3b1a-4b54-a858-137ff10033f1"
 type = "improvement"
 description = "Add `PythonBuildSystem.bump_version()` function with a single implementation for Poetry/Maturin/Pdm which correctly reverts to the original file contents. Note that reverting is still not supported for Slap"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "38ef4850-c7b2-435e-8801-f4fe50070be8"
+type = "improvement"
+description = "Remove mitmweb dependency, install it with PEX instead. Print mitmweb proxy and UI URLs in the CargoAuthProxy task"
+author = "niklas.rosenstein@helsing.ai"
