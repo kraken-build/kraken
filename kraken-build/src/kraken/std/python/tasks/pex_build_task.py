@@ -110,12 +110,7 @@ def _build_pex(
     if pex_binary is not None:
         command = [str(pex_binary)]
     else:
-        command = [
-            str(python or sys.executable),
-            "-m",
-            "pex",
-            "-v",
-        ]
+        command = [str(python or sys.executable), "-m", "pex", "-v"]
 
     command += [
         "--pip-version",
