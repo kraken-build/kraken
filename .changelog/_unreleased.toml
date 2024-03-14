@@ -16,3 +16,9 @@ id = "654174ac-b3d2-476a-b761-e65c8f4dd8a5"
 type = "fix"
 description = "Fixed an issue where when the DaemonController fails to start the daemon process, the fork of the Kraken process continues, resulting in two copies of the process trying to run to completion, e.g. executing tasks from this point on."
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "7d1ec411-3b1a-4b54-a858-137ff10033f1"
+type = "improvement"
+description = "Add `PythonBuildSystem.bump_version()` function with a single implementation for Poetry/Maturin/Pdm which correctly reverts to the original file contents. Note that reverting is still not supported for Slap"
+author = "niklas.rosenstein@helsing.ai"

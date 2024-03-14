@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
@@ -161,3 +161,12 @@ class PyprojectHandler(ABC):
         """
 
         raise NotImplementedError("%s.set_path_dependencies_to_version()" % type(self).__name__)
+
+    @dataclass(frozen=True)
+    class Package:
+        include: str
+        from_: str | None = None
+
+    @abstractmethod
+    def get_packages(self) -> list[Package]:
+        pass

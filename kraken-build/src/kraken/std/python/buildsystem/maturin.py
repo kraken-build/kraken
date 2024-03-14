@@ -75,16 +75,7 @@ class _MaturinBuilder:
     def add_build_environment_variable(self, key: str, value: str) -> None:
         self._build_env[key] = value
 
-    def build(self, output_directory: Path, as_version: str | None) -> list[Path]:
-        # We set the version
-        old_poetry_version = None
-        pyproject_path = self._project_directory / "pyproject.toml"
-        if as_version is not None:
-            pyproject = self._get_pyproject_reader(Pyproject.read(pyproject_path))
-            old_poetry_version = pyproject.get_version()
-            pyproject.set_version(as_version)
-            pyproject.raw.save()
-
+    def build(self, output_directory: Path) -> list[Path]:
         # We clean up target dir
         metadata = CargoMetadata.read(self._project_directory)
         dist_dir = metadata.target_directory / "wheels"
@@ -135,12 +126,6 @@ class _MaturinBuilder:
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):
             shutil.rmtree(dist_dir)
-
-        if as_version is not None:
-            # We roll back the version
-            pyproject = self._get_pyproject_reader(Pyproject.read(pyproject_path))
-            pyproject.set_version(old_poetry_version)
-            pyproject.raw.save()
 
         return dst_files
 
@@ -212,8 +197,8 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
         handler = self.get_pyproject_reader(pyproject)
         handler.synchronize_project_section_to_poetry_state()
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        return self._builder.build(output_directory, as_version)
+    def build(self, output_directory: Path) -> list[Path]:
+        return self._builder.build(output_directory)
 
     def get_lockfile(self) -> Path | None:
         return self.project_directory / "poetry.lock"
@@ -264,8 +249,8 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
     def get_managed_environment(self) -> ManagedEnvironment:
         return MaturinPdmManagedEnvironment(self.project_directory)
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        return self._builder.build(output_directory, as_version)
+    def build(self, output_directory: Path) -> list[Path]:
+        return self._builder.build(output_directory)
 
     def get_lockfile(self) -> Path | None:
         return self.project_directory / "pdm.lock"
