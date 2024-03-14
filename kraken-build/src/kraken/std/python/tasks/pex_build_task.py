@@ -10,8 +10,10 @@ from typing import Literal
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
+from kraken.std.util.url import redact_url_password
 
 logger = logging.getLogger(__name__)
+default_index_url: str | None = None
 
 
 class PexBuildTask(Task):
@@ -26,6 +28,7 @@ class PexBuildTask(Task):
     venv: Property[Literal["prepend", "append"] | None] = Property.default(None)
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
+    index_url: Property[str | None] = Property.default(None)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -70,6 +73,7 @@ class PexBuildTask(Task):
                 venv=self.venv.get(),
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
+                index_url=self.index_url.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -88,6 +92,7 @@ def _build_pex(
     inject_env: Mapping[str, str] | None = None,
     pex_binary: Path | None = None,
     python: Path | None = None,
+    index_url: str | None = None,
     log: logging.Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
@@ -132,7 +137,13 @@ def _build_pex(
     for key, value in (inject_env or {}).items():
         command += ["--inject-env", f"{key}={value}"]
 
-    (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, command)))
+    safe_command = list(command)
+    index_url = index_url or default_index_url
+    if index_url is not None:
+        command += ["--index-url", index_url]
+        safe_command += ["--index-url", redact_url_password(index_url)]
+
+    (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, safe_command)))
     subprocess.run(command, check=True)
 
 
@@ -144,6 +155,7 @@ def pex_build(
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
     venv: Literal["prepend", "append"] | None = None,
+    index_url: str | None = None,
     task_name: str | None = None,
     project: Project | None = None,
 ) -> PexBuildTask:
@@ -161,6 +173,7 @@ def pex_build(
         and existing_task.console_script.get() == console_script
         and existing_task.interpreter_constraint.get() == interpreter_constraint
         and existing_task.venv.get() == venv
+        and existing_task.index_url.get() == index_url
     ):
         return existing_task
 
@@ -171,4 +184,12 @@ def pex_build(
     task.console_script = console_script
     task.interpreter_constraint = interpreter_constraint
     task.venv = venv
+    task.index_url = index_url
     return task
+
+
+def pex_set_default_index_url(url: str) -> None:
+    """Set the default index URL for Pex globally."""
+
+    global default_index_url
+    default_index_url = url
