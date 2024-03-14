@@ -138,7 +138,9 @@ def test__python_project_upgrade_python_version_string(
     kraken_ctx.execute([":build"])
 
     # Check if files that were supposed to be temporarily modified are the same after the build.
-    assert filecmp.cmp(original_dir / "pyproject.toml", tempdir / "pyproject.toml", shallow=False)
+    assert filecmp.cmp(original_dir / "pyproject.toml", tempdir / "pyproject.toml", shallow=False), (
+        tempdir / "pyproject.toml"
+    ).read_text()
     assert filecmp.cmp(original_dir / init_file, tempdir / init_file, shallow=False)
     # Check if generated files are named following proper version.
     assert Path(project_dist / f"version_project-{build_as_version}.tar.gz").is_file()
