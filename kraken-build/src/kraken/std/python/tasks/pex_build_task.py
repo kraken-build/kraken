@@ -193,7 +193,8 @@ def _get_default_index_url(project: Project | None) -> str | None:
     """Looks up the default Python package index in the Python settings of the current project, or falls back
     to the global `default_index_url`."""
 
-    from kraken.std.python.settings import PackageIndex, python_settings
+    from kraken.std.python.pyproject import PackageIndex
+    from kraken.std.python.settings import python_settings
 
     settings = python_settings(project=project)
     for idx in settings.package_indexes.values():
