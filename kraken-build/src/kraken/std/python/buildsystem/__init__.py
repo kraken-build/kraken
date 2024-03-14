@@ -79,7 +79,10 @@ class PythonBuildSystem(abc.ABC):
 
         # Bump the in-source version number.
         pyproject = self.get_pyproject_reader(Pyproject.read(pyproject_toml))
-        pyproject.set_path_dependencies_to_version(version)
+        try:
+            pyproject.set_path_dependencies_to_version(version)
+        except NotImplementedError:
+            pass
         pyproject.set_version(version)
         pyproject.raw.save()
 
