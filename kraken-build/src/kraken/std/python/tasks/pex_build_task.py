@@ -10,7 +10,7 @@ from typing import Literal
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
-from kraken.std.util.url import redact_url_password
+from kraken.std.util.url import inject_url_credentials, redact_url_password
 
 logger = logging.getLogger(__name__)
 default_index_url: str | None = None
@@ -73,7 +73,7 @@ class PexBuildTask(Task):
                 venv=self.venv.get(),
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
-                index_url=self.index_url.get(),
+                index_url=self.index_url.get() or _get_default_index_url(self.project),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -133,7 +133,6 @@ def _build_pex(
         command += ["--inject-env", f"{key}={value}"]
 
     safe_command = list(command)
-    index_url = index_url or default_index_url
     if index_url is not None:
         command += ["--index-url", index_url]
         safe_command += ["--index-url", redact_url_password(index_url)]
@@ -188,3 +187,22 @@ def pex_set_default_index_url(url: str) -> None:
 
     global default_index_url
     default_index_url = url
+
+
+def _get_default_index_url(project: Project | None) -> str | None:
+    """Looks up the default Python package index in the Python settings of the current project, or falls back
+    to the global `default_index_url`."""
+
+    from kraken.std.python.settings import PackageIndex, python_settings
+
+    settings = python_settings(project=project)
+    for idx in settings.package_indexes.values():
+        if idx.priority == PackageIndex.Priority.default:
+            break
+    else:
+        return default_index_url
+
+    if idx.credentials:
+        return inject_url_credentials(idx.index_url, *idx.credentials)
+
+    return idx.index_url
