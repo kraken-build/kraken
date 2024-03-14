@@ -68,7 +68,7 @@ class Pyproject(dict[str, Any]):
         return cls(None, tomlkit.parse(text))
 
     @classmethod
-    def read(cls, path: Path)    -> Pyproject:
+    def read(cls, path: Path) -> Pyproject:
         with path.open("rb") as fp:
             return cls(path, tomlkit.load(fp))
 
@@ -76,7 +76,7 @@ class Pyproject(dict[str, Any]):
         path = path or self.path
         if not path:
             raise RuntimeError("No path to save to")
-        with path.open("wb") as fp:
+        with path.open("w") as fp:
             tomlkit.dump(self, fp)
 
     def to_toml_string(self) -> str:
