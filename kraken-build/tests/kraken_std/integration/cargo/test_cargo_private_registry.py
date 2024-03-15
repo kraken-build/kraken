@@ -75,8 +75,6 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
                 version=publish_version,
                 cargo_toml_file=project1.directory.joinpath("Cargo.toml"),
             )
-            project1.context.execute(["fmt", "lint"])
-
             project1.context.execute(["fmt", "lint", "publish"])
 
         num_tries = 3
