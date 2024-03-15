@@ -1,0 +1,5 @@
+[[entries]]
+id = "49b2f413-5962-4376-9f48-d25355b99955"
+type = "fix"
+description = "Pass the PEX-built `pycln` binary also to the Pycln format task (was only passed to the check variant)"
+author = "niklas.rosenstein@helsing.ai"
