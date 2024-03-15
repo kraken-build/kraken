@@ -61,6 +61,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
         if self.coverage.is_filled():
             coverage_file = f"coverage{self.coverage.get().get_suffix()}"
             command += [
+                "--no-cov-on-fail",
+                "--cov-append",
                 "--cov-report",
                 f"{self.coverage.get().get_format()}:{str(self.project.build_directory / coverage_file)}",
                 "--cov-report",
