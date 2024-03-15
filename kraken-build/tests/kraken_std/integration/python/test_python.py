@@ -13,7 +13,6 @@ from unittest.mock import patch
 import pytest
 import tomli
 
-from kraken.common import not_none
 from kraken.core import Context, Project
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
@@ -49,26 +48,29 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
 
         # Create a htpasswd file for the registry.
         logger.info("Generating htpasswd for Pypiserver")
-        htpasswd_content = not_none(
-            docker_service_manager.run(
-                "httpd:2",
-                entrypoint="htpasswd",
-                args=["-Bbn", USER_NAME, USER_PASS],
-                capture_output=True,
-            )
-        )
+        htpasswd_content = docker_service_manager.run(
+            "httpd:2",
+            entrypoint="htpasswd",
+            args=["-Bbn", USER_NAME, USER_PASS],
+            capture_output=True,
+        ).output
         htpasswd = tempdir / "htpasswd"
         htpasswd.write_bytes(htpasswd_content)
 
-        index_url = f"http://localhost:{PYPISERVER_PORT}/simple"
-        docker_service_manager.run(
+        container = docker_service_manager.run(
             "pypiserver/pypiserver:latest",
             ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
-            ports=[f"{PYPISERVER_PORT}:8080"],
+            ports=["8080"],
             volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
             detach=True,
-            probe=("GET", index_url),
         )
+
+        host = container.ports["8080"][0]["HostIp"]
+        port = container.ports["8080"][0]["HostPort"]
+        index_url = f"http://{host}:{port}/simple"
+
+        container.probe("GET", index_url)
+
         logger.info("Started local Pypiserver at %s", index_url)
         return index_url
 

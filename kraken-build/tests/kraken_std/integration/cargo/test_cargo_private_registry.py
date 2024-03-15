@@ -127,20 +127,20 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
 
 @pytest.fixture()
 def private_registry(docker_service_manager: DockerServiceManager) -> str:
-    port = "35504"
-    host = "0.0.0.0"
-    address = f"{host}:{port}"
-    index_url = f"http://{address}/git"
-    docker_service_manager.run(
+    container = docker_service_manager.run(
         "ghcr.io/d-e-s-o/cargo-http-registry:latest",
         [
             "/tmp/test-registry",
             "--addr",
-            address,
+            "0.0.0.0:3333",
         ],
-        ports=[f"{port}:{port}"],
+        ports=["3333"],
         detach=True,
     )
+
+    host = container.ports["3333/tcp"][0]["HostIp"]
+    port = container.ports["3333/tcp"][0]["HostPort"]
+    index_url = f"http://{host}:{port}/git"
     logger.info("Started local cargo registry at %s", index_url)
     return index_url
 
