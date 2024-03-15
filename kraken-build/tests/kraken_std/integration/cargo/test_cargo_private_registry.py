@@ -66,18 +66,6 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
                 read_credentials=repository.creds,
                 publish_token=repository.token,
             )
-            print()
-            print()
-            print(
-                dict(
-                    id=cargo_registry_id,
-                    url=repository.index_url,
-                    read_credentials=repository.creds,
-                    publish_token=repository.token,
-                )
-            )
-            print()
-            print()
             cargo_auth_proxy()
             task = cargo_sync_config()
             task.git_fetch_with_cli.set(True)
