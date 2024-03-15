@@ -1,0 +1,5 @@
+[[entries]]
+id = "f39ed8fc-360e-4b63-88ab-305f8b788555"
+type = "fix"
+description = "Fixed dictionary keys changed during iteration\" error in `PoetryPyprojectHandler.set_path_dependencies_to_version()` which seems to be caused by `tomlkit` even when modifying an existing key but setting it to a different value/type"
+author = "niklas.rosenstein@helsing.ai"

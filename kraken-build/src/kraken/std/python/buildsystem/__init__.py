@@ -86,17 +86,19 @@ class PythonBuildSystem(abc.ABC):
         pyproject.set_version(version)
         pyproject.raw.save()
 
-        sum_replaced = 0
         for package in pyproject.get_packages():
             package_dir = self.project_directory / (package.from_ or "") / package.include
+
+            sum_replaced = 0
             for path, n_replaced in update_python_version_str_in_source_files(version, package_dir):
                 sum_replaced += n_replaced
                 revert_files[path] = path.read_text()
 
-            print(
-                f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
-                f"{package_dir.relative_to(self.project_directory)} to {version}",
-            )
+            if sum_replaced > 0:
+                print(
+                    f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
+                    f"{package_dir.relative_to(self.project_directory)} to {version}",
+                )
 
         print("Modified files:")
         for path in sorted(revert_files):

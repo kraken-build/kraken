@@ -121,7 +121,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
                 yield "group.dev.dependencies", group_dev_dependencies
 
         for name, dependencies in _dependency_groups():
-            for key, value in dependencies.items():
+            for key, value in list(dependencies.items()):
                 if isinstance(value, dict) and "path" in value:
                     logger.debug("Replacing path dependency %s with version %s in %s", key, version, name)
                     dependencies[key] = version
