@@ -3,3 +3,18 @@ id = "a2e6c3ac-b166-4287-9f74-d79dbd499205"
 type = "fix"
 description = "Fix that updating the `pyproject.toml` is continuously outdated in certain cases"
 author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/221"
+
+[[entries]]
+id = "f39ed8fc-360e-4b63-88ab-305f8b788555"
+type = "fix"
+description = "Fixed dictionary keys changed during iteration\" error in `PoetryPyprojectHandler.set_path_dependencies_to_version()` which seems to be caused by `tomlkit` even when modifying an existing key but setting it to a different value/type"
+author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/223"
+
+[[entries]]
+id = "49b2f413-5962-4376-9f48-d25355b99955"
+type = "fix"
+description = "Pass the PEX-built `pycln` binary also to the Pycln format task (was only passed to the check variant)"
+author = "niklas.rosenstein@helsing.ai"
+pr = "https://github.com/kraken-build/kraken/pull/222"
