@@ -1,0 +1,5 @@
+[[entries]]
+id = "a2e6c3ac-b166-4287-9f74-d79dbd499205"
+type = "fix"
+description = "Fix that updating the `pyproject.toml` is continuously outdated in certain cases"
+author = "niklas.rosenstein@helsing.ai"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -52,16 +52,26 @@ class PackageIndex:
 
 
 @dataclass
-class Pyproject(dict[str, Any]):
+class Pyproject(MutableMapping[str, Any]):
     """
     Represents a raw `pyproject.toml` file in deserialized form.
     """
 
     path: Path | None
+    data: MutableMapping[str, Any]
 
-    def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
-        super().__init__(data)
+    def __init__(self, path: Path | None, data: MutableMapping[str, Any]) -> None:
         self.path = path
+        self.data = data
+
+    def __getitem__(self, key: str) -> Any:
+        return self.data[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.data[key] = value
+
+    def setdefault(self, key: str, value: Any) -> Any:
+        return self.data.setdefault(key, value)
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
@@ -77,10 +87,10 @@ class Pyproject(dict[str, Any]):
         if not path:
             raise RuntimeError("No path to save to")
         with path.open("w") as fp:
-            tomlkit.dump(self, fp)
+            fp.write(self.to_toml_string())
 
     def to_toml_string(self) -> str:
-        return tomlkit.dumps(self)
+        return tomlkit.dumps(self.data)
 
 
 class PyprojectHandler(ABC):
