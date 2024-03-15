@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Iterator, MutableMapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -64,14 +64,20 @@ class Pyproject(MutableMapping[str, Any]):
         self.path = path
         self.data = data
 
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.data)
+
+    def __len__(self) -> int:
+        return len(self.data)
+
     def __getitem__(self, key: str) -> Any:
         return self.data[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
         self.data[key] = value
 
-    def setdefault(self, key: str, value: Any) -> Any:
-        return self.data.setdefault(key, value)
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
