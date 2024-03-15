@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import logging
 import subprocess as sp
 import time
+from typing import Any, TypeAlias, TypedDict, cast
 
 import httpx
 
@@ -21,22 +23,6 @@ class DockerServiceManager:
     def _stop_container(self, container_id: str) -> None:
         sp.call(["docker", "stop", container_id])
 
-    def _run_probe(self, probe_method: str, probe_url: str, timeout: int) -> None:
-        logger.info("Probing %s %s (timeout: %d)", probe_method, probe_url, timeout)
-        tstart = time.perf_counter()
-        while (time.perf_counter() - tstart) < timeout:
-            try:
-                request = http.request(probe_method, probe_url)
-            except httpx.RequestError as exc:
-                logger.debug("Ignoring error while probing (%s)", exc)
-            else:
-                if request.status_code // 100 in (2, 3):
-                    logger.info("Probe returned status code %d", request.status_code)
-                    return
-                logger.debug("Probe returned status code %d (continue probing)", request.status_code)
-            time.sleep(0.5)
-        raise TimeoutError("Probe timed out")
-
     def run(
         self,
         image: str,
@@ -48,9 +34,7 @@ class DockerServiceManager:
         env: dict[str, str] | None = None,
         entrypoint: str | None = None,
         capture_output: bool = False,
-        probe: tuple[str, str] | None = None,
-        probe_timeout: int = 60,
-    ) -> bytes | None:
+    ) -> Container:
         command = ["docker", "run", "--rm"]
         if detach:
             command += ["-d"]
@@ -78,12 +62,54 @@ class DockerServiceManager:
 
             self._exit_stack.callback(_stop_logs_proc)
 
-            if probe:
-                self._run_probe(probe[0], probe[1], probe_timeout)
+            inspect_data = json.loads(sp.check_output(["docker", "inspect", container_id]).decode())[0]
+            assert isinstance(inspect_data, dict), type(inspect_data)
+            return Container(cast(dict[str, Any], inspect_data), None)
 
         elif capture_output:
-            return sp.check_output(command)
+            return Container(None, sp.check_output(command))
         else:
             sp.check_call(command)
+            return Container(None, None)
 
-        return None
+
+class Container:
+    PortPlusProtocol: TypeAlias = str
+
+    class ContainerPort(TypedDict):
+        HostIp: str
+        HostPort: str
+
+    ContainerPorts = dict[PortPlusProtocol, list[ContainerPort]]
+
+    def __init__(self, data: dict[str, Any] | None, output: bytes | None) -> None:
+        self._data = data
+        self._output = output
+
+    @property
+    def ports(self) -> ContainerPorts:
+        assert self._data is not None, "Not a live container"
+        return cast(Container.ContainerPorts, self._data["NetworkSettings"]["Ports"])
+
+    @property
+    def output(self) -> bytes:
+        assert self._output is not None, "Did not capture output of container"
+        return self._output
+
+    def probe(self, method: str, url: str, timeout: float = 60) -> None:
+        logger.info("Probing %s %s (timeout: %d)", method, url, timeout)
+
+        tstart = time.perf_counter()
+        while (time.perf_counter() - tstart) < timeout:
+            try:
+                request = http.request(method, url)
+            except httpx.RequestError as exc:
+                logger.debug("Ignoring error while probing (%s)", exc)
+            else:
+                if request.status_code // 100 in (2, 3):
+                    logger.info("Probe returned status code %d", request.status_code)
+                    return
+                logger.debug("Probe returned status code %d (continue probing)", request.status_code)
+            time.sleep(0.5)
+
+        raise TimeoutError("Probe timed out")
