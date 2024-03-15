@@ -67,7 +67,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
         )
 
         # host = container.ports["8080/tcp"][0]["HostIp"]
-        host = "localhost" # The container ports HostIp is 0.0.0.0, which PDM won't trust without extra config.
+        host = "localhost"  # The container ports HostIp is 0.0.0.0, which PDM won't trust without extra config.
         port = container.ports["8080/tcp"][0]["HostPort"]
         index_url = f"http://{host}:{port}/simple"
 
