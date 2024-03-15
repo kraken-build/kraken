@@ -79,7 +79,7 @@ class Pyproject(MutableMapping[str, Any]):
     def __delitem__(self, key: str) -> None:
         del self.data[key]
 
-    def setdefault(self, key: str, default: Any) -> Any:
+    def setdefault(self, key: str, default: Any | None = None) -> Any:
         # NOTE(@niklas): We need to override this as the default implementation from MutableMapping is not
         #       compatible with the expected behaviour from the wrapped Tomlkit container. See
         #       https://github.com/sdispater/tomlkit/issues/49#issuecomment-1999713939
