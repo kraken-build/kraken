@@ -38,7 +38,7 @@ class CargoRepositoryWithAuth:
     token: str | None
 
 
-def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdir: Path) -> None:
+def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
     # Copy the Cargo project files to a temporary directory.
     for item in ["cargo-hello-world-lib", "cargo-hello-world-app"]:
         shutil.copytree(example_dir(item), tempdir / item)
@@ -52,38 +52,44 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
 
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
         # Build the library and publish it to the registry.
-        if repository:
-            logger.info(
-                "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
-                repository.name,
-                repository.index_url,
-            )
-        else:
-            logger.info("Building data/hello-world-lib")
+        logger.info(
+            "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
+            repository.name,
+            repository.index_url,
+        )
 
         with kraken_ctx() as ctx, kraken_project(ctx) as project1:
             project1.directory = lib_dir
-            if repository:
-                cargo_registry(
-                    cargo_registry_id,
-                    repository.index_url,
+            cargo_registry(
+                cargo_registry_id,
+                repository.index_url,
+                read_credentials=repository.creds,
+                publish_token=repository.token,
+            )
+            print()
+            print()
+            print(
+                dict(
+                    id=cargo_registry_id,
+                    url=repository.index_url,
                     read_credentials=repository.creds,
                     publish_token=repository.token,
                 )
+            )
+            print()
+            print()
             cargo_auth_proxy()
             task = cargo_sync_config()
             task.git_fetch_with_cli.set(True)
             cargo_check_toolchain_version(minimal_version="1.60")
             cargo_publish(
-                cargo_registry_id, version=publish_version, cargo_toml_file=project1.directory.joinpath("Cargo.toml")
+                cargo_registry_id,
+                version=publish_version,
+                cargo_toml_file=project1.directory.joinpath("Cargo.toml"),
             )
-            if repository:
-                project1.context.execute(["fmt", "lint", "publish"])
-            else:
-                project1.context.execute(["fmt", "lint", "build"])
+            project1.context.execute(["fmt", "lint"])
 
-        if not repository:
-            return
+            project1.context.execute(["fmt", "lint", "publish"])
 
         num_tries = 3
         for idx in range(num_tries):
@@ -113,6 +119,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                 # Running the application should give "Hello from hello-world-lib!".
                 output = sp.check_output([app_dir / "target" / "debug" / "hello-world-app"]).decode()
                 assert output.strip() == "Hello from hello-world-lib!"
+                break
             except BuildError as exc:
                 logger.error(
                     "Encountered a build error (%s); most likely that is because the Cargo repository "
@@ -125,21 +132,34 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                 time.sleep(10)
 
 
-@pytest.fixture()
+# NOTE(@niklas): It would be better if we could just create a new Cargo registry for each test instead of scoping
+#       it to the session, however somehow `cargo publish` chooses the server's internal port for the
+#       `/api/v1/crates/new` request even if we configure the host port instead.
+#
+#       Logs from mitmweb on `cargo publish --registry private-repo --token xxxxx`
+#
+#           - GET http://localhost:49321/git/info/refs?service=git-upload-pack HTTP/1.1
+#           - GET http://localhost:49321/git/HEAD HTTP/1.1
+#           - PUT http://0.0.0.0:35504/api/v1/crates/new HTTP/1.1
+#
+#       I suppose it's caused by the repository config served via the Git repository that directs Cargo to a separate
+#       API endpoint. Until we can find a way to change this behavior, we need the container port and the host port
+#       to be the same, which prevents us from running multiple test-scoped fixtures in parallel.
+@pytest.fixture(scope="session")
 def private_registry(docker_service_manager: DockerServiceManager) -> str:
     container = docker_service_manager.run(
         "ghcr.io/d-e-s-o/cargo-http-registry:latest",
         [
             "/tmp/test-registry",
             "--addr",
-            "0.0.0.0:3333",
+            "0.0.0.0:35504",
         ],
-        ports=["3333"],
+        ports=["35504:35504"],
         detach=True,
     )
 
-    host = container.ports["3333/tcp"][0]["HostIp"]
-    port = container.ports["3333/tcp"][0]["HostPort"]
+    host = "localhost"
+    port = container.ports["35504/tcp"][0]["HostPort"]
     index_url = f"http://{host}:{port}/git"
     logger.info("Started local cargo registry at %s", index_url)
     return index_url
@@ -150,7 +170,3 @@ def test__private_cargo_registry_publish_and_consume(tempdir: Path, private_regi
         "kraken-std-cargo-integration-test", private_registry, None, "xxxxxxxxxxxxxxxxxxxxxx"
     )
     publish_lib_and_build_app(repository, tempdir)
-
-
-def test_cargo_build(tempdir: Path) -> None:
-    publish_lib_and_build_app(None, tempdir)
