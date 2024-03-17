@@ -13,7 +13,6 @@ from ._importlib import appending_to_sys_path, import_class
 from ._option_sets import LoggingOptions
 from ._requirements import LocalRequirement, PipRequirement, Requirement, RequirementSpec, parse_requirement
 from ._runner import (
-    BuildDslScriptRunner,
     CurrentDirectoryProjectFinder,
     GitAwareProjectFinder,
     ProjectFinder,
@@ -60,7 +59,6 @@ __all__ = [
     "PipRequirement",
     "RequirementSpec",
     # _runner
-    "BuildDslScriptRunner",
     "CurrentDirectoryProjectFinder",
     "GitAwareProjectFinder",
     "ProjectFinder",

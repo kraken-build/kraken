@@ -9,9 +9,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any, NamedTuple
 
-import builddsl
-
-from ._buildscript import BuildscriptMetadata, buildscript
+from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet
 
 ##
@@ -147,39 +145,6 @@ class PythonScriptRunner(ScriptPicker):
         return code
 
 
-class BuildDslScriptRunner(ScriptPicker):
-    """
-    A finder and runner for BuildDSL based Kraken build scripts called `kraken.build` (optionally prefixed with `.`).
-    """
-
-    def __init__(self, filenames: Sequence[str] = ("kraken.build", ".kraken.build")) -> None:
-        super().__init__(filenames)
-
-    def execute_script(self, script: Path, scope: dict[str, Any]) -> None:
-        code = script.read_text()
-        scope = {"buildscript": buildscript, **scope}
-        builddsl.Closure.from_map(scope).run_code(code, str(script))
-
-    def has_buildscript_call(self, script: Path) -> bool:
-        code = script.read_text()
-        if re.match(r"^buildscript\s*(\(|\{})", code, re.M):
-            return False
-        return True
-
-    def get_buildscript_call_recommendation(self, metadata: BuildscriptMetadata) -> str:
-        code = "buildscript {"
-        if metadata.index_url:
-            code += f"\n    index_url = {metadata.index_url!r}"
-        if metadata.extra_index_urls:
-            for url in metadata.extra_index_urls:
-                code += f"\n    extra_index_url {url!r}"
-        if metadata.requirements:
-            for req in metadata.requirements:
-                code += f"        requires {req!r}"
-        code += "}"
-        return code
-
-
 ##
 # ProjectFinder Implementations
 ##
@@ -207,12 +172,7 @@ class CurrentDirectoryProjectFinder(ProjectFinder):
         Returns the default instance that contains the known :class:`ScriptRunner` implementations.
         """
 
-        return cls(
-            (
-                PythonScriptRunner(),
-                BuildDslScriptRunner(),
-            )
-        )
+        return cls([PythonScriptRunner()])
 
 
 class GitAwareProjectFinder(ProjectFinder):

@@ -7,12 +7,7 @@ from pytest import fixture
 
 from kraken.common._buildscript import BuildscriptMetadata
 from kraken.common._generic import not_none
-from kraken.common._runner import (
-    BuildDslScriptRunner,
-    CurrentDirectoryProjectFinder,
-    GitAwareProjectFinder,
-    PythonScriptRunner,
-)
+from kraken.common._runner import CurrentDirectoryProjectFinder, GitAwareProjectFinder, PythonScriptRunner
 from kraken.core import Project
 
 
@@ -33,27 +28,6 @@ def test__PythonScriptRunner__can_find_and_execute_script(tempdir: Path, kraken_
         )
     )
     runner = PythonScriptRunner()
-    script = runner.find_script(tempdir)
-    assert script is not None
-
-    with BuildscriptMetadata.capture() as metadata_future:
-        runner.execute_script(script, {})
-
-    assert metadata_future.result() == BuildscriptMetadata(requirements=["kraken-std"])
-
-
-def test__BuildDslScriptRunner__can_find_and_execute_script(tempdir: Path, kraken_project: Project) -> None:
-    (tempdir / "kraken.build").write_text(
-        dedent(
-            """
-        buildscript {
-            requires "kraken-std"
-        }
-        """
-        )
-    )
-
-    runner = BuildDslScriptRunner()
     script = runner.find_script(tempdir)
     assert script is not None
 
