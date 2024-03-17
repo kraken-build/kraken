@@ -13,7 +13,8 @@ from kraken.core.system.task import Task, TaskStatus
 from kraken.std.util.url import inject_url_credentials, redact_url_password
 
 logger = logging.getLogger(__name__)
-default_index_url: str | None = None
+_default_index_url: str | None = None
+_global_store_path: Path | None = None
 
 
 class PexBuildTask(Task):
@@ -48,16 +49,18 @@ class PexBuildTask(Task):
                 ]
             ).encode()
         ).hexdigest()
-        return (
-            self.project.context.build_directory
-            / ".store"
-            / f"{hashsum}-{self.binary_name.get()}"
-            / self.binary_name.get()
-        ).with_suffix(".pex")
+
+        if _global_store_path:
+            store_path = _global_store_path
+        else:
+            store_path = self.project.context.build_directory / ".store"
+
+        return (store_path / f"{hashsum}-{self.binary_name.get()}" / self.binary_name.get()).with_suffix(".pex")
 
     def prepare(self) -> TaskStatus | None:
-        self.output_file = self._get_output_file_path().absolute()
-        if self.output_file.get().exists():
+        if not self.output_file.is_set():
+            self.output_file = self._get_output_file_path().absolute()
+        if not self.always_rebuild.get() and self.output_file.get().exists():
             return TaskStatus.skipped(f"PEX `{self.binary_name.get()}` already exists ({self.output_file.get()})")
         return TaskStatus.pending()
 
@@ -185,8 +188,16 @@ def pex_build(
 def pex_set_default_index_url(url: str) -> None:
     """Set the default index URL for Pex globally."""
 
-    global default_index_url
-    default_index_url = url
+    global _default_index_url
+    _default_index_url = url
+
+
+def pex_set_global_store_path(path: Path | None) -> None:
+    """Set the global Pex store path. This can be used to override the default Pex store directory, which is
+    inside the current context's build directory."""
+
+    global _global_store_path
+    _global_store_path = path
 
 
 def _get_default_index_url(project: Project | None) -> str | None:
@@ -201,7 +212,7 @@ def _get_default_index_url(project: Project | None) -> str | None:
         if idx.priority == PackageIndex.Priority.default:
             break
     else:
-        return default_index_url
+        return _default_index_url
 
     if idx.credentials:
         return inject_url_credentials(idx.index_url, *idx.credentials)

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from kraken.std.python.tasks.pex_build_task import pex_set_global_store_path
 from tests.kraken_std.util.docker import DockerServiceManager
 
 
@@ -29,3 +30,7 @@ def chdir_context(path: Path) -> Iterator[None]:
         yield
     finally:
         os.chdir(cwd)
+
+
+# Speed up building PEX's in test.
+pex_set_global_store_path(Path(__file__).parent.parent.parent / "build/.store")

@@ -15,3 +15,9 @@ id = "788398a7-320e-45b2-9590-d977387c2ed1"
 type = "improvement"
 description = "Override `MaturinPoetryPyprojectHandler.get_python_version_constraint()` to fall back on `[project.version]` key if `[tool.poetry.version]` is not set"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ef21ce61-3e39-4177-9182-72c67e80be63"
+type = "feature"
+description = "Add `pex_set_global_store_path()` function"
+author = "@NiklasRosenstein"
