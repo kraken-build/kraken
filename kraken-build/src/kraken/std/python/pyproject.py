@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
-from collections.abc import Mapping, Sequence
+from abc import ABC, abstractmethod
+from collections.abc import Iterator, MutableMapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
 
-import tomli
-import tomli_w
+import tomlkit
 
 logger = logging.getLogger(__name__)
 
@@ -53,35 +52,58 @@ class PackageIndex:
 
 
 @dataclass
-class Pyproject(dict[str, Any]):
+class Pyproject(MutableMapping[str, Any]):
     """
     Represents a raw `pyproject.toml` file in deserialized form.
     """
 
     path: Path | None
+    data: MutableMapping[str, Any]
 
-    def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
-        super().__init__(data)
+    def __init__(self, path: Path | None, data: MutableMapping[str, Any]) -> None:
         self.path = path
+        self.data = data
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.data)
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.data[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.data[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
+
+    def setdefault(self, key: str, default: Any | None = None) -> Any:
+        # NOTE(@niklas): We need to override this as the default implementation from MutableMapping is not
+        #       compatible with the expected behaviour from the wrapped Tomlkit container. See
+        #       https://github.com/sdispater/tomlkit/issues/49#issuecomment-1999713939
+        self.data.setdefault(key, default)
+        return self.data[key]
 
     @classmethod
     def read_string(cls, text: str) -> Pyproject:
-        return cls(None, tomli.loads(text))
+        return cls(None, tomlkit.parse(text))
 
     @classmethod
     def read(cls, path: Path) -> Pyproject:
         with path.open("rb") as fp:
-            return cls(path, tomli.load(fp))
+            return cls(path, tomlkit.load(fp))
 
     def save(self, path: Path | None = None) -> None:
         path = path or self.path
         if not path:
             raise RuntimeError("No path to save to")
-        with path.open("wb") as fp:
-            tomli_w.dump(self, fp)
+        with path.open("w") as fp:
+            fp.write(self.to_toml_string())
 
     def to_toml_string(self) -> str:
-        return tomli_w.dumps(self)
+        return tomlkit.dumps(self.data)
 
 
 class PyprojectHandler(ABC):
@@ -162,3 +184,12 @@ class PyprojectHandler(ABC):
         """
 
         raise NotImplementedError("%s.set_path_dependencies_to_version()" % type(self).__name__)
+
+    @dataclass(frozen=True)
+    class Package:
+        include: str
+        from_: str | None = None
+
+    @abstractmethod
+    def get_packages(self) -> list[Package]:
+        pass

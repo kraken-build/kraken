@@ -4,6 +4,7 @@ import os
 from collections.abc import Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
+from collections.abc import Sequence
 from pathlib import Path
 
 from kraken.common import Supplier

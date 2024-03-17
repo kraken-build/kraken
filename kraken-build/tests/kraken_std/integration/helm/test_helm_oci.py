@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from kraken.common import http, not_none
+from kraken.common import http
 from kraken.core import Project
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
 from tests.kraken_std.util.docker import DockerServiceManager
@@ -23,23 +23,21 @@ def oci_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
     with tempfile.TemporaryDirectory() as tempdir:
         # Create a htpasswd file for the registry.
         logger.info("Generating htpasswd for OCI registry")
-        htpasswd_content = not_none(
-            docker_service_manager.run(
-                "httpd:2",
-                entrypoint="htpasswd",
-                args=["-Bbn", USER_NAME, USER_PASS],
-                capture_output=True,
-            )
-        )
+        htpasswd_content = docker_service_manager.run(
+            "httpd:2",
+            entrypoint="htpasswd",
+            args=["-Bbn", USER_NAME, USER_PASS],
+            capture_output=True,
+        ).output
         htpasswd = Path(tempdir) / "htpasswd"
         htpasswd.write_bytes(htpasswd_content)
 
         # Start the registry.
         logger.info("Starting OCI registry")
-        docker_service_manager.run(
+        container = docker_service_manager.run(
             "registry",
             detach=True,
-            ports=[f"{REGISTRY_PORT}:5000"],
+            ports=["5000"],
             volumes=[f"{htpasswd.absolute()}:/auth/htpasswd"],
             env={
                 "REGISTRY_AUTH": "htpasswd",
@@ -49,7 +47,8 @@ def oci_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
         )
 
         time.sleep(0.5)
-        yield f"localhost:{REGISTRY_PORT}"
+        port = container.ports["5000/tcp"][0]["HostPort"]
+        yield f"localhost:{port}"
 
 
 def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) -> None:

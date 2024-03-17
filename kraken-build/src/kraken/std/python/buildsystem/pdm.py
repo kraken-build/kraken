@@ -107,6 +107,11 @@ class PdmPyprojectHandler(PyprojectHandler):
                 source["verify_ssl"] = False
             sources_conf.append(source)
 
+    def get_packages(self) -> list[PyprojectHandler.Package]:
+        # TODO: Detect packages in the PDM project. Until we do, the __version__ in source files of PDM
+        #       projects are not bumped on publish.
+        return []
+
 
 class PDMPythonBuildSystem(PythonBuildSystem):
     name = "PDM"
@@ -157,17 +162,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
                     if code != 0:
                         raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        previous_version: str | None = None
-
-        if as_version is not None:
-            # Bump the in-source version number.
-            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
-            previous_version = pyproject.get_version()
-            # pyproject.set_path_dependencies_to_version(as_version)
-            pyproject.set_version(as_version)
-            pyproject.raw.save()
-
+    def build(self, output_directory: Path) -> list[Path]:
         # PDM does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
         dist_dir = self.project_directory / "dist"
@@ -187,11 +182,6 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):
             shutil.rmtree(dist_dir)
-
-        # Roll back the previously updated in-source version numbers.
-        if previous_version is not None:
-            pyproject.set_version(previous_version)
-            pyproject.raw.save()
 
         return dst_files
 

@@ -8,7 +8,6 @@ import shutil
 import subprocess as sp
 from collections.abc import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +15,6 @@ from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.common.pyenv import get_current_venv
 from kraken.core import TaskStatus
-from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
 from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
@@ -30,11 +28,6 @@ class PoetryPyprojectHandler(PyprojectHandler):
     Pyproject configuration handler for Poetry projects.
     """
 
-    @dataclass(frozen=True)
-    class Package:
-        include: str
-        from_: str | None = None
-
     def __init__(self, pyproj: Pyproject) -> None:
         super().__init__(pyproj)
 
@@ -42,7 +35,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
     def _poetry_section(self) -> dict[str, Any]:
         return self.raw.setdefault("tool", {}).setdefault("poetry", {})  # type: ignore[no-any-return]
 
-    def get_packages(self, fallback: bool = True) -> list[Package]:
+    def get_packages(self) -> list[PyprojectHandler.Package]:
         """
         Returns the packages included in the distribution of this project listed in `[tool.poetry.packages]`.
 
@@ -51,7 +44,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
         """
 
         packages: list[dict[str, Any]] | None = self._poetry_section.get("packages")
-        if packages is None and fallback:
+        if packages is None:
             package_name = self._poetry_section["name"]
             return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
         else:
@@ -132,7 +125,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
                 yield "group.dev.dependencies", group_dev_dependencies
 
         for name, dependencies in _dependency_groups():
-            for key, value in dependencies.items():
+            for key, value in list(dependencies.items()):
                 if isinstance(value, dict) and "path" in value:
                     logger.debug("Replacing path dependency %s with version %s in %s", key, version, name)
                     dependencies[key] = version
@@ -173,26 +166,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
                 if code != 0:
                     raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        previous_version: str | None = None
-        revert_version_paths: list[Path] = []
-        if as_version is not None:
-            # Bump the in-source version number.
-            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
-            pyproject.set_path_dependencies_to_version(as_version)
-            previous_version = pyproject.get_version()
-            pyproject.set_version(as_version)
-            pyproject.raw.save()
-            for package in pyproject.get_packages(fallback=True):
-                package_dir = self.project_directory / (package.from_ or "") / package.include
-                n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
-                if n_replaced > 0:
-                    revert_version_paths.append(package_dir)
-                    print(
-                        f"Bumped {n_replaced} version reference(s) in "
-                        f"{package_dir.relative_to(self.project_directory)} to {as_version}"
-                    )
-
+    def build(self, output_directory: Path) -> list[Path]:
         # Poetry does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
         dist_dir = self.project_directory / "dist"
@@ -210,13 +184,6 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):
             shutil.rmtree(dist_dir)
-
-        # Roll back the previously updated in-source version numbers.
-        if previous_version is not None:
-            pyproject.set_version(previous_version)
-            pyproject.raw.save()
-            for package_dir in revert_version_paths:
-                update_python_version_str_in_source_files(previous_version, package_dir)
 
         return dst_files
 
