@@ -8,4 +8,4 @@ python_package_index(
     credentials=(os.environ["LOCAL_USER"], os.environ["LOCAL_PASSWORD"]),
     publish=True,
 )
-python_project()
+python_project(enforce_project_version="0.1.0")
