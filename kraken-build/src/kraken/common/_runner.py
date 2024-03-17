@@ -68,8 +68,7 @@ class ProjectFinder(ABC):
     """
 
     @abstractmethod
-    def find_project(self, directory: Path) -> "ProjectInfo | None":
-        ...
+    def find_project(self, directory: Path) -> "ProjectInfo | None": ...
 
 
 ##

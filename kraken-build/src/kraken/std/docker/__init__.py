@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from kraken.common import Supplier, import_class
 from kraken.core import Project, Task
@@ -31,7 +31,7 @@ def build_docker_image(
 
     project = project or Project.current()
     task_class = import_class(BUILD_BACKENDS[backend], BaseBuildTask)  # type: ignore[type-abstract]
-    dockerfile = Supplier.of(dockerfile).map(project.directory.joinpath)
+    dockerfile = cast(Supplier[Path | str], Supplier.of(dockerfile)).map(project.directory.joinpath)
     return project.do(name, task_class, dockerfile=dockerfile, **kwds)
 
 

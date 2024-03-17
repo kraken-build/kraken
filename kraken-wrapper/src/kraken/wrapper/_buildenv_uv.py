@@ -7,8 +7,7 @@ from ._buildenv_venv import VenvBuildEnv as _VenvBuildEnv
 
 if TYPE_CHECKING:
 
-    def find_uv_bin() -> str:
-        ...
+    def find_uv_bin() -> str: ...
 
 else:
     from uv.__main__ import find_uv_bin
