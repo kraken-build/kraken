@@ -1,6 +1,6 @@
 import os
 
-from kraken.std.python.project import python_package_index, python_project
+from kraken.std import python_package_index, python_project
 
 python_package_index(
     alias="local",
