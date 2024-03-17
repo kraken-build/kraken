@@ -286,3 +286,48 @@ def python_project(
 
     # TODO(@niklas): Support auto-detecting when Mypy stubtests need to be run or
     #       accept arguments for stubtests.
+
+
+def python_app(
+    *,
+    app_name: str,
+    entry_point: str | None = None,
+    console_script: str | None = None,
+    interpreter_constraint: str | None = None,
+    venv_mode: Literal["append", "prepend"] | None = None,
+    name: str = "build-pex",
+) -> None:
+    """Build a PEX binary from a Python application.
+
+    This function must be called after `python_project()`.
+
+    Args:
+        app_name: The name of the applicaiton. This will be used as the binary output filename. The output PEX
+            file will be written into the build directory.
+        entry_point: The Python entrypoint to run when the PEX application is invoked.
+        console_script: The console script to run when the PEX application is invoked.
+        interpreter_constraint: A Python version specifier that informs the version of Python that the PEX
+            is built against. If this is not set, the constraint will be deduced from the project (e.g. via
+            a Python version specifier in `pyproject.toml`).
+        venv_mode: Whether the virtual env environment variables should be appended/prepended when the PEX runs.
+        name: Override the default task name.
+
+    Note that `entry_point` and `console_script` are mutually exclusive.
+    """
+
+    from kraken.build import project
+    from kraken.std.python.tasks.pex_build_task import pex_build
+
+    output_file = project.build_directory / "pex" / app_name
+
+    pex_build(
+        binary_name=app_name,
+        requirements=[str(project.directory.absolute())],
+        entry_point=entry_point,
+        console_script=console_script,
+        interpreter_constraint=interpreter_constraint,
+        venv=venv_mode,
+        always_rebuild=True,
+        output_file=output_file,
+        task_name=name,
+    )

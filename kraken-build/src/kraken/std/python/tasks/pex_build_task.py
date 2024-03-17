@@ -30,6 +30,7 @@ class PexBuildTask(Task):
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
     index_url: Property[str | None] = Property.default(None)
+    always_rebuild: Property[bool] = Property.default(False)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -153,6 +154,8 @@ def pex_build(
     interpreter_constraint: str | None = None,
     venv: Literal["prepend", "append"] | None = None,
     index_url: str | None = None,
+    always_rebuild: bool = False,
+    output_file: Path | None = None,
     task_name: str | None = None,
     project: Project | None = None,
 ) -> PexBuildTask:
@@ -171,6 +174,8 @@ def pex_build(
         and existing_task.interpreter_constraint.get() == interpreter_constraint
         and existing_task.venv.get() == venv
         and existing_task.index_url.get() == index_url
+        and existing_task.always_rebuild.get() == always_rebuild
+        and existing_task.output_file.get_or(None) == output_file
     ):
         return existing_task
 
@@ -182,6 +187,8 @@ def pex_build(
     task.interpreter_constraint = interpreter_constraint
     task.venv = venv
     task.index_url = index_url
+    task.always_rebuild = always_rebuild
+    task.output_file = output_file
     return task
 
 

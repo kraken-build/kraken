@@ -21,3 +21,15 @@ id = "ef21ce61-3e39-4177-9182-72c67e80be63"
 type = "feature"
 description = "Add `pex_set_global_store_path()` function"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "79e9748a-4d81-4636-be2e-3772b150c976"
+type = "feature"
+description = "Add `python_app()` function to build a PEX from your Python project."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "897d94dc-79e7-45bf-abba-bd346a3fb7d5"
+type = "feature"
+description = "Add `PexBuildTask.always_rebuild` property and add `pex_build(always_rebuild, output_file)` parameters"
+author = "@NiklasRosenstein"
