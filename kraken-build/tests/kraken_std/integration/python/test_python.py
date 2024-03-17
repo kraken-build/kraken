@@ -121,6 +121,7 @@ def test__python_project_install_lint_and_publish(
     print()
 
     kraken_ctx.execute([":python.install"])
+    kraken_ctx.execute([":lint"])
     # TODO (@NiklasRosenstein): Test importing the consumer project.
 
 
