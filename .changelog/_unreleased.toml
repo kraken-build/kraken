@@ -9,3 +9,9 @@ id = "84e8fb46-7aef-4dfc-b4ec-5ad507c82544"
 type = "improvement"
 description = "`build_docker_image(dockerfile)` now treats the path relative to the current project"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "788398a7-320e-45b2-9590-d977387c2ed1"
+type = "improvement"
+description = "Override `MaturinPoetryPyprojectHandler.get_python_version_constraint()` to fall back on `[project.version]` key if `[tool.poetry.version]` is not set"
+author = "@NiklasRosenstein"

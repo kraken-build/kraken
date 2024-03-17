@@ -152,6 +152,11 @@ class MaturinPoetryPyprojectHandler(PoetryPyprojectHandler):
             else:
                 project_section[field_name] = poetry_value
 
+    def get_python_version_constraint(self) -> str | None:
+        return PoetryPyprojectHandler.get_python_version_constraint(
+            self
+        ) or PyprojectHandler.get_python_version_constraint(self)
+
 
 class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
     """A maturin-backed version of the Poetry build system, that invokes the maturin build-backend.
