@@ -123,6 +123,14 @@ def buildscript(
     from kraken.std import ...
     ```
 
+    You can depend on local dependencies and Python packages from URLs by prefixing them with `<package name> @`:
+
+    ```py
+    buildscript(requirements=[
+        "kraken-build @ git+https://github.com/kraken-build/kraken.git@nr/python-project#subdirectory=kraken-build"
+    ])
+    ```
+
     Args:
         closure: Only relevant for BuildDsl scripts. This is experimental, you can ignore this argument.
         index_url: The index URL for Python packages to install from. If this is a private package registry, the
