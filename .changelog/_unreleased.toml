@@ -1,0 +1,5 @@
+[[entries]]
+id = "057c0e07-9028-4127-b64e-0aa74323320b"
+type = "feature"
+description = "Support URL requirements in `buildscript(requirements)`"
+author = "@NiklasRosenstein"

@@ -12,7 +12,7 @@
 To use `krakenw`, you need to have Python 3.10 or newer installed. You can install `krakenw` using `pipx`:
 
 ```bash
-pipx install kraken-wrapper
+$ pipx install kraken-wrapper
 ```
 
 ## Usage
