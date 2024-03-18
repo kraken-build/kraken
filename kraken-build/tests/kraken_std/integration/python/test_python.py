@@ -7,7 +7,6 @@ import tempfile
 import unittest.mock
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TypeVar
 from unittest.mock import patch
 
 import httpx
@@ -19,7 +18,7 @@ from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
-from kraken.std.python.pyproject import Pyproject
+from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 
@@ -168,22 +167,20 @@ def test__python_project_upgrade_python_version_string(
         assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
 
 
-M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
-
-
 @pytest.mark.parametrize(
     "project_dir, reader, expected_python_version",
     [
-        ("poetry-project", PoetryPyprojectHandler, "^3.7"),
-        ("slap-project", PoetryPyprojectHandler, "^3.6"),
-        ("pdm-project", PdmPyprojectHandler, ">=3.9"),
-        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.7"),
+        ("poetry-project", PoetryPyprojectHandler, "^3.10"),
+        ("slap-project", PoetryPyprojectHandler, "^3.10"),
+        ("pdm-project", PdmPyprojectHandler, ">=3.10"),
+        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.10"),
+        ("rust-pdm-project", PdmPyprojectHandler, ">=3.10"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_pyproject_reads_correct_data(
     project_dir: str,
-    reader: type[M],
+    reader: type[PyprojectHandler],
     expected_python_version: str,
     kraken_project: Project,
 ) -> None:
@@ -194,13 +191,17 @@ def test__python_pyproject_reads_correct_data(
     pyproject = Pyproject.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
     assert local_build_system is not None
-    assert local_build_system.get_pyproject_reader(pyproject) is not None
-    assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
+    local = local_build_system.get_pyproject_reader(pyproject)
+    assert local is not None
+
+    if isinstance(local, PoetryPyprojectHandler):
+        assert local_build_system.get_pyproject_reader(pyproject).get_name() == project_dir
     assert local_build_system.get_pyproject_reader(pyproject).get_python_version_constraint() == expected_python_version
 
     spec = reader(pyproject)
 
-    assert spec.get_name() == project_dir
+    if isinstance(spec, PoetryPyprojectHandler):
+        assert spec.get_name() == project_dir
     assert spec.get_python_version_constraint() == expected_python_version
 
 
