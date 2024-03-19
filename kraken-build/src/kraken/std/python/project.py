@@ -6,6 +6,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Literal, TypeVar
 
+from attr import dataclass
 from nr.stream import Optional
 
 from kraken.core.system.task import Task
@@ -99,7 +100,7 @@ def python_project(
     mypy_protobuf_version_spec: str = ">=3.5.0,<4.0.0",
     buf_version: str = "1.30.0",
     codegen: Sequence[Task | str] = (),
-) -> None:
+) -> "PythonProject":
     """
     Use this function in a Python project.
 
@@ -366,6 +367,10 @@ def python_project(
     # TODO(@niklas): Support auto-detecting when Mypy stubtests need to be run or
     #       accept arguments for stubtests.
 
+    data = PythonProject(codegen=codegen)
+    project.metadata.append(data)
+    return data
+
 
 def python_app(
     *,
@@ -379,7 +384,8 @@ def python_app(
 ) -> PexBuildTask:
     """Build a PEX binary from a Python application.
 
-    This function must be called after `python_project()`.
+    This function should be called after `python_project()`. If any Python code generation is employed by the project,
+    the generated PEX build task will depend on it.
 
     Args:
         app_name: The name of the applicaiton. This will be used as the binary output filename. The output PEX
@@ -398,6 +404,11 @@ def python_app(
     from kraken.build import project
     from kraken.std.python.tasks.pex_build_task import pex_build
 
+    # If there's `python_project()` metadata, we depend on it's codegen.
+    project_metadata = project.find_metadata(PythonProject)
+    if project_metadata:
+        dependencies = [*dependencies, *project_metadata.codegen]
+
     output_file = project.build_directory / "pex" / app_name
 
     task = pex_build(
@@ -414,3 +425,10 @@ def python_app(
     task.depends_on(*dependencies)
 
     return task
+
+
+@dataclass
+class PythonProject:
+    """Result metadata from calling `python_project()`."""
+
+    codegen: Sequence[Task | str]
