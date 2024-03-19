@@ -246,7 +246,11 @@ def python_project(
         protoc.protoc_bin = protoc_bin
         protoc.proto_dir = ["proto"]
         protoc.generate("python", Path(protobuf_output_dir))
+        protoc.generate("grpc_python", Path(protobuf_output_dir))
         protoc.generate("mypy", Path(protobuf_output_dir))
+        protoc.generate("mypy_grpc", Path(protobuf_output_dir))
+        # TODO(@niklas): Seems the standard GRPCio tools can already generate .pyi files, but not for the grpc stubs?
+        # protoc.generate("pyi", Path(protobuf_output_dir))
 
         codegen = [*codegen, protoc]
         exclude_format_directories = [
