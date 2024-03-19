@@ -6,11 +6,6 @@
   "rebaseWhen": "conflicted",
   "packageRules": [
       {
-          "groupName": "docs requirements",
-          "matchPackagePatterns": ["*"],
-          "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
-      },
-      {
           "groupName": "minor and patch updates",
           "matchPackagePatterns": ["*"],
           "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
