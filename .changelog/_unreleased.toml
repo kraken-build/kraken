@@ -33,3 +33,15 @@ id = "897d94dc-79e7-45bf-abba-bd346a3fb7d5"
 type = "feature"
 description = "Add `PexBuildTask.always_rebuild` property and add `pex_build(always_rebuild, output_file)` parameters"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1ae440c5-cd7a-4fdc-a6a9-da10165fa260"
+type = "feature"
+description = "Add `ProtocTask` and `BufInstallTask` to `kraken.std.protobuf`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "691608ae-68bd-45d6-abbb-bb6a1b7200eb"
+type = "breaking change"
+description = "Remove `buf_lint()` and `buf_format()` helper functions from `kraken.std.protobuf`"
+author = "@NiklasRosenstein"
