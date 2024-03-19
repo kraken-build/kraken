@@ -7,6 +7,7 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 from platform import machine
+from shutil import rmtree
 
 import httpx
 
@@ -101,16 +102,19 @@ class ProtocTask(Task):
     create_gitignore: Property[bool] = Property.default(True, help="Create a .gitignore file in the output directory.")
 
     def generate(self, language: str, output_dir: Path) -> None:
-        """Helper to specify a code generator."""
+        """Helper to specify a code generator.
+
+        IMPORTANT: The contents of *output_dir* will be deleted before running `protoc`."""
+
         self.generators.setdefault(())
         self.generators.setmap(lambda v: [*v, (language, output_dir)])
 
     def execute(self) -> TaskStatus | None:
-        print(">>", self.generators, self.generators._value)
         command = [self.protoc_bin.get()]
         for proto_dir in self.proto_dir.get():
             command += [f"--proto_path={self.project.directory / proto_dir}"]
         for language, output_dir in self.generators.get():
+            rmtree(output_dir, ignore_errors=True)
             output_dir.mkdir(parents=True, exist_ok=True)
             if self.create_gitignore.get():
                 output_dir.joinpath(".gitignore").write_text("*\n")
