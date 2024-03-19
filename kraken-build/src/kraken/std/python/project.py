@@ -2,20 +2,28 @@
 
 import logging
 import re
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Literal
+from typing import Literal, TypeVar
 
 from nr.stream import Optional
 
+from kraken.core.system.task import Task
 from kraken.std.git.version import EmptyGitRepositoryError, GitVersion, NotAGitRepositoryError, git_describe
+from kraken.std.protobuf import BufFormatTask, BufInstallTask, BufLintTask, ProtocTask
 from kraken.std.python.buildsystem import detect_build_system
 from kraken.std.python.pyproject import PackageIndex
 from kraken.std.python.settings import python_settings
+from kraken.std.python.tasks.pex_build_task import PexBuildTask, pex_build
 from kraken.std.python.tasks.pytest_task import CoverageFormat
 from kraken.std.python.version import git_version_to_python_version
 
+T = TypeVar("T")
 logger = logging.getLogger(__name__)
+
+
+def concat(*args: Iterable[T]) -> list[T]:
+    return [x for arg in args for x in arg]
 
 
 def python_package_index(
@@ -69,6 +77,7 @@ def python_project(
     tests_directory: str = "tests",
     additional_lint_directories: Sequence[str] | None = None,
     exclude_lint_directories: Sequence[str] = (),
+    exclude_format_directories: Sequence[str] = (),
     line_length: int = 120,
     enforce_project_version: str | None = None,
     detect_git_version_build_type: Literal["release", "develop", "branch"] = "develop",
@@ -84,6 +93,12 @@ def python_project(
     mypy_version_spec: str = ">=1.8.0,<2.0.0",
     pycln_version_spec: str = ">=2.4.0,<3.0.0",
     pyupgrade_version_spec: str = ">=3.15.0,<4.0.0",
+    protobuf_enabled: bool = True,
+    protobuf_output_dir: str | None = None,
+    grpcio_tools_version_spec: str = ">=1.62.1,<2.0.0",
+    mypy_protobuf_version_spec: str = ">=3.5.0,<4.0.0",
+    buf_version: str = "1.30.0",
+    codegen: Sequence[Task | str] = (),
 ) -> None:
     """
     Use this function in a Python project.
@@ -110,6 +125,8 @@ def python_project(
         exclude_lint_directories: Directories in the project that contain Python sourec code that should not be
             linted and formatted but would otherwise be included via *source_directory*, *tests_directory*
             and *additional_directories*.
+        exclude_format_directories: Similar to *exclude_lint_directories*, but the paths will only be excluded by
+            formatters (e.g. Black, Isort) and Flake8 but will still be linted by Mypy.
         line_length: The line length to assume for all formatters and linters.
         enforce_project_version: When set, enforces the specified version number for the project when building wheels
             and publishing them. If not specified, the version number will be derived from the Git repository using
@@ -128,6 +145,16 @@ def python_project(
             be used to add Flake8 plugins.
         flake8_extend_ignore: Flake8 lints to ignore. The default ignores lints that would otherwise conflict with
             the way Black formats code.
+        protobuf_enabled: Enable Protobuf code generation tasks if a `proto/` directory. Is a no-op when the directory
+            does not exist. Creates tasks for linting, formatting and generating code from Protobuf files.
+        protobuf_output_dir: The output directory for generated Python code from Protobuf files. If not specified, the
+            default is the _only_ directory in the project's source directory plus `/proto`. If there is more than one
+            directory in the source directory, this must be specified, otherwise an error will be raised.
+        grpcio_tools_version_spec: The version specifier for the `grpcio-tools` package to use when generating code
+            from Protobuf files.
+        buf_version: The version specifier for the `buf` tool to use when linting and formatting Protobuf files.
+        codegen: A list of code generation tasks that should be executed before the project is built. This can be
+            used to generate code from Protobuf files, for example.
     """
 
     from kraken.build import project
@@ -168,7 +195,12 @@ def python_project(
     #       the lowest Python version comes first in the version spec. We also need to support Poetry-style semver
     #       range selectors here.
     if python_version := handler.get_python_version_constraint():
-        python_version = Optional(re.search(r"[\d\.]+", python_version)).map(lambda m: m.group(0)).or_else(None)
+        python_version = (
+            Optional(re.search(r"[\d\.]+", python_version))
+            .map(lambda m: m.group(0))
+            .map(lambda s: s.rstrip("."))
+            .or_else(None)
+        )
     if not python_version:
         logger.warning(
             "Unable to determine minimum Python version for project %s, fallback to '3'",
@@ -176,30 +208,74 @@ def python_project(
         )
         python_version = "3"
 
-    login_task()
+    login = login_task()
     update_lockfile_task()
     update_pyproject_task()
-    install_task()
     info_task(build_system=build_system)
+    install_task().depends_on(login)
+
+    # === Protobuf
+
+    if protobuf_enabled and project.directory.joinpath("proto").is_dir():
+
+        if not protobuf_output_dir:
+            srcdir = project.directory.joinpath(source_directory)
+            source_dirs = [d for d in srcdir.iterdir() if not d.name.endswith(".egg-info")]
+            if len(source_dirs) != 1:
+                raise ValueError(
+                    f"Multiple source directories found in {srcdir}; `protobuf_output_dir` must be specified"
+                )
+            protobuf_output_dir = str(source_dirs[0] / "proto")
+
+        buf_binary = project.task("buf.install", BufInstallTask)
+        buf_binary.version = buf_version
+        buf_format = project.task("buf.format", BufFormatTask, group="fmt")
+        buf_format.buf_bin = buf_binary.output_file.map(lambda p: str(p.absolute()))
+        buf_lint = project.task("buf.lint", BufLintTask, group="lint")
+        buf_lint.buf_bin = buf_binary.output_file.map(lambda p: str(p.absolute()))
+
+        protoc_bin = pex_build(
+            binary_name="protoc",
+            requirements=[f"grpcio-tools{grpcio_tools_version_spec}", f"mypy-protobuf{mypy_protobuf_version_spec}"],
+            entry_point="grpc_tools.protoc",
+            venv="prepend",
+        ).output_file.map(lambda p: str(p.absolute()))
+
+        protoc = project.task("protoc-python", ProtocTask)
+        protoc.protoc_bin = protoc_bin
+        protoc.proto_dir = ["proto"]
+        protoc.generate("python", Path(protobuf_output_dir))
+        protoc.generate("mypy", Path(protobuf_output_dir))
+
+        codegen = [*codegen, protoc]
+        exclude_format_directories = [
+            *exclude_format_directories,
+            # Ensure that the generated Protobuf code is not linted or formatted
+            str((project.directory / protobuf_output_dir).relative_to(project.directory)),
+        ]
+
+    # === Python tooling
 
     pyupgrade_task(
         python_version=python_version,
         keep_runtime_typing=pyupgrade_keep_runtime_typing,
-        exclude=[Path(x) for x in exclude_lint_directories],
+        exclude=[Path(x) for x in concat(exclude_lint_directories, exclude_format_directories)],
         paths=source_paths,
         version_spec=pyupgrade_version_spec,
     )
 
     pycln_task(
         paths=source_paths,
-        exclude_directories=exclude_lint_directories,
+        exclude_directories=concat(exclude_lint_directories, exclude_format_directories),
         remove_all_unused_imports=pycln_remove_all_unused_imports,
         version_spec=pycln_version_spec,
     )
 
     black = black_tasks(
         paths=source_paths,
-        config=BlackConfig(line_length=line_length, exclude_directories=exclude_lint_directories),
+        config=BlackConfig(
+            line_length=line_length, exclude_directories=concat(exclude_lint_directories, exclude_format_directories)
+        ),
         version_spec=black_version_spec,
     )
 
@@ -208,7 +284,7 @@ def python_project(
         config=IsortConfig(
             profile="black",
             line_length=line_length,
-            extend_skip=exclude_lint_directories,
+            extend_skip=concat(exclude_lint_directories, exclude_format_directories),
         ),
         version_spec=isort_version_spec,
     )
@@ -217,7 +293,9 @@ def python_project(
     flake8 = flake8_tasks(
         paths=source_paths,
         config=Flake8Config(
-            max_line_length=line_length, extend_ignore=flake8_extend_ignore, exclude=exclude_lint_directories
+            max_line_length=line_length,
+            extend_ignore=flake8_extend_ignore,
+            exclude=concat(exclude_lint_directories, exclude_format_directories),
         ),
         version_spec=flake8_version_spec,
         additional_requirements=flake8_additional_requirements,
@@ -235,7 +313,7 @@ def python_project(
         version_spec=mypy_version_spec,
         python_version=python_version,
         use_daemon=mypy_use_daemon,
-    )
+    ).depends_on(*codegen)
 
     # TODO(@niklas): Improve this heuristic to check whether Coverage reporting should be enabled.
     if "pytest-cov" in str(dict(pyproject)):
@@ -249,7 +327,7 @@ def python_project(
         coverage=coverage,
         doctest_modules=True,
         allow_no_tests=True,
-    )
+    ).depends_on(*codegen)
 
     if not enforce_project_version:
         try:
@@ -280,6 +358,7 @@ def python_project(
 
     # Create publish tasks for any package index with publish=True.
     build = build_task(as_version=enforce_project_version)
+    build.depends_on(*codegen)
     for index in python_settings().package_indexes.values():
         if index.publish:
             publish_task(package_index=index.alias, distributions=build.output_files, interactive=False)
@@ -296,7 +375,8 @@ def python_app(
     interpreter_constraint: str | None = None,
     venv_mode: Literal["append", "prepend"] | None = None,
     name: str = "build-pex",
-) -> None:
+    dependencies: Sequence[Task | str] = (),
+) -> PexBuildTask:
     """Build a PEX binary from a Python application.
 
     This function must be called after `python_project()`.
@@ -320,7 +400,7 @@ def python_app(
 
     output_file = project.build_directory / "pex" / app_name
 
-    pex_build(
+    task = pex_build(
         binary_name=app_name,
         requirements=[str(project.directory.absolute())],
         entry_point=entry_point,
@@ -331,3 +411,6 @@ def python_app(
         output_file=output_file,
         task_name=name,
     )
+    task.depends_on(*dependencies)
+
+    return task
