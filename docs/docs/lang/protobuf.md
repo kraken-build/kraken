@@ -2,22 +2,40 @@
 
   [Buf]: https://buf.build/docs/
 
-Format and lint Proto files using [buf][].
+We currently support automatic linting, formatting and code generation from Protobuf files using [buf][]
+and [protoc][] when using the `python_project()` function. 
 
-__Quickstart__
+No local development tools are needed as both `protoc` and `buf` are fetched for you by Kraken.
 
-```py
-# .kraken.py
-from kraken.core import Project
-from kraken.std.protobuf import BufFormatTask, BufLintTask
+### Project layout
 
-
-project = Project.current()
-project.task(name, BufLintTask, group="lint")
-project.task(name, BufFormatTask, group="fmt")
+```
+my-project/
+  proto/
+    my_project/
+      service.proto
+  src/
+    my_project/
+      __init__.py
 ```
 
-## Requirements
+Kraken will then generate the following files via the `protoc-python` task:
 
-- The buf lint task will only succeed when executed in a `/proto` directory
-- The buf format task can be executed in the root of the project directory and will format inplace all of the proto files that exist in the repo 
+```
+my-proect/
+  src/
+    my_project/
+      .gitignore
+      service_pb2.py
+      service_pb2_grpc.py
+```
+
+The `.gitignore` file contains all the generated files.
+
+### Tasks
+
+The following tasks are created by `python_project()` when a `proto/` directory exists:
+
+* `protoc-python` - Generates Python code from the `.proto` files, including Mypy stub files.
+* `buf.lint` - Lints the `.proto` files using [buf][] (group: `lint`)
+* `buf.format` - Formats the `.proto` files using [buf][] (group: `fmt`)
