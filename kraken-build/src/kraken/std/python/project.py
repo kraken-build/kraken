@@ -11,7 +11,6 @@ from nr.stream import Optional
 
 from kraken.core.system.task import Task
 from kraken.std.git.version import EmptyGitRepositoryError, GitVersion, NotAGitRepositoryError, git_describe
-from kraken.std.protobuf import BufFormatTask, BufInstallTask, BufLintTask, ProtocTask
 from kraken.std.python.buildsystem import detect_build_system
 from kraken.std.python.pyproject import PackageIndex
 from kraken.std.python.settings import python_settings
@@ -95,7 +94,6 @@ def python_project(
     pycln_version_spec: str = ">=2.4.0,<3.0.0",
     pyupgrade_version_spec: str = ">=3.15.0,<4.0.0",
     protobuf_enabled: bool = True,
-    protobuf_output_dir: str | None = None,
     grpcio_tools_version_spec: str = ">=1.62.1,<2.0.0",
     mypy_protobuf_version_spec: str = ">=3.5.0,<4.0.0",
     buf_version: str = "1.30.0",
@@ -147,10 +145,8 @@ def python_project(
         flake8_extend_ignore: Flake8 lints to ignore. The default ignores lints that would otherwise conflict with
             the way Black formats code.
         protobuf_enabled: Enable Protobuf code generation tasks if a `proto/` directory. Is a no-op when the directory
-            does not exist. Creates tasks for linting, formatting and generating code from Protobuf files.
-        protobuf_output_dir: The output directory for generated Python code from Protobuf files. If not specified, the
-            default is the _only_ directory in the project's source directory plus `/proto`. If there is more than one
-            directory in the source directory, this must be specified, otherwise an error will be raised.
+            does not exist. Creates tasks for linting, formatting and generating code from Protobuf files. The
+            generated code will be placed into the `source_directory`.
         grpcio_tools_version_spec: The version specifier for the `grpcio-tools` package to use when generating code
             from Protobuf files.
         buf_version: The version specifier for the `buf` tool to use when linting and formatting Protobuf files.
@@ -219,21 +215,30 @@ def python_project(
 
     if protobuf_enabled and project.directory.joinpath("proto").is_dir():
 
-        if not protobuf_output_dir:
-            srcdir = project.directory.joinpath(source_directory)
-            source_dirs = [d for d in srcdir.iterdir() if not d.name.endswith(".egg-info")]
-            if len(source_dirs) != 1:
-                raise ValueError(
-                    f"Multiple source directories found in {srcdir}; `protobuf_output_dir` must be specified"
-                )
-            protobuf_output_dir = str(source_dirs[0] / "proto")
+        from kraken.std.protobuf import BufFormatTask, BufInstallTask, BufLintTask, ProtocTask
+        from kraken.std.buffrs import buffrs_install as buffrs_install_task
+        from kraken.std.util import fetch_tarball
 
-        buf_binary = project.task("buf.install", BufInstallTask)
-        buf_binary.version = buf_version
+        if project.directory.joinpath("Proto.toml").is_file():
+            buffrs_install = buffrs_install_task()
+        else:
+            buffrs_install = None
+
+        # TODO(@niklas): This is a temporary solution to fetch the Buf binary until we have a proper way to
+        buf_binary = fetch_tarball(
+            name="buf",
+            url=f"https://github.com/bufbuild/buf/releases/download/v{buf_version}/buf-Linux-aarch64.tar.gz",
+        ).out.map(lambda p: p.absolute() / "buf" / "bin" / "buf").map(str)
+
         buf_format = project.task("buf.format", BufFormatTask, group="fmt")
-        buf_format.buf_bin = buf_binary.output_file.map(lambda p: str(p.absolute()))
+        buf_format.buf_bin = buf_binary
+
         buf_lint = project.task("buf.lint", BufLintTask, group="lint")
-        buf_lint.buf_bin = buf_binary.output_file.map(lambda p: str(p.absolute()))
+        buf_lint.buf_bin = buf_binary
+
+        if buffrs_install is not None:
+            buf_lint.depends_on(buffrs_install)
+            buf_format.depends_on(buffrs_install)
 
         protoc_bin = pex_build(
             binary_name="protoc",
@@ -244,19 +249,23 @@ def python_project(
 
         protoc = project.task("protoc-python", ProtocTask)
         protoc.protoc_bin = protoc_bin
-        protoc.proto_dir = ["proto"]
-        protoc.generate("python", Path(protobuf_output_dir))
-        protoc.generate("grpc_python", Path(protobuf_output_dir))
-        protoc.generate("mypy", Path(protobuf_output_dir))
-        protoc.generate("mypy_grpc", Path(protobuf_output_dir))
+        protoc.proto_dir = "proto"
+        protoc.generate("python", Path(source_directory))
+        protoc.generate("grpc_python", Path(source_directory))
+        protoc.generate("mypy", Path(source_directory))
+        protoc.generate("mypy_grpc", Path(source_directory))
         # TODO(@niklas): Seems the standard GRPCio tools can already generate .pyi files, but not for the grpc stubs?
-        # protoc.generate("pyi", Path(protobuf_output_dir))
+        # protoc.generate("pyi", Path(source_directory))
+
+        if buffrs_install is not None:
+            protoc.depends_on(buffrs_install)
+            protoc.proto_dir = "proto/vendor"
 
         codegen = [*codegen, protoc]
         exclude_format_directories = [
             *exclude_format_directories,
             # Ensure that the generated Protobuf code is not linted or formatted
-            str((project.directory / protobuf_output_dir).relative_to(project.directory)),
+            str((project.directory / source_directory / "proto").relative_to(project.directory)),
         ]
 
     # === Python tooling

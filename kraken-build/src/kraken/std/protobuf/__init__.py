@@ -57,7 +57,7 @@ class BufInstallTask(Task):
         output_file = self._get_output_file()
         output_file.parent.mkdir(parents=True, exist_ok=True)
 
-        response = httpx.get(dist_url, timeout=10)
+        response = httpx.get(dist_url, timeout=10, follow_redirects=True)
         response = response.raise_for_status()
         output_file.write_bytes(response.content)
 
@@ -95,7 +95,7 @@ class ProtocTask(Task):
     """Generate code with `protoc`."""
 
     protoc_bin: Property[str] = Property.default("protoc", help="Path to `protoc` binary.")
-    proto_dir: Property[Sequence[Path | str]] = Property.required(help="The directories containing the .proto files.")
+    proto_dir: Property[Path | str] = Property.required(help="The directories containing the .proto files.")
     generators: Property[Sequence[tuple[str, Path]]] = Property.required(
         help="The code generators to use. Each tuple contains the language name and the output directory."
     )
@@ -110,9 +110,13 @@ class ProtocTask(Task):
         self.generators.setmap(lambda v: [*v, (language, output_dir)])
 
     def execute(self) -> TaskStatus | None:
+
+        # TODO: Re-organize proto_dir to be prefixed with a `proto/` directory that is not contained
+        #       in the `--proto_path` argument. This is necessary to ensure we generate imports in
+        #       a `proto/` namespace package.
+
         command = [self.protoc_bin.get()]
-        for proto_dir in self.proto_dir.get():
-            command += [f"--proto_path={self.project.directory / proto_dir}"]
+        command += [f"--proto_path={self.project.directory / self.proto_dir.get()}"]
         for language, output_dir in self.generators.get():
             rmtree(output_dir, ignore_errors=True)
             output_dir.mkdir(parents=True, exist_ok=True)

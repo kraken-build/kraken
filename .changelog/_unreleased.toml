@@ -45,3 +45,9 @@ id = "691608ae-68bd-45d6-abbb-bb6a1b7200eb"
 type = "breaking change"
 description = "Remove `buf_lint()` and `buf_format()` helper functions from `kraken.std.protobuf`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "07fb65a6-fe5a-420a-ad96-36a50714dee1"
+type = "feature"
+description = "Add `kraken.std.util.fetch_tarball()`"
+author = "@NiklasRosenstein"
