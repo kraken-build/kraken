@@ -1,0 +1,4 @@
+syntax = "proto3";
+package myservice;
+message MyMessage {}
+service MyService {}
