@@ -63,3 +63,9 @@ id = "33f61844-e82b-40da-aba9-f552142d6abd"
 type = "improvement"
 description = "`Supplier.of()` and related functions now take an `Iterable[Supplier[Any]]` as the `derived_from` parameter instead of a `Sequence` as it is converted to a `tuple` later anyway."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6bddf45d-7195-42d9-a490-2a567371d7f4"
+type = "feature"
+description = "Add `kraken.build.experimental.functional.v1` API with common tasks for operations in a functional manner (fetching a file, tarball, writing a file and executing a shell command)"
+author = "@NiklasRosenstein"
