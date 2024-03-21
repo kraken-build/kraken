@@ -6,8 +6,6 @@ from dataclasses import dataclass, field
 from threading import local
 from typing import Any
 
-import builddsl
-
 
 @dataclass
 class BuildscriptMetadata:
@@ -100,7 +98,6 @@ _global = _ModeGlobal()
 
 
 def buildscript(
-    closure: "builddsl.UnboundClosure | None" = None,
     *,
     index_url: "str | None" = None,
     extra_index_urls: "Sequence[str] | None" = None,
@@ -132,7 +129,6 @@ def buildscript(
     ```
 
     Args:
-        closure: Only relevant for BuildDsl scripts. This is experimental, you can ignore this argument.
         index_url: The index URL for Python packages to install from. If this is a private package registry, the
             credentials can be configured with the `krakenw auth` command.
         extra_index_urls: Additional index URLs for Python packages to install from.
@@ -152,9 +148,6 @@ def buildscript(
         requirements=list(requirements or ()),
         additional_sys_paths=list(additional_sys_paths or ()),
     )
-
-    if closure:
-        closure(metadata)
 
     if _global.mode == _Mode.RAISE:
         raise BuildscriptMetadataException(metadata)

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, ca
 
 from deprecated import deprecated
 
-from kraken.common import NotSet, Supplier
+from kraken.common import Supplier
 from kraken.core.address import Address
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
@@ -610,44 +610,6 @@ class BackgroundTask(Task):
     def teardown(self) -> None:
         self.__exit_stack.close()
         del self.__exit_stack
-
-
-class InlineTask(Task):
-    """
-    This class is what is instantiated when calling #Project.task() with only a name and a BuildDSL closure.
-    It simplifies the implementation of one-off tasks in a BuildDSK Kraken build script, allowing to dynamically
-    define properties.
-    """
-
-    _properties: dict[str, Property[Any]]
-
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self._properties = {}
-
-    @overload
-    def property(self, name: str) -> Property[Any]:
-        """Retrieve a property by name."""
-
-    @overload
-    def property(self, name: str, value: Any) -> Property[Any]:
-        """Define a property on this task with the given *name* and *value*."""
-
-    def property(self, name: str, value: Any | NotSet = NotSet.Value) -> Property[Any]:
-        if value is NotSet.Value:
-            return self._properties[name]
-        prop = self._properties[name] = Property(self, name, Any)
-        prop.set(value)
-        return prop
-
-    # Task
-
-    def get_properties(self) -> Iterable[Property[Any]]:
-        yield from self._properties.values()
-        yield from super().get_properties()
-
-    def execute(self) -> TaskStatus | None:
-        return None
 
 
 class TaskSet(Collection[Task]):

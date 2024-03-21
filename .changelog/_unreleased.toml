@@ -1,0 +1,5 @@
+[[entries]]
+id = "e82eb99a-558f-4c74-8cd0-e4e47c84deaa"
+type = "breaking change"
+description = "Remove support for BuildDSL as build script language"
+author = "niklas.rosenstein@helsing.ai"

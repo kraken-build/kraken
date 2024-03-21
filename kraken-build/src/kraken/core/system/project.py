@@ -6,14 +6,13 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
-import builddsl
 from deprecated import deprecated
 
 from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, InlineTask, Task, TaskSet
+from kraken.core.system.task import GroupTask, Task, TaskSet
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
@@ -144,52 +143,10 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         exists, a #DuplicateMember exception is raised.
         """
 
-    @overload
-    def task(self, name: str, type_: type[T_Task], closure: builddsl.UnboundClosure, /) -> T_Task:
-        """
-        This overload is used to create a task in a BuildDSL script.
-
-        ```py
-        project.task "myTask" MyTaskType {
-            default = False
-            some_property.set("foobar")
-            depends_on "otherTask"
-        }
-        ```
-        """
-
-    @overload
     def task(
         self,
         name: str,
-        closure: builddsl.UnboundClosure,
-        /,
-        *,
-        default: bool | None = None,
-        group: str | GroupTask | None = None,
-        description: str | None = None,
-    ) -> Task:
-        """
-        Create a new task, applying the *closure*. This is useful for BuildDSL scripts that want to implement
-        a custom task. This can be done by overriding the task's `execute()` method with a closure. It will
-        create a task of type #InlineTask for you.
-
-        ```py
-        project.task "myTask" {
-            property "name" "John"
-            execute = () -> {
-                def name = self.property("name").get()
-                print "Hello," name
-            }
-        }
-        ```
-        """
-
-    def task(
-        self,
-        name: str,
-        type_: type[T_Task] | builddsl.UnboundClosure | None = None,
-        default_or_closure: bool | builddsl.UnboundClosure | None = None,
+        type_: type[T_Task] | None = None,
         /,
         *,
         default: bool | None = None,
@@ -197,7 +154,6 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         description: str | None = None,
     ) -> Task | T_Task:
         if type_ is None:
-            assert default_or_closure is None
             assert default is None
             assert group is None
             assert description is None
@@ -210,10 +166,6 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
                 raise TaskNotFound(self.address.concat(name))
             return task
 
-        if isinstance(type_, builddsl.UnboundClosure):
-            default_or_closure = type_
-            type_ = InlineTask  # type: ignore[assignment]
-
         if type_ is None or not isinstance(type_, type) or not issubclass(type_, Task):
             raise TypeError(f"Expected a Task type, got {type(type_).__name__}")
 
@@ -221,13 +173,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             raise DuplicateMember(f"{self} already has a member {name!r}")
 
         task = type_(name, self)
-
-        if callable(default_or_closure):
-            default_or_closure(task)
-        elif default_or_closure is not None:
-            assert isinstance(default_or_closure, bool)
-            task.default = default_or_closure
-        elif default is not None:
+        if default is not None:
             task.default = default
 
         match group:
@@ -353,7 +299,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         self,
         name: str,
         task_type: type[T_Task] = cast(Any, Task),
-        default: bool | builddsl.UnboundClosure | None = None,
+        default: bool | None = None,
         *,
         group: str | GroupTask | None = None,
         description: str | None = None,
@@ -363,7 +309,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
         :param name: The name of the task to add.
         :param task_type: The type of task to add.
-        :param default: Override :attr:`Task.default`, or a closure to invoke with the created task.
+        :param default: Override :attr:`Task.default`.
         :param group: Add the task to the given group in the project.
         :param kwargs: Any number of properties to set on the task. Unknown properties will be ignored
             with a warning log.
@@ -390,7 +336,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             raise ValueError(f"{self} already has a member {name!r}")
 
         task = task_type(name, self)
-        if default is not None and not isinstance(default, builddsl.UnboundClosure):
+        if default is not None:
             task.default = default
         if description is not None:
             task.description = description
@@ -408,8 +354,6 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
                 "properties %s cannot be set because they don't exist (task %s)", invalid_keys, task.address
             )
 
-        if isinstance(default, builddsl.UnboundClosure):
-            default(task)
         self.add_task(task)
         if isinstance(group, str):
             group = self.group(group)

@@ -37,7 +37,6 @@ kraken = "kraken.core.cli.main:main"
 # ------------
 
 [tool.poetry.dependencies]
-builddsl = "^1.0.0"
 databind-json = "^4.2.5"
 dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
