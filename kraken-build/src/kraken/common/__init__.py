@@ -1,4 +1,4 @@
-__version__ = "0.35.7"
+__version__ = "0.36.1"
 
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
@@ -13,7 +13,6 @@ from ._importlib import appending_to_sys_path, import_class
 from ._option_sets import LoggingOptions
 from ._requirements import LocalRequirement, PipRequirement, Requirement, RequirementSpec, parse_requirement
 from ._runner import (
-    BuildDslScriptRunner,
     CurrentDirectoryProjectFinder,
     GitAwareProjectFinder,
     ProjectFinder,
@@ -60,7 +59,6 @@ __all__ = [
     "PipRequirement",
     "RequirementSpec",
     # _runner
-    "BuildDslScriptRunner",
     "CurrentDirectoryProjectFinder",
     "GitAwareProjectFinder",
     "ProjectFinder",

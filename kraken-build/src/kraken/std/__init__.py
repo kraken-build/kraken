@@ -1,4 +1,4 @@
-__version__ = "0.35.7"
+__version__ = "0.36.1"
 
 from kraken.std.python.project import python_package_index, python_project
 

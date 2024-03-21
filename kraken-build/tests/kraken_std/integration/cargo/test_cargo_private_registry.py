@@ -148,6 +148,7 @@ def private_registry(docker_service_manager: DockerServiceManager) -> str:
     port = container.ports["35504/tcp"][0]["HostPort"]
     index_url = f"http://{host}:{port}/git"
     logger.info("Started local cargo registry at %s", index_url)
+    time.sleep(5)
     return index_url
 
 

@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import json
 import logging
-import time
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from kraken.std.util.daemon_controller import DaemonController
+from kraken.std.util.http import http_probe
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,6 @@ inject_auth_addon_file = Path(__file__).parent / "mitm_addon.py"
 
 def start_mitmweb_proxy(
     auth: Mapping[str, tuple[str, str]],
-    startup_wait_time: float = 3.0,
     mitmweb_bin: str = "mitmweb",
     additional_args: Sequence[str] = (),
 ) -> tuple[str, Path]:
@@ -67,14 +66,16 @@ def start_mitmweb_proxy(
         stdout=daemon_log_file,
         stderr="stdout",
     )
+
+    # Wait for the proxy to come up. It will respond with a 502 code because there's no
+    # additioal information in the request to tell it what to proxy.
+    http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=60 if started else 0)
+
     if started:
-        # Give the proxy some time to fully start up.
-        time.sleep(startup_wait_time)
-        if not controller.is_alive():
-            raise RuntimeError("The mitmweb proxy failed to start. Check its logs at %s" % daemon_log_file)
         print("mitmweb was started successfully")
     else:
         print("mitmweb already running")
+
     print(f"proxy available at http://localhost:{mitmweb_port}")
     print(f"web ui available at http://localhost:{mitmweb_ui_port}")
     return f"localhost:{mitmweb_port}", mitmproxy_ca_cert_file

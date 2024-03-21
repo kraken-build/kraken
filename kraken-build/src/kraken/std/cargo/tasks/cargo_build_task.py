@@ -128,6 +128,7 @@ class CargoBuildTask(Task):
 
         total_attempts = self.retry_attempts.get() + 1
 
+        result = -1
         while total_attempts > 0:
             result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
 

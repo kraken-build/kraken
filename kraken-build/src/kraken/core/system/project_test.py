@@ -52,7 +52,7 @@ def test__Project__resolve_outputs_supplier(kraken_project: Project) -> None:
 
 def test__Project__do_normalizes_taskname_backwards_compatibility_pre_0_12_0(kraken_project: Project) -> None:
     with pytest.warns(DeprecationWarning) as warninfo:
-        task = kraken_project.do("this is a :test task", VoidTask)
+        task = kraken_project.task("this is a :test task", VoidTask)
     assert task.name == "this-is-a-test-task"
     assert str(warninfo.list[0].message) == ("Call to deprecated method do. (Use Project.task() instead)")
     assert str(warninfo.list[1].message) == (
