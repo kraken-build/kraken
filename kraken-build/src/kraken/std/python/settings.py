@@ -133,6 +133,15 @@ class PythonSettings:
         )
         return self
 
+    def get_primary_index(self) -> _PackageIndex | None:
+        default: PythonSettings._PackageIndex | None = None
+        for idx in self.package_indexes.values():
+            if idx.priority == PackageIndex.Priority.primary:
+                return idx
+            if idx.priority == PackageIndex.Priority.default:
+                default = idx
+        return default
+
 
 def python_settings(
     project: Project | None = None,

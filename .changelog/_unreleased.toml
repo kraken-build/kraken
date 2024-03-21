@@ -1,0 +1,5 @@
+[[entries]]
+id = "4a66818e-2b62-4094-8a34-d625e08fd74a"
+type = "improvement"
+description = "Add `PythonSettings.get_primary_index()` that supports both `PackageIndex.Priority.primary` and `PackageIndex.Priority.default`"
+author = "niklas.rosenstein@helsing.ai"
