@@ -27,3 +27,9 @@ id = "206f3c8d-2493-4965-bf79-73906a75e36b"
 type = "breaking change"
 description = "Remove deprecated `KanikoExecutor._render_main_script()` and `._get_kaniko_executor_command()`"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "91fae694-8053-49a1-9283-9993dcb2b6dd"
+type = "fix"
+description = "Fix `pyupgrade()` not passing the Pex built pyupgrade to the format task"
+author = "niklas.rosenstein@helsing.ai"
