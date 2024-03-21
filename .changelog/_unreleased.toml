@@ -69,3 +69,9 @@ id = "6bddf45d-7195-42d9-a490-2a567371d7f4"
 type = "feature"
 description = "Add `kraken.build.experimental.functional.v1` API with common tasks for operations in a functional manner (fetching a file, tarball, writing a file and executing a shell command)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "640c9b5a-e459-429c-8aa1-b92430cb5065"
+type = "feature"
+description = "Install Buffrs CLI from GitHub releases"
+author = "@NiklasRosenstein"

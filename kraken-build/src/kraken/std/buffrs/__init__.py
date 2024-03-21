@@ -5,11 +5,11 @@ import platform as _platform
 from pathlib import Path
 from typing import cast
 
+from kraken.build.experimental.functional.v1 import fetch_tarball
 from kraken.common.supplier import Supplier
 from kraken.core import Project
 
 from .tasks import BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask
-from kraken.std.util import fetch_tarball
 
 logger = logging.getLogger(__name__)
 
@@ -40,18 +40,21 @@ def buffrs_login(
         task = root_project.task("buffrsLogin", BuffrsLoginTask)
         task.registry = registry
         task.token = token
-        task.buffrs_bin = buffrs_bin or buffrs_fetch_binary().map(str)
+        task.buffrs_bin = buffrs_bin or get_buffrs_binary().map(str)
 
     return task
 
 
-def buffrs_install(*, project: Project | None = None,
-    buffrs_bin: Supplier[str] | None = None,) -> BuffrsInstallTask:
+def buffrs_install(
+    *,
+    project: Project | None = None,
+    buffrs_bin: Supplier[str] | None = None,
+) -> BuffrsInstallTask:
     """Installs buffrs dependencies defined in the `Proto.toml`"""
 
     project = project or Project.current()
     task = project.task("buffrsInstall", BuffrsInstallTask)
-    task.buffrs_bin = buffrs_bin or buffrs_fetch_binary().map(str)
+    task.buffrs_bin = buffrs_bin or get_buffrs_binary().map(str)
 
     return task
 
@@ -72,11 +75,11 @@ def buffrs_publish(
     task.registry = registry
     task.repository = repository
     task.version = version
-    task.buffrs_bin = buffrs_bin or buffrs_fetch_binary().map(str)
+    task.buffrs_bin = buffrs_bin or get_buffrs_binary().map(str)
     return task
 
 
-def buffrs_fetch_binary(
+def get_buffrs_binary(
     version: str = "0.8.0",
     target_triplet: str | None = None,
 ) -> Supplier[Path]:
@@ -95,20 +98,20 @@ def buffrs_fetch_binary(
 
 
 def get_buffrs_triplet() -> str:
-    """ Returns the Buffrs target triplet for the current platform."""
+    """Returns the Buffrs target triplet for the current platform."""
 
     match (_platform.machine(), _platform.system()):
         case ("x86_64", "Linux"):
             return "x86_64-unknown-linux-gnu"
         case ("x86_64", "Darwin"):
             return "x86_64-apple-darwin"
-        case ("x86_64", "Windows"):
+        case ("AMD64", "Windows"):
             return "x86_64-pc-windows-msvc"
         case ("aarch64", "Linux"):
             return "arm-unknown-linux-gnueabihf"
-        case ("aarch64", "Darwin"):
+        case ("arm64", "Darwin"):
             return "aarch64-apple-darwin"
-        case ("aarch64", "Windows"):
-            return "i686-pc-windows-msvc"
+        # case ("aarch64", "Windows"):
+        #     return "i686-pc-windows-msvc"
         case _:
             raise NotImplementedError(f"Platform {_platform.machine()} is not supported by Buffrs.")
