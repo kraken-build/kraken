@@ -216,14 +216,14 @@ def python_project(
     if protobuf_enabled and project.directory.joinpath("proto").is_dir():
 
         from kraken.std.buffrs import buffrs_install as buffrs_install_task
-        from kraken.std.protobuf import ProtocTask, buf_apply
+        from kraken.std.protobuf import ProtocTask, buf
 
         if project.directory.joinpath("Proto.toml").is_file():
             buffrs_install = buffrs_install_task()
         else:
             buffrs_install = None
 
-        buf_apply(
+        buf(
             buf_version=buf_version,
             path="proto/vendor" if buffrs_install else "proto",
             dependencies=[buffrs_install] if buffrs_install else [],
