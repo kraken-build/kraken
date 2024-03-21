@@ -20,6 +20,7 @@ from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject
+from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 
@@ -71,7 +72,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
         port = container.ports["8080/tcp"][0]["HostPort"]
         index_url = f"http://{host}:{port}/simple"
 
-        container.probe("GET", index_url)
+        http_probe("GET", index_url)
 
         logger.info("Started local Pypiserver at %s", index_url)
         return index_url

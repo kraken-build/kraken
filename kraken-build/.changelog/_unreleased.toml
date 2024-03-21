@@ -15,3 +15,9 @@ id = "cda7e55d-fe31-491a-8bd9-d9a0cb189e47"
 type = "breaking change"
 description = "Remove `CargoAuthProxy.startup_wait_time` and `start_mitm_proxy(startup_wait_time)`"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "3c4128cd-9c60-4660-a6b3-7be3252c2ec3"
+type = "breaking change"
+description = "Remove `Container.probe()` in favor of `kraken.std.util.http.http_probe()`"
+author = "niklas.rosenstein@helsing.ai"

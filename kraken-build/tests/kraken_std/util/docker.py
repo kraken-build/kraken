@@ -6,10 +6,7 @@ import logging
 import subprocess as sp
 from typing import Any, TypeAlias, TypedDict, cast
 
-from deprecated import deprecated
-
 from kraken.common import flatten
-from kraken.std.util.http import http_probe
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +92,3 @@ class Container:
     def output(self) -> bytes:
         assert self._output is not None, "Did not capture output of container"
         return self._output
-
-    @deprecated(reason="Use `kraken.std.util.http.http_probe() instead")
-    def probe(self, method: str, url: str, timeout: float = 60) -> None:
-        http_probe(method, url, timeout)
