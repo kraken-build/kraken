@@ -127,8 +127,8 @@ class CargoBuildTask(Task):
                         out_libraries_candidates.append(CargoLibraryArtifact(base_name, target_dir / filename))
 
         total_attempts = self.retry_attempts.get() + 1
-        assert total_attempts > 0
 
+        result = -1
         while total_attempts > 0:
             result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
 
