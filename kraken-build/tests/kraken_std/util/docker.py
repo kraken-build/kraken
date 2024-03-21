@@ -4,12 +4,9 @@ import contextlib
 import json
 import logging
 import subprocess as sp
-import time
 from typing import Any, TypeAlias, TypedDict, cast
 
-import httpx
-
-from kraken.common import flatten, http
+from kraken.common import flatten
 
 logger = logging.getLogger(__name__)
 
@@ -95,21 +92,3 @@ class Container:
     def output(self) -> bytes:
         assert self._output is not None, "Did not capture output of container"
         return self._output
-
-    def probe(self, method: str, url: str, timeout: float = 60) -> None:
-        logger.info("Probing %s %s (timeout: %d)", method, url, timeout)
-
-        tstart = time.perf_counter()
-        while (time.perf_counter() - tstart) < timeout:
-            try:
-                request = http.request(method, url)
-            except httpx.RequestError as exc:
-                logger.debug("Ignoring error while probing (%s)", exc)
-            else:
-                if request.status_code // 100 in (2, 3):
-                    logger.info("Probe returned status code %d", request.status_code)
-                    return
-                logger.debug("Probe returned status code %d (continue probing)", request.status_code)
-            time.sleep(0.5)
-
-        raise TimeoutError("Probe timed out")

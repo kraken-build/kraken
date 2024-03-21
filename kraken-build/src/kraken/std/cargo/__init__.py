@@ -275,13 +275,11 @@ def cargo_deny(
     """
 
     project = project or Project.current()
-    return project.do(
-        "cargoDeny",
-        CargoDenyTask,
-        checks=checks,
-        config_file=config_file,
-        error_message=error_message,
-    )
+    task = project.task("cargoDeny", CargoDenyTask)
+    task.checks = checks
+    task.config_file = config_file
+    task.error_message = error_message
+    return task
 
 
 @dataclasses.dataclass
@@ -488,8 +486,6 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
 
 def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
     project = project or Project.current()
-    return project.do(
-        "cargoGenerateDeb",
-        CargoGenerateDebPackage,
-        package_name=package_name,
-    )
+    task = project.task("cargoGenerateDeb", CargoGenerateDebPackage)
+    task.package_name = package_name
+    return task

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import time
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 from urllib.parse import urlparse
@@ -37,9 +36,6 @@ class CargoAuthProxyTask(BackgroundTask):
 
     #: The path to the certificate file that needs to be trusted in order to talk to the proxy over HTTPS.
     proxy_cert_file: Property[Path] = Property.output()
-
-    #: The number of seconds to wait after the proxy started.
-    startup_wait_time: Property[float] = Property.default(1.0)
 
     #: Path to the mitmweb binary.
     mitmweb_bin: Property[str] = Property.default("mitmweb")
@@ -109,9 +105,5 @@ class CargoAuthProxyTask(BackgroundTask):
         self.proxy_cert_file.set(cert_file)
         exit_stack.callback(lambda: self.proxy_url.clear())
         exit_stack.callback(lambda: self.proxy_cert_file.clear())
-
-        # Give the proxy some time to start up.
-        time.sleep(self.startup_wait_time.get())
-
         exit_stack.enter_context(self._inject_config())
         return TaskStatus.started()

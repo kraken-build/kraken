@@ -134,7 +134,7 @@ def pyupgrade(
     check_task.python_version = python_version
 
     format_task = project.task(name, PyUpgradeTask, group="fmt")
-    check_task.pyupgrade_bin = pyupgrade_bin
+    format_task.pyupgrade_bin = pyupgrade_bin
     format_task.additional_files = filtered_files
     format_task.keep_runtime_typing = keep_runtime_typing
     format_task.python_version = python_version
