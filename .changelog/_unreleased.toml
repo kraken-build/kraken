@@ -51,3 +51,9 @@ id = "07fb65a6-fe5a-420a-ad96-36a50714dee1"
 type = "feature"
 description = "Add `kraken.std.util.fetch_tarball()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ec6bf736-6a6e-4625-9703-89bff7094d56"
+type = "breaking change"
+description = "Add `enable_error_code = \"ignore-without-code, possibly-undefined\"` to default Mypy settings"
+author = "@NiklasRosenstein"
