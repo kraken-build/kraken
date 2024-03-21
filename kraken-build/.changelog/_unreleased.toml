@@ -1,0 +1,17 @@
+[[entries]]
+id = "fd1c5d87-ad0a-4bfb-b8a1-bb657df091b6"
+type = "fix"
+description = "Use `http_probe()` to wait for `mitmweb` proxy to come up"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "f785e204-3fa5-41ae-b9b2-9d7c9de850ce"
+type = "feature"
+description = "Add `kraken.std.util.http.http_probe()`"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "cda7e55d-fe31-491a-8bd9-d9a0cb189e47"
+type = "breaking change"
+description = "Remove `CargoAuthProxy.startup_wait_time` and `start_mitm_proxy(startup_wait_time)`"
+author = "niklas.rosenstein@helsing.ai"
