@@ -37,7 +37,7 @@ author = "@NiklasRosenstein"
 [[entries]]
 id = "1ae440c5-cd7a-4fdc-a6a9-da10165fa260"
 type = "feature"
-description = "Add `ProtocTask` and `BufInstallTask` to `kraken.std.protobuf`"
+description = "Add `ProtocTask` to `kraken.std.protobuf`"
 author = "@NiklasRosenstein"
 
 [[entries]]
@@ -80,4 +80,16 @@ author = "@NiklasRosenstein"
 id = "6cd1582c-d975-4888-809c-89cd7d66073c"
 type = "improvement"
 description = "`buffrs.install` task now produces a `.gitignore` file in the `proto/vendor` directory to exclude it"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "f8a491fb-daea-4279-b5d6-eb15f73a847b"
+type = "breaking change"
+description = "Remove `BufLintTask` and `BufInstallTask` in favor of `buf()` function that uses our new `kraken.build.experimental.functional.v1` API to implement the same functionality more streamlined"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "7d264f42-d0c1-4077-9fbb-c869ab093b46"
+type = "improvement"
+description = "Pass a default `buf.yaml` configuration to `buf lint` to disable `PACKAGE_VERSION_SUFFIX` and `PACKAGE_DIRECTORY_MATCH` lint rules for compatibility with Buffrs."
 author = "@NiklasRosenstein"

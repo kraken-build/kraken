@@ -2,93 +2,15 @@
 
 from __future__ import annotations
 
+import platform as _platform
 import subprocess as sp
-import sys
 from collections.abc import Sequence
 from pathlib import Path
-from platform import machine
 from shutil import rmtree
 
-import httpx
-
+from kraken.build.experimental.functional.v1 import fetch_file, fetch_tarball, shell_cmd, write_file
+from kraken.common.supplier import Supplier
 from kraken.core import Property, Task, TaskStatus
-
-
-class BufInstallTask(Task):
-    """Installs [buf](https://github.com/bufbuild/buf) from GitHub."""
-
-    description = "Install buf."
-    version: Property[str] = Property.default("1.30.0", help="The version of `buf` to install.")
-    output_file: Property[Path] = Property.output(help="The path to the installed `buf` binary.")
-
-    def _get_dist_url(self) -> str:
-        version = self.version.get()
-        suffix = ""
-        match sys.platform:
-            case "linux":
-                platform = "Linux"
-            case "darwin":
-                platform = "Darwin"
-            case "win32":
-                platform = "Windows"
-                suffix = ".exe"
-            case _:
-                raise NotImplementedError(f"Platform {sys.platform} is not supported by `buf`.")
-        match machine():
-            case "x86_64":
-                arch = "x86_64"
-            case "aarch64":
-                arch = "aarch64" if platform == "Linux" else "arm64"
-            case _:
-                raise NotImplementedError(f"Architecture {machine()} is not supported by `buf`.")
-        return f"https://github.com/bufbuild/buf/releases/download/v{version}/buf-{platform}-{arch}{suffix}"
-
-    def _get_output_file(self) -> Path:
-        filename = f"buf-v{self.version.get()}{'.exe' if sys.platform == 'win32' else ''}"
-        return self.project.context.build_directory / filename
-
-    def prepare(self) -> TaskStatus | None:
-        if self._get_output_file().is_file():
-            return TaskStatus.skipped("buf is already installed.")
-        return None
-
-    def execute(self) -> TaskStatus | None:
-        dist_url = self._get_dist_url()
-        output_file = self._get_output_file()
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-
-        response = httpx.get(dist_url, timeout=10, follow_redirects=True)
-        response = response.raise_for_status()
-        output_file.write_bytes(response.content)
-
-        self.output_file = output_file
-        return TaskStatus.succeeded(f"Installed buf to {output_file}.")
-
-
-class BufFormatTask(Task):
-    """Format Protobuf files with `buf`."""
-
-    description = "Format Protobuf files with buf."
-    buf_bin: Property[str] = Property.default("buf", help="Path to `buf` binary.")
-
-    def execute(self) -> TaskStatus | None:
-        command = [self.buf_bin.get(), "format", "-w"]
-        result = sp.call(command, cwd=self.project.directory / "proto")
-
-        return TaskStatus.from_exit_code(command, result)
-
-
-class BufLintTask(Task):
-    """Lint Protobuf files with `buf`."""
-
-    description = "Lint Protobuf files with buf."
-    buf_bin: Property[str] = Property.default("buf", help="Path to `buf` binary.")
-
-    def execute(self) -> TaskStatus | None:
-        command = [self.buf_bin.get(), "lint"]
-        result = sp.call(command, cwd=self.project.directory / "proto")
-
-        return TaskStatus.from_exit_code(command, result)
 
 
 class ProtocTask(Task):
@@ -129,3 +51,80 @@ class ProtocTask(Task):
             command,
             sp.call(command, cwd=self.project.directory),
         )
+
+
+def get_buf_binary(version: str, target_triplet: str | None = None) -> Supplier[Path]:
+    """Fetches the `buf` binary from GitHub."""
+
+    target_triplet = target_triplet or get_buf_triplet()
+
+    if "Windows" in target_triplet:
+        url = f"https://github.com/bufbuild/buf/releases/download/v{version}/buf-{target_triplet}.exe"
+        return fetch_file(name="buf", url=url, chmod=0o777, suffix=".exe").out.map(lambda p: p.absolute())
+    else:
+        url = f"https://github.com/bufbuild/buf/releases/download/v{version}/buf-{target_triplet}.tar.gz"
+        return fetch_tarball(name="buf", url=url).out.map(lambda p: p.absolute() / "buf" / "bin" / "buf")
+
+
+def get_buf_triplet() -> str:
+    match (_platform.machine(), _platform.system()):
+        case (machine, "Linux"):
+            return f"Linux-{machine}"
+        case (machine, "Darwin"):
+            return f"Darwin-{machine}"
+        case ("AMD64", "Windows"):
+            return "Windows-x86_64"
+        case other:
+            raise NotImplementedError(f"Platform {other} is not supported by `buf`.")
+
+
+def buf(
+    *,
+    buf_version: str = "1.30.0",
+    path: str = "proto",
+    exclude_path: Sequence[str] = (),
+    dependencies: Sequence[Task] = (),
+) -> tuple[Task, Task]:
+    from shlex import quote
+
+    buf_bin = get_buf_binary(buf_version).map(str)
+
+    # Configure buf; see https://buf.build/docs/lint/rules
+    buf_config = write_file(
+        name="buf.yaml",
+        content_dedent="""
+        version: v1
+        lint:
+            use:
+                - DEFAULT
+            except:
+                - PACKAGE_VERSION_SUFFIX
+                # NOTE(@niklas): We only ignore this rule because Buffrs uses hyphens in place of underscores for
+                #       the generated directories, but the `package` directive in Protobuf can't contain hyphens.
+                - PACKAGE_DIRECTORY_MATCH
+    """,
+    ).map(str)
+
+    exclude_args = " ".join(f"--exclude-path {quote(path)}" for path in exclude_path)
+
+    buf_format = shell_cmd(
+        name="buf.format",
+        template='"{buf}" format -w --config "{config}" "{path}" {exclude_args}',
+        buf=buf_bin,
+        path=path,
+        config=buf_config,
+        exclude_args=exclude_args,
+    )
+    buf_format.depends_on(*dependencies)
+
+    buf_lint = shell_cmd(
+        name="buf.lint",
+        template='"{buf}" lint --config "{config}" "{path}" {exclude_args}',
+        buf=buf_bin,
+        path=path,
+        config=buf_config,
+        exclude_args=exclude_args,
+    )
+    buf_lint.depends_on(*dependencies)
+
+    return (buf_format, buf_lint)

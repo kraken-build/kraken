@@ -215,30 +215,19 @@ def python_project(
 
     if protobuf_enabled and project.directory.joinpath("proto").is_dir():
 
-        from kraken.std.protobuf import BufFormatTask, BufInstallTask, BufLintTask, ProtocTask
         from kraken.std.buffrs import buffrs_install as buffrs_install_task
-        from kraken.std.util import fetch_tarball
+        from kraken.std.protobuf import ProtocTask, buf_apply
 
         if project.directory.joinpath("Proto.toml").is_file():
             buffrs_install = buffrs_install_task()
         else:
             buffrs_install = None
 
-        # TODO(@niklas): This is a temporary solution to fetch the Buf binary until we have a proper way to
-        buf_binary = fetch_tarball(
-            name="buf",
-            url=f"https://github.com/bufbuild/buf/releases/download/v{buf_version}/buf-Linux-aarch64.tar.gz",
-        ).out.map(lambda p: p.absolute() / "buf" / "bin" / "buf").map(str)
-
-        buf_format = project.task("buf.format", BufFormatTask, group="fmt")
-        buf_format.buf_bin = buf_binary
-
-        buf_lint = project.task("buf.lint", BufLintTask, group="lint")
-        buf_lint.buf_bin = buf_binary
-
-        if buffrs_install is not None:
-            buf_lint.depends_on(buffrs_install)
-            buf_format.depends_on(buffrs_install)
+        buf_apply(
+            buf_version=buf_version,
+            path="proto/vendor" if buffrs_install else "proto",
+            dependencies=[buffrs_install] if buffrs_install else [],
+        )
 
         protoc_bin = pex_build(
             binary_name="protoc",
