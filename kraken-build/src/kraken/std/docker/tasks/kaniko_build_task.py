@@ -103,14 +103,6 @@ class KanikoBuildTask(BaseBuildTask):
         executor_command += ["--context", self.kaniko_context.get()]
         return executor_command
 
-    @deprecated.deprecated("use KanikoBuildTask.render_main_script() instead", version="0.3.6")
-    def _render_main_script(self, executor_command: list[str]) -> str:
-        return self.render_main_script(executor_command)
-
-    @deprecated.deprecated("use KanikoBuildTask.get_kaniko_executor_command() instead", version="0.3.6")
-    def _get_kaniko_executor_command(self, dockerfile: str | None, tar_path: str | None) -> list[str]:
-        return self.get_kaniko_executor_command(dockerfile, tar_path)
-
     def _build(
         self,
         exit_stack: contextlib.ExitStack,
@@ -139,9 +131,9 @@ class KanikoBuildTask(BaseBuildTask):
             volumes += [f"{image_output_file.parent.absolute()}:/kaniko/out"]
             tar_path = f"/kaniko/out/{image_output_file.name}"
 
-        executor_command = self._get_kaniko_executor_command(in_container_dockerfile, tar_path)
+        executor_command = self.get_kaniko_executor_command(in_container_dockerfile, tar_path)
 
-        script = self._render_main_script(executor_command)
+        script = self.render_main_script(executor_command)
 
         result = docker_run(
             image=self.kaniko_image.get(),

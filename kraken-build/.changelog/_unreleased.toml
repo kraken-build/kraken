@@ -21,3 +21,9 @@ id = "3c4128cd-9c60-4660-a6b3-7be3252c2ec3"
 type = "breaking change"
 description = "Remove `Container.probe()` in favor of `kraken.std.util.http.http_probe()`"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "206f3c8d-2493-4965-bf79-73906a75e36b"
+type = "breaking change"
+description = "Remove deprecated `KanikoExecutor._render_main_script()` and `._get_kaniko_executor_command()`"
+author = "niklas.rosenstein@helsing.ai"
