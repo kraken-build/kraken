@@ -6,8 +6,8 @@ def redact_url_password(url: str, placeholder: str = "[REDACTED]") -> str:
 
     parsed = urlparse(url)
     if parsed.password:
-        replaced = parsed._replace(netloc=f"{parsed.username}:{placeholder}@{parsed.hostname}")
-    return replaced.geturl()
+        return parsed._replace(netloc=f"{parsed.username}:{placeholder}@{parsed.hostname}").geturl()
+    return url
 
 
 def inject_url_credentials(url: str, username: str, password: str) -> str:

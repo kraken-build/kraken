@@ -3,3 +3,9 @@ id = "e82eb99a-558f-4c74-8cd0-e4e47c84deaa"
 type = "breaking change"
 description = "Remove support for BuildDSL as build script language"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "f2236c36-b135-419f-a8af-5d2d4d7eb1a3"
+type = "fix"
+description = "Fix possible undefined variable in `kraken.std.util.urk.redact_url_password()`"
+author = "niklas.rosenstein@helsing.ai"
