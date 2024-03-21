@@ -75,3 +75,9 @@ id = "640c9b5a-e459-429c-8aa1-b92430cb5065"
 type = "feature"
 description = "Install Buffrs CLI from GitHub releases"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6cd1582c-d975-4888-809c-89cd7d66073c"
+type = "improvement"
+description = "`buffrs.install` task now produces a `.gitignore` file in the `proto/vendor` directory to exclude it"
+author = "@NiklasRosenstein"

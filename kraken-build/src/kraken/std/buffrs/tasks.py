@@ -34,10 +34,19 @@ class BuffrsInstallTask(Task):
 
     def execute(self) -> TaskStatus:
         command = [self.buffrs_bin.get(), "install"]
-        return TaskStatus.from_exit_code(
+
+        result = TaskStatus.from_exit_code(
             command,
             sp.call(command, cwd=self.project.directory),
         )
+
+        if result.is_succeeded():
+            # Create a .gitignore file in the proto/vendor directory to ensure it does not get committed.
+            vendor_dir = self.project.directory / "proto" / "vendor"
+            vendor_dir.mkdir(exist_ok=True, parents=True)
+            vendor_dir.joinpath(".gitignore").write_text("*\n")
+
+        return result
 
 
 class BuffrsPublishTask(Task):
