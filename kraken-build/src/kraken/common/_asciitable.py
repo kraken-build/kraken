@@ -6,7 +6,7 @@ try:
     from termcolor import colored
 except ImportError:
 
-    def colored(s: str, *args: Any, **kwargs: Any) -> str:  # type: ignore
+    def colored(s: str, *args: Any, **kwargs: Any) -> str:  # type: ignore[misc]
         return s
 
 

@@ -156,5 +156,7 @@ class CargoBuildTask(Task):
                 if total_attempts > 0:
                     self.logger.info("Waiting for 10 seconds before retrying..")
                     time.sleep(10)
+        else:
+            assert False
 
         return TaskStatus.from_exit_code(safe_command, result)
