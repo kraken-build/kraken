@@ -37,8 +37,10 @@ class BlackConfig:
                 exclude_patterns.append("^/" + re.escape(dirname.strip("/")) + "/.*$")
             exclude_regex = "(" + "|".join(exclude_patterns) + ")"
             config["exclude"] = exclude_regex
+        else:
+            config["exclude"] = ""
 
-        return config
+        return {"tool": {"black": config}}
 
     def to_file(self, path: Path) -> None:
         path.write_text(tomli_w.dumps(self.dump()))

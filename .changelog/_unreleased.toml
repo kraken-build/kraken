@@ -93,3 +93,9 @@ id = "7d264f42-d0c1-4077-9fbb-c869ab093b46"
 type = "improvement"
 description = "Pass a default `buf.yaml` configuration to `buf lint` to disable `PACKAGE_VERSION_SUFFIX` and `PACKAGE_DIRECTORY_MATCH` lint rules for compatibility with Buffrs."
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a8814dcb-b28b-42ed-aa0b-92297a63877d"
+type = "fix"
+description = "Remove default files that should be excluded for `isort`, `pycln` and `black` so that a `build/` directory in the `src/` directory also gets checked. We can do this safely because we expect the `src/` folder in a Python project to contain only files that should be checked unless otherwise explicitly specified"
+author = "@NiklasRosenstein"

@@ -29,6 +29,7 @@ class IsortConfig:
         config.set(section_name, "profile", self.profile)
         config.set(section_name, "line_length", str(self.line_length))
         config.set(section_name, "combine_as_imports", str(self.combine_as_imports).lower())
+        config.set(section_name, "skip", "")
         config.set(section_name, "extend_skip", ",".join(self.extend_skip))
         return config
 
