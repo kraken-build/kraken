@@ -127,6 +127,7 @@ class CargoBuildTask(Task):
                         out_libraries_candidates.append(CargoLibraryArtifact(base_name, target_dir / filename))
 
         total_attempts = self.retry_attempts.get() + 1
+        assert total_attempts > 0
 
         while total_attempts > 0:
             result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
@@ -157,6 +158,4 @@ class CargoBuildTask(Task):
                     self.logger.info("Waiting for 10 seconds before retrying..")
                     time.sleep(10)
 
-            return TaskStatus.from_exit_code(safe_command, result)
-
-        assert False
+        return TaskStatus.from_exit_code(safe_command, result)
