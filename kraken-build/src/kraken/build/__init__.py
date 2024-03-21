@@ -1,4 +1,5 @@
 from kraken.core import Context, Project
+
 from .utils.import_helper import _KrakenBuildModuleWrapper
 
 # Install a wrapper around the module object to allow build-scripts to always import the current (i.e. their own)

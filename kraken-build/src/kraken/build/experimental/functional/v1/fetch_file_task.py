@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import cast
 
 import httpx
+
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
 
 
 class FetchFileTask(Task):
-    """ Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files. """
+    """Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files."""
 
     url: Property[str] = Property.required(help="The URL to fetch the tarball from.")
     chmod: Property[int | None] = Property.default(None, help="The file mode to set on the downloaded file.")
@@ -42,7 +43,7 @@ class FetchFileTask(Task):
 
 
 def fetch_file(*, name: str, url: str, chmod: int | None = None, suffix: str = "") -> FetchFileTask:
-    """ Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files. """
+    """Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files."""
 
     from kraken.build import context
 

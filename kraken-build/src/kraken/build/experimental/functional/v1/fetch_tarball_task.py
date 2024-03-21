@@ -1,25 +1,28 @@
 import hashlib
-from pathlib import Path
 import shutil
 import tempfile
+from pathlib import Path
 from typing import Literal, cast
 
 import httpx
+
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
 
 
 class FetchTarballTask(Task):
-    """ Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files. """
+    """Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files."""
 
     url: Property[str] = Property.required(help="The URL to fetch the tarball from.")
-    format: Property[Literal["tar", "zip"] | None] = Property.default("tar", help="The format of the tarball. If not set, will be inferred from the file extension in the URL.")
+    format: Property[Literal["tar", "zip"] | None] = Property.default(
+        "tar", help="The format of the tarball. If not set, will be inferred from the file extension in the URL."
+    )
     out: Property[Path] = Property.output(help="The path to the unpacked tarball.")
 
     # TODO(@niklas): SHA256 checksum verification
 
     def _unpack(self, archive: Path, store_path: Path) -> None:
-        """ Unpacks the archive at the given path to the store path. """
+        """Unpacks the archive at the given path to the store path."""
 
         if (format_ := self.format.get()) is None:
             format_ = "zip" if archive.suffix == ".zip" else "tar"
@@ -51,7 +54,7 @@ class FetchTarballTask(Task):
 
 
 def fetch_tarball(*, name: str, url: str, format: Literal["tar", "zip"] | None = None) -> FetchTarballTask:
-    """ Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files. """
+    """Fetches a tarball from a URL and unpacks it. May also be used to fetch ZIP files."""
 
     from kraken.build import context
 

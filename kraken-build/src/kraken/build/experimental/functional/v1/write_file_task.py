@@ -8,7 +8,7 @@ from kraken.core.system.task import Task, TaskStatus
 
 
 class WriteFile(Task):
-    """ Fetches a file from a URL.  """
+    """Fetches a file from a URL."""
 
     content: Property[str] = Property.required(help="The content of the file.")
     out: Property[Path] = Property.output(help="The path to the output file.")
@@ -29,8 +29,10 @@ class WriteFile(Task):
         return TaskStatus.succeeded(f"Wrote {len(content)} {store_path}")
 
 
-def write_file(*, name: str, content: str | Supplier[str] | None = None, content_dedent: str | Supplier[str] | None = None) -> Supplier[Path]:
-    """ Writes a file to the store.
+def write_file(
+    *, name: str, content: str | Supplier[str] | None = None, content_dedent: str | Supplier[str] | None = None
+) -> Supplier[Path]:
+    """Writes a file to the store.
 
     NOTE: Because task names must be known before hand but the content hash can only be known at a later time, the
     task name is fixed as specified with *name* and thus may conflict if the same name is reused.
@@ -45,10 +47,10 @@ def write_file(*, name: str, content: str | Supplier[str] | None = None, content
     else:
         raise ValueError("Either content or content_dedent must be set.")
 
-    store_dir =context.build_directory / ".store"
+    store_dir = context.build_directory / ".store"
     dest = content.map(lambda c: hashlib.md5(c.encode()).hexdigest()).map(lambda h: store_dir / f"{h}-{name}")
 
     task = context.root_project.task(name, WriteFile)
-    task.content =content
+    task.content = content
     task.out = dest
     return task.out
