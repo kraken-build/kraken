@@ -6,8 +6,6 @@ import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
-import deprecated
-
 from kraken.common import flatten
 from kraken.core import Project, Property
 from kraken.std.docker.util.dockerapi import docker_load, docker_run
