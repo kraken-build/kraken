@@ -57,3 +57,9 @@ id = "ec6bf736-6a6e-4625-9703-89bff7094d56"
 type = "breaking change"
 description = "Add `enable_error_code = \"ignore-without-code, possibly-undefined\"` to default Mypy settings"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "33f61844-e82b-40da-aba9-f552142d6abd"
+type = "improvement"
+description = "`Supplier.of()` and related functions now take an `Iterable[Supplier[Any]]` as the `derived_from` parameter instead of a `Sequence` as it is converted to a `tuple` later anyway."
+author = "@NiklasRosenstein"
