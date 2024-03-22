@@ -105,3 +105,9 @@ id = "863c7431-cfb0-4491-a6c1-7209a6e2cf59"
 type = "feature"
 description = "Add `Supplier.agg()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "16b2de57-29c2-410f-816a-018e9812871b"
+type = "feature"
+description = "Add `kraken.build.protobuf.v1alpha1.protobuf_project()`"
+author = "@NiklasRosenstein"

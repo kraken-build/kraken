@@ -4,11 +4,12 @@ import logging
 import re
 from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Literal, TypeVar
+from typing import Literal, Protocol, TypeVar, cast
 
 from attr import dataclass
 from nr.stream import Optional
 
+from kraken.common.supplier import Supplier
 from kraken.core.system.task import Task
 from kraken.std.git.version import EmptyGitRepositoryError, GitVersion, NotAGitRepositoryError, git_describe
 from kraken.std.python.buildsystem import detect_build_system
@@ -20,6 +21,18 @@ from kraken.std.python.version import git_version_to_python_version
 
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
+
+
+class PythonCodegen(Protocol):
+    """ Protocol for functions that produce a task to generate Python code."""
+
+    def __call__(self, source_dir: Path) -> tuple[Task, Supplier[Sequence[Path]]]:
+        """
+        Returns:
+            1. The code generation task.
+            2. A supplier that provides the generated files. These are used to exclude them from linting and formatting.
+        """
+        ...
 
 
 def concat(*args: Iterable[T]) -> list[T]:
@@ -93,11 +106,7 @@ def python_project(
     mypy_version_spec: str = ">=1.8.0,<2.0.0",
     pycln_version_spec: str = ">=2.4.0,<3.0.0",
     pyupgrade_version_spec: str = ">=3.15.0,<4.0.0",
-    protobuf_enabled: bool = True,
-    grpcio_tools_version_spec: str = ">=1.62.1,<2.0.0",
-    mypy_protobuf_version_spec: str = ">=3.5.0,<4.0.0",
-    buf_version: str = "1.30.0",
-    codegen: Sequence[Task | str] = (),
+    codegen: Sequence[PythonCodegen] = (),
 ) -> "PythonProject":
     """
     Use this function in a Python project.
@@ -148,14 +157,9 @@ def python_project(
             be used to add Flake8 plugins.
         flake8_extend_ignore: Flake8 lints to ignore. The default ignores lints that would otherwise conflict with
             the way Black formats code.
-        protobuf_enabled: Enable Protobuf code generation tasks if a `proto/` directory. Is a no-op when the directory
-            does not exist. Creates tasks for linting, formatting and generating code from Protobuf files. The
-            generated code will be placed into the `source_directory`.
-        grpcio_tools_version_spec: The version specifier for the `grpcio-tools` package to use when generating code
-            from Protobuf files.
-        buf_version: The version specifier for the `buf` tool to use when linting and formatting Protobuf files.
-        codegen: A list of code generation tasks that should be executed before the project is built. This can be
-            used to generate code from Protobuf files, for example.
+        codegen: A list of code generators that should be run before the project is built. This is typically the
+            a function, such as [`protobuf_project()`][kraken.build.protobuf.v1alpha1.protobuf_project][`.python`][
+                kraken.build.protobuf.v1alpha1.ProtobufProject.python].
     """
 
     from kraken.build import project
@@ -214,51 +218,32 @@ def python_project(
     info_task(build_system=build_system)
     install_task().depends_on(login)
 
-    # === Protobuf
+    # === Codegen invokation
 
-    if protobuf_enabled and project.directory.joinpath("proto").is_dir():
+    codegen_tasks, codegen_files = [], []
+    for codegen_fn in codegen:
+        task, files = codegen_fn(source_dir=project.directory / source_directory)
+        codegen_tasks.append(task)
+        codegen_files.append(files)
 
-        from kraken.std.buffrs import buffrs_install as buffrs_install_task
-        from kraken.std.protobuf import ProtocTask, buf
+    print("### DEBUG")
+    print(codegen_files)
+    # Concatenate the excluded directories and the generated files from the codegen tasks.
+    new_exclude_format_paths: Supplier[Sequence[Path]] = Supplier.agg(
+        (lambda a, *b: [*a.get(), *(x for y in b for x in y.get())]),
+        Supplier.of(exclude_format_directories),
+        *codegen_files,
+    )
+    print(new_exclude_format_paths.get())
 
-        if project.directory.joinpath("Proto.toml").is_file():
-            buffrs_install = buffrs_install_task()
-        else:
-            buffrs_install = None
+    from typing import TYPE_CHECKING
+    if TYPE_CHECKING:
+        reveal_type(exclude_format_directories)
 
-        buf(
-            buf_version=buf_version,
-            path="proto/vendor" if buffrs_install else "proto",
-            dependencies=[buffrs_install] if buffrs_install else [],
-        )
-
-        protoc_bin = pex_build(
-            binary_name="protoc",
-            requirements=[f"grpcio-tools{grpcio_tools_version_spec}", f"mypy-protobuf{mypy_protobuf_version_spec}"],
-            entry_point="grpc_tools.protoc",
-            venv="prepend",
-        ).output_file.map(lambda p: str(p.absolute()))
-
-        protoc = project.task("protoc-python", ProtocTask)
-        protoc.protoc_bin = protoc_bin
-        protoc.proto_dir = "proto"
-        protoc.generate("python", Path(source_directory))
-        protoc.generate("grpc_python", Path(source_directory))
-        protoc.generate("mypy", Path(source_directory))
-        protoc.generate("mypy_grpc", Path(source_directory))
-        # TODO(@niklas): Seems the standard GRPCio tools can already generate .pyi files, but not for the grpc stubs?
-        # protoc.generate("pyi", Path(source_directory))
-
-        if buffrs_install is not None:
-            protoc.depends_on(buffrs_install)
-            protoc.proto_dir = "proto/vendor"
-
-        codegen = [*codegen, protoc]
-        exclude_format_directories = [
-            *exclude_format_directories,
-            # Ensure that the generated Protobuf code is not linted or formatted
-            str((project.directory / source_directory / "proto").relative_to(project.directory)),
-        ]
+    #     *exclude_format_directories,
+    #     # Ensure that the generated Protobuf code is not linted or formatted
+    #     str((project.directory / source_directory / "proto").relative_to(project.directory)),
+    # ]
 
     # === Python tooling
 
@@ -319,7 +304,7 @@ def python_project(
         version_spec=mypy_version_spec,
         python_version=python_version,
         use_daemon=mypy_use_daemon,
-    ).depends_on(*codegen)
+    ).depends_on(*codegen_tasks)
 
     # TODO(@niklas): Improve this heuristic to check whether Coverage reporting should be enabled.
     if "pytest-cov" in str(dict(pyproject)):
@@ -333,7 +318,7 @@ def python_project(
         coverage=coverage,
         doctest_modules=True,
         allow_no_tests=True,
-    ).depends_on(*codegen)
+    ).depends_on(*codegen_tasks)
 
     if not enforce_project_version:
         try:
@@ -364,7 +349,7 @@ def python_project(
 
     # Create publish tasks for any package index with publish=True.
     build = build_task(as_version=enforce_project_version)
-    build.depends_on(*codegen)
+    build.depends_on(*codegen_tasks)
     for index in python_settings().package_indexes.values():
         if index.publish:
             publish_task(package_index=index.alias, distributions=build.output_files, interactive=False)

@@ -6,8 +6,6 @@ __Features__
 * Standardized Python project configuration (`src/` directory, `tests/` directory, tests with Pytest incl. doctests,
     Mypy, Black, isort, Pycln, Pyupgrade, Flake8).
 * Supports [Slap][], [Poetry][] and [PDM][]-managed Python projects.
-* Built-in Protobuf support (dependency management using [Buffrs][], linting with [Buf][] and code generation with
-    [grpcio-tools][]).
 * Produce a PEX application from your Python project using [`python_app()`](kraken.build.python.v1alpha1.python_app).
 
 !!! note "Tools"
@@ -17,10 +15,6 @@ __Features__
 [Slap]: https://github.com/NiklasRosenstein/slap
 [Poetry]: https://python-poetry.org/docs
 [PDM]: https://pdm-project.org/latest/
-[Buffrs]: https://github.com/helsing-ai/buffrs
-[Buf]: https://buf.build/
-[grpcio-tools]: https://pypi.org/project/grpcio-tools/
-
 !!! warning "Unstable API"
     This API is unstable and should be used with caution.
 """
