@@ -6,8 +6,8 @@ theme:
   palette:
     primary: blue
     accent: green
-  # features:
-  #   - navigation.tabs
+  features:
+    - navigation.sections
 
 hooks:
   - mksync-hook.py
@@ -38,6 +38,9 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
 
 nav:
   - index.md
@@ -54,6 +57,8 @@ nav:
     - lang/python.md
   - API Documentation:
     - api/kraken.build.md
+    - api/kraken.build.python.v1alpha1.md
+    - api/kraken.build.utils.v1alpha1.md
     - api/kraken.common.md
     - api/kraken.core.md
     - api/kraken.std.buffrs.md
@@ -66,6 +71,7 @@ nav:
     - api/kraken.std.mitm.md
     - api/kraken.std.protobuf.md
     - api/kraken.std.python.md
+    - api/kraken.std.shellcheck.md
     - api/kraken.std.sccache.md
     - api/kraken.std.util.md
   - Command-line:

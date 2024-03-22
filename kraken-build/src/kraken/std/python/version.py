@@ -9,7 +9,7 @@ _PRE_RELEASE_NAMES = {
 }
 
 
-def git_version_to_python_version(value: str | GitVersion, include_sha: bool) -> str:
+def git_version_to_python_version(value: str | GitVersion, include_sha: bool = False) -> str:
     """Converts a Git version to a Python version.
 
     :param value: The Git version to convert.

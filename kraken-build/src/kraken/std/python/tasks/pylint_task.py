@@ -48,7 +48,10 @@ def pylint(
     project = project or Project.current()
     if version_spec is not None:
         pylint_bin = pex_build(
-            "pylint", requirements=[f"pylint{version_spec}"], console_script="pylint", project=project
+            "pylint",
+            requirements=[f"pylint{version_spec}"],
+            console_script="pylint",
+            project=project,
         ).output_file.map(str)
     else:
         pylint_bin = Supplier.of("pylint")

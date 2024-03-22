@@ -1,10 +1,10 @@
 """ This module provides provides the :class:`Supplier` interface which is used to represent values that can be
 calculated lazily and track provenance of such computations. """
 
-
 import abc
-from collections.abc import Callable, Iterable, Mapping, Sequence
-from typing import Any, Generic, TypeVar
+from collections.abc import Callable, Iterable, Mapping
+from functools import partial
+from typing import Any, Generic, ParamSpec, TypeVar
 
 from ._generic import NotSet
 
@@ -12,6 +12,7 @@ T = TypeVar("T", covariant=True)
 U = TypeVar("U")
 K = TypeVar("K")
 V = TypeVar("V")
+P = ParamSpec("P")
 
 
 class Supplier(Generic[T], abc.ABC):
@@ -96,20 +97,28 @@ class Supplier(Generic[T], abc.ABC):
             stack += derived_from
 
     @staticmethod
-    def of(value: "T | Supplier[T]", derived_from: Sequence["Supplier[Any]"] = ()) -> "Supplier[T]":
+    def of(value: "T | Supplier[T]", derived_from: Iterable["Supplier[Any]"] = ()) -> "Supplier[T]":
         if isinstance(value, Supplier):
             return value
         return OfSupplier(value, derived_from)
 
     @staticmethod
-    def of_callable(func: Callable[[], T], derived_from: Sequence["Supplier[Any]"] = ()) -> "Supplier[T]":
+    def of_callable(func: Callable[[], T], derived_from: Iterable["Supplier[Any]"] = ()) -> "Supplier[T]":
         return OfCallableSupplier(func, derived_from)
 
     @staticmethod
-    def void(from_exc: "Exception | None" = None, derived_from: Sequence["Supplier[Any]"] = ()) -> "Supplier[T]":
+    def void(from_exc: "Exception | None" = None, derived_from: Iterable["Supplier[Any]"] = ()) -> "Supplier[T]":
         """Returns a supplier that always raises :class:`Empty`."""
 
         return VoidSupplier(from_exc, derived_from)
+
+    @staticmethod
+    def agg(fn: Callable[P, "U"], *args: P.args, **kwargs: P.kwargs) -> "Supplier[U]":
+        derived_from = [
+            *(arg for arg in args if isinstance(arg, Supplier)),
+            *(arg for arg in kwargs.values() if isinstance(arg, Supplier)),
+        ]
+        return OfCallableSupplier(partial(fn, *args, **kwargs), derived_from)
 
     def __repr__(self) -> str:
         try:
@@ -202,9 +211,9 @@ class OnceSupplier(Supplier[T]):
 
 
 class OfCallableSupplier(Supplier[T]):
-    def __init__(self, func: Callable[[], T], derived_from: Sequence[Supplier[Any]]) -> None:
+    def __init__(self, func: Callable[[], T], derived_from: Iterable[Supplier[Any]]) -> None:
         self._func = func
-        self._derived_from = derived_from
+        self._derived_from = tuple(derived_from)
 
     def derived_from(self) -> Iterable[Supplier[Any]]:
         return self._derived_from
@@ -223,7 +232,7 @@ class OfCallableSupplier(Supplier[T]):
 
 
 class OfSupplier(Supplier[T]):
-    def __init__(self, value: T, derived_from: Sequence[Supplier[Any]]) -> None:
+    def __init__(self, value: T, derived_from: Iterable[Supplier[Any]]) -> None:
         self._value = value
         self._derived_from = tuple(derived_from)
 
@@ -244,7 +253,7 @@ class OfSupplier(Supplier[T]):
 
 
 class VoidSupplier(Supplier[T]):
-    def __init__(self, from_exc: "Exception | None", derived_from: Sequence[Supplier[Any]]) -> None:
+    def __init__(self, from_exc: "Exception | None", derived_from: Iterable[Supplier[Any]]) -> None:
         self._from_exc = from_exc
         self._derived_from = tuple(derived_from)
 

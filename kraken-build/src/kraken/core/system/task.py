@@ -165,9 +165,11 @@ class TaskStatus:
     def from_exit_code(command: list[str] | None, code: int) -> TaskStatus:
         return TaskStatus(
             TaskStatusType.SUCCEEDED if code == 0 else TaskStatusType.FAILED,
-            None
-            if code == 0 or command is None
-            else 'command "' + " ".join(map(shlex.quote, command)) + f'" returned exit code {code}',
+            (
+                None
+                if code == 0 or command is None
+                else 'command "' + " ".join(map(shlex.quote, command)) + f'" returned exit code {code}'
+            ),
         )
 
 
@@ -704,12 +706,10 @@ class TaskSetPartitions:
         return iter(self._ptt)
 
     @overload
-    def __getitem__(self, partition: str) -> Collection[Task]:
-        ...
+    def __getitem__(self, partition: str) -> Collection[Task]: ...
 
     @overload
-    def __getitem__(self, partition: Task) -> Collection[str]:
-        ...
+    def __getitem__(self, partition: Task) -> Collection[str]: ...
 
     def __getitem__(self, partition: str | Task) -> Collection[str] | Collection[Task]:
         if isinstance(partition, str):

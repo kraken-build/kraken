@@ -24,7 +24,9 @@ class CargoDenyTask(Task):
             return TaskStatus.succeeded()
 
         return self.error_message.map(
-            lambda message: TaskStatus.failed(message)
-            if message is not None
-            else TaskStatus.from_exit_code(command, result.returncode)
+            lambda message: (
+                TaskStatus.failed(message)
+                if message is not None
+                else TaskStatus.from_exit_code(command, result.returncode)
+            )
         ).get()

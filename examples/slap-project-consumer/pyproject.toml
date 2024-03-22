@@ -20,7 +20,7 @@ keywords = []
 # Repository = ""
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.10"
 slap-project = { version = "0.1.0", source = "local" }
 
 [tool.poetry.dev-dependencies]

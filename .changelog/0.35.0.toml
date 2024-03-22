@@ -33,6 +33,18 @@ description = "Add task to login in all cargo registries"
 author = "quentin.santos@helsing.ai"
 
 [[entries]]
+id = "fb3fcc4a-a38a-445f-b124-571395b7ac86"
+type = "feature"
+description = "Introduce `kraken.std.python.project.python_project()` function which creates all tasks for a Python project."
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "ae70e553-81c2-4eb2-a6f3-210ca6c24992"
+type = "breaking change"
+description = "Default project groups `lint` now only depends on `check` for order instead of strictly"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
 id = "bc4f2e14-e52b-48ba-b0f3-c1b6210e1682"
 type = "fix"
 description = "Fix passing the actual list of tasks to `BuildError` and turn `BuildError.failed_tasks` into `Set[Task]` from `Set[str]`"
@@ -45,3 +57,9 @@ type = "feature"
 description = "Add shellcheck capabilities"
 author = "niklas.rosenstein@helsing.ai"
 component = "kraken-build"
+
+[[entries]]
+id = "4cb0fe80-d359-4302-8893-c0fd62bf0631"
+type = "improvement"
+description = "Raise `EmptyGitRepositoryError` and `NotAGitRepositoryError` respectively in `git_describe()`"
+author = "@NiklasRosenstein"

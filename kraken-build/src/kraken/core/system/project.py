@@ -63,7 +63,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         gen_group = self.group("gen", description="Tasks that perform code generation.", default=True)
 
         lint_group = self.group("lint", description="Tasks that perform code linting.", default=True)
-        lint_group.depends_on(check_group, mode="strict")
+        lint_group.depends_on(check_group, mode="order-only")
         lint_group.depends_on(gen_group, mode="strict")
 
         build_group = self.group("build", description="Tasks that produce build artefacts.")

@@ -40,11 +40,17 @@ class AuthModel:
         raw_result: str
         hint: str
 
-    def __init__(self, config: MutableMapping[str, Any], path: Path, use_keyring_if_available: bool) -> None:
+    def __init__(
+        self,
+        config: MutableMapping[str, Any],
+        path: Path,
+        use_keyring_if_available: bool,
+    ) -> None:
         self._config = config
         self._path = path
         self._has_keyring = use_keyring_if_available and not isinstance(
-            keyring.get_keyring(), (keyring.backends.fail.Keyring, keyring.backends.null.Keyring)
+            keyring.get_keyring(),
+            (keyring.backends.fail.Keyring, keyring.backends.null.Keyring),
         )
 
     def get_credentials(self, host: str) -> Credentials | None:
@@ -118,7 +124,10 @@ class AuthModel:
             url_suffix = (
                 self._config.get("auth", {})
                 .get(host, {})
-                .get("auth_check_url_suffix", "artifactory/api/pypi/python-all/simple/flask/")
+                .get(
+                    "auth_check_url_suffix",
+                    "artifactory/api/pypi/python-all/simple/flask/",
+                )
             )
             url = f"https://{host}/{url_suffix}"
             curl_command = f"curl --user '{username}:{password}' {url}"

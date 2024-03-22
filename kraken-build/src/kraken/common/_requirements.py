@@ -153,9 +153,9 @@ class RequirementSpec:
             requirements=self.requirements if requirements is None else tuple(requirements),
             index_url=self.index_url if index_url is NotSet.Value else index_url,
             extra_index_urls=self.extra_index_urls if extra_index_urls is None else tuple(extra_index_urls),
-            interpreter_constraint=self.interpreter_constraint
-            if interpreter_constraint is NotSet.Value
-            else interpreter_constraint,
+            interpreter_constraint=(
+                self.interpreter_constraint if interpreter_constraint is NotSet.Value else interpreter_constraint
+            ),
             pythonpath=self.pythonpath if pythonpath is None else tuple(pythonpath),
         )
 

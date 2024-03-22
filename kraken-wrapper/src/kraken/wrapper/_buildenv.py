@@ -47,7 +47,8 @@ class BuildEnv(abc.ABC):
     def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         """Dispatch the kraken cli command in *argv* to the build environment.
 
-        :param argv: The arguments to pass to the kraken cli (without the "kraken" command name itself)."""
+        :param argv: The arguments to pass to the kraken cli (without the "kraken" command name itself).
+        """
 
 
 @dataclasses.dataclass(frozen=True)
@@ -102,7 +103,9 @@ class BuildEnvError(Exception):
     """
 
 
-def general_get_installed_distributions(kraken_command_prefix: Sequence[str]) -> list[Distribution]:
+def general_get_installed_distributions(
+    kraken_command_prefix: Sequence[str],
+) -> list[Distribution]:
     command = [*kraken_command_prefix, "query", "env"]
     output = subprocess.check_output(command).decode()
     return [Distribution(x["name"], x["version"], x["requirements"], x["extras"]) for x in json.loads(output)]

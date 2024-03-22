@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from nr.stream import Optional
+
 from kraken.core import Project
 from kraken.std.python.pyproject import PackageIndex
 
@@ -57,7 +59,8 @@ class PythonSettings:
 
     def get_tests_directory_as_args(self) -> list[str]:
         """Returns a list with a single item that is the test directory, or an empty list. This is convenient
-        when constructing command-line arguments where you want to pass the test directory if it exists."""
+        when constructing command-line arguments where you want to pass the test directory if it exists.
+        """
 
         test_dir = self.get_tests_directory()
         return [] if test_dir is None else [str(test_dir)]
@@ -133,6 +136,15 @@ class PythonSettings:
         )
         return self
 
+    def get_source_paths(self) -> list[str]:
+        return [
+            str(self.source_directory),
+            *Optional(self.get_tests_directory())
+            .map(lambda p: [str(p.relative_to(self.project.directory) if p.is_absolute() else p)])
+            .or_else([]),
+            *map(str, self.lint_enforced_directories),
+        ]
+
     def get_primary_index(self) -> _PackageIndex | None:
         default: PythonSettings._PackageIndex | None = None
         for idx in self.package_indexes.values():
@@ -173,7 +185,11 @@ def python_settings(
         # Autodetect the environment handler.
         build_system = detect_build_system(project.directory)
         if build_system:
-            logger.info("Detected Python build system %r for %s", type(build_system).__name__, project)
+            logger.info(
+                "Detected Python build system %r for %s",
+                type(build_system).__name__,
+                project,
+            )
 
     if build_system is not None:
         if settings.build_system:

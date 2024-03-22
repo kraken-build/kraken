@@ -1,0 +1,113 @@
+[[entries]]
+id = "d9440e6f-b19b-4b49-bad4-dc7860228cf8"
+type = "improvement"
+description = "Add order-only dependencies between check and format tasks created for Python projects"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "84e8fb46-7aef-4dfc-b4ec-5ad507c82544"
+type = "improvement"
+description = "`build_docker_image(dockerfile)` now treats the path relative to the current project"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "788398a7-320e-45b2-9590-d977387c2ed1"
+type = "improvement"
+description = "Override `MaturinPoetryPyprojectHandler.get_python_version_constraint()` to fall back on `[project.version]` key if `[tool.poetry.version]` is not set"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ef21ce61-3e39-4177-9182-72c67e80be63"
+type = "feature"
+description = "Add `pex_set_global_store_path()` function"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "79e9748a-4d81-4636-be2e-3772b150c976"
+type = "feature"
+description = "Add `python_app()` function to build a PEX from your Python project."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "897d94dc-79e7-45bf-abba-bd346a3fb7d5"
+type = "feature"
+description = "Add `PexBuildTask.always_rebuild` property and add `pex_build(always_rebuild, output_file)` parameters"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1ae440c5-cd7a-4fdc-a6a9-da10165fa260"
+type = "feature"
+description = "Add `ProtocTask` to `kraken.std.protobuf`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "691608ae-68bd-45d6-abbb-bb6a1b7200eb"
+type = "breaking change"
+description = "Remove `buf_lint()` and `buf_format()` helper functions from `kraken.std.protobuf`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "07fb65a6-fe5a-420a-ad96-36a50714dee1"
+type = "feature"
+description = "Add `kraken.std.util.fetch_tarball()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ec6bf736-6a6e-4625-9703-89bff7094d56"
+type = "breaking change"
+description = "Add `enable_error_code = \"ignore-without-code, possibly-undefined\"` to default Mypy settings"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "33f61844-e82b-40da-aba9-f552142d6abd"
+type = "improvement"
+description = "`Supplier.of()` and related functions now take an `Iterable[Supplier[Any]]` as the `derived_from` parameter instead of a `Sequence` as it is converted to a `tuple` later anyway."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6bddf45d-7195-42d9-a490-2a567371d7f4"
+type = "feature"
+description = "Add `kraken.build.experimental.functional.v1` API with common tasks for operations in a functional manner (fetching a file, tarball, writing a file and executing a shell command)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "640c9b5a-e459-429c-8aa1-b92430cb5065"
+type = "feature"
+description = "Install Buffrs CLI from GitHub releases"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6cd1582c-d975-4888-809c-89cd7d66073c"
+type = "improvement"
+description = "`buffrs.install` task now produces a `.gitignore` file in the `proto/vendor` directory to exclude it"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "f8a491fb-daea-4279-b5d6-eb15f73a847b"
+type = "breaking change"
+description = "Remove `BufLintTask` and `BufInstallTask` in favor of `buf()` function that uses our new `kraken.build.experimental.functional.v1` API to implement the same functionality more streamlined"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "7d264f42-d0c1-4077-9fbb-c869ab093b46"
+type = "improvement"
+description = "Pass a default `buf.yaml` configuration to `buf lint` to disable `PACKAGE_VERSION_SUFFIX` and `PACKAGE_DIRECTORY_MATCH` lint rules for compatibility with Buffrs."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a8814dcb-b28b-42ed-aa0b-92297a63877d"
+type = "fix"
+description = "Remove default files that should be excluded for `isort`, `pycln` and `black` so that a `build/` directory in the `src/` directory also gets checked. We can do this safely because we expect the `src/` folder in a Python project to contain only files that should be checked unless otherwise explicitly specified"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "863c7431-cfb0-4491-a6c1-7209a6e2cf59"
+type = "feature"
+description = "Add `Supplier.agg()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "16b2de57-29c2-410f-816a-018e9812871b"
+type = "feature"
+description = "Add `kraken.build.protobuf.v1alpha1.protobuf_project()`"
+author = "@NiklasRosenstein"

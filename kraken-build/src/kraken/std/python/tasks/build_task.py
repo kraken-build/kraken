@@ -53,7 +53,8 @@ def build(
 ) -> BuildTask:
     """Creates a build task for the given project.
 
-    The build task relies on the build system configured in the Python project settings."""
+    The build task relies on the build system configured in the Python project settings.
+    """
 
     project = project or Project.current()
     task = project.task(name, BuildTask, group=group)

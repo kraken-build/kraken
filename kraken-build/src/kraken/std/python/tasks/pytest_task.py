@@ -8,6 +8,7 @@ from pathlib import Path
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
+from kraken.std.python.settings import python_settings
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -30,8 +31,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     description = "Run unit tests using Pytest."
     python_dependencies = ["pytest"]
 
-    tests_dir: Property[Path]
-    include_dirs: Property[Sequence[Path]] = Property.default(())
+    paths: Property[Sequence[str]]
     ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
@@ -40,22 +40,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def is_skippable(self) -> bool:
-        return self.allow_no_tests.get() and self.tests_dir.is_empty() and not self.settings.get_tests_directory()
-
     def get_execute_command(self) -> list[str] | TaskStatus:
-        tests_dir = self.tests_dir.get_or(None)
-        tests_dir = tests_dir or self.settings.get_tests_directory()
-        if not tests_dir:
-            print("error: no test directory configured and none could be detected")
-            return TaskStatus.failed("no test directory configured and none could be detected")
-        command = [
-            "pytest",
-            "-vv",
-            str(self.project.directory / self.settings.source_directory),
-            str(self.project.directory / tests_dir),
-            *[str(self.project.directory / path) for path in self.include_dirs.get()],
-        ]
+        command = ["pytest", "-vv", *self.paths.get()]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
         if self.coverage.is_filled():
@@ -86,18 +72,27 @@ def pytest(
     name: str = "pytest",
     group: str = "test",
     project: Project | None = None,
-    tests_dir: Path | str | None = None,
-    include_dirs: Sequence[Path | str] = (),
+    paths: Sequence[str] | None = None,
+    include_dirs: Sequence[str] = (),
     ignore_dirs: Sequence[Path | str] = (),
     allow_no_tests: bool = False,
     doctest_modules: bool = True,
     marker: str | None = None,
     coverage: CoverageFormat | None = None,
 ) -> PytestTask:
+    """Create a task for running Pytest. Note that Pytest must be installed in the Python virtual environment.
+
+    Args:
+        paths: The paths that contain Pythen test files. If not specified, uses the test and source directories
+            from the project's `PythonSettings`.
+    """
+
+    if paths is None:
+        paths = python_settings(project).get_source_paths()
+
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
-    task.tests_dir = Path(tests_dir) if tests_dir is not None else None
-    task.include_dirs = list(map(Path, include_dirs))
+    task.paths = [*paths, *include_dirs]
     task.ignore_dirs = list(map(Path, ignore_dirs))
     task.allow_no_tests = allow_no_tests
     task.doctest_modules = doctest_modules

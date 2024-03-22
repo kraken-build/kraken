@@ -1,6 +1,5 @@
 """ Abstraction of Python build systems such as Poetry and Slap. """
 
-
 from __future__ import annotations
 
 import abc

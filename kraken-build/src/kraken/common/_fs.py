@@ -14,8 +14,7 @@ def atomic_file_swap(
     mode: Literal["w"],
     always_revert: bool = ...,
     create_dirs: bool = ...,
-) -> ContextManager[TextIO]:
-    ...
+) -> ContextManager[TextIO]: ...
 
 
 @overload
@@ -24,8 +23,7 @@ def atomic_file_swap(
     mode: Literal["wb"],
     always_revert: bool = ...,
     create_dirs: bool = ...,
-) -> ContextManager[BinaryIO]:
-    ...
+) -> ContextManager[BinaryIO]: ...
 
 
 @contextlib.contextmanager  # type: ignore[arg-type, misc]

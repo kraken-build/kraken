@@ -13,7 +13,8 @@ from kraken.core.system.task import Task, TaskStatus
 from kraken.std.util.url import inject_url_credentials, redact_url_password
 
 logger = logging.getLogger(__name__)
-default_index_url: str | None = None
+_default_index_url: str | None = None
+_global_store_path: Path | None = None
 
 
 class PexBuildTask(Task):
@@ -29,6 +30,7 @@ class PexBuildTask(Task):
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
     index_url: Property[str | None] = Property.default(None)
+    always_rebuild: Property[bool] = Property.default(False)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -48,16 +50,18 @@ class PexBuildTask(Task):
                 ]
             ).encode()
         ).hexdigest()
-        return (
-            self.project.context.build_directory
-            / ".store"
-            / f"{hashsum}-{self.binary_name.get()}"
-            / self.binary_name.get()
-        ).with_suffix(".pex")
+
+        if _global_store_path:
+            store_path = _global_store_path
+        else:
+            store_path = self.project.context.build_directory / ".store"
+
+        return (store_path / f"{hashsum}-{self.binary_name.get()}" / self.binary_name.get()).with_suffix(".pex")
 
     def prepare(self) -> TaskStatus | None:
-        self.output_file = self._get_output_file_path().absolute()
-        if self.output_file.get().exists():
+        if not self.output_file.is_set():
+            self.output_file = self._get_output_file_path().absolute()
+        if not self.always_rebuild.get() and self.output_file.get().exists():
             return TaskStatus.skipped(f"PEX `{self.binary_name.get()}` already exists ({self.output_file.get()})")
         return TaskStatus.pending()
 
@@ -150,6 +154,8 @@ def pex_build(
     interpreter_constraint: str | None = None,
     venv: Literal["prepend", "append"] | None = None,
     index_url: str | None = None,
+    always_rebuild: bool = False,
+    output_file: Path | None = None,
     task_name: str | None = None,
     project: Project | None = None,
 ) -> PexBuildTask:
@@ -168,6 +174,8 @@ def pex_build(
         and existing_task.interpreter_constraint.get() == interpreter_constraint
         and existing_task.venv.get() == venv
         and existing_task.index_url.get() == index_url
+        and existing_task.always_rebuild.get() == always_rebuild
+        and existing_task.output_file.get_or(None) == output_file
     ):
         return existing_task
 
@@ -179,14 +187,24 @@ def pex_build(
     task.interpreter_constraint = interpreter_constraint
     task.venv = venv
     task.index_url = index_url
+    task.always_rebuild = always_rebuild
+    task.output_file = output_file
     return task
 
 
 def pex_set_default_index_url(url: str) -> None:
     """Set the default index URL for Pex globally."""
 
-    global default_index_url
-    default_index_url = url
+    global _default_index_url
+    _default_index_url = url
+
+
+def pex_set_global_store_path(path: Path | None) -> None:
+    """Set the global Pex store path. This can be used to override the default Pex store directory, which is
+    inside the current context's build directory."""
+
+    global _global_store_path
+    _global_store_path = path
 
 
 def _get_default_index_url(project: Project | None) -> str | None:
@@ -197,7 +215,7 @@ def _get_default_index_url(project: Project | None) -> str | None:
 
     settings = python_settings(project=project)
     if (idx := settings.get_primary_index()) is None:
-        return default_index_url
+        return _default_index_url
     if idx.credentials:
         return inject_url_credentials(idx.index_url, *idx.credentials)
     return idx.index_url

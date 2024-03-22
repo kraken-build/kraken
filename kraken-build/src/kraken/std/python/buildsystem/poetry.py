@@ -74,15 +74,19 @@ class PoetryPyprojectHandler(PyprojectHandler):
             PackageIndex(
                 alias=source["name"],
                 index_url=source["url"],
-                priority=PackageIndex.Priority[source["priority"]]
-                if "priority" in source
-                else (
-                    PackageIndex.Priority.default
-                    # Support deprecated source configurations.
-                    if source.get("default")
-                    else PackageIndex.Priority.secondary
-                    if source.get("secondary")
-                    else PackageIndex.Priority.supplemental
+                priority=(
+                    PackageIndex.Priority[source["priority"]]
+                    if "priority" in source
+                    else (
+                        PackageIndex.Priority.default
+                        # Support deprecated source configurations.
+                        if source.get("default")
+                        else (
+                            PackageIndex.Priority.secondary
+                            if source.get("secondary")
+                            else PackageIndex.Priority.supplemental
+                        )
+                    )
                 ),
                 verify_ssl=True,
             )

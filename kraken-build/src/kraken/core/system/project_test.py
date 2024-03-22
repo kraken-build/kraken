@@ -21,8 +21,7 @@ def test__Project__resolve_outputs__can_find_dataclass_in_properties(kraken_proj
     class MyTask(Task):
         out_prop: Property[MyDescriptor] = Property.output()
 
-        def execute(self) -> None:
-            ...
+        def execute(self) -> None: ...
 
     task = kraken_project.task("carrier", MyTask)
     task.out_prop = MyDescriptor("foobar")
@@ -33,8 +32,7 @@ def test__Project__resolve_outputs__can_not_find_input_property(kraken_project: 
     class MyTask(Task):
         out_prop: Property[MyDescriptor]
 
-        def execute(self) -> None:
-            ...
+        def execute(self) -> None: ...
 
     task = kraken_project.task("carrier", MyTask)
     task.out_prop = MyDescriptor("foobar")
@@ -45,8 +43,7 @@ def test__Project__resolve_outputs_supplier(kraken_project: Project) -> None:
     class MyTask(Task):
         out_prop: Property[MyDescriptor] = Property.output()
 
-        def execute(self) -> None:
-            ...
+        def execute(self) -> None: ...
 
     task = kraken_project.task("carrier", MyTask)
     task.out_prop = MyDescriptor("foobar")
@@ -55,7 +52,7 @@ def test__Project__resolve_outputs_supplier(kraken_project: Project) -> None:
 
 def test__Project__do_normalizes_taskname_backwards_compatibility_pre_0_12_0(kraken_project: Project) -> None:
     with pytest.warns(DeprecationWarning) as warninfo:
-        task = kraken_project.task("this is a :test task", VoidTask)
+        task = kraken_project.do("this is a :test task", VoidTask)
     assert task.name == "this-is-a-test-task"
     assert str(warninfo.list[0].message) == ("Call to deprecated method do. (Use Project.task() instead)")
     assert str(warninfo.list[1].message) == (
@@ -69,8 +66,7 @@ def test__Project__do__does_not_set_property_on_None_value(kraken_project: Proje
     class MyTask(Task):
         in_prop: Property[str]
 
-        def execute(self) -> None:
-            ...
+        def execute(self) -> None: ...
 
     kraken_project.task("carrier", MyTask)
     assert kraken_project.resolve_tasks(":carrier").select(str).supplier().get() == []
