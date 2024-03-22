@@ -58,7 +58,7 @@ def python_package_index(
 
     # NOTE(@niklas): Currently this function is a simple wrapper, but it may replace the wrapped method eventually.
 
-    from .....std.python.settings import python_settings
+    from kraken.std.python.settings import python_settings
 
     python_settings().add_package_index(
         alias=alias,
@@ -104,9 +104,13 @@ def python_project(
 
     The Python build system used for the library is automatically detected. Supported build systems are:
 
-    * [Slap](https://github.com/NiklasRosenstein/slap)
-    * [Poetry](https://python-poetry.org/docs)
-    * [PDM](https://pdm-project.org/latest/)
+    * [Slap][]
+    * [Poetry][]
+    * [PDM][]
+
+    [Slap]: https://github.com/NiklasRosenstein/slap
+    [Poetry]: https://python-poetry.org/docs
+    [PDM]: https://pdm-project.org/latest/
 
     Note: Pytest dependencies
         Your project should have the `pytest` dependency in it's development dependencies. Kraken does not currently
@@ -385,8 +389,8 @@ def python_app(
 ) -> PexBuildTask:
     """Build a PEX binary from a Python application.
 
-    This function should be called after `python_project()`. If any Python code generation is employed by the project,
-    the generated PEX build task will depend on it.
+    This function should be called after [`python_project()`][kraken.build.python.v1alpha1.project.python_project].
+    If any Python code generation is employed by the project, the generated PEX build task will depend on it.
 
     Args:
         app_name: The name of the applicaiton. This will be used as the binary output filename. The output PEX
