@@ -42,6 +42,8 @@ def git_describe(path: Path | None, tags: bool = True, dirty: bool = True) -> st
         stderr = exc.stderr.decode()
         if "unknown revision" in stderr:
             raise EmptyGitRepositoryError(path)
+        count = 0
+
     short_rev = sp.check_output(["git", "rev-parse", "--short", "HEAD"], cwd=path).decode().strip()
     return f"0.0.0-{count}-g{short_rev}"
 
