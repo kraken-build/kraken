@@ -5,7 +5,7 @@ import platform as _platform
 from pathlib import Path
 from typing import cast
 
-from kraken.build.functional.v1alpha1 import fetch_tarball
+from kraken.build.utils.v1alpha1 import fetch_tarball
 from kraken.common.supplier import Supplier
 from kraken.core import Project
 

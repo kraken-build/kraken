@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from shutil import rmtree
 
-from kraken.build.functional.v1alpha1 import fetch_file, fetch_tarball, shell_cmd, write_file
+from kraken.build.utils.v1alpha1 import fetch_file, fetch_tarball, shell_cmd, write_file
 from kraken.common.supplier import Supplier
 from kraken.core import Property, Task, TaskStatus
 
