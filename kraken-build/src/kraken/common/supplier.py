@@ -3,7 +3,8 @@ calculated lazily and track provenance of such computations. """
 
 import abc
 from collections.abc import Callable, Iterable, Mapping
-from typing import Any, Generic, TypeVar
+from functools import partial
+from typing import Any, Generic, ParamSpec, TypeVar
 
 from ._generic import NotSet
 
@@ -11,6 +12,7 @@ T = TypeVar("T", covariant=True)
 U = TypeVar("U")
 K = TypeVar("K")
 V = TypeVar("V")
+P = ParamSpec("P")
 
 
 class Supplier(Generic[T], abc.ABC):
@@ -109,6 +111,14 @@ class Supplier(Generic[T], abc.ABC):
         """Returns a supplier that always raises :class:`Empty`."""
 
         return VoidSupplier(from_exc, derived_from)
+
+    @staticmethod
+    def agg(fn: Callable[P, "U"], *args: P.args, **kwargs: P.kwargs) -> "Supplier[U]":
+        derived_from = [
+            *(arg for arg in args if isinstance(arg, Supplier)),
+            *(arg for arg in kwargs.values() if isinstance(arg, Supplier)),
+        ]
+        return OfCallableSupplier(partial(fn, *args, **kwargs), derived_from)
 
     def __repr__(self) -> str:
         try:

@@ -99,3 +99,9 @@ id = "a8814dcb-b28b-42ed-aa0b-92297a63877d"
 type = "fix"
 description = "Remove default files that should be excluded for `isort`, `pycln` and `black` so that a `build/` directory in the `src/` directory also gets checked. We can do this safely because we expect the `src/` folder in a Python project to contain only files that should be checked unless otherwise explicitly specified"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "863c7431-cfb0-4491-a6c1-7209a6e2cf59"
+type = "feature"
+description = "Add `Supplier.agg()`"
+author = "@NiklasRosenstein"
