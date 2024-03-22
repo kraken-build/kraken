@@ -58,7 +58,7 @@ def python_package_index(
 
     # NOTE(@niklas): Currently this function is a simple wrapper, but it may replace the wrapped method eventually.
 
-    from .settings import python_settings
+    from .....std.python.settings import python_settings
 
     python_settings().add_package_index(
         alias=alias,
@@ -156,22 +156,21 @@ def python_project(
 
     from kraken.build import project
     from kraken.common import not_none
-
-    from .pyproject import Pyproject
-    from .tasks.black_task import BlackConfig, black as black_tasks
-    from .tasks.build_task import build as build_task
-    from .tasks.flake8_task import Flake8Config, flake8 as flake8_tasks
-    from .tasks.info_task import info as info_task
-    from .tasks.install_task import install as install_task
-    from .tasks.isort_task import IsortConfig, isort as isort_tasks
-    from .tasks.login_task import login as login_task
-    from .tasks.mypy_task import MypyConfig, mypy as mypy_task
-    from .tasks.publish_task import publish as publish_task
-    from .tasks.pycln_task import pycln as pycln_task
-    from .tasks.pytest_task import pytest as pytest_task
-    from .tasks.pyupgrade_task import pyupgrade as pyupgrade_task
-    from .tasks.update_lockfile_task import update_lockfile_task
-    from .tasks.update_pyproject_task import update_pyproject_task
+    from kraken.std.python.pyproject import Pyproject
+    from kraken.std.python.tasks.black_task import BlackConfig, black as black_tasks
+    from kraken.std.python.tasks.build_task import build as build_task
+    from kraken.std.python.tasks.flake8_task import Flake8Config, flake8 as flake8_tasks
+    from kraken.std.python.tasks.info_task import info as info_task
+    from kraken.std.python.tasks.install_task import install as install_task
+    from kraken.std.python.tasks.isort_task import IsortConfig, isort as isort_tasks
+    from kraken.std.python.tasks.login_task import login as login_task
+    from kraken.std.python.tasks.mypy_task import MypyConfig, mypy as mypy_task
+    from kraken.std.python.tasks.publish_task import publish as publish_task
+    from kraken.std.python.tasks.pycln_task import pycln as pycln_task
+    from kraken.std.python.tasks.pytest_task import pytest as pytest_task
+    from kraken.std.python.tasks.pyupgrade_task import pyupgrade as pyupgrade_task
+    from kraken.std.python.tasks.update_lockfile_task import update_lockfile_task
+    from kraken.std.python.tasks.update_pyproject_task import update_pyproject_task
 
     if additional_lint_directories is None:
         additional_lint_directories = []

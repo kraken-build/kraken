@@ -1,2 +1,2 @@
-from kraken.std.python.project import python_project
+from kraken.build.python.v1alpha1 import python_project
 python_project()

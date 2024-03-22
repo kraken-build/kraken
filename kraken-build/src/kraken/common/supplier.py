@@ -2,7 +2,7 @@
 calculated lazily and track provenance of such computations. """
 
 import abc
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping
 from typing import Any, Generic, TypeVar
 
 from ._generic import NotSet

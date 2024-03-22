@@ -1,4 +1,6 @@
-""" This module provides an experimental new functional API for defining Kraken tasks. """
+""" This module provides an experimental new functional API for defining Kraken tasks.
+
+This API is marked as `v1alpha1` and should be used with caution. """
 
 from .fetch_file_task import fetch_file
 from .fetch_tarball_task import fetch_tarball
