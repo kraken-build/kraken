@@ -1,6 +1,6 @@
 import os
 
-from kraken.std import python_package_index, python_project
+from kraken.build.python.v1alpha1 import python_package_index, python_project
 from kraken.std.python import mypy_stubtest
 
 python_package_index(
