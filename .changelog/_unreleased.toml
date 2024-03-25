@@ -1,0 +1,5 @@
+[[entries]]
+id = "e90f9fb8-e97a-49ac-83d7-f71ea3b3ca77"
+type = "fix"
+description = "`Project.subproject(mode=\"if-exists\")` now loads the project if it exists, instead of not loading it and only returning it if it has been loaded before. Added new `\"or-none\"` mode for the old behaviour."
+author = "niklas.rosenstein@helsing.ai"
