@@ -1,0 +1,5 @@
+[[entries]]
+id = "4250059a-27af-4ec5-8810-141bf06ca67e"
+type = "fix"
+description = "Fix `BuildxBuildTask.execute()` accessing `self.cache_from/cache_to` incorrectly"
+author = "niklas.rosenstein@helsing.ai"

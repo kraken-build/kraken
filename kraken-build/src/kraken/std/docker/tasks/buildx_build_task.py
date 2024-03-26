@@ -64,7 +64,7 @@ class BuildxBuildTask(BaseBuildTask):
             command += ["--no-cache"]
         if cache_from := self.cache_from.get():
             command += ["--cache-from", cache_from]
-        if cache_to := self.cache_from.get():
+        if cache_to := self.cache_to.get():
             command += ["--cache-to", cache_to]
         command += flatten(["--tag", t] for t in self.tags.get())
         if self.push.get():
