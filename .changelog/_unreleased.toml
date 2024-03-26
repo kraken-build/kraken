@@ -1,0 +1,5 @@
+[[entries]]
+id = "a72504b2-c281-4f05-be50-02df8f97f908"
+type = "feature"
+description = "Add `BuildxBuildTask.cache_from` and `.cache_to` properties"
+author = "niklas.rosenstein@helsing.ai"

@@ -20,6 +20,9 @@ class BuildxBuildTask(BaseBuildTask):
     #: `False`.
     provenance: Property[bool] = Property.default(False)
 
+    cache_from: Property[str | None] = Property.default(None)
+    cache_to: Property[str | None] = Property.default(None)
+
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.preprocess_dockerfile.set(True)
@@ -59,6 +62,10 @@ class BuildxBuildTask(BaseBuildTask):
             command += ["--cache-to", f"type=registry,ref={not_none(self.cache_repo.get())},mode=max,ignore-error=true"]
         if not self.cache.get():
             command += ["--no-cache"]
+        if cache_from := self.cache_from.get():
+            command += ["--cache-from", self.cache_from.get()]
+        if cache_to := self.cache_from.get():
+            command += ["--cache-to", self.cache_to.get()]
         command += flatten(["--tag", t] for t in self.tags.get())
         if self.push.get():
             command += ["--push"]
