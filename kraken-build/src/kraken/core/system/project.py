@@ -213,23 +213,25 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         """
 
     @overload
-    def subproject(self, name: str, mode: Literal["if-exists"]) -> Project | None:
+    def subproject(self, name: str, mode: Literal["if-exists", "or-none"]) -> Project | None:
         """
         Mount a sub-project of this project with the specified *name* and execute it if the directory matching the
         *name* exists. If such a directory does not exist, no project is created and `None` is returned. If you want
         to create a project in any case, you can use this method, and if you get `None` back you can call
         #subproject() again with the *mode* set to "empty".
+
+        Using the `"or-none"` mode, the sub-project will only be returned if it was already loaded.
         """
 
     def subproject(
         self,
         name: str,
-        mode: Literal["empty", "execute", "if-exists"] = "execute",
+        mode: Literal["empty", "execute", "if-exists", "or-none"] = "execute",
     ) -> Project | None:
         assert isinstance(mode, str), f"mode must be a string, got {type(mode).__name__}"
 
         obj = self._members.get(name)
-        if obj is None and mode == "if-exists":
+        if obj is None and mode == "or-none":
             return None
         if obj is not None:
             if not isinstance(obj, Project):
@@ -242,8 +244,10 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         if mode == "empty":
             project = Project(name, directory, self, self.context)
             self._members[name] = project
-        elif mode == "execute":
+        elif mode == "execute" or mode == "if-exists":
             if not directory.is_dir():
+                if mode == "if-exists":
+                    return None
                 raise FileNotFoundError(
                     f"{self.address}:{name} cannot be loaded because the directory {directory} does not exist"
                 )
