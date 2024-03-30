@@ -3,10 +3,10 @@
 import logging
 import re
 from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Protocol, TypeVar, cast
+from typing import Literal, Protocol, TypeVar
 
-from attr import dataclass
 from nr.stream import Optional
 
 from kraken.common.supplier import Supplier
@@ -15,7 +15,7 @@ from kraken.std.git.version import EmptyGitRepositoryError, GitVersion, NotAGitR
 from kraken.std.python.buildsystem import detect_build_system
 from kraken.std.python.pyproject import PackageIndex
 from kraken.std.python.settings import python_settings
-from kraken.std.python.tasks.pex_build_task import PexBuildTask, pex_build
+from kraken.std.python.tasks.pex_build_task import PexBuildTask
 from kraken.std.python.tasks.pytest_task import CoverageFormat
 from kraken.std.python.version import git_version_to_python_version
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class PythonCodegen(Protocol):
-    """ Protocol for functions that produce a task to generate Python code."""
+    """Protocol for functions that produce a task to generate Python code."""
 
     def __call__(self, source_dir: Path) -> tuple[Task, Supplier[Sequence[Path]]]:
         """
@@ -237,6 +237,7 @@ def python_project(
     print(new_exclude_format_paths.get())
 
     from typing import TYPE_CHECKING
+
     if TYPE_CHECKING:
         reveal_type(exclude_format_directories)
 

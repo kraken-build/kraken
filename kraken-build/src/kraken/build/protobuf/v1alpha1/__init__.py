@@ -9,6 +9,6 @@ linting and code-generation capabilities with [grpcio-tools][].
     This API is unstable and should be consumed with caution.
 """
 
-from .project import protobuf_project, ProtobufProject
+from .project import ProtobufProject, protobuf_project
 
 __all__ = ["protobuf_project", "ProtobufProject"]

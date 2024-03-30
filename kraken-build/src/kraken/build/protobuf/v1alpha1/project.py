@@ -1,8 +1,8 @@
-
+import logging
 from collections.abc import Sequence
 from dataclasses import dataclass
-import logging
 from pathlib import Path
+
 from kraken.common.supplier import Supplier
 from kraken.core.system.project import Project
 from kraken.core.system.task import Task
@@ -18,7 +18,7 @@ def protobuf_project(
     buf_version: str = "1.30.0",
     buffrs_version: str = "0.8.0",
 ) -> "ProtobufProject":
-    """ Defines tasks for a Protobuf project.
+    """Defines tasks for a Protobuf project.
 
     * If a `Proto.toml` exists, [Buffrs][] will be be used to install dependencies. Buffrs will produce a `proto/vendor`
         directory that will be used as the source directory for the remaining Protobuf tasks. If the `Proto.toml` does
@@ -61,7 +61,7 @@ def protobuf_project(
 
 @dataclass
 class ProtobufProject:
-    """ Represents a Protobuf project, and allows creating code generators for supported versions. """
+    """Represents a Protobuf project, and allows creating code generators for supported versions."""
 
     project: Project
     """ The Kraken project. """
@@ -80,17 +80,23 @@ class ProtobufProject:
 
     @property
     def protoc(self) -> Supplier[str]:
-        """ Returns the ProtocTask for the project. """
+        """Returns the ProtocTask for the project."""
 
         return pex_build(
             binary_name="protoc",
-            requirements=[f"grpcio-tools{self.grpcio_tools_version_spec}", f"mypy-protobuf{self.mypy_protobuf_version_spec}"],
+            requirements=[
+                f"grpcio-tools{self.grpcio_tools_version_spec}",
+                f"mypy-protobuf{self.mypy_protobuf_version_spec}",
+            ],
             entry_point="grpc_tools.protoc",
             venv="prepend",
         ).output_file.map(lambda p: str(p.absolute()))
 
-    def python(self, source_dir: Path, ) -> tuple[Task, Supplier[Sequence[Path]]]:
-        """ Create a code generator for Python code from the Protobuf files.
+    def python(
+        self,
+        source_dir: Path,
+    ) -> tuple[Task, Supplier[Sequence[Path]]]:
+        """Create a code generator for Python code from the Protobuf files.
 
         The Python code will be generated in a `proto` namespace package that will be placed into your projects
         source directory. Before invoking the `protoc` compiler, the contents of the `proto` directory (the one
