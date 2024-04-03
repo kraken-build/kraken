@@ -111,3 +111,9 @@ id = "16b2de57-29c2-410f-816a-018e9812871b"
 type = "feature"
 description = "Add `kraken.build.protobuf.v1alpha1.protobuf_project()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "54f6e294-e60f-402a-97ae-17cbce9e8bc6"
+type = "feature"
+description = "add `pex_build(python_shebang)` parameter"
+author = "niklas.rosenstein@helsing.ai"

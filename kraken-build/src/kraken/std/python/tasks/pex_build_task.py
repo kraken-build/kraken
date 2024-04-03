@@ -31,6 +31,7 @@ class PexBuildTask(Task):
     python: Property[Path | None] = Property.default(None)
     index_url: Property[str | None] = Property.default(None)
     always_rebuild: Property[bool] = Property.default(False)
+    python_shebang: Property[str | None] = Property.default(None)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -47,6 +48,7 @@ class PexBuildTask(Task):
                     self.venv.get() or "",
                     self.pex_binary.map(str).get() or "",
                     self.python.map(str).get() or "",
+                    self.python_shebang.get() or "",
                 ]
             ).encode()
         ).hexdigest()
@@ -78,6 +80,7 @@ class PexBuildTask(Task):
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
                 index_url=self.index_url.get() or _get_default_index_url(self.project),
+                python_shebang=self.python_shebang.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -97,6 +100,7 @@ def _build_pex(
     pex_binary: Path | None = None,
     python: Path | None = None,
     index_url: str | None = None,
+    python_shebang: str | None = None,
     log: logging.Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
@@ -109,6 +113,9 @@ def _build_pex(
     :param pex_binary: Path to the `pex` binary to execute. If not specified, `python -m pex` will be used
         taking into account the :param:`python` parameter.
     :param python: The Python executable to run `python -m pex` with. If not set, defaults to :data:`sys.executable`.
+    :param python_shebang: The shebang for the generated PEX. This may need to be set to ensure that it works in
+        all target environemnts, otherwise it will default to a compatible Python interpreter as specified with the
+        *interpreter_constraint* option, which may be too specific.
     """
 
     if pex_binary is not None:
@@ -135,6 +142,8 @@ def _build_pex(
         command += ["--venv", venv]
     for key, value in (inject_env or {}).items():
         command += ["--inject-env", f"{key}={value}"]
+    if python_shebang is not None:
+        command += ["--python-shebang", python_shebang]
 
     safe_command = list(command)
     if index_url is not None:
@@ -155,6 +164,7 @@ def pex_build(
     venv: Literal["prepend", "append"] | None = None,
     index_url: str | None = None,
     always_rebuild: bool = False,
+    python_shebang: str | None = None,
     output_file: Path | None = None,
     task_name: str | None = None,
     project: Project | None = None,
@@ -175,6 +185,7 @@ def pex_build(
         and existing_task.venv.get() == venv
         and existing_task.index_url.get() == index_url
         and existing_task.always_rebuild.get() == always_rebuild
+        and existing_task.python_shebang.get() == python_shebang
         and existing_task.output_file.get_or(None) == output_file
     ):
         return existing_task
@@ -188,6 +199,7 @@ def pex_build(
     task.venv = venv
     task.index_url = index_url
     task.always_rebuild = always_rebuild
+    task.python_shebang = python_shebang
     task.output_file = output_file
     return task
 
