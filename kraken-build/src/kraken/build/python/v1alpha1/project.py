@@ -369,6 +369,7 @@ def python_app(
     entry_point: str | None = None,
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
+    python_shebang: str | None = None,
     venv_mode: Literal["append", "prepend"] | None = None,
     name: str = "build-pex",
     dependencies: Sequence[Task | str] = (),
@@ -410,6 +411,7 @@ def python_app(
         interpreter_constraint=interpreter_constraint,
         venv=venv_mode,
         always_rebuild=True,
+        python_shebang=python_shebang,
         output_file=output_file,
         task_name=name,
     )
