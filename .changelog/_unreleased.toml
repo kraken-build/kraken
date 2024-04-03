@@ -117,3 +117,9 @@ id = "54f6e294-e60f-402a-97ae-17cbce9e8bc6"
 type = "feature"
 description = "add `pex_build(python_shebang)` parameter"
 author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "9ac5c38b-cb7c-4aa2-bd01-5cf3601dc953"
+type = "feature"
+description = "Add `pex_build(python_versions)`"
+author = "@NiklasRosenstein"

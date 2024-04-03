@@ -236,11 +236,6 @@ def python_project(
     )
     print(new_exclude_format_paths.get())
 
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        reveal_type(exclude_format_directories)
-
     #     *exclude_format_directories,
     #     # Ensure that the generated Protobuf code is not linted or formatted
     #     str((project.directory / source_directory / "proto").relative_to(project.directory)),
@@ -369,8 +364,9 @@ def python_app(
     entry_point: str | None = None,
     console_script: str | None = None,
     interpreter_constraint: str | None = None,
-    python_shebang: str | None = None,
     venv_mode: Literal["append", "prepend"] | None = None,
+    python_shebang: str | None = None,
+    python_versions: Sequence[str] = (),
     name: str = "build-pex",
     dependencies: Sequence[Task | str] = (),
 ) -> PexBuildTask:
@@ -412,6 +408,7 @@ def python_app(
         venv=venv_mode,
         always_rebuild=True,
         python_shebang=python_shebang,
+        python_versions=python_versions,
         output_file=output_file,
         task_name=name,
     )

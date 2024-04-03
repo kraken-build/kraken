@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Literal
 
+from kraken.common import findpython
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
@@ -32,6 +33,14 @@ class PexBuildTask(Task):
     index_url: Property[str | None] = Property.default(None)
     always_rebuild: Property[bool] = Property.default(False)
     python_shebang: Property[str | None] = Property.default(None)
+    sh_boot: Property[bool] = Property.default(True)
+
+    #: This is not a PEX option, but we use it to ensure that we find at least the specified Python versions
+    #: and use them all to build a multi-version PEX. The Python interpreters will be searched on the current
+    #: system PATH using the same method as the kraken-wrapper uses to find the Python interpreter (using the
+    #: `findpython` module). If any of the given Python versions is not available, it will cause an error unless
+    #: it is trailed by a question mark. Example: `["3.10", "3.11", "3.12?"]`
+    python_versions: Property[Sequence[str]] = Property.default_factory(list)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -49,6 +58,8 @@ class PexBuildTask(Task):
                     self.pex_binary.map(str).get() or "",
                     self.python.map(str).get() or "",
                     self.python_shebang.get() or "",
+                    str(self.sh_boot.get()),
+                    ":".join(self.python_versions.get()),
                 ]
             ).encode()
         ).hexdigest()
@@ -81,6 +92,8 @@ class PexBuildTask(Task):
                 python=self.python.get(),
                 index_url=self.index_url.get() or _get_default_index_url(self.project),
                 python_shebang=self.python_shebang.get(),
+                sh_boot=self.sh_boot.get(),
+                python_versions=self.python_versions.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -101,6 +114,8 @@ def _build_pex(
     python: Path | None = None,
     index_url: str | None = None,
     python_shebang: str | None = None,
+    sh_boot: bool = True,
+    python_versions: Sequence[str] = (),
     log: logging.Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
@@ -116,6 +131,9 @@ def _build_pex(
     :param python_shebang: The shebang for the generated PEX. This may need to be set to ensure that it works in
         all target environemnts, otherwise it will default to a compatible Python interpreter as specified with the
         *interpreter_constraint* option, which may be too specific.
+    :param sh_boot: If True, the PEX will be generated with a shell bootstrapper that will run the PEX with the
+        correct Python interpreter. This is usually preferred (see PEX documentation).
+    :param python_versions: See :class:`PexBuildTask.python_versions`.
     """
 
     if pex_binary is not None:
@@ -144,6 +162,43 @@ def _build_pex(
         command += ["--inject-env", f"{key}={value}"]
     if python_shebang is not None:
         command += ["--python-shebang", python_shebang]
+    command += ["--sh-boot" if sh_boot else "--no-sh-boot"]
+
+    # Find compatible Python versions.
+    if python_versions:
+        logger.info(
+            "Finding Python versions %s under interpreter_constraint %s", python_versions, interpreter_constraint
+        )
+        python_versions_to_find = {version.rstrip("?"): version.endswith("?") for version in python_versions}
+        for candidate in findpython.get_candidates():
+            if not python_versions_to_find:
+                break
+            if (candidate_version := candidate.get("exact_version")) is None:
+                continue
+            if interpreter_constraint is not None and not findpython.match_version_constraint(
+                interpreter_constraint, candidate_version
+            ):
+                continue
+
+            for version, optional in python_versions_to_find.items():
+                if candidate_version == version or candidate_version.startswith(version + "."):
+                    logger.info(
+                        "Found candidate Python version %s (%s) for requested version %s",
+                        candidate_version,
+                        candidate["path"],
+                        version,
+                    )
+                    python_versions_to_find.pop(version)
+                    command += ["--python", candidate["path"]]
+                    break
+
+        # Drop optional versions that were not found.
+        missing_optional = {version for version, optional in python_versions_to_find.items() if optional}
+        if missing_optional:
+            logger.warning("Could not find optional Python versions %s", missing_optional)
+        missing_required = {version for version, optional in python_versions_to_find.items() if not optional}
+        if missing_required:
+            raise ValueError(f"Could not find required Python versions {missing_required}")
 
     safe_command = list(command)
     if index_url is not None:
@@ -165,6 +220,7 @@ def pex_build(
     index_url: str | None = None,
     always_rebuild: bool = False,
     python_shebang: str | None = None,
+    python_versions: Sequence[str] = (),
     output_file: Path | None = None,
     task_name: str | None = None,
     project: Project | None = None,
@@ -186,6 +242,7 @@ def pex_build(
         and existing_task.index_url.get() == index_url
         and existing_task.always_rebuild.get() == always_rebuild
         and existing_task.python_shebang.get() == python_shebang
+        and list(existing_task.python_versions.get()) == list(python_versions)
         and existing_task.output_file.get_or(None) == output_file
     ):
         return existing_task
@@ -200,6 +257,7 @@ def pex_build(
     task.index_url = index_url
     task.always_rebuild = always_rebuild
     task.python_shebang = python_shebang
+    task.python_versions = python_versions
     task.output_file = output_file
     return task
 
