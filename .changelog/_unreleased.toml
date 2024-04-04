@@ -123,3 +123,9 @@ id = "9ac5c38b-cb7c-4aa2-bd01-5cf3601dc953"
 type = "feature"
 description = "Add `pex_build(python_versions)`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2b5d4590-5c9b-4fd0-a15f-87d93adb6e7e"
+type = "improvement"
+description = "Improve the `--cache-to` argument produced by the `BuildxBuildTask.cache_repo` property to include `image-manifest=true,oci-mediatypes=true` options for better OCI registry support (see https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/)"
+author = "@NiklasRosenstein"
