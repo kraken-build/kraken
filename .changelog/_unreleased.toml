@@ -1,0 +1,5 @@
+[[entries]]
+id = "4560750d-452d-43f0-af08-d791aaf5134a"
+type = "improvement"
+description = "Upgrade keyring to v25"
+author = "@NiklasRosenstein"
