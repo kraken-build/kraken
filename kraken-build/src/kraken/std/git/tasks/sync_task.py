@@ -53,11 +53,13 @@ class GitignoreSyncTask(RenderFileTask):
             user1, user2 = user2, user1
 
         # Replace the generated content.
-        generated = GitignoreFile.parse(self.generated_content.get())
+        generated = GitignoreFile()
         if tokens := self.gitignore_io_tokens.get():
             generated += GitignoreFile.parse(
                 gitignore_io_fetch_cached(tokens, backfill=self.gitignore_io_allow_http_request_backfill.get())
             )
+        # User-provided generated content, allowing for overrides to API-generated content.
+        generated += GitignoreFile.parse(self.generated_content.get())
 
         # Ensure there's at least one blank space between sections.
         if user1 and generated and (user1[-1] != "" and generated[0] != ""):
