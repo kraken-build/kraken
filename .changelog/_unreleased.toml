@@ -1,4 +1,10 @@
 [[entries]]
+id = "5a4c9349-429d-4594-805b-404ed45020c3"
+type = "improvement"
+description = "Expose the `locked` property of `CargoBuildTask` via the `cargo_build` helper function"
+author = "uluc.sengil@helsing.ai"
+
+[[entries]]
 id = "4560750d-452d-43f0-af08-d791aaf5134a"
 type = "improvement"
 description = "Upgrade keyring to v25"
