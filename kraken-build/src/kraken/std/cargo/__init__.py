@@ -321,6 +321,7 @@ def cargo_build(
     project: Project | None = None,
     features: list[str] | None = None,
     depends_on: Sequence[Task] = (),
+    locked: bool | None = None,
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -359,6 +360,7 @@ def cargo_build(
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
+    task.locked = locked
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
 
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")

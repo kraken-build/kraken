@@ -129,3 +129,15 @@ id = "2b5d4590-5c9b-4fd0-a15f-87d93adb6e7e"
 type = "improvement"
 description = "Improve the `--cache-to` argument produced by the `BuildxBuildTask.cache_repo` property to include `image-manifest=true,oci-mediatypes=true` options for better OCI registry support (see https://aws.amazon.com/blogs/containers/announcing-remote-cache-support-in-amazon-ecr-for-buildkit-clients/)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5a4c9349-429d-4594-805b-404ed45020c3"
+type = "improvement"
+description = "Expose the `locked` property of `CargoBuildTask` via the `cargo_build` helper function"
+author = "uluc.sengil@helsing.ai"
+
+[[entries]]
+id = "4560750d-452d-43f0-af08-d791aaf5134a"
+type = "improvement"
+description = "Upgrade keyring to v25"
+author = "@NiklasRosenstein"
