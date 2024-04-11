@@ -68,4 +68,5 @@ def pycln(*, name: str = "python.pycln", project: Project | None = None, version
     check_task.pycln_bin = pycln_bin
     check_task.check_only = True
     format_task = project.task(name, PyclnTask, group="fmt")
+    format_task.pycln_bin = pycln_bin
     return PyclnTasks(check_task, format_task)

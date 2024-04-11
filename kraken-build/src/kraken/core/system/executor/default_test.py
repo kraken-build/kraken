@@ -78,7 +78,7 @@ def test__DefaultExecutor__print_correct_failures_with_dependencies(
     graph = TaskGraph(kraken_project.context).trim([task_d])
     assert set(graph.tasks()) == {task_a, task_b, task_c, task_d}
     execute_print_test(graph)
-    captured = capsys.readouterr()  # type: ignore
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
     result = trim_printed_result(captured)
     assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     assert ":fake_task_c" in result
@@ -105,7 +105,7 @@ def test__DefaultExecutor__print_correct_failures_inside_groups_without_dependen
 
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
-    captured = capsys.readouterr()  # type: ignore
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
     assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE not in captured.out
     result = trim_printed_result(captured)
     assert ":group" not in result
@@ -142,7 +142,7 @@ def test__DefaultExecutor__print_correct_failures_inside_group_with_dependency(
 
     graph = TaskGraph(kraken_project.context).trim([group])
     execute_print_test(graph)
-    captured = capsys.readouterr()  # type: ignore
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
     assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result
@@ -183,7 +183,7 @@ def test__DefaultExecutor__print_correct_failures_with_independent_groups(
 
     graph = TaskGraph(kraken_project.context).trim([g1, g2])
     execute_print_test(graph)
-    captured = capsys.readouterr()  # type: ignore
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
     assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result
@@ -229,7 +229,7 @@ def test__DefaultExecutor__print_correct_failures_with_dependent_groups(
 
     graph = TaskGraph(kraken_project.context).trim([g2])
     execute_print_test(graph)
-    captured = capsys.readouterr()  # type: ignore
+    captured = capsys.readouterr()  # type: ignore[attr-defined]
     assert TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE in captured.out
     result = trim_printed_result(captured)
     assert ":fake_task_c" in result

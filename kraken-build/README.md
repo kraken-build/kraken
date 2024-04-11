@@ -55,7 +55,8 @@ add the `--incremental` flag or set `KRAKENW_INCREMENTAL=1`.
 
   [Slap]: https://github.com/NiklasRosenstein/slap
 
-This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to install Kraken for development:
+This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to
+install Kraken for development.
 
 ```
 $ slap venv -c --python python3.10
@@ -63,6 +64,11 @@ $ slap install --link
 # If you have the Slap shell magic installed, it will activate the Venv in your shell.
 $ slap venv -a
 ```
+
+You may want to use a released version of `krakenw` to interact in the repository however:
+
+    $ krakenw python.install
+    $ krakenw run fmt lint test
 
 ### Releases
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import contextlib
 import logging
-import time
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 from urllib.parse import urlparse
@@ -38,8 +37,8 @@ class CargoAuthProxyTask(BackgroundTask):
     #: The path to the certificate file that needs to be trusted in order to talk to the proxy over HTTPS.
     proxy_cert_file: Property[Path] = Property.output()
 
-    #: The number of seconds to wait after the proxy started.
-    startup_wait_time: Property[float] = Property.default(1.0)
+    #: Path to the mitmweb binary.
+    mitmweb_bin: Property[str] = Property.default("mitmweb")
 
     #: Additional args for the mitmproxy.
     #: We pass `--no-http2` by default as that breaks Cargo HTTP/2 multiplexing. See
@@ -99,14 +98,12 @@ class CargoAuthProxyTask(BackgroundTask):
             host = not_none(urlparse(registry.index).hostname)
             auth[host] = registry.read_credentials
 
-        proxy_url, cert_file = start_mitmweb_proxy(auth=auth, additional_args=self.mitmproxy_additional_args.get())
+        proxy_url, cert_file = start_mitmweb_proxy(
+            auth=auth, mitmweb_bin=self.mitmweb_bin.get(), additional_args=self.mitmproxy_additional_args.get()
+        )
         self.proxy_url.set(proxy_url)
         self.proxy_cert_file.set(cert_file)
         exit_stack.callback(lambda: self.proxy_url.clear())
         exit_stack.callback(lambda: self.proxy_cert_file.clear())
-
-        # Give the proxy some time to start up.
-        time.sleep(self.startup_wait_time.get())
-
         exit_stack.enter_context(self._inject_config())
         return TaskStatus.started()

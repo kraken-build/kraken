@@ -9,6 +9,7 @@ from typing import Literal
 
 from kraken.common import Supplier
 from kraken.core import Project, Task
+from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
@@ -177,8 +178,13 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
+    mitmweb_bin = pex_build(
+        "mitmweb", requirements=["mitmproxy>=10.0.0,<11.0.0"], console_script="mitmweb"
+    ).output_file.map(lambda p: str(p.absolute()))
+
     task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+    task.mitmweb_bin = mitmweb_bin
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
@@ -269,13 +275,11 @@ def cargo_deny(
     """
 
     project = project or Project.current()
-    return project.do(
-        "cargoDeny",
-        CargoDenyTask,
-        checks=checks,
-        config_file=config_file,
-        error_message=error_message,
-    )
+    task = project.task("cargoDeny", CargoDenyTask)
+    task.checks = checks
+    task.config_file = config_file
+    task.error_message = error_message
+    return task
 
 
 @dataclasses.dataclass
@@ -317,6 +321,7 @@ def cargo_build(
     project: Project | None = None,
     features: list[str] | None = None,
     depends_on: Sequence[Task] = (),
+    locked: bool | None = None,
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -355,6 +360,7 @@ def cargo_build(
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
+    task.locked = locked
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
 
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
@@ -482,8 +488,6 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
 
 def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
     project = project or Project.current()
-    return project.do(
-        "cargoGenerateDeb",
-        CargoGenerateDebPackage,
-        package_name=package_name,
-    )
+    task = project.task("cargoGenerateDeb", CargoGenerateDebPackage)
+    task.package_name = package_name
+    return task

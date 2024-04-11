@@ -45,7 +45,7 @@ def mkdocs(
 
     build_dir = (project.build_directory / task_prefix / "_site").absolute()
 
-    build_task = project.do(f"{task_prefix}.build", MkDocsTask)
+    build_task = project.task(f"{task_prefix}.build", MkDocsTask)
     build_task.mkdocs_root = project.directory / (mkdocs_root or "")
     build_task.mkdocs_bin = mkdocs_bin
     build_task.args = ["build", "-d", str(build_dir), "--strict"]
@@ -53,7 +53,7 @@ def mkdocs(
     port = int(os.environ.get("MKDOCS_PORT", "8000"))
     watch_files = [(project.directory / x).absolute() for x in watch_files]
 
-    serve_task = project.do(f"{task_prefix}.serve", MkDocsTask)
+    serve_task = project.task(f"{task_prefix}.serve", MkDocsTask)
     build_task.mkdocs_root = project.directory / (mkdocs_root or "")
     serve_task.mkdocs_bin = mkdocs_bin
     serve_args = ["serve", "-a", f"localhost:{port}"]
