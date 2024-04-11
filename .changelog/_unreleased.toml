@@ -9,3 +9,9 @@ id = "4560750d-452d-43f0-af08-d791aaf5134a"
 type = "improvement"
 description = "Upgrade keyring to v25"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bc473819-4740-43ac-a86a-ce98b8039041"
+type = "improvement"
+description = "update dependency httpx to ^0.27.0"
+author = "@NiklasRosenstein"
