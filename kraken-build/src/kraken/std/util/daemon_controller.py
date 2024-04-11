@@ -101,8 +101,10 @@ def spawn_fork(func: Callable[[], Any], detach: bool = True) -> int:
         return pid
     if detach:
         os.setsid()
-    func()
-    os._exit(os.EX_OK)
+    try:
+        func()
+    finally:
+        os._exit(os.EX_OK)
 
 
 def replace_stdio(stdin: int | None = None, stdout: int | None = None, stderr: int | None = None) -> None:
@@ -240,6 +242,7 @@ class DaemonController:
             state = self.State(command, str(cwd), env, proc.pid, time.time())
             self.save_state(state)
 
+        logger.debug("Spawning fork to start daemon %s", self.name)
         pid = spawn_fork(start_daemon)
         if status := wait_for_child_process(pid, 10.0):
             raise Exception("An unexpected error ocurred when starting daemon %r (exit code %s).", self.name, status)

@@ -6,6 +6,7 @@ on:
 
 env:
   COLUMNS: 200
+  PYTEST_FLAGS: --numprocesses auto
 
 jobs:
 

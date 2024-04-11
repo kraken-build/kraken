@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import logging
 from pathlib import Path
 
@@ -31,9 +32,15 @@ class BuildTask(Task):
         build_system = self.build_system.get()
         if not build_system:
             return TaskStatus.failed("no build system configured")
+
         output_directory = self.output_directory.get_or(self.project.build_directory / "python-dist")
         output_directory.mkdir(exist_ok=True, parents=True)
-        self.output_files.set(build_system.build(output_directory, self.as_version.get()))
+
+        with contextlib.ExitStack() as stack:
+            if as_version := self.as_version.get():
+                stack.enter_context(build_system.bump_version(as_version))
+            self.output_files.set(build_system.build(output_directory))
+
         return TaskStatus.succeeded()
 
 

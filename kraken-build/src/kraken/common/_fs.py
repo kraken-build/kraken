@@ -28,7 +28,7 @@ def atomic_file_swap(
     ...
 
 
-@contextlib.contextmanager  # type: ignore
+@contextlib.contextmanager  # type: ignore[arg-type, misc]
 def atomic_file_swap(
     path: "str | Path",
     mode: Literal["w", "wb"],

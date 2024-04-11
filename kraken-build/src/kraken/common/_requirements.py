@@ -7,6 +7,7 @@ import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
@@ -16,14 +17,16 @@ DEFAULT_BUILD_SUPPORT_FOLDER = "build-support"
 DEFAULT_INTERPRETER_CONSTRAINT = ">=3.10,<3.11"  # Kraken-core requires 3.10 exactly
 
 
-def parse_requirement(value: str) -> "PipRequirement | LocalRequirement":
+def parse_requirement(value: str) -> "PipRequirement | LocalRequirement | UrlRequirement":
     """
     Parse a string as a requirement. Return a :class:`PipRequirement` or :class:`LocalRequirement`.
     """
 
-    match = re.match(r"(.+?)@(.+)", value)
-    if match:
-        return LocalRequirement(match.group(1).strip(), Path(match.group(2).strip()))
+    if match := re.match(r"(.+?)@(.+)", value):
+        name, value = match.group(1).strip(), match.group(2).strip()
+        if match := re.match(r"(git\+)?(ssh|https?)://.+", value):
+            return UrlRequirement(name, value)
+        return LocalRequirement(name, Path(value))
 
     match = re.match(r"([\w\d\-\_]+)(.*)", value)
     if match:
@@ -47,7 +50,11 @@ class PipRequirement(Requirement):
     """Represents a Pip requriement."""
 
     name: str
-    spec: "str | None"
+    spec: str | None
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid URL requirement: {self}")
 
     def __str__(self) -> str:
         return f"{self.name}{self.spec or ''}"
@@ -65,11 +72,36 @@ class LocalRequirement(Requirement):
     name: str
     path: Path
 
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid requirement: {self}")
+
     def __str__(self) -> str:
-        return f"{self.name}@{self.path}"
+        return f"{self.name} @ {self.path}"
 
     def to_args(self, base_dir: Path) -> list[str]:
         return [str((base_dir / self.path if base_dir else self.path).absolute())]
+
+
+@dataclasses.dataclass(frozen=True)
+class UrlRequirement(Requirement):
+    """Represents a requirement that is installed from a URL."""
+
+    name: str
+    url: str
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid requirement: {self}")
+        print(self.url)
+        if not urlparse(self.url).scheme:
+            raise ValueError(f"invalid URL requirement: {self}")
+
+    def __str__(self) -> str:
+        return f"{self.name} @ {self.url}"
+
+    def to_args(self, base_dir: Path) -> list[str]:
+        return [str(self)]
 
 
 @dataclasses.dataclass(frozen=True)

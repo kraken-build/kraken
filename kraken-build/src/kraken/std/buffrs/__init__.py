@@ -3,16 +3,13 @@ from __future__ import annotations
 import logging
 from typing import cast
 
-from kraken.common import CredentialsWithHost
 from kraken.core import Project
 
-from .tasks import BuffrsGenerateTask, BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask, Language
+from .tasks import BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["buffrs_login", "buffrs_publish", "buffrs_generate"]
-
-PROTO_REPO = "proto"
+__all__ = ["buffrs_login", "buffrs_publish"]
 
 PYTHON_BUILD_TASK_NAME = "python.build"
 
@@ -20,82 +17,48 @@ PYTHON_BUILD_TASK_NAME = "python.build"
 def buffrs_login(
     *,
     project: Project | None = None,
-    artifactory_credentials: CredentialsWithHost,
+    registry: str,
+    token: str,
 ) -> BuffrsLoginTask:
-    """Logs buffrs into Artifactory."""
+    """Create a task to log into an Artifactory registry with Buffrs. The task is created in the root project
+    regardless from where it is called. Note that currently we only support a single registry to push to, because
+    we always use `buffrsLogin` as the task name."""
 
     project = project or Project.current()
     root_project = project.context.root_project
 
     if "buffrsLogin" in root_project.tasks():
-        return cast(BuffrsLoginTask, root_project.task("buffrsLogin"))
-
-    task = root_project.do(
-        "buffrsLogin",
-        BuffrsLoginTask,
-        artifactory_credentials=artifactory_credentials,
-    )
+        task = cast(BuffrsLoginTask, root_project.task("buffrsLogin"))
+        if task.registry.get() != registry or task.token.get() != token:
+            raise RuntimeError("multiple buffrs_login() calls with different registry/token not currently supported")
+    else:
+        task = root_project.task("buffrsLogin", BuffrsLoginTask)
+        task.registry = registry
+        task.token = token
 
     return task
 
 
-CARGO_BUILD_SUPPORT_GROUP_NAME = "cargoBuildSupport"
-
-
-def buffrs_install(
-    *,
-    project: Project | None = None,
-) -> BuffrsInstallTask:
+def buffrs_install(*, project: Project | None = None) -> BuffrsInstallTask:
     """Installs buffrs dependencies defined in the `Proto.toml`"""
 
     project = project or Project.current()
-
-    task = project.do(
-        "buffrsInstall",
-        BuffrsInstallTask,
-    )
-
-    return task
+    return project.task("buffrsInstall", BuffrsInstallTask)
 
 
 def buffrs_publish(
     *,
     project: Project | None = None,
-    artifactory_repository: str,
-    version: str,
+    registry: str,
+    repository: str,
+    version: str | None = None,
 ) -> BuffrsPublishTask:
     """Publishes the buffrs package to the repository of the project."""
 
     project = project or Project.current()
 
-    task = project.do(
-        "buffrsPublish",
-        BuffrsPublishTask,
-        artifactory_repository=artifactory_repository,
-        group="publish",
-        version=version,
-    )
-
-    return task
-
-
-def buffrs_generate(
-    *,
-    project: Project | None = None,
-    language: Language,
-    generated_output_dir: str,
-) -> BuffrsGenerateTask:
-    """Generates code for installed packages with buffrs.
-    Should only be called for python projects that have a Proto.toml file"""
-
-    project = project or Project.current()
-
-    task = project.do(
-        "buffrsGenerate",
-        BuffrsGenerateTask,
-        language=language,
-        generated_output_dir=generated_output_dir,
-        group="gen",
-    )
-
+    task = project.task("buffrsPublish", BuffrsPublishTask)
+    task.registry = registry
+    task.repository = repository
+    task.version = version
     return task

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from kraken.core.address import Address
+    from kraken.core.system.task import Task
 
     from .project import Project
 
@@ -27,11 +28,17 @@ class ProjectLoaderError(Exception):
 
 
 class BuildError(Exception):
-    def __init__(self, failed_tasks: Iterable[str]) -> None:
+    def __init__(self, failed_tasks: Iterable[Task]) -> None:
+        assert not isinstance(failed_tasks, str), type(failed_tasks)  # type: ignore[unreachable]
+        assert isinstance(failed_tasks, Iterable), type(failed_tasks)
         self.failed_tasks = set(failed_tasks)
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         if len(self.failed_tasks) == 1:
-            return f'task "{next(iter(self.failed_tasks))}" failed'
+            return f'task "{next(iter(self.failed_tasks)).address}" failed'
         else:
-            return "tasks " + ", ".join(f'"{task}"' for task in sorted(self.failed_tasks)) + " failed"
+            return (
+                "tasks "
+                + ", ".join(f'"{task}"' for task in sorted(str(x.address) for x in self.failed_tasks))
+                + " failed"
+            )

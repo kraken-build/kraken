@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
 
 from kraken.common import Supplier
@@ -41,6 +42,7 @@ def flake8(
     project: Project | None = None,
     config_file: Path | Supplier[Path] | None = None,
     version_spec: str | None = None,
+    additional_requirements: Sequence[str] = (),
 ) -> Flake8Task:
     """Creates a task for linting your Python project with Flake8.
 
@@ -52,7 +54,10 @@ def flake8(
 
     if version_spec is not None:
         flake8_bin = pex_build(
-            "flake8", requirements=[f"flake8{version_spec}"], console_script="flake8", project=project
+            "flake8",
+            requirements=[f"flake8{version_spec}", *additional_requirements],
+            console_script="flake8",
+            project=project,
         ).output_file.map(str)
     else:
         flake8_bin = Supplier.of("flake8")

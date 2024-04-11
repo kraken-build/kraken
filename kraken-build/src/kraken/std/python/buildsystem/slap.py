@@ -4,10 +4,12 @@ Requires at least Slap 1.6.25. """
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import shutil
 import subprocess as sp
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import quote
@@ -57,14 +59,16 @@ class SlapPythonBuildSystem(PythonBuildSystem):
     def requires_login(self) -> bool:
         return False
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        if as_version is not None:
-            # TODO (@NiklasRosenstein): We should find a way to revert the changes to the worktree
-            #       that this command does.
-            command = ["slap", "release", as_version]
-            logger.info("%s", command)
-            sp.check_call(command, cwd=self.project_directory)
+    @contextlib.contextmanager
+    def bump_version(self, version: str) -> Iterator[None]:
+        # TODO (@NiklasRosenstein): We should find a way to revert the changes to the worktree
+        #       that this command does.
+        command = ["slap", "release", version]
+        logger.info("%s", command)
+        sp.check_call(command, cwd=self.project_directory)
+        yield
 
+    def build(self, output_directory: Path) -> list[Path]:
         with tempfile.TemporaryDirectory() as tempdir:
             command = ["slap", "publish", "--dry", "-b", tempdir]
             sp.check_call(command, cwd=self.project_directory)

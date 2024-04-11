@@ -1,31 +1,41 @@
 [[entries]]
-id = "67c15e74-a142-482f-9d2e-972a50161129"
-type = "feature"
-description = "Make Rust builds respect Cargo.lock when present"
-author = "jon.gjengset@helsing.ai"
+id = "251fc70d-a665-448a-9c07-42794342129a"
+type = "improvement"
+description = "Move generated .gitignore around so user-provided definitions can overwrite API-provided ones"
+author = "uluc.sengil@helsing.ai"
 
 [[entries]]
-id = "ebe30d77-1206-4437-8aa2-7373e9335926"
+id = "5a4c9349-429d-4594-805b-404ed45020c3"
 type = "improvement"
-description = "Improve Windows support in `krakenw` by supporting the `PYENV` env-var and using the right `pyhon.exe` path on Windows"
+description = "Expose the `locked` property of `CargoBuildTask` via the `cargo_build` helper function"
+author = "uluc.sengil@helsing.ai"
+
+[[entries]]
+id = "4560750d-452d-43f0-af08-d791aaf5134a"
+type = "improvement"
+description = "Upgrade keyring to v25"
 author = "@NiklasRosenstein"
-component = "kraken-wrapper"
 
 [[entries]]
-id = "a8200c89-b05a-46ce-895c-c4a4f5a736a6"
-type = "fix"
-description = "Do not use `dmypy` on Windows"
+id = "bc473819-4740-43ac-a86a-ce98b8039041"
+type = "improvement"
+description = "update dependency httpx to ^0.27.0"
 author = "@NiklasRosenstein"
-component = "kraken-build"
 
 [[entries]]
-id = "db65bd12-a9d1-472c-a38b-6f889cdda683"
+id = "b49b893d-73c9-4173-a224-6e33c359eda2"
 type = "improvement"
-description = "Move bump version into publish"
-author = "colin.mikolajczak@helsing.ai"
+description = "update dependency pyartifactory to v2"
+author = "@NiklasRosenstein"
 
 [[entries]]
-id = "31a52a49-8d26-4dd7-a4bc-84fe9fb37c19"
+id = "407a8a90-315a-442b-b7b5-e53c44b7e532"
 type = "improvement"
-description = "Add task to login in all cargo registries"
-author = "quentin.santos@helsing.ai"
+description = "update dependency termcolor to v2"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "367b2d48-8515-4846-8ec7-3a3b3d5a9483"
+type = "hygiene"
+description = "`CargoManifest.read()` now raises a `ValueError` if the manifest has neither a `[package]` nor a `[workspace]` section rather than a `pydantic.ClassError`"
+author = "@NiklasRosenstein"
