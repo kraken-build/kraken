@@ -21,3 +21,9 @@ id = "bc473819-4740-43ac-a86a-ce98b8039041"
 type = "improvement"
 description = "update dependency httpx to ^0.27.0"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b49b893d-73c9-4173-a224-6e33c359eda2"
+type = "improvement"
+description = "update dependency pyartifactory to v2"
+author = "@NiklasRosenstein"
