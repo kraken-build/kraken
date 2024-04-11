@@ -13,7 +13,6 @@ from typing import Any
 
 import tomli
 import tomli_w
-from pydantic import ClassError
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +239,7 @@ class CargoManifest:
         with path.open("rb") as fp:
             ret = cls.of(path, tomli.load(fp))
             if ret.package is None and ret.workspace is None:
-                raise ClassError
+                raise ValueError("Cargo manifest must have either a package or a workspace section.")
             return ret
 
     @classmethod

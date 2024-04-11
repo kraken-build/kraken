@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-from pydantic import ClassError
 
 from kraken.std.cargo.manifest import CargoManifest
 
@@ -89,9 +88,9 @@ def test_cargo_manifest_workspace_file() -> None:
 def test_cargo_manifest_throws_when_no_workspace_or_package() -> None:
     """
     This test ensures that when we read a file missing both a Package section and a Workspace section, it
-    throws a ClassError.
+    throws a ValueError.
     """
 
     cargo_file = Path(__file__).parent / "data" / "invalid_manifest.toml"
-    with pytest.raises(ClassError):
+    with pytest.raises(ValueError):
         CargoManifest.read(cargo_file)

@@ -21,3 +21,9 @@ id = "bc473819-4740-43ac-a86a-ce98b8039041"
 type = "improvement"
 description = "update dependency httpx to ^0.27.0"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "367b2d48-8515-4846-8ec7-3a3b3d5a9483"
+type = "hygiene"
+description = "`CargoManifest.read()` now raises a `ValueError` if the manifest has neither a `[package]` nor a `[workspace]` section rather than a `pydantic.ClassError`"
+author = "@NiklasRosenstein"
