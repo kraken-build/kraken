@@ -27,3 +27,9 @@ id = "b49b893d-73c9-4173-a224-6e33c359eda2"
 type = "improvement"
 description = "update dependency pyartifactory to v2"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "407a8a90-315a-442b-b7b5-e53c44b7e532"
+type = "improvement"
+description = "update dependency termcolor to v2"
+author = "@NiklasRosenstein"
