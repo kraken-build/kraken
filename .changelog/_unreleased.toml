@@ -1,4 +1,10 @@
 [[entries]]
+id = "251fc70d-a665-448a-9c07-42794342129a"
+type = "improvement"
+description = "Move generated .gitignore around so user-provided definitions can overwrite API-provided ones"
+author = "uluc.sengil@helsing.ai"
+
+[[entries]]
 id = "5a4c9349-429d-4594-805b-404ed45020c3"
 type = "improvement"
 description = "Expose the `locked` property of `CargoBuildTask` via the `cargo_build` helper function"
