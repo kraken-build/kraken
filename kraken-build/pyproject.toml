@@ -67,12 +67,6 @@ types-termcolor = "^1.1.5"
 pytest-xdist = {version = "^3.5.0", extras = ["psutil"]}
 mitmproxy = "^10.2.4"
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = "*"
-mkdocs-material = "*"
-novella = "0.2.6"
-pydoc-markdown = "^4.6.0"
-
 # Slap configuration
 # ------------------
 
