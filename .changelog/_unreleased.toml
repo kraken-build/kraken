@@ -21,3 +21,21 @@ id = "bc473819-4740-43ac-a86a-ce98b8039041"
 type = "improvement"
 description = "update dependency httpx to ^0.27.0"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b49b893d-73c9-4173-a224-6e33c359eda2"
+type = "improvement"
+description = "update dependency pyartifactory to v2"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "407a8a90-315a-442b-b7b5-e53c44b7e532"
+type = "improvement"
+description = "update dependency termcolor to v2"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "367b2d48-8515-4846-8ec7-3a3b3d5a9483"
+type = "hygiene"
+description = "`CargoManifest.read()` now raises a `ValueError` if the manifest has neither a `[package]` nor a `[workspace]` section rather than a `pydantic.ClassError`"
+author = "@NiklasRosenstein"
