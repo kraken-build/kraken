@@ -150,14 +150,14 @@ jobs:
   #         .venvs
   #       key: build-cache:${{ runner.os }}:selftest
 
-  uv-installer:
-    runs-on: arc-amd64-small
-    steps:
-    - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check
-    - run: krakenw --reinstall --use=UV
-    - run: krakenw run fmt lint
+  # uv-installer:
+  #   runs-on: arc-amd64-small
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: NiklasRosenstein/slap@gha/install/v1
+  #   - run: slap config --venv-type=uv && slap install --link --no-venv-check
+  #   - run: krakenw --reinstall --use=UV
+  #   - run: krakenw run fmt lint
 
   examples-docker-manual:
     runs-on: arc-amd64-small
