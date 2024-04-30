@@ -6,13 +6,14 @@ import json
 import logging
 import os
 import subprocess
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import tomli
 import tomli_w
+from deprecated import deprecated
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +22,20 @@ logger = logging.getLogger(__name__)
 class Bin:
     name: str
     path: str
-    _remainder: dict[str, Any]
+    _raw: dict[str, Any]
 
     def to_json(self) -> dict[str, Any]:
-        return {"name": self.name, "path": self.path, **self._remainder}
+        return self._raw
 
     @staticmethod
     def from_json(data: dict[str, Any]) -> Bin:
         data = dict(data)
-        return Bin(data.pop("name"), data.pop("path"), _remainder=data)
+        return Bin(data.get("name", ""), data.get("path", ""), _raw=data)
+
+    @property
+    @deprecated(reason="use Bin._raw instead", version="0.37.0")
+    def _remainder(self) -> dict[str, Any]:
+        return self._raw
 
 
 # TODO: Differentiate between lib kinds?
@@ -63,7 +69,7 @@ class WorkspaceMember:
 @dataclass
 class CargoMetadata:
     _path: Path
-    _data: dict[str, Any]
+    _raw: dict[str, Any]
 
     workspaceMembers: list[WorkspaceMember]
     artifacts: list[Artifact]
@@ -144,70 +150,81 @@ class CargoMetadata:
 
         return cls(path, data, workspace_members, artifacts, Path(data["target_directory"]))
 
+    @property
+    @deprecated(reason="use CargoMetadata._raw instead", version="0.37.0")
+    def _data(self) -> dict[str, Any]:
+        return self._raw
+
 
 @dataclass
 class Package:
     name: str
     version: str | None
     edition: str | None
-    unhandled: dict[str, Any] | None
+    _raw: dict[str, Any]
 
     @classmethod
-    def from_json(cls, json: dict[str, str]) -> Package:
-        cloned = dict(json)
-        name = cloned.pop("name")
-        version = cloned.pop("version", None)
-        edition = cloned.pop("edition", None)
-        return Package(name, version, edition, cloned)
+    def from_json(cls, json: dict[str, Any]) -> Package:
+        _raw = dict(json)
+        name = _raw.get("name", "")
+        version = _raw.get("version", None)
+        edition = _raw.get("edition", None)
+        return Package(name, version, edition, _raw)
 
-    def to_json(self) -> dict[str, str]:
-        values = {f.name: getattr(self, f.name) for f in fields(self) if f.name != "unhandled"}
-        if self.unhandled is not None:
-            values.update({k: v for k, v in self.unhandled.items() if v is not None})
-        return {k: v for k, v in values.items() if v is not None}
+    def to_json(self) -> dict[str, Any]:
+        return {k: v for k, v in self._raw.items() if v is not None}
+
+    @property
+    @deprecated(reason="use Package._raw instead", version="0.37.0")
+    def unhandled(self) -> dict[str, Any]:
+        return self._raw
 
 
 @dataclass
 class WorkspacePackage:
     version: str
-    unhandled: dict[str, Any] | None
+    _raw: dict[str, Any]
 
     @classmethod
-    def from_json(cls, json: dict[str, str]) -> WorkspacePackage:
+    def from_json(cls, json: dict[str, Any]) -> WorkspacePackage:
         cloned = dict(json)
-        version = cloned.pop("version")
+        version = cloned.get("version", "")
         return WorkspacePackage(version, cloned)
 
-    def to_json(self) -> dict[str, str]:
-        values = {f.name: getattr(self, f.name) for f in fields(self) if f.name != "unhandled"}
-        if self.unhandled is not None:
-            values.update({k: v for k, v in self.unhandled.items() if v is not None})
-        return {k: v for k, v in values.items() if v is not None}
+    def to_json(self) -> dict[str, Any]:
+        return {k: v for k, v in self._raw.items() if v is not None}
+
+    @property
+    @deprecated(reason="use WorkspacePackage._raw instead", version="0.37.0")
+    def unhandled(self) -> dict[str, Any]:
+        return self._raw
 
 
 @dataclass
 class Workspace:
     package: WorkspacePackage | None
     members: list[str] | None
-    unhandled: dict[str, Any] | None
+    dependencies: Dependencies | None
+    build_dependencies: Dependencies | None
+    _raw: dict[str, Any]
 
     @classmethod
     def from_json(cls, json: dict[str, Any]) -> Workspace:
-        cloned = dict(json)
         return Workspace(
-            WorkspacePackage.from_json(cloned.pop("package")) if "package" in cloned else None,
-            cloned.pop("members") if "members" in cloned else None,
-            cloned,
+            WorkspacePackage.from_json(json["package"]) if "package" in json else None,
+            json.get("members"),
+            Dependencies.from_json(json["dependencies"]) if "dependencies" in json else None,
+            Dependencies.from_json(json["build-dependencies"]) if "build-dependencies" in json else None,
+            json,
         )
 
     def to_json(self) -> dict[str, Any]:
-        values = {
-            "package": self.package.to_json() if self.package else None,
-            "members": self.members if self.members else None,
-        }
-        if self.unhandled is not None:
-            values.update({k: v for k, v in self.unhandled.items() if v is not None})
-        return {k: v for k, v in values.items() if v is not None}
+        return {k: v for k, v in self._raw.items() if v is not None}
+
+    @property
+    @deprecated(reason="use Workspace._raw instead", version="0.37.0")
+    def unhandled(self) -> dict[str, Any]:
+        return self._raw
 
 
 @dataclass
@@ -226,7 +243,7 @@ class Dependencies:
 @dataclass
 class CargoManifest:
     _path: Path
-    _data: dict[str, Any]
+    _raw: dict[str, Any]
 
     package: Package | None
     workspace: Workspace | None
@@ -255,7 +272,7 @@ class CargoManifest:
         )
 
     def to_json(self) -> dict[str, Any]:
-        result = self._data.copy()
+        result = self._raw.copy()
         if self.bin:
             result["bin"] = [x.to_json() for x in self.bin]
         else:
@@ -277,3 +294,8 @@ class CargoManifest:
         path = path or self._path
         with path.open("wb") as fp:
             tomli_w.dump(self.to_json(), fp)
+
+    @property
+    @deprecated(reason="use CargoManifest._raw instead", version="0.37.0")
+    def _data(self) -> dict[str, Any]:
+        return self._raw

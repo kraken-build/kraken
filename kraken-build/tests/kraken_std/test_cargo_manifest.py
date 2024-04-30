@@ -25,10 +25,10 @@ def test_cargo_manifest_handles_unknown_fields_correctly() -> None:
     assert manifest.package.version == "0.1.2"
     assert manifest.package.edition == "2021"
 
-    assert manifest.package.unhandled is not None
-    assert len(manifest.package.unhandled) == 2
-    assert len(manifest.package.unhandled["include"]) == 2
-    assert manifest.package.unhandled["authors"] == ["author1", "author2"]
+    assert manifest.package._raw is not None
+    assert len(manifest.package._raw) == 5
+    assert len(manifest.package._raw["include"]) == 2
+    assert manifest.package._raw["authors"] == ["author1", "author2"]
 
 
 def test_cargo_manifest_writes_json_correctly() -> None:
@@ -61,13 +61,13 @@ def test_cargo_manifest_complex_file() -> None:
 
     assert manifest is not None
     assert manifest.package is not None
-    assert manifest.package.unhandled is not None
-    assert len(manifest.package.unhandled) > 0
+    assert manifest.package._raw is not None
+    assert len(manifest.package._raw) > 0
     assert manifest.package.name == "rand"
     assert manifest.package.edition == "2018"
     assert manifest.package.version == "0.8.5"
-    assert manifest.package.unhandled["include"] == ["src/", "LICENSE-*", "README.md", "CHANGELOG.md", "COPYRIGHT"]
-    assert manifest.package.unhandled["autobenches"]
+    assert manifest.package._raw["include"] == ["src/", "LICENSE-*", "README.md", "CHANGELOG.md", "COPYRIGHT"]
+    assert manifest.package._raw["autobenches"]
 
 
 def test_cargo_manifest_workspace_file() -> None:
@@ -83,6 +83,10 @@ def test_cargo_manifest_workspace_file() -> None:
     assert manifest.workspace is not None
     assert manifest.workspace.members is not None
     assert manifest.workspace.members == ["crates/*"]
+    assert manifest.workspace.dependencies is not None
+    assert manifest.workspace.dependencies.data == {"subcrate": {"path": "./subcrate"}}
+    assert manifest.workspace.build_dependencies is not None
+    assert manifest.workspace.build_dependencies.data == {"other_subcrate": {"path": "./other_subcrate"}}
 
 
 def test_cargo_manifest_throws_when_no_workspace_or_package() -> None:

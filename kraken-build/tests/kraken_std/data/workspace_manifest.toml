@@ -1,2 +1,8 @@
 [workspace]
 members = ["crates/*"]
+
+[workspace.dependencies]
+subcrate.path = "./subcrate"
+
+[workspace.build-dependencies]
+other_subcrate.path = "./other_subcrate"

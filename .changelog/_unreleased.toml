@@ -1,0 +1,5 @@
+[[entries]]
+id = "1fddba58-dd61-4906-baca-f1a41e3b534f"
+type = "fix"
+description = "inject version for path dependencies in workspace virtual manifests"
+author = "tom.karwowski@helsing.ai"
