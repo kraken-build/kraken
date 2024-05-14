@@ -106,7 +106,7 @@ class PythonSettings:
 
         if index_url is None:
             if alias == "pypi":
-                index_url = "https://pypi.org/simple"
+                index_url = None
             elif alias == "testpypi":
                 index_url = "https://test.pypi.org/simple"
             else:
