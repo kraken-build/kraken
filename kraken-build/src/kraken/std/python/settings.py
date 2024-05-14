@@ -105,16 +105,16 @@ class PythonSettings:
                 raise ValueError(f"cannot add another default index (got: {defidx.alias!r}, trying to add: {alias!r})")
 
         if index_url is None:
-            if alias == "pypi":
+            if alias.lower() == "pypi":
                 index_url = None
-            elif alias == "testpypi":
+            elif alias.lower() == "testpypi":
                 index_url = "https://test.pypi.org/simple"
             else:
                 raise ValueError(f"cannot derive index URL for alias {alias!r}")
         if upload_url is None:
-            if alias == "pypi":
+            if alias.lower() == "pypi":
                 upload_url = "https://upload.pypi.org/legacy"
-            elif alias == "testpypi":
+            elif alias.lower() == "testpypi":
                 upload_url = "https://test.pypi.org/legacy"
             elif index_url.endswith("/simple"):
                 upload_url = index_url[: -len("/simple")]
