@@ -1,0 +1,5 @@
+[[entries]]
+id = "e6f6ee7b-e382-44f1-84b8-a24ad01c5d24"
+type = "hygiene"
+description = "Make it possible for Kraken to handle PyPI"
+author = "quentin.santos@helsing.ai"
