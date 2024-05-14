@@ -41,7 +41,7 @@ class PackageIndex:
     alias: str
 
     #: The URL to find the packages at.
-    index_url: str
+    index_url: str | None
 
     #: The priority of the index. Not all tools support it exactly how we model it in here (e.g. like Poetry),
     #: so the corresponding #PyprojectHandler implementation may need to do some translation.

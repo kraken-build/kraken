@@ -97,13 +97,13 @@ class PoetryPyprojectHandler(PyprojectHandler):
                 logger.warning(
                     "Poetry does not support disabling SSL verification for indexes (source: %s)", index.alias
                 )
-            sources.append(
-                {
-                    "name": index.alias,
-                    "url": index.index_url,
-                    "priority": index.priority.value,
-                }
-            )
+            package = {
+                "name": index.alias,
+                "priority": index.priority.value,
+            }
+            if index.index_url is not None:
+                package["url"] = index.index_url
+            sources.append(package)
 
     def set_path_dependencies_to_version(self, version: str) -> None:
         """
