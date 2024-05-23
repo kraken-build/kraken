@@ -1,0 +1,5 @@
+[[entries]]
+id = "01585c8d-7600-447d-99af-d615c0070c65"
+type = "improvement"
+description = "added an optional overwrite option for RenderFileTask"
+author = "uluc.sengil@helsing.ai"
