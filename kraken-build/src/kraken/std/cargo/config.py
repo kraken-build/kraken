@@ -104,7 +104,7 @@ class CargoManifestManager:
             self._manifest = CargoManifest.read(self._cargo_toml)
         return self._manifest
 
-    def set_version(self, version: str, registry_alias: str) -> None:
+    def set_version(self, version: str, registry_alias: str | None = None) -> None:
         """
         Updates the `version` field in the `[project]` section of the `Cargo.toml`.
 
@@ -132,10 +132,11 @@ class CargoManifestManager:
                         dependency["registry"] = registry_alias
 
         # CargoProject.get_or_create(None)
-        if manifest.dependencies:
-            update_path_deps(manifest.dependencies.data)
-        if manifest.build_dependencies:
-            update_path_deps(manifest.build_dependencies.data)
+        if registry_alias is not None:
+            if manifest.dependencies:
+                update_path_deps(manifest.dependencies.data)
+            if manifest.build_dependencies:
+                update_path_deps(manifest.build_dependencies.data)
 
     def write(self) -> None:
         fp = self._stack.enter_context(atomic_file_swap(self._cargo_toml, "w", always_revert=True))

@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from kraken.core import Project, Property, Task, TaskStatus
+from kraken.std.cargo.config import CargoManifestManager
 from kraken.std.cargo.manifest import ArtifactKind, CargoMetadata
 from kraken.std.descriptors.resource import BinaryArtifact, LibraryArtifact
 
@@ -55,6 +56,13 @@ class CargoBuildTask(Task):
 
     #: Flag indicating if we should execute this command from the project directory
     from_project_dir: Property[bool] = Property.default(False)
+
+    #: Specify the version of the Cargo project. If set, this version will be injected into the `Cargo.toml`
+    #: before building the project.
+    version: Property[str | None] = Property.default(None)
+
+    #: The path of the Cargo.toml that is used for the build.
+    cargo_toml_file: Property[Path] = Property.default("Config.toml")
 
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
@@ -130,7 +138,10 @@ class CargoBuildTask(Task):
 
         result = -1
         while total_attempts > 0:
-            result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
+            with CargoManifestManager(self.cargo_toml_file.get()) as cfg:
+                if (version := self.version.get()) is not None:
+                    cfg.set_version(version)
+                result = sp.call(command, cwd=self.project.directory, env={**os.environ, **env})
 
             if result == 0:
                 # Check that binaries which were due have been built.
