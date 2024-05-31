@@ -8,8 +8,8 @@ python.python_settings(always_use_managed_env=True).add_package_index(
     credentials=(os.environ["LOCAL_USER"], os.environ["LOCAL_PASSWORD"]),
 )
 python.install()
-python.mypy()
+python.mypy(version_spec="==1.10.0")
 python.flake8()
-python.black()
+python.black(version_spec="==24.4.2")
 python.isort()
 python.pytest()
