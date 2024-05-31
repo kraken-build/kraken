@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+from contextlib import ExitStack
+from pathlib import Path
+from typing import Any
 
+from kraken.common import atomic_file_swap
 from kraken.core import Project
+
+from .manifest import CargoManifest
 
 
 @dataclasses.dataclass
@@ -62,3 +68,76 @@ class CargoProject:
 @dataclasses.dataclass
 class CargoConfig:
     nightly: bool
+
+
+class CargoManifestManager:
+    """
+    This is a helper class to perform changes to a `Cargo.toml` configuration file, sometimes only temporarily.
+    For example to bumping the version of a project at build and publish time.
+
+    Example usage:
+
+    ```py
+    with CargoConfigManager() as cfg:
+        cfg.set_version("1.0.0", "crates.io")
+        cfg.write()
+        build_cargo_project()
+    ```
+    """
+
+    def __init__(self, cargo_toml: Path) -> None:
+        self._cargo_toml = cargo_toml
+        self._stack = ExitStack()
+        self._config_backed_up = False
+        self._manifest: CargoManifest | None = None
+
+    def __enter__(self) -> CargoManifestManager:
+        self._stack.__enter__()
+        return self
+
+    def __exit__(self, *a: Any) -> None | bool:
+        return self._stack.__exit__(*a)
+
+    @property
+    def manifest(self) -> CargoManifest:
+        if self._manifest is None:
+            self._manifest = CargoManifest.read(self._cargo_toml)
+        return self._manifest
+
+    def set_version(self, version: str, registry_alias: str) -> None:
+        """
+        Updates the `version` field in the `[project]` section of the `Cargo.toml`.
+
+        If any path dependencies are found in the manifest, they are assumed to be have been published to the given
+        *registry_alias* with the same *version* and are translated to registry dependencies.
+        """
+
+        manifest = self.manifest
+        if not manifest.package:
+            return
+
+        # Cargo does not play nicely with semver metadata (ie. 1.0.1-dev3+abc123)
+        # We replace that to 1.0.1-dev3abc123
+        fixed_version_string = version.replace("+", "")
+        manifest.package.version = fixed_version_string
+        if manifest.workspace and manifest.workspace.package:
+            manifest.workspace.package.version = version
+
+        def update_path_deps(dependencies: dict[str, Any]) -> None:
+            for dep_name in dependencies:
+                dependency = dependencies[dep_name]
+                if isinstance(dependency, dict):
+                    if "path" in dependency:
+                        dependency["version"] = f"={fixed_version_string}"
+                        dependency["registry"] = registry_alias
+
+        # CargoProject.get_or_create(None)
+        if manifest.dependencies:
+            update_path_deps(manifest.dependencies.data)
+        if manifest.build_dependencies:
+            update_path_deps(manifest.build_dependencies.data)
+
+    def write(self) -> None:
+        fp = self._stack.enter_context(atomic_file_swap(self._cargo_toml, "w", always_revert=True))
+        fp.write(self.manifest.to_toml_string())
+        fp.close()

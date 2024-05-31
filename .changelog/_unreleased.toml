@@ -1,0 +1,5 @@
+[[entries]]
+id = "17ab9652-663d-47b6-9e21-24d9fe8c4b3a"
+type = "improvement"
+description = "Move logic to bump Cargo manifest version to `CargoManifestManager` class"
+author = "@NiklasRosenstein"

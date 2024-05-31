@@ -1,13 +1,12 @@
-import contextlib
 import logging
 from pathlib import Path
 from typing import Any
 
-from kraken.common import atomic_file_swap, not_none
+from kraken.common import not_none
 from kraken.core import Project, Property, TaskStatus
 from kraken.std.cargo import CargoProject
 
-from ..config import CargoRegistry
+from ..config import CargoManifestManager, CargoRegistry
 from .cargo_build_task import CargoBuildTask
 
 logger = logging.getLogger(__name__)
@@ -100,11 +99,9 @@ class CargoPublishTask(CargoBuildTask):
                     dependency["registry"] = registry_alias
 
     def execute(self) -> TaskStatus:
-        with contextlib.ExitStack() as stack:
+        with CargoManifestManager(self.cargo_toml_file.get()) as cfg:
             if (version := self.version.get()) is not None:
-                content = self._get_updated_cargo_toml(version)
-                fp = stack.enter_context(atomic_file_swap(self.cargo_toml_file.get(), "w", always_revert=True))
-                fp.write(content)
-                fp.close()
+                cfg.set_version(version, self.registry.map(lambda r: r.alias).get_or("<undefined>"))
+                cfg.write()
             result = super().execute()
         return result
