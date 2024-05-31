@@ -19,7 +19,7 @@ packages = [
   {include = "kraken/std", from = "src"},
 ]
 readme = "README.md"
-version = "0.36.5"
+version = "0.36.6"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
