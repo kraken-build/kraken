@@ -72,6 +72,8 @@ class ColorOptions:
     def init_color(args: argparse.Namespace) -> None:
         no_color: bool = getattr(args, "no_color", False)
 
+        raise Exception("FOOBAR")
+
         import termcolor
         from termcolor import colored
 
