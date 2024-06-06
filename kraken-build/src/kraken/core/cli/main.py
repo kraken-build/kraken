@@ -21,6 +21,7 @@ from termcolor import colored
 from kraken.common import (
     BuildscriptMetadata,
     CurrentDirectoryProjectFinder,
+    ColorOptions,
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
@@ -64,6 +65,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
             """
         ),
     )
+    ColorOptions.add_to_parser(parser)
     subparsers = parser.add_subparsers(dest="cmd")
 
     run = subparsers.add_parser(
@@ -619,6 +621,8 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
     if not args.cmd:
         parser.print_usage()
         sys.exit(0)
+
+    ColorOptions.init_color(args)
 
     if LoggingOptions.available(args):
         LoggingOptions.collect(args).init_logging()

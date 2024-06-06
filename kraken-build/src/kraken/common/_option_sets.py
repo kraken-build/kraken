@@ -54,3 +54,30 @@ class LoggingOptions:
             assert False, verbosity
 
         logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler()])
+
+
+class ColorOptions:
+
+    @staticmethod
+    def add_to_parser(parser: argparse.ArgumentParser) -> None:
+        parser.add_argument(
+            "--no-color",
+            dest="no_color",
+            action="store_true",
+            help="disable colored output",
+        )
+
+    @staticmethod
+    def init_color(args: argparse.Namespace) -> None:
+        no_color: bool = getattr(args, "no_color", False)
+
+        import termcolor
+        from termcolor import colored
+
+        def _colored(text: str, *args, **kwargs) -> str:
+            if no_color:
+                return text
+            kwargs.setdefault("force_color", True)
+            return colored(text, *args, **kwargs)
+
+        termcolor.colored = _colored
