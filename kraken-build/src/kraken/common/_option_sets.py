@@ -1,5 +1,7 @@
 import argparse
 from dataclasses import dataclass
+from functools import wraps
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -57,7 +59,6 @@ class LoggingOptions:
 
 
 class ColorOptions:
-
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
@@ -74,7 +75,8 @@ class ColorOptions:
         import termcolor
         from termcolor import colored
 
-        def _colored(text: str, *args, **kwargs) -> str:
+        @wraps(colored)
+        def _colored(text: str, *args: Any, **kwargs: Any) -> str:
             if no_color:
                 return text
             kwargs.setdefault("force_color", True)

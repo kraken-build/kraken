@@ -20,8 +20,8 @@ from termcolor import colored
 
 from kraken.common import (
     BuildscriptMetadata,
-    CurrentDirectoryProjectFinder,
     ColorOptions,
+    CurrentDirectoryProjectFinder,
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
