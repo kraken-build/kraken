@@ -24,7 +24,7 @@ def status_to_text(status: TaskStatus, colored: bool = True) -> str:
     else:
         message = status.type.name
     if status.message:
-        message += f" ({status.message})"
+        message += _colored(f" ({status.message})", "grey")
     return message
 
 

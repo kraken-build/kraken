@@ -18,3 +18,9 @@ id = "09440dbc-c1ec-42dd-a54b-0febab707010"
 type = "hygiene"
 description = "Remove `kraken.core.system.executor.colored module`; it was duplicate dead code that already existed in `kraken.core.cli.executor`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1d77d312-4b95-4d2c-bfdf-0f2db5d5481e"
+type = "improvement"
+description = "Task status messages are now printed in grey"
+author = "@NiklasRosenstein"
