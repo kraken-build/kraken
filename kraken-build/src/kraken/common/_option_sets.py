@@ -1,7 +1,10 @@
 import argparse
+import logging
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any
+from typing import Any, ClassVar
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -59,6 +62,14 @@ class LoggingOptions:
 
 
 class ColorOptions:
+    """
+    Adds a `--no-color` option to the argument parser. Use [init_color] to monkey-patch the [termcolor] module
+    to force color output unless the `--no-color` option is set. This ensures we have colored output even in CI
+    environments by default.
+    """
+
+    _termcolor_monkeypatched: ClassVar[bool] = False
+
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
@@ -70,18 +81,21 @@ class ColorOptions:
 
     @staticmethod
     def init_color(args: argparse.Namespace) -> None:
-        no_color: bool = getattr(args, "no_color", False)
-
-        raise Exception("FOOBAR")
+        if ColorOptions._termcolor_monkeypatched:
+            return
+        ColorOptions._termcolor_monkeypatched = True
 
         import termcolor
         from termcolor import colored
+
+        no_color: bool = getattr(args, "no_color", False)
 
         @wraps(colored)
         def _colored(text: str, *args: Any, **kwargs: Any) -> str:
             if no_color:
                 return text
-            kwargs.setdefault("force_color", True)
+            if not kwargs.get("no_color", False):
+                kwargs.setdefault("force_color", True)
             return colored(text, *args, **kwargs)
 
         termcolor.colored = _colored
