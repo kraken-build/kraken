@@ -93,9 +93,11 @@ class ColorOptions:
         @wraps(colored)
         def _colored(text: str, *args: Any, **kwargs: Any) -> str:
             if no_color:
+                print(r"!!! no color ({text!r})")
                 return text
             if not kwargs.get("no_color", False):
                 kwargs.setdefault("force_color", True)
+            print(r"!!! coloring ({text!r})")
             return colored(text, *args, **kwargs)
 
         termcolor.colored = _colored
