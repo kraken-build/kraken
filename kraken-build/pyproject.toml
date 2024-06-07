@@ -63,7 +63,7 @@ pyartifactory = "^2.0.0"
 pytest = ">=6.0.0"
 types-Deprecated = "^1.2.9"
 types-requests = "^2.28.0"
-types-termcolor = "^1.1.5"
+types-termcolor = "^1.1.6.2"
 pytest-xdist = {version = "^3.5.0", extras = ["psutil"]}
 mitmproxy = "^10.2.4"
 
