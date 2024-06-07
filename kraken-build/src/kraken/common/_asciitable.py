@@ -1,14 +1,8 @@
 import re
 from collections.abc import Iterator, Sequence
-from typing import Any, TextIO
+from typing import TextIO
 
-try:
-    from termcolor import colored
-except ImportError:
-
-    def colored(s: str, *args: Any, **kwargs: Any) -> str:  # type: ignore[misc]
-        return s
-
+from ._colored import colored
 
 REGEX_ANSI_ESCAPE = re.compile(
     r"""

@@ -16,7 +16,6 @@ from typing import Any, NoReturn
 
 from nr.io.graphviz.render import render_to_browser
 from nr.io.graphviz.writer import GraphvizWriter
-from termcolor import colored
 
 from kraken.common import (
     BuildscriptMetadata,
@@ -25,6 +24,7 @@ from kraken.common import (
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
+    colored,
     get_terminal_width,
     not_none,
     propagate_argparse_formatter_to_subparser,

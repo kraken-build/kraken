@@ -5,6 +5,7 @@ from ._argparse import propagate_argparse_formatter_to_subparser
 from ._asciitable import AsciiTable
 from ._auth import CredentialsWithHost
 from ._buildscript import BuildscriptMetadata, BuildscriptMetadataException, buildscript
+from ._colored import colored
 from ._date import datetime_to_iso8601, iso8601_to_datetime
 from ._environment import EnvironmentType
 from ._fs import atomic_file_swap, safe_rmpath
@@ -31,6 +32,8 @@ __all__ = [
     "propagate_argparse_formatter_to_subparser",
     # _asciitable
     "AsciiTable",
+    # _colored
+    "colored",
     # _date
     "datetime_to_iso8601",
     "iso8601_to_datetime",

@@ -1,8 +1,7 @@
 import argparse
 import logging
 from dataclasses import dataclass
-from functools import wraps
-from typing import Any, ClassVar
+from typing import ClassVar
 
 logger = logging.getLogger(__name__)
 
@@ -81,23 +80,8 @@ class ColorOptions:
 
     @staticmethod
     def init_color(args: argparse.Namespace) -> None:
-        if ColorOptions._termcolor_monkeypatched:
-            return
-        ColorOptions._termcolor_monkeypatched = True
+        from kraken.common import _colored
 
-        import termcolor
-        from termcolor import colored
-
-        no_color: bool = getattr(args, "no_color", False)
-
-        @wraps(colored)
-        def _colored(text: str, *args: Any, **kwargs: Any) -> str:
-            if no_color:
-                print(r"!!! no color ({text!r})")
-                return text
-            if not kwargs.get("no_color", False):
-                kwargs.setdefault("force_color", True)
-            print(r"!!! coloring ({text!r})")
-            return colored(text, *args, **kwargs)
-
-        termcolor.colored = _colored
+        no_color = getattr(args, "no_color", None)
+        if no_color is not None:
+            _colored.COLORS_ENABLED = not no_color
