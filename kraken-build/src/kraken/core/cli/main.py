@@ -411,7 +411,7 @@ def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
 
         parent = address.parent.set_container(True) if address and not address.is_root() else None
         if parent:
-            result = colored(str(parent), "grey")
+            result = colored(str(parent), "light_grey")
         else:
             result = ""
         result = result + colored(":" if address.is_root() else address.name, attrs=["bold"])
