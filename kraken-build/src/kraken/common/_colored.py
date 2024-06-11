@@ -1,15 +1,16 @@
 from collections.abc import Iterable
 
 from termcolor import colored as _colored
+from termcolor._types import Color, Highlight, Attribute
 
 COLORS_ENABLED = True
 
 
 def colored(
     text: str,
-    color: str | None = None,
-    on_color: str | None = None,
-    attrs: Iterable[str] | None = None,
+    color: Color | None = None,
+    on_color: Highlight | None = None,
+    attrs: Iterable[Attribute] | None = None,
 ) -> str:
     if not COLORS_ENABLED:
         return text
