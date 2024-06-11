@@ -40,9 +40,10 @@ class LoggingOptions:
             quietness=args.quietness,
         )
 
-    def init_logging(self) -> None:
+    def init_logging(self, force_color: bool = False) -> None:
         import logging
 
+        from rich.console import Console
         from rich.logging import RichHandler
 
         verbosity = self.verbosity - self.quietness
@@ -57,15 +58,19 @@ class LoggingOptions:
         else:
             assert False, verbosity
 
-        logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler()])
+        console = Console(force_terminal=True if force_color else None)
+        logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler(console=console)])
 
 
+@dataclass
 class ColorOptions:
     """
     Adds a `--no-color` option to the argument parser. Use [init_color] to monkey-patch the [termcolor] module
     to force color output unless the `--no-color` option is set. This ensures we have colored output even in CI
     environments by default.
     """
+
+    no_color: bool
 
     _termcolor_monkeypatched: ClassVar[bool] = False
 
@@ -79,9 +84,13 @@ class ColorOptions:
         )
 
     @staticmethod
-    def init_color(args: argparse.Namespace) -> None:
+    def collect(args: argparse.Namespace) -> "ColorOptions":
+        return ColorOptions(
+            no_color=args.no_color,
+        )
+
+    def init_color(self) -> None:
         from kraken.common import _colored
 
-        no_color = getattr(args, "no_color", None)
-        if no_color is not None:
-            _colored.COLORS_ENABLED = not no_color
+        if self.no_color:
+            _colored.COLORS_ENABLED = False

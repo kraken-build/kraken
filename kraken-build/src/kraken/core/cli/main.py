@@ -622,10 +622,11 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         parser.print_usage()
         sys.exit(0)
 
-    ColorOptions.init_color(args)
+    color_opts = ColorOptions.collect(args)
+    color_opts.init_color()
 
     if LoggingOptions.available(args):
-        LoggingOptions.collect(args).init_logging()
+        LoggingOptions.collect(args).init_logging(force_color=not color_opts.no_color)
 
     if pdb_enabled:
         logger.info("note: KRAKEN_PDB=1 is set, an interactive debugging session will be started on exit.")
