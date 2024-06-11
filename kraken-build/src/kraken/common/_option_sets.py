@@ -58,6 +58,8 @@ class LoggingOptions:
         else:
             assert False, verbosity
 
+        print(f"\n\n======= Setting up logging with basicConfig(), force_color={force_color}\n")
+
         console = Console(force_terminal=True if force_color else None)
         logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler(console=console)])
 
