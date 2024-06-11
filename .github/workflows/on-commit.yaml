@@ -136,7 +136,8 @@ jobs:
           .venvs
         key: build-cache:${{ runner.os }}:selftest
 
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+    # - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+    - run: slap install --link --no-venv-check ${{ matrix.only }}
 
     - run: kraken run python.install fmt lint test -vv
     - run: kraken q ls
