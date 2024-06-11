@@ -6,7 +6,7 @@ from kraken.common import Color, colored as _colored
 from kraken.core import Graph, Task, TaskGraph, TaskStatus, TaskStatusType
 from kraken.core.system.executor.default import DefaultPrintingExecutorObserver
 
-COLORS_BY_STATUS = {
+COLORS_BY_STATUS: dict[TaskStatusType, Color] = {
     TaskStatusType.PENDING: "magenta",
     TaskStatusType.FAILED: "red",
     TaskStatusType.INTERRUPTED: "red",
