@@ -16,14 +16,15 @@ from typing import Any, NoReturn
 
 from nr.io.graphviz.render import render_to_browser
 from nr.io.graphviz.writer import GraphvizWriter
-from termcolor import colored
 
 from kraken.common import (
     BuildscriptMetadata,
+    ColorOptions,
     CurrentDirectoryProjectFinder,
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
+    colored,
     get_terminal_width,
     not_none,
     propagate_argparse_formatter_to_subparser,
@@ -64,6 +65,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
             """
         ),
     )
+    ColorOptions.add_to_parser(parser)
     subparsers = parser.add_subparsers(dest="cmd")
 
     run = subparsers.add_parser(
@@ -409,7 +411,7 @@ def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
 
         parent = address.parent.set_container(True) if address and not address.is_root() else None
         if parent:
-            result = colored(str(parent), "grey")
+            result = colored(str(parent), "light_grey")
         else:
             result = ""
         result = result + colored(":" if address.is_root() else address.name, attrs=["bold"])
@@ -620,8 +622,11 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         parser.print_usage()
         sys.exit(0)
 
+    color_opts = ColorOptions.collect(args)
+    color_opts.init_color()
+
     if LoggingOptions.available(args):
-        LoggingOptions.collect(args).init_logging()
+        LoggingOptions.collect(args).init_logging(force_color=not color_opts.no_color)
 
     if pdb_enabled:
         logger.info("note: KRAKEN_PDB=1 is set, an interactive debugging session will be started on exit.")

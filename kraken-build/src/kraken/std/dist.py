@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any, Literal, Union, cast
 
 import databind.json
-from termcolor import colored
 
+from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource

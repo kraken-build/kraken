@@ -40,7 +40,7 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - index.md
+  - Home: index.md
   - changelog.md
   - Concepts:
     - concepts/tasks.md
@@ -67,6 +67,7 @@ nav:
     - api/kraken.std.protobuf.md
     - api/kraken.std.python.md
     - api/kraken.std.sccache.md
+    - api/kraken.std.shellcheck.md
     - api/kraken.std.util.md
   - Command-line:
     - cli/kraken-query-describe.md

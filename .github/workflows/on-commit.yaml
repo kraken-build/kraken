@@ -7,6 +7,7 @@ on:
 env:
   COLUMNS: 200
   PYTEST_FLAGS: --numprocesses auto
+  SLAP_VERBOSE: more
 
 jobs:
 
@@ -135,13 +136,16 @@ jobs:
   #         .venvs
   #       key: build-cache:${{ runner.os }}:selftest
 
-  #   - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+  #   # - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+  #   - run: slap install --link --no-venv-check ${{ matrix.only }}
 
   #   - run: kraken run python.install fmt lint test -vv
   #   - run: kraken q ls
   #   - run: kraken q tree
   #   - run: kraken q viz
   #   - run: kraken q d python.mypy
+
+  #   - run: krakenw run python.install fmt lint test -vv
 
   #   - name: Save cache
   #     uses: actions/cache/save@v4

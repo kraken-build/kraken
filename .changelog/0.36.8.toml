@@ -1,0 +1,28 @@
+release-date = "2024-06-11"
+
+[[entries]]
+id = "39390399-dc21-4364-8539-89a94b409801"
+type = "fix"
+description = "Default to always show colors for colored output produced by Kraken itself and added a `--no-color` option to the `kraken` CLI"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/245",
+]
+
+[[entries]]
+id = "dd823cdd-6f3a-445f-a103-644ff9e8fe83"
+type = "feature"
+description = "Add `kraken.common.colored` function"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "09440dbc-c1ec-42dd-a54b-0febab707010"
+type = "hygiene"
+description = "Remove `kraken.core.system.executor.colored module`; it was duplicate dead code that already existed in `kraken.core.cli.executor`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1d77d312-4b95-4d2c-bfdf-0f2db5d5481e"
+type = "improvement"
+description = "Task status messages are now printed in grey"
+author = "@NiklasRosenstein"

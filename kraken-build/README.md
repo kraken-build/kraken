@@ -1,7 +1,3 @@
----
-title: Home
----
-
 # The Kraken build system
 
 ![kraken-logo](https://i.imgur.com/Lqjy2zi.png)

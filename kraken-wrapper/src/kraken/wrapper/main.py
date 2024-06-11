@@ -19,11 +19,11 @@ from kraken.common import (
     LoggingOptions,
     RequirementSpec,
     TomlConfigFile,
+    colored,
     datetime_to_iso8601,
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
-from termcolor import colored
 
 from . import __version__
 from ._buildenv import BuildEnvError
