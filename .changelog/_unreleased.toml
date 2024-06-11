@@ -10,7 +10,7 @@ issues = [
 [[entries]]
 id = "dd823cdd-6f3a-445f-a103-644ff9e8fe83"
 type = "feature"
-description = "Add `kraken.common.color` function"
+description = "Add `kraken.common.colored` function"
 author = "@NiklasRosenstein"
 
 [[entries]]
