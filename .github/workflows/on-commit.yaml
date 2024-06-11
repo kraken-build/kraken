@@ -139,11 +139,11 @@ jobs:
     # - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
     - run: slap install --link --no-venv-check ${{ matrix.only }}
 
-    - run: kraken run python.install fmt lint test -vv
-    - run: kraken q ls
-    - run: kraken q tree
-    - run: kraken q viz
-    - run: kraken q d python.mypy
+    - run: krakenw run python.install fmt lint test -vv
+    - run: krakenw q ls
+    - run: krakenw q tree
+    - run: krakenw q viz
+    - run: krakenw q d python.mypy
 
     - name: Save cache
       uses: actions/cache/save@v4
