@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from termcolor import colored as _colored
-from termcolor._types import Color, Highlight, Attribute
+from termcolor._types import Attribute, Color, Highlight
 
 COLORS_ENABLED = True
 
