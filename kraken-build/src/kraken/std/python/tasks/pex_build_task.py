@@ -34,6 +34,7 @@ class PexBuildTask(Task):
     pex_binary: Property[Path | None] = Property.default(None)
     python: Property[Path | None] = Property.default(None)
     index_url: Property[str | None] = Property.default(None)
+    verbose: Property[bool] = Property.default(False)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -50,6 +51,7 @@ class PexBuildTask(Task):
                     self.venv.get() or "",
                     self.pex_binary.map(str).get() or "",
                     self.python.map(str).get() or "",
+                    # note: "verbose" is intentionally not hashed as it has no effect on the build result
                 ]
             ).encode()
         ).hexdigest()
@@ -79,6 +81,7 @@ class PexBuildTask(Task):
                 pex_binary=self.pex_binary.get(),
                 python=self.python.get(),
                 index_url=self.index_url.get() or _get_default_index_url(self.project),
+                verbose=self.verbose.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -98,6 +101,7 @@ def _build_pex(
     pex_binary: Path | None = None,
     python: Path | None = None,
     index_url: str | None = None,
+    verbose: bool = False,
     log: Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
@@ -115,7 +119,7 @@ def _build_pex(
     if pex_binary is not None:
         command = [str(pex_binary)]
     else:
-        command = [str(python or sys.executable), "-m", "pex", "-v"]
+        command = [str(python or sys.executable), "-m", "pex"]
 
     command += [
         "--pip-version",
@@ -141,6 +145,9 @@ def _build_pex(
     if index_url is not None:
         command += ["--index-url", index_url]
         safe_command += ["--index-url", redact_url_password(index_url)]
+
+    if verbose:
+        command.append("-v")
 
     (log or logger).info("Building PEX $ %s", " ".join(map(shlex.quote, safe_command)))
     subprocess.run(command, check=True)
