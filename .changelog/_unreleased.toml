@@ -3,3 +3,9 @@ id = "aecba9fb-2f3e-4681-a8d4-a75425617a2e"
 type = "improvement"
 description = "Bump `uv` to `^0.2.11`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "835cba5d-2150-44be-a2f7-1388c77f918b"
+type = "improvement"
+description = "Add `PexBuildTask.verbose` property and make it default to `False` (used to be not configurable and enabled by default)"
+author = "@NiklasRosenstein"
