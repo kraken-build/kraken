@@ -3,11 +3,11 @@ from __future__ import annotations
 import collections
 import dataclasses
 import enum
-import logging
 from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
 from pathlib import Path
 from typing import Any, ClassVar, TypeAlias, TypeVar, overload
 
+from loguru import logger
 from nr.stream import Stream
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
@@ -24,7 +24,6 @@ from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.task import Task
 
-logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 

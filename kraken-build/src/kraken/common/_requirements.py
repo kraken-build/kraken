@@ -2,7 +2,6 @@ import abc
 import argparse
 import dataclasses
 import hashlib
-import logging
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -12,7 +11,6 @@ from urllib.parse import urlparse
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
 
-logger = logging.getLogger(__name__)
 DEFAULT_BUILD_SUPPORT_FOLDER = "build-support"
 DEFAULT_INTERPRETER_CONSTRAINT = ">=3.10"
 

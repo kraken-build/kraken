@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import shutil
 import subprocess as sp
 from collections.abc import Callable, Collection
 from dataclasses import dataclass
 from pathlib import Path
+
+from loguru import logger
 
 from kraken.common.path import is_relative_to
 
@@ -18,8 +19,6 @@ from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
 from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

@@ -5,7 +5,6 @@ Requires at least Slap 1.6.25. """
 from __future__ import annotations
 
 import contextlib
-import logging
 import shutil
 import subprocess as sp
 import tempfile
@@ -25,7 +24,7 @@ from .poetry import PoetryPyprojectHandler, PoetryPythonBuildSystem
 if TYPE_CHECKING:
     from ..settings import PythonSettings
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class SlapPythonBuildSystem(PythonBuildSystem):

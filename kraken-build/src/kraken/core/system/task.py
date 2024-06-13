@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
 from deprecated import deprecated
+from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
@@ -33,7 +34,6 @@ else:
 
 T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
-logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass

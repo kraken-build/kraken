@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import abc
 import contextlib
-import logging
 from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
@@ -17,7 +16,7 @@ from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 if TYPE_CHECKING:
     from ..settings import PythonSettings
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 class PythonBuildSystem(abc.ABC):

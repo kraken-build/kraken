@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from collections.abc import MutableMapping
 from pathlib import Path
 from typing import Any, NamedTuple
@@ -10,8 +9,8 @@ import keyring.backends.fail
 import keyring.backends.null
 from kraken.common import EnvironmentType, http
 from kraken.common.http import ReadTimeout
+from loguru import logger
 
-logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("~/.config/krakenw/config.toml").expanduser()
 
 

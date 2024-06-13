@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from abc import ABC, abstractmethod
 from collections.abc import Iterator, MutableMapping, Sequence
 from dataclasses import dataclass
@@ -9,8 +8,6 @@ from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
 
 import tomlkit
-
-logger = logging.getLogger(__name__)
 
 
 class _PackageIndexPriority(str, Enum):

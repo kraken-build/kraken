@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import logging
 import os
 import subprocess as sp
 from pathlib import Path
 
-from kraken.common import flatten
+from loguru import logger
 
-logger = logging.getLogger(__name__)
+from kraken.common import flatten
 
 
 def docker_run(

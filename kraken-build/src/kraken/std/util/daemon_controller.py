@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import IO, Any, Literal
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 def process_exists(pid: int) -> bool:

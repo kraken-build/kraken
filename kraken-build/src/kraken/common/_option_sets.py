@@ -1,9 +1,10 @@
 import argparse
 import logging
+import sys
 from dataclasses import dataclass
 from typing import ClassVar
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 @dataclass(frozen=True)
@@ -41,25 +42,23 @@ class LoggingOptions:
         )
 
     def init_logging(self, force_color: bool = False) -> None:
-        import logging
-
-        from rich.console import Console
-        from rich.logging import RichHandler
-
         verbosity = self.verbosity - self.quietness
         if verbosity > 1:
-            level = logging.DEBUG
+            level = "DEBUG"
         elif verbosity > 0:
-            level = logging.INFO
+            level = "INFO"
         elif verbosity == 0:
-            level = logging.WARNING
+            level = "WARNING"
         elif verbosity < 0:
-            level = logging.ERROR
+            level = "ERROR"
         else:
             assert False, verbosity
 
-        console = Console(force_terminal=True if force_color else None)
-        logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler(console=console)])
+        # note: this is for components that don't use the `loguru.logger`.
+        logging.basicConfig(level=getattr(logging, level), format="%(asctime)s | %(levelname)s | %(message)s")
+
+        logger.remove()
+        logger.add(sys.stderr, level=level)
 
 
 @dataclass

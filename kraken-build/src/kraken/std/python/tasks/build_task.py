@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import contextlib
-import logging
 from pathlib import Path
 
 from kraken.common import Supplier
@@ -9,8 +8,6 @@ from kraken.core import Project, Property, Task, TaskStatus
 
 from ..buildsystem import PythonBuildSystem
 from ..settings import python_settings
-
-logger = logging.getLogger(__name__)
 
 
 class BuildTask(Task):

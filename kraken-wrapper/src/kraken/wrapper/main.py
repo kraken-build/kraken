@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import getpass
-import logging
 import os
 import shlex
 import sys
@@ -24,6 +23,7 @@ from kraken.common import (
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
+from loguru import logger
 
 from . import __version__
 from ._buildenv import BuildEnvError
@@ -37,7 +37,6 @@ BUILDSCRIPT_FILENAME = ".kraken.py"
 BUILD_SUPPORT_DIRECTORY = "build-support"
 LOCK_FILENAME = ".kraken.lock"
 _FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: 731
-logger = logging.getLogger(__name__)
 
 
 def _get_argument_parser() -> argparse.ArgumentParser:
@@ -228,7 +227,6 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
-    import rich
     from kraken.common import findpython
 
     if argv:
@@ -236,8 +234,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
         sys.exit(1)
 
     interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
-    table = findpython.build_rich_table(interpreters)
-    rich.print(table)
+    findpython.print_interpreters(interpreters)
     sys.exit(0)
 
 

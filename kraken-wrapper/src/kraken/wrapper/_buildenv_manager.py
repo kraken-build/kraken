@@ -2,20 +2,18 @@ from __future__ import annotations
 
 import datetime
 import hashlib
-import logging
 import platform
 from pathlib import Path
 from urllib.parse import quote, urlparse, urlunparse
 
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
+from loguru import logger
 
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
 from ._buildenv_uv import UvBuildEnv
 from ._buildenv_venv import VenvBuildEnv
 from ._config import AuthModel
 from ._lockfile import Lockfile
-
-logger = logging.getLogger(__name__)
 
 
 class BuildEnvManager:

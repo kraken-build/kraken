@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-import logging
 import os
 import random
 import shutil
@@ -13,6 +12,7 @@ import unittest.mock
 from pathlib import Path
 
 import pytest
+from loguru import logger
 
 from kraken.core import BuildError
 from kraken.core.testing import kraken_ctx, kraken_project
@@ -26,8 +26,6 @@ from kraken.std.cargo import (
 )
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
-
-logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass

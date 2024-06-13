@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import abc
-import logging
 import tarfile
 import zipfile
 from collections.abc import Mapping, Sequence
@@ -18,8 +17,6 @@ from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-import logging
 import shutil
 import subprocess as sp
 
+from loguru import logger
+
 from kraken.core import Property, Task, TaskStatus
 from kraken.std.cargo.config import CargoConfig
-
-logger = logging.getLogger(__name__)
 
 
 class CargoFmtTask(Task):

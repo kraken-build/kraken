@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import shutil
 import subprocess as sp
@@ -10,6 +9,8 @@ from collections.abc import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
+
+from loguru import logger
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
@@ -19,8 +20,6 @@ from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandle
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
-
-logger = logging.getLogger(__name__)
 
 
 class PoetryPyprojectHandler(PyprojectHandler):

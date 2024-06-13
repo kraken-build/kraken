@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-import logging
 import re
 from collections.abc import Iterable
 from pathlib import Path
 
 import dill  # type: ignore[import-untyped]
+from loguru import logger
 
 from kraken.common import pluralize
 from kraken.core import Context, TaskGraph
 
-logger = logging.getLogger(__name__)
 state_file_regex = r"^state-.*\.dill$"
 state_file_template = "state-{name}.dill"
 

@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import contextlib
-import logging
 import shutil
 import subprocess as sp
 import tempfile
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 def helm_package(

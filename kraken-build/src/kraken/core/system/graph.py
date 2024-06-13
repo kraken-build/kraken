@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import dataclasses
-import logging
 from collections.abc import Collection, Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from loguru import logger
 from networkx import DiGraph, restricted_view, transitive_reduction
 from networkx.algorithms import topological_sort
 from nr.stream import Stream
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from kraken.core.system.context import Context
 
 T = TypeVar("T")
-logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass

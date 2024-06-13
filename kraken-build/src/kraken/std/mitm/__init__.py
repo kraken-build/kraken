@@ -7,14 +7,11 @@ The proxy stays alive as a daemon process until its configuration changes.
 from __future__ import annotations
 
 import json
-import logging
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from kraken.std.util.daemon_controller import DaemonController
 from kraken.std.util.http import http_probe
-
-logger = logging.getLogger(__name__)
 
 daemon_state_file = Path("~/.config/krakenw/.mitmweb-daemon-state.json").expanduser()
 daemon_log_file = daemon_state_file.with_suffix(".log")

@@ -12,7 +12,6 @@ from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
 from kraken.std.util.url import inject_url_credentials, redact_url_password
 
-logger = logging.getLogger(__name__)
 default_index_url: str | None = None
 
 

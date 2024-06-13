@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-import logging
 import sys
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
+
+from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
-
-logger = logging.getLogger(__name__)
 
 
 class MypyTask(EnvironmentAwareDispatchTask):

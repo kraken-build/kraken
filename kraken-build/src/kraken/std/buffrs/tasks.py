@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import logging
 import subprocess as sp
 
 from kraken.core import Property, Task, TaskStatus
-
-logger = logging.getLogger(__name__)
 
 
 class BuffrsLoginTask(Task):
