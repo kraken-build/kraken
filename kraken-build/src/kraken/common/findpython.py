@@ -218,12 +218,12 @@ def print_interpreters(interpreters: Iterable[Interpreter]) -> None:
     Prints the interpeter information to stdout, colored.
     """
 
-    from kraken.common import colored
+    from kraken.common import Color, colored
 
     for interpreter in interpreters:
         prefix = "  "
         version = interpreter["version"]
-        version_color = "grey"
+        version_color: Color = "grey"
         if interpreter.get("selected"):
             prefix = " *"
             version_color = "cyan"

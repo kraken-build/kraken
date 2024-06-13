@@ -8,7 +8,6 @@ import abc
 import contextlib
 import dataclasses
 import enum
-import logging
 import shlex
 from collections.abc import Collection, Iterable, Iterator, Sequence
 from pathlib import Path
@@ -16,6 +15,11 @@ from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, ca
 
 from deprecated import deprecated
 from loguru import logger
+
+if TYPE_CHECKING:
+    from loguru import Logger
+else:
+    Logger = object  # satisfy typeapi introspection for Task objects
 
 from kraken.common import Supplier
 from kraken.core.address import Address
@@ -207,7 +211,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
     #: A logger that is bound to the task's address. Use this logger to log messages related to the task,
     #: for example when implementing :meth:`finalize`, :meth:`prepare` or :meth:`execute`.
-    logger: logging.Logger
+    logger: Logger
 
     def __init__(self, name: str, project: Project) -> None:
         from kraken.core.system.project import Project
@@ -216,7 +220,9 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(project, Project), type(project)
         KrakenObject.__init__(self, name, project)
         PropertyContainer.__init__(self)
-        self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
+        self.logger = logger.bind(
+            task_name=str(self.address), task_type=f"{type(self).__module__}.{type(self).__qualname__}"
+        )
         self._outputs: list[Any] = []
         self.__tags: dict[str, set[TaskTag]] = {}
         self.__relationships: list[_Relationship[Address | Task]] = []

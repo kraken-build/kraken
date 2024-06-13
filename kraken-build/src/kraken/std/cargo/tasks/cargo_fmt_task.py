@@ -82,12 +82,12 @@ class CargoFmtTask(Task):
     def is_using_rust_nightly() -> bool:
         rustc = shutil.which("rustc")
         if rustc is None:
-            logger.warn("rustc is not installed, could not determine the active rust version")
+            logger.warning("rustc is not installed, could not determine the active rust version")
             return False
 
         result = sp.run([rustc, "--version"], stdout=sp.PIPE, stderr=sp.DEVNULL)
         if result.returncode != 0:
-            logger.warn("rustc --version is not installed, could not determine the active rust version")
+            logger.warning("rustc --version is not installed, could not determine the active rust version")
             return False
 
         return "-nightly" in result.stdout.decode("utf-8")

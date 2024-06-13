@@ -152,8 +152,8 @@ class CargoBuildTask(Task):
                 break
             else:
                 total_attempts -= 1
-                self.logger.warn("%s failed with result %s", safe_command, result)
-                self.logger.warn("There are %s attempts remaining", total_attempts)
+                self.logger.warning("%s failed with result %s", safe_command, result)
+                self.logger.warning("There are %s attempts remaining", total_attempts)
                 if total_attempts > 0:
                     self.logger.info("Waiting for 10 seconds before retrying..")
                     time.sleep(10)
