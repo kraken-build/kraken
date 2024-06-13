@@ -1,0 +1,5 @@
+[[entries]]
+id = "aecba9fb-2f3e-4681-a8d4-a75425617a2e"
+type = "improvement"
+description = "Bump `uv` to `^0.2.11`"
+author = "@NiklasRosenstein"
