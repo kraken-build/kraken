@@ -1,0 +1,5 @@
+[[entries]]
+id = "935f95cc-2ca9-4b36-a264-f03f415b6d48"
+type = "fix"
+description = "Pyupgrade: Fixed \"exclude\" option treated relative to project directory, not CWD"
+author = "@NiklasRosenstein"
