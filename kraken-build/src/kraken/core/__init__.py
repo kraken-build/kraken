@@ -1,4 +1,4 @@
-__version__ = "0.36.9"
+__version__ = "0.36.10"
 
 from kraken.core.address import Address
 from kraken.core.system.context import Context, ContextEvent

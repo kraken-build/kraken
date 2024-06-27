@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "kraken-wrapper"
-version = "0.36.9"
+version = "0.36.10"
 description = ""
 authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 license = "MIT"
@@ -22,7 +22,7 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-kraken-build = "0.36.9"
+kraken-build = "0.36.10"
 packaging = "^23.1"
 python = ">=3.10"
 termcolor = "^2.3.0"
