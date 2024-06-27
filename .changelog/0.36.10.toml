@@ -5,9 +5,3 @@ id = "658082d0-9b9a-4a79-a575-d5d0e7b3debc"
 type = "fix"
 description = "Twine: Change default version requirement from `>=4.0.2,<5.0.0` to `>=5.0.0,<6.0.0`.\n\nThis is a fix because earlier versions of Twine read their `twine.__license__` field from a `importlib_metadata` field but it was moved to a trove classifier in newer versions of `importlib_metadata`. See https://github.com/pypa/twine/pull/968 for more context."
 author = "@NiklasRosenstein"
-
-[[entries]]
-id = "935f95cc-2ca9-4b36-a264-f03f415b6d48"
-type = "fix"
-description = "Pyupgrade: Fixed \"exclude\" option treated relative to project directory, not CWD"
-author = "@NiklasRosenstein"
