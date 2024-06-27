@@ -45,6 +45,7 @@ def configure_project() -> None:
             credentials=(os.environ["TESTPYPI_USER"], os.environ["TESTPYPI_PASSWORD"])
             if "TESTPYPI_USER" in os.environ
             else None,
+            is_package_source=False,
         )
     )
 
