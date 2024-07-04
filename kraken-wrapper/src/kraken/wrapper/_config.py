@@ -112,7 +112,7 @@ class AuthModel:
         return result
 
     def check_credential(self, host: str, username: str, password: str) -> CredentialCheck | None:
-        if ".jfrog.io" in host:
+        if "jfrog" in host:
             # Allow the user to override the url that will be used by setting
             # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
             url_suffix = (
