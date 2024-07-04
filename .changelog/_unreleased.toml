@@ -7,5 +7,5 @@ author = "alexandre.ghelfi@helsing.ai"
 [[entries]]
 id = "d4b25ed1-3720-4c9a-9aeb-06c23ac5d0aa"
 type = "fix"
-description = "Widen jfrog auth check"
+description = "Allow auth check against any host with jfrog in the name"
 author = "alex.spencer@helsing.ai"
