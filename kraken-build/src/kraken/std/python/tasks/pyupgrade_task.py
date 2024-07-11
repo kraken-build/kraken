@@ -120,7 +120,7 @@ def pyupgrade(
     if test_directory is not None:
         directories.append(project.directory / test_directory)
     files = {f.resolve() for p in directories for f in Path(p).glob("**/*.py")}
-    exclude = [e.resolve() for e in exclude]
+    exclude = [(project.directory / e).resolve() for e in exclude]
     filtered_files = [
         f
         for f in files
