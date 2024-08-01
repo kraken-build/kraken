@@ -21,3 +21,9 @@ id = "bbdd557d-b4c2-4ba6-9adc-66c18f51a44c"
 type = "hygiene"
 description = "Eliminate `nr-io-graphviz` dependency and update `databind` to min `4.5.0`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "0a74ab07-f895-48e8-8842-6c5382ba8402"
+type = "refactor"
+description = "Eliminate `nr-stream` dependency"
+author = "@NiklasRosenstein"
