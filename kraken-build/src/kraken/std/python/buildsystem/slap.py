@@ -1,6 +1,6 @@
-""" Implements Slap as a Python build system for kraken-std.
+"""Implements Slap as a Python build system for kraken-std.
 
-Requires at least Slap 1.6.25. """
+Requires at least Slap 1.6.25."""
 
 from __future__ import annotations
 

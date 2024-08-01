@@ -1,4 +1,4 @@
-""" Implements Poetry as a build system for kraken-std. """
+"""Implements Poetry as a build system for kraken-std."""
 
 from __future__ import annotations
 

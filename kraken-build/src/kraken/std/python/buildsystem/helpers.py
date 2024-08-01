@@ -1,4 +1,4 @@
-"""Python build system helper functions """
+"""Python build system helper functions"""
 
 from __future__ import annotations
 

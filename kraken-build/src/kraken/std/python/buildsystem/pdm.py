@@ -1,4 +1,4 @@
-""" Implements PDM as a build system for kraken-std. """
+"""Implements PDM as a build system for kraken-std."""
 
 from __future__ import annotations
 

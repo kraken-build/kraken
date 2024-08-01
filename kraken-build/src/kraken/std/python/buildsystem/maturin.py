@@ -1,4 +1,4 @@
-""" Implements Maturin as a build system for kraken-std. """
+"""Implements Maturin as a build system for kraken-std."""
 
 from __future__ import annotations
 

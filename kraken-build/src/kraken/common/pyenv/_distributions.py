@@ -1,4 +1,4 @@
-""" Inspect a Python environment for all installed packages. """
+"""Inspect a Python environment for all installed packages."""
 
 import argparse
 import csv

@@ -11,12 +11,7 @@ from kraken.std.git import git_describe
 def configure_project() -> None:
     from kraken.build import project
 
-    python.pyupgrade(python_version="3.10", version_spec="==3.15.0")
-    python.pycln(version_spec="==2.4.0")
-
-    python.black(additional_args=["--config", "pyproject.toml"], version_spec="==23.12.1")
-    python.flake8(version_spec="==6.1.0")
-    python.isort(version_spec="==5.13.2")
+    python.ruff()
     python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
 
     if project.directory.joinpath("tests").is_dir():

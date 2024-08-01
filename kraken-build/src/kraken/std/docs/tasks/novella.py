@@ -1,4 +1,4 @@
-""" Build documentation using [Novella](https://github.com/NiklasRosenstein/novella/). """
+"""Build documentation using [Novella](https://github.com/NiklasRosenstein/novella/)."""
 
 import subprocess
 from collections.abc import Sequence

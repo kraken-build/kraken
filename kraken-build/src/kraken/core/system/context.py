@@ -384,12 +384,10 @@ class Context(MetadataContainer, Currentable["Context"]):
     @overload
     def listen(
         self, event_type: str | ContextEvent.Type
-    ) -> Callable[[ContextEvent.T_Listener], ContextEvent.T_Listener]:
-        ...
+    ) -> Callable[[ContextEvent.T_Listener], ContextEvent.T_Listener]: ...
 
     @overload
-    def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener) -> None:
-        ...
+    def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener) -> None: ...
 
     def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener | None = None) -> Any:
         """Registers a listener to the context for the given event type."""

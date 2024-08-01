@@ -95,12 +95,7 @@ ignore_errors = true
 ignore_missing_imports = true
 module = "networkx.*"
 
-[tool.isort]
-combine_as_imports = true
-line_length = 120
-profile = "black"
-
-[tool.black]
+[tool.ruff]
 line-length = 120
 
 [tool.pytest.ini_options]

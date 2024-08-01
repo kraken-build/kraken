@@ -332,11 +332,11 @@ class Property(Supplier[T]):
         Note that this does not work with generic parametrized types."""
 
         value = self.get()
-        if type_ != object and isinstance(value, type_):
+        if type_ is not object and isinstance(value, type_):
             return [value]
         if isinstance(value, Sequence):
             return [x for x in value if isinstance(x, type_)]
-        if type_ == object:
+        if type_ is object:
             return [cast(U, value)]
         return []
 

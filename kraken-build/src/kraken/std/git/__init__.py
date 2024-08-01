@@ -1,4 +1,4 @@
-""" Tools for Git versioned projects. """
+"""Tools for Git versioned projects."""
 
 from __future__ import annotations
 
