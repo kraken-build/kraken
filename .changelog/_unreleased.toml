@@ -15,3 +15,9 @@ id = "b7f209cb-7ff7-414d-b368-bde8cb57109d"
 type = "refactor"
 description = "move `kraken.std.git.gitignore.parser` to `kraken.common.gitignore`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "0a74ab07-f895-48e8-8842-6c5382ba8402"
+type = "refactor"
+description = "Eliminate `nr-stream` dependency"
+author = "@NiklasRosenstein"
