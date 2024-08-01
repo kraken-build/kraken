@@ -3,3 +3,9 @@ id = "00907a4a-2abe-43a5-a134-d96aaf0bdbdb"
 type = "docs"
 description = "Fixing typo in README"
 author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "b7f209cb-7ff7-414d-b368-bde8cb57109d"
+type = "refactor"
+description = "move `kraken.std.git.gitignore.parser` to `kraken.common.gitignore`"
+author = "@NiklasRosenstein"
