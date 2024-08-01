@@ -37,14 +37,13 @@ kraken = "kraken.core.cli.main:main"
 # ------------
 
 [tool.poetry.dependencies]
-databind-json = "^4.2.5"
+databind = "^4.5.0"
 dataclasses = {version = "^0.6", python = "<3.7"}
 deprecated = "^1.2.13"
 dill = ">=0.3.8,<0.4.0"
 httpx = "^0.27.0"
 keyring = "^25.0.0"
 networkx = "^3.1"
-nr-io-graphviz = "^0.1.1"
 nr-stream = "^1.1.0"
 packaging = "^23.1"
 pex = "^2.1.156"
