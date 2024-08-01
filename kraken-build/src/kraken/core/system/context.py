@@ -8,8 +8,6 @@ from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequen
 from pathlib import Path
 from typing import Any, ClassVar, TypeAlias, TypeVar, overload
 
-from nr.stream import Stream
-
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
@@ -303,11 +301,11 @@ class Context(MetadataContainer, Currentable["Context"]):
             address = relative_to.concat(address).normalize(keep_container=True)
 
         matches = list(resolve_address(space, self.root_project, address).matches())
-        tasks = Stream(matches).of_type(Task).collect()  # type: ignore[type-abstract]
+        tasks = [t for t in matches if isinstance(t, Task)]
         if set_selected:
             for task in tasks:
                 task.selected = True
-        projects = Stream(matches).of_type(Project).collect()
+        projects = [p for p in matches if isinstance(p, Project)]
         if projects:
             # Using the address of a project means we want to select its default tasks
             for proj in projects:

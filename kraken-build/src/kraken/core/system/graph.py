@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from networkx import DiGraph, restricted_view, transitive_reduction
 from networkx.algorithms import topological_sort
-from nr.stream import Stream
 
 from kraken.common import not_none
+from kraken.common.iter import bipartition
 from kraken.core.address import Address
 from kraken.core.system.executor import Graph
 from kraken.core.system.task import GroupTask, Task, TaskStatus, TaskTag
@@ -503,7 +503,7 @@ class TaskGraph(Graph):
         # NOTE(NiklasRosenstein): We don't need to return GroupTasks, we can mark them as skipped right away.
         #       In a future version of Kraken, we want to represent groups not as task objects, so this special
         #       handling code will be obsolete.
-        result, groups = map(lambda x: list(x), Stream(tasks).bipartition(lambda t: isinstance(t, GroupTask)))
+        result, groups = map(lambda x: list(x), bipartition((lambda t: isinstance(t, GroupTask)), tasks))
         for group in groups:
             self.set_status(group, TaskStatus.skipped())
         if not result:
