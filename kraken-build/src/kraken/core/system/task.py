@@ -14,7 +14,6 @@ from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
-from deprecated import deprecated
 
 from kraken.common import Supplier
 from kraken.core.address import Address
