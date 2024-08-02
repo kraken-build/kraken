@@ -236,7 +236,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         return self._parent
 
     @property
-    @deprecated(reason="Task.outputs is deprecated.")
+    # @deprecated(reason="Task.outputs is deprecated.")
     def outputs(self) -> list[Any]:
         return self._outputs
 

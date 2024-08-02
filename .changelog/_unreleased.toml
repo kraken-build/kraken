@@ -15,3 +15,9 @@ id = "afea35ef-4ce0-4c2e-9b25-b72d288ce6c7"
 type = "breaking change"
 description = "Remove `Project.do()` as it was deprecated for a long time. Use `Project.task()` instead"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "aabad4ba-ff7c-47b7-9703-5a84366b6d2b"
+type = "fix"
+description = "Temporarily remove @deprecated from Task.outputs; the API is actively used and we have no replacement API for it"
+author = "@NiklasRosenstein"
