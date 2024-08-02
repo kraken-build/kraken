@@ -1,17 +1,13 @@
 from __future__ import annotations
 
-import re
 import warnings
 from collections.abc import Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
 
-from deprecated import deprecated
 
-from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
-from kraken.core.system.property import Property
 from kraken.core.system.task import GroupTask, Task
 
 if TYPE_CHECKING:
@@ -297,73 +293,6 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
         assert self._members[project.name] is project
 
         del self._members[project.name]
-
-    @deprecated(reason="Use Project.task() instead")
-    def do(
-        self,
-        name: str,
-        task_type: type[T_Task] = cast(Any, Task),
-        default: bool | None = None,
-        *,
-        group: str | GroupTask | None = None,
-        description: str | None = None,
-        **kwargs: Any,
-    ) -> T_Task:
-        """Add a task to the project under the given name, executing the specified action.
-
-        :param name: The name of the task to add.
-        :param task_type: The type of task to add.
-        :param default: Override :attr:`Task.default`.
-        :param group: Add the task to the given group in the project.
-        :param kwargs: Any number of properties to set on the task. Unknown properties will be ignored
-            with a warning log.
-        :return: The created task.
-        """
-
-        # NOTE(NiklasRosenstein): In versions prior to kraken-core 0.12.0, we did not validate task names.
-        #       Now, the #Address class performs the validation and is rather strict. In order to not fully
-        #       break usage of this function with invalid names, we convert the name to a valid form instead
-        #       and issue a warning. This behaviour shall be removed in kraken-core 0.14.0.
-
-        if not re.match(Address.Element.VALIDATION_REGEX, name):
-            new_name = re.sub(f"[^{Address.Element.VALID_CHARACTERS}]+", "-", name)
-            warnings.warn(
-                f"Task name `{name}` is invalid and will be normalized to `{new_name}`. Starting with "
-                "kraken-core 0.12.0, Task names must follow a stricter naming convention subject to the "
-                f"Address class' validation (must match /{Address.Element.VALIDATION_REGEX}/).",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            name = new_name
-
-        if name in self._members:
-            raise ValueError(f"{self} already has a member {name!r}")
-
-        task = task_type(name, self)
-        if default is not None:
-            task.default = default
-        if description is not None:
-            task.description = description
-
-        invalid_keys = set()
-        for key, value in kwargs.items():
-            prop = getattr(task, key, None)
-            if isinstance(prop, Property):
-                if value is not None:
-                    prop.set(value)
-            else:
-                invalid_keys.add(key)
-        if invalid_keys:
-            task.logger.warning(
-                "properties %s cannot be set because they don't exist (task %s)", invalid_keys, task.address
-            )
-
-        self.add_task(task)
-        if isinstance(group, str):
-            group = self.group(group)
-        if group is not None:
-            group.add(task)
-        return task
 
     def group(self, name: str, *, description: str | None = None, default: bool | None = None) -> GroupTask:
         """Create or get a group of the given name. If a task with the given name already exists, it must refer
