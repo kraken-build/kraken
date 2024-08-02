@@ -3,3 +3,9 @@ id = "7db61e19-eb5b-4385-a854-9523fb256d5c"
 type = "deprecation"
 description = "Deprecate `gitignore(gitignore_io_tokens, gitignore_io_allow_http_request_backfill)`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "17854ad9-56e6-41a9-9d69-a4a55a830682"
+type = "feature"
+description = "Add `kraken.std.git.gitignore_extend()` function"
+author = "@NiklasRosenstein"
