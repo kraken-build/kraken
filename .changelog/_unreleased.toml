@@ -1,0 +1,5 @@
+[[entries]]
+id = "7db61e19-eb5b-4385-a854-9523fb256d5c"
+type = "deprecation"
+description = "Deprecate `gitignore(gitignore_io_tokens, gitignore_io_allow_http_request_backfill)`"
+author = "@NiklasRosenstein"
