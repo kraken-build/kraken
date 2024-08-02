@@ -6,7 +6,7 @@ on:
 
 env:
   COLUMNS: 200
-  PYTEST_FLAGS: --numprocesses 6  # Our runners typically have 4 CPUs, let's oversubscribe a bit because of I/O
+  PYTEST_FLAGS: --numprocesses 4
   SLAP_VERBOSE: more
 
 jobs:
