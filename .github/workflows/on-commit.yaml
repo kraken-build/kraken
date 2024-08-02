@@ -11,19 +11,6 @@ env:
 
 jobs:
 
-  # == Validate data embedded in the Kraken standard library ==
-
-  gitignore-io-up-to-date:
-    runs-on: arc-amd64-small
-    steps:
-    - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "3.10" }
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-    - run: python -m kraken.std.git.gitignore.gitignore_io
-    - run: git diff --exit-code
-
   # == Documentation ==
 
   documentation:

@@ -1,4 +1,6 @@
 """
+DEPRECATED: This module will be removed in a future version.
+
 This module provides a thin client for the gitignore.io API to retrieve template `.gitignore` files.
 
 Run this module to update the `gitignore-io-tokens.json.gz` file.
