@@ -45,7 +45,7 @@ class TaskGraph(Graph):
         self._context = context
 
         # Nodes have the form {'data': _Node} and edges have the form {'data': _Edge}.
-        self._digraph = DiGraph()
+        self._digraph = DiGraph[Address]()
 
         # Keep track of task execution results.
         self._results: dict[Address, TaskStatus] = {}
@@ -198,7 +198,7 @@ class TaskGraph(Graph):
                     )
             self._digraph.remove_node(addr)
 
-    def _get_ready_graph(self) -> DiGraph:
+    def _get_ready_graph(self) -> DiGraph[Address]:
         """Updates the ready graph. Remove all ok tasks (successful or skipped) and any non-strict dependencies
         (edges) on failed tasks."""
 
@@ -225,7 +225,7 @@ class TaskGraph(Graph):
                 else:
                     set_non_strict_edge_for_removal(failed_task_path, out_task_path)
 
-        return restricted_view(self._digraph, self._ok_tasks, removable_edges)
+        return cast(DiGraph[Address], restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]
 
     # Public API
 
@@ -380,7 +380,7 @@ class TaskGraph(Graph):
 
         tasks = (self.get_task(addr) for addr in self._digraph)
         if goals:
-            tasks = (t for t in tasks if self._digraph.out_degree(t.address) == 0)
+            tasks = (t for t in tasks if len(self._digraph.out_degree(t.address)) == 0)
         if pending:
             tasks = (t for t in tasks if t.address not in self._results)
         if failed:
@@ -494,7 +494,7 @@ class TaskGraph(Graph):
 
         ready_graph = self._get_ready_graph()
         root_set = (
-            node for node in ready_graph.nodes if ready_graph.in_degree(node) == 0 and node not in self._results
+            node for node in ready_graph.nodes if len(ready_graph.in_degree(node)) == 0 and node not in self._results
         )
         tasks = [self.get_task(addr) for addr in root_set]
         if not tasks:
