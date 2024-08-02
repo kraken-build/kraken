@@ -45,7 +45,8 @@ class TaskGraph(Graph):
         self._context = context
 
         # Nodes have the form {'data': _Node} and edges have the form {'data': _Edge}.
-        self._digraph = DiGraph[Address]()
+        # NOTE: DiGraph is not runtime-subscriptable.
+        self._digraph: DiGraph[Address] = DiGraph()
 
         # Keep track of task execution results.
         self._results: dict[Address, TaskStatus] = {}
@@ -225,7 +226,7 @@ class TaskGraph(Graph):
                 else:
                     set_non_strict_edge_for_removal(failed_task_path, out_task_path)
 
-        return cast(DiGraph[Address], restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]
+        return cast("DiGraph[Address]", restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]
 
     # Public API
 
