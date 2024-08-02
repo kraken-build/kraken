@@ -345,7 +345,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         if targets is None:
             tasks = self.resolve_tasks(None)
         else:
-            needs_resolving, resolved = bipartition(lambda t: isinstance(t, (str, Address)), targets)
+            needs_resolving, resolved = bipartition(lambda t: isinstance(t, Task), targets)
             tasks = cast(list[Task], list(resolved))
             tasks.extend(self.resolve_tasks(needs_resolving))
 
