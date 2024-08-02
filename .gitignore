@@ -1,6 +1,10 @@
+# GENERATED-CONTENT-START
+# Kraken
+/build
+# GENERATED-CONTENT-END
+
 /.vscode
 /dist
-build/
 .venv/
 .venvs/
 *.egg-info/

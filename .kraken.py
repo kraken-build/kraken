@@ -4,8 +4,9 @@ buildscript(requirements=["kraken-build>=0.33.2"])
 
 import os
 
+from kraken.build import project
 from kraken.std import python
-from kraken.std.git import git_describe
+from kraken.std.git import git_describe, gitignore
 
 
 def configure_project() -> None:
@@ -86,13 +87,8 @@ def configure_project() -> None:
             )
 
 
-from kraken.build import project
-
-try:
-    project.subproject("docs")
-except ImportError:
-    pass
-
+gitignore()
+project.subproject("docs")
 for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
     with subproject.as_current():
         configure_project()
