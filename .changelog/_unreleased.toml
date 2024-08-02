@@ -1,0 +1,5 @@
+[[entries]]
+id = "fc3bb12e-db3f-46e3-a99a-69e696ec2681"
+type = "fix"
+description = "Accept `Address` in `dist(dependencies)` when passing a map"
+author = "@NiklasRosenstein"

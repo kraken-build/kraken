@@ -198,7 +198,7 @@ class ZipArchiveWriter(ArchiveWriter):
 def dist(
     *,
     name: str,
-    dependencies: Sequence[str | Address | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
+    dependencies: Sequence[str | Address | Task] | Mapping[str | Address, Mapping[str, Any] | IndividualDistOptions],
     output_file: str | Path,
     archive_type: str | None = None,
     prefix: str | None = None,
@@ -226,7 +226,7 @@ def dist(
 
     if isinstance(dependencies, Sequence):
         dependencies = cast(
-            Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
+            Mapping[str | Address, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
         )
     dependencies_map = {
         k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
@@ -242,7 +242,7 @@ def dist(
         .map(
             lambda resources: get_configured_resources(
                 resources,
-                dependencies_map,
+                {str(k): v for k, v in dependencies_map.items()},
                 dependencies_set,
             )
         )
