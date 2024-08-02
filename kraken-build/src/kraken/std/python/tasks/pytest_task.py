@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 import os
 import shlex
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import flatten
@@ -43,7 +43,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     def is_skippable(self) -> bool:
         return self.allow_no_tests.get() and self.tests_dir.is_empty() and not self.settings.get_tests_directory()
 
-    def get_execute_command(self) -> list[str] | TaskStatus:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         tests_dir = self.tests_dir.get_or(None)
         tests_dir = tests_dir or self.settings.get_tests_directory()
         if not tests_dir:
