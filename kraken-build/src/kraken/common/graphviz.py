@@ -152,7 +152,7 @@ def render_to_browser(graphviz_code: str, algorithm: str = "dot") -> None:
         render(graphviz_code, "svg", algorithm, output_file=svg_file)
         server = http.server.HTTPServer(
             ("", 0),
-            lambda *args: http.server.SimpleHTTPRequestHandler(*args, directory=tempdir),  # type: ignore[misc]
+            lambda *args: http.server.SimpleHTTPRequestHandler(*args, directory=tempdir),
         )
         webbrowser.open(f"http://localhost:{server.server_port}/graph.svg")
         server.handle_request()
