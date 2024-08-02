@@ -27,3 +27,9 @@ id = "0a74ab07-f895-48e8-8842-6c5382ba8402"
 type = "refactor"
 description = "Eliminate `nr-stream` dependency"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2293b312-487a-41ce-80c0-9f39214fac09"
+type = "fix"
+description = "Add missing `py.typed` marker for `kraken.build` module"
+author = "@NiklasRosenstein"
