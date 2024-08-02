@@ -3,3 +3,9 @@ id = "fc3bb12e-db3f-46e3-a99a-69e696ec2681"
 type = "fix"
 description = "Accept `Address` in `dist(dependencies)` when passing a map"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "45684802-8870-4051-a548-942f814eb463"
+type = "improvement"
+description = "Accept `Address` in more places where previously only a string for a task address was accepted"
+author = "@NiklasRosenstein"

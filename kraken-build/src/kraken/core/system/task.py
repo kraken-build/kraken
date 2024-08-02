@@ -462,7 +462,7 @@ class GroupTask(Task):
         self.tasks = []
         self.default = False
 
-    def add(self, tasks: str | Task | Iterable[str | Task]) -> None:
+    def add(self, tasks: str | Address | Task | Iterable[str | Address | Task]) -> None:
         """Add one or more tasks by name or task object to this group.
 
         This is different from adding a task via :meth:`add_relationship` because the task is instead stored in the
@@ -473,11 +473,11 @@ class GroupTask(Task):
         to add a task to the group by a selector string requires that the task already exists.
         """
 
-        if isinstance(tasks, (str, Task)):
+        if isinstance(tasks, (str, Address, Task)):
             tasks = [tasks]
 
         for task in tasks:
-            if isinstance(task, str):
+            if isinstance(task, (str, Address)):
                 self.tasks += [
                     t for t in self.project.context.resolve_tasks([task], self.project) if t not in self.tasks
                 ]

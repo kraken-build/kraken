@@ -6,9 +6,10 @@ import enum
 import logging
 from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, TypeAlias, TypeVar, overload
+from typing import Any, ClassVar, TypeAlias, TypeVar, cast, overload
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
+from kraken.common.iter import bipartition
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
@@ -333,7 +334,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         self.trigger(ContextEvent.Type.on_context_finalized, self)
 
-    def get_build_graph(self, targets: Sequence[str | Task] | None) -> TaskGraph:
+    def get_build_graph(self, targets: Sequence[str | Address | Task] | None) -> TaskGraph:
         """Returns the :class:`TaskGraph` that contains either all default tasks or the tasks specified with
         the *targets* argument.
 
@@ -344,9 +345,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         if targets is None:
             tasks = self.resolve_tasks(None)
         else:
-            tasks = self.resolve_tasks([t for t in targets if isinstance(t, str)]) + [
-                t for t in targets if not isinstance(t, str)
-            ]
+            needs_resolving, resolved = bipartition(lambda t: isinstance(t, (str, Address)), targets)
+            tasks = cast(list[Task], list(resolved))
+            tasks.extend(self.resolve_tasks(needs_resolving))
 
         if not tasks:
             raise ValueError("no tasks selected")
@@ -356,7 +357,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert graph, "TaskGraph cannot be empty"
         return graph
 
-    def execute(self, tasks: list[str | Task] | TaskGraph | None = None) -> None:
+    def execute(self, tasks: list[str | Address | Task] | TaskGraph | None = None) -> None:
         """Execute all default tasks or the tasks specified by *targets* using the default executor.
         If :meth:`finalize` was not called already it will be called by this function before the build
         graph is created, unless a build graph is passed in the first place.
