@@ -16,6 +16,7 @@ import databind.json
 
 from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
+from kraken.core.address import Address
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
 
@@ -197,7 +198,7 @@ class ZipArchiveWriter(ArchiveWriter):
 def dist(
     *,
     name: str,
-    dependencies: Sequence[str | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
+    dependencies: Sequence[str | Address | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
     output_file: str | Path,
     archive_type: str | None = None,
     prefix: str | None = None,

@@ -1,0 +1,5 @@
+[[entries]]
+id = "4725d1c3-2459-47c5-8885-60b4a47f0cdb"
+type = "improvement"
+description = "Update `dist(dependencies)` to accept `Address` values now that `Task.path` is removed."
+author = "@NiklasRosenstein"
