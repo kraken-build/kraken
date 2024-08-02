@@ -6,7 +6,7 @@ on:
 
 env:
   COLUMNS: 200
-  PYTEST_FLAGS: --numprocesses auto
+  PYTEST_FLAGS: --numprocesses 4
   SLAP_VERBOSE: more
 
 jobs:
