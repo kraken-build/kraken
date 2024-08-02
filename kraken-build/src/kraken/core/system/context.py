@@ -210,7 +210,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
     def resolve_tasks(
         self,
-        addresses: Sequence[Task | str | Address] | None,
+        addresses: Iterable[Task | str | Address] | None,
         relative_to: Project | Address | None = None,
         set_selected: bool = False,
     ) -> list[Task]:

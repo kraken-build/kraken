@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
+from kraken.core.system.task import TaskStatus
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -22,7 +23,7 @@ class RuffTask(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [
             self.ruff_bin.get(),
             *self.ruff_task.get(),

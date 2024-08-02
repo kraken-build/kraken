@@ -231,7 +231,7 @@ def dist(
         k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
         for k, v in dependencies.items()
     }
-    dependencies_set = project.resolve_tasks(dependencies_map)
+    dependencies_set = TaskSet(project.context.resolve_tasks(dependencies_map, project))
 
     # This associates the IndividualDistOptions specified in *dependencies* to the Resource(s)
     # provided by the task(s).

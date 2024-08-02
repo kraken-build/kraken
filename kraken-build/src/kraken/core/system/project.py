@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import warnings
-from collections.abc import Iterable, Mapping
+from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
@@ -12,7 +12,7 @@ from kraken.core.address import Address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property
-from kraken.core.system.task import GroupTask, Task, TaskSet
+from kraken.core.system.task import GroupTask, Task
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
@@ -384,30 +384,3 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
             task.default = default
 
         return task
-
-    ##
-    # Begin: Deprecated APIs
-    ##
-
-    @property
-    @deprecated(reason="Project.path is deprecated, use str(Project.address) instead")
-    def path(self) -> str:
-        """Returns the path that uniquely identifies the project in the current build context."""
-
-        return str(self.address)
-
-    @deprecated(reason="Project.resolve_tasks() is deprecated, use Project.context.resolve_tasks() instead.")
-    def resolve_tasks(self, tasks: str | Task | Iterable[str | Task]) -> TaskSet:
-        """Resolve tasks relative to the current project."""
-
-        if isinstance(tasks, (str, Task)):
-            tasks = [tasks]
-
-        result = TaskSet()
-        for item in tasks:
-            if isinstance(item, str):
-                result.add(self.context.resolve_tasks([item], self), partition=item)
-            else:
-                result.add([item])
-
-        return result
