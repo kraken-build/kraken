@@ -219,9 +219,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(project, Project), type(project)
         KrakenObject.__init__(self, name, project)
         PropertyContainer.__init__(self)
-        self.logger = logger.bind(
-            task_name=str(self.address), task_type=f"{type(self).__module__}.{type(self).__qualname__}"
-        )
+        self.logger = self._create_logger()
         self._outputs: list[Any] = []
         self.__tags: dict[str, set[TaskTag]] = {}
         self.__relationships: list[_Relationship[Address | Task]] = []
@@ -454,6 +452,18 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         return None
+
+    def _create_logger(self) -> Logger:
+        return logger.bind(task_name=str(self.address), task_type=f"{type(self).__module__}.{type(self).__qualname__}")
+
+    def __getstate__(self) -> Any:
+        state = vars(self).copy()
+        state.pop("logger")  # Loguru loggers cannot be pickled
+        return state
+
+    def __setstate__(self, state: Any) -> None:
+        vars(self).update(state)
+        self.logger = self._create_logger()
 
 
 class GroupTask(Task):
