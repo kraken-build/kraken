@@ -408,9 +408,9 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
 
 
 @exit_on_known_exceptions(BuildEnvError, exit_code=2)
-def main() -> NoReturn:
+def main(krakenw_args: list[str] | None = None) -> NoReturn:
     parser = _get_argument_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args=krakenw_args)
     logging_options = LoggingOptions.collect(args)
     logging_options.init_logging()
     env_options = EnvOptions.collect(args)
@@ -443,6 +443,7 @@ def main() -> NoReturn:
     config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
+        project.directory,
         project.directory / BUILDENV_PATH,
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,

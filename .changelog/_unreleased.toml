@@ -5,6 +5,13 @@ description = "Replace `rich` logger with `loguru` which produces nicer log form
 author = "@NiklasRosenstein"
 
 [[entries]]
+id = "5f259115-ab4d-43d1-b23f-6b2436f26bb2"
+type = "feature"
+description = "Add `buildscript(interpreter_constraint)` argument"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
 id = "9a319506-3900-402f-a40b-ad9052acfbbf"
 type = "fix"
 description = "Detect Pyenv shims in interpreter constraint matching and ignore them by default; and if not ignore, then do not commit their version to the cache as the Python version they represent might change."

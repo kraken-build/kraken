@@ -31,7 +31,7 @@ class UvBuildEnv(_VenvBuildEnv):
 
     def _get_install_command(self, venv_dir: Path, requirements: RequirementSpec, env: dict[str, str]) -> list[str]:
         env["VIRTUAL_ENV"] = str(venv_dir)
-        return [self._uv_bin, "pip", "install", *requirements.to_args()]
+        return [self._uv_bin, "pip", "install", *requirements.to_args(base_dir=self._project_root)]
 
     def get_type(self) -> EnvironmentType:
         return EnvironmentType.UV

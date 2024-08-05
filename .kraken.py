@@ -12,7 +12,7 @@ from kraken.std.git import git_describe, gitignore
 def configure_project() -> None:
     from kraken.build import project
 
-    python.ruff()
+    python.ruff(additional_args=["--exclude", "tests/iss-263/example_project"])
     python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
 
     if project.directory.joinpath("tests").is_dir():
