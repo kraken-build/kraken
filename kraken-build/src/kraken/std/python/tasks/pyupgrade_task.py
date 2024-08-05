@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Collection, Iterable, Sequence
+from collections.abc import Collection, Iterable, MutableMapping, Sequence
 from difflib import unified_diff
 from pathlib import Path
 from sys import stdout
@@ -26,7 +26,7 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         return self.run_pyupgrade(self.additional_files.get(), ("--exit-zero-even-if-changed",))
 
     def run_pyupgrade(self, files: Iterable[Path], extra: Iterable[str]) -> list[str]:
@@ -77,7 +77,7 @@ class PyUpgradeCheckTask(PyUpgradeTask):
                     )
             return result
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         return self.run_pyupgrade(self._files, ())
 
 
@@ -120,7 +120,7 @@ def pyupgrade(
     if test_directory is not None:
         directories.append(project.directory / test_directory)
     files = {f.resolve() for p in directories for f in Path(p).glob("**/*.py")}
-    exclude = [e.resolve() for e in exclude]
+    exclude = [(project.directory / e).resolve() for e in exclude]
     filtered_files = [
         f
         for f in files

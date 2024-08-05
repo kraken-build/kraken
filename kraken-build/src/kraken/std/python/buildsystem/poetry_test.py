@@ -1,5 +1,6 @@
+from kraken.common.toml import TomlFile
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
-from kraken.std.python.pyproject import PackageIndex, Pyproject
+from kraken.std.python.pyproject import PackageIndex
 
 EXAMPLE_POETRY_PYPROJECT = """
 [tool.poetry]
@@ -26,19 +27,19 @@ secondary = true
 
 
 def test__PoetryPyprojectHandler__getters() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT))
     assert handler.get_name() == "poetry-project"
     assert handler.get_version() == "0.1.0"
 
 
 def test__PoetryPyprojectHandler__set_version() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT))
     handler.set_version("2.0.0")
     assert handler.raw["tool"]["poetry"]["version"] == "2.0.0"
 
 
 def test__PoetryPyprojectHandler__get_package_indexes() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT))
     assert handler.get_package_indexes() == [
         PackageIndex(
             alias="foo",
@@ -50,7 +51,7 @@ def test__PoetryPyprojectHandler__get_package_indexes() -> None:
 
 
 def test__PoetryPyprojectHandler__get_package_indexes__with_legacy_source_config() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT_WITH_LEGACY_SOURCE_CONFIG))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT_WITH_LEGACY_SOURCE_CONFIG))
     assert handler.get_package_indexes() == [
         PackageIndex(
             alias="foo",
@@ -68,13 +69,13 @@ def test__PoetryPyprojectHandler__get_package_indexes__with_legacy_source_config
 
 
 def test__PoetryPyprojectHandler__set_package_indexes__to_empty_list() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT))
     handler.set_package_indexes([])
     assert handler.raw["tool"]["poetry"]["source"] == []
 
 
 def test__PoetryPyprojectHandler__set_package_indexes__to_various_indexes() -> None:
-    handler = PoetryPyprojectHandler(Pyproject.read_string(EXAMPLE_POETRY_PYPROJECT))
+    handler = PoetryPyprojectHandler(TomlFile.read_string(EXAMPLE_POETRY_PYPROJECT))
     handler.set_package_indexes(
         [
             PackageIndex("a", "https://a.com", PackageIndex.Priority.primary, True),

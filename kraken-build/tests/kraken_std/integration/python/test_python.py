@@ -14,12 +14,12 @@ import pytest
 import tomli
 from loguru import logger
 
+from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
-from kraken.std.python.pyproject import Pyproject
 from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
@@ -140,7 +140,7 @@ def test__python_project_upgrade_python_version_string(
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    pyproject = TomlFile.read(original_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
@@ -190,7 +190,7 @@ def test__python_pyproject_reads_correct_data(
     new_dir = kraken_project.directory / project_dir
     shutil.copytree(example_dir(project_dir), new_dir)
 
-    pyproject = Pyproject.read(new_dir / "pyproject.toml")
+    pyproject = TomlFile.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
@@ -217,7 +217,7 @@ def test__python_project_coverage(
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    pyproject = TomlFile.read(original_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None

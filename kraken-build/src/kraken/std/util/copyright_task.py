@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.core import Project, Property
+from kraken.core.system.task import TaskStatus
 from kraken.std.python.tasks.base_task import EnvironmentAwareDispatchTask
 
 
@@ -19,7 +20,7 @@ class CopyrightTask(EnvironmentAwareDispatchTask):
     custom_license: Property[str]
     custom_license_file: Property[Path]
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = ["pyaddlicense"]
 
         if self.holder.get() != "":

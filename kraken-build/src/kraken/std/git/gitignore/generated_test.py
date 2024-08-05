@@ -1,5 +1,5 @@
+from kraken.common.gitignore import GitignoreFile
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
-from kraken.std.git.gitignore.parser import GitignoreFile
 
 LEGACY_GITIGNORE = """
 ### START-GENERATED-CONTENT [HASH: 3d9a3142ccc0b9baed88a8427ff555e32ebc44d88e851c24d35a8e6ea7901ad3]

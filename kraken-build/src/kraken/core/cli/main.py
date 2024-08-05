@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, NoReturn
 
 from loguru import logger
-from nr.io.graphviz.render import render_to_browser
-from nr.io.graphviz.writer import GraphvizWriter
+from kraken.common.graphviz import render_to_browser
+from kraken.common.graphviz import GraphvizWriter
 
 from kraken.common import (
     BuildscriptMetadata,

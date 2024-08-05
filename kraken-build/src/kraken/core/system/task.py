@@ -1,4 +1,4 @@
-""" This module provides the :class:`Task` class which represents a unit of work that is configurable through
+"""This module provides the :class:`Task` class which represents a unit of work that is configurable through
 :class:`Properties <Property>` that represent input/output parameters and are used to construct a dependency
 graph."""
 
@@ -9,12 +9,9 @@ import contextlib
 import dataclasses
 import enum
 import shlex
-from collections.abc import Collection, Iterable, Iterator, Sequence
+from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
-
-from deprecated import deprecated
-from loguru import logger
 
 if TYPE_CHECKING:
     from loguru import Logger
@@ -241,57 +238,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(self._parent, Project), "Task.parent must be a Project"
         return self._parent
 
-    ###
-    # Begin: Deprecated APIs
-    ###
-
     @property
-    @deprecated(reason="Task.path is deprecated, use str(Task.address) instead.")
-    def path(self) -> str:
-        return str(self.address)
-
-    @property
-    @deprecated(reason="Task.outputs is deprecated.")
+    # @deprecated(reason="Task.outputs is deprecated.")
     def outputs(self) -> list[Any]:
         return self._outputs
-
-    @deprecated(reason="Task.add_relationship() is deprecated, use Task.depends_on() or Task.required_by() instead.")
-    def add_relationship(
-        self,
-        task_or_selector: Task | Sequence[Task | Address] | Address | str,
-        strict: bool = True,
-        inverse: bool = False,
-    ) -> None:
-        """Add a relationship to this task that will be returned by :meth:`get_relationships`.
-
-        :param task_or_selector: A task, list of tasks or a task selector (wich may expand to multiple tasks)
-            to add as a relationship to this task. If a task selector string is specified, it will be evaluated
-            lazily when :meth:`get_relationships` is called.
-        :param strict: Whether the relationship is strict, i.e. informs a strong dependency in one or the other
-            direction. If a relationship is not strict, it informs only order of execution and parallel
-            exclusivity.
-        :param inverse: Whether to invert the relationship.
-        """
-
-        if isinstance(task_or_selector, (Task, str)):
-            if isinstance(task_or_selector, str):
-                task_or_selector = Address(task_or_selector)
-            self.__relationships.append(_Relationship(task_or_selector, strict, inverse))
-        elif isinstance(task_or_selector, Sequence):
-            for idx, task in enumerate(task_or_selector):
-                if not isinstance(task, Task):
-                    raise TypeError(
-                        f"task_or_selector[{idx}] must be Task | Sequence[Task] | str, got "
-                        f"{type(task_or_selector).__name__}"
-                    )
-            for task in task_or_selector:
-                if isinstance(task, str):
-                    task = Address(task)
-                self.__relationships.append(_Relationship(task, strict, inverse))
-        else:
-            raise TypeError(
-                f"task_or_selector argument must be Task | Sequence[Task] | str, got {type(task_or_selector).__name__}"
-            )
 
     def add_tag(self, name: str, *, reason: str, origin: str | None = None) -> None:
         """
@@ -516,7 +466,7 @@ class GroupTask(Task):
         self.tasks = []
         self.default = False
 
-    def add(self, tasks: str | Task | Iterable[str | Task]) -> None:
+    def add(self, tasks: str | Address | Task | Iterable[str | Address | Task]) -> None:
         """Add one or more tasks by name or task object to this group.
 
         This is different from adding a task via :meth:`add_relationship` because the task is instead stored in the
@@ -527,11 +477,11 @@ class GroupTask(Task):
         to add a task to the group by a selector string requires that the task already exists.
         """
 
-        if isinstance(tasks, (str, Task)):
+        if isinstance(tasks, (str, Address, Task)):
             tasks = [tasks]
 
         for task in tasks:
-            if isinstance(task, str):
+            if isinstance(task, (str, Address)):
                 self.tasks += [
                     t for t in self.project.context.resolve_tasks([task], self.project) if t not in self.tasks
                 ]
@@ -710,12 +660,10 @@ class TaskSetPartitions:
         return iter(self._ptt)
 
     @overload
-    def __getitem__(self, partition: str) -> Collection[Task]:
-        ...
+    def __getitem__(self, partition: str) -> Collection[Task]: ...
 
     @overload
-    def __getitem__(self, partition: Task) -> Collection[str]:
-        ...
+    def __getitem__(self, partition: Task) -> Collection[str]: ...
 
     def __getitem__(self, partition: str | Task) -> Collection[str] | Collection[Task]:
         if isinstance(partition, str):

@@ -6,7 +6,6 @@ import subprocess as sp
 import sys
 from collections.abc import Iterable, MutableMapping
 
-from deprecated import deprecated
 from loguru import logger
 
 from kraken.common.pyenv import VirtualEnvInfo, get_current_venv
@@ -36,10 +35,6 @@ class EnvironmentAwareDispatchTask(Task):
 
         yield from super().get_relationships()
 
-    @deprecated(reason="Implement get_execute_command_v2() instead")
-    def get_execute_command(self) -> list[str] | TaskStatus:
-        raise NotImplementedError()
-
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         raise NotImplementedError()
 
@@ -60,10 +55,7 @@ class EnvironmentAwareDispatchTask(Task):
 
     def execute(self) -> TaskStatus:
         env = os.environ.copy()
-        try:
-            command = self.get_execute_command_v2(env)
-        except NotImplementedError:
-            command = self.get_execute_command()
+        command = self.get_execute_command_v2(env)
         if isinstance(command, TaskStatus):
             return command
         if self.settings.build_system and self.settings.build_system.supports_managed_environments():

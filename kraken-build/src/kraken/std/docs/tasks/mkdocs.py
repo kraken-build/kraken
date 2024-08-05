@@ -1,4 +1,4 @@
-""" Build documentation using [MkDocs](https://www.mkdocs.org/). """
+"""Build documentation using [MkDocs](https://www.mkdocs.org/)."""
 
 import os
 import subprocess

@@ -3,12 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal
 
+from kraken.common.gitignore import GitignoreEntry, GitignoreFile
 from kraken.core import Project, Property
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
 from kraken.std.util.render_file_task import RenderFileTask
 
 from ..gitignore.gitignore_io import gitignore_io_fetch_cached
-from ..gitignore.parser import GitignoreEntry, GitignoreFile
 
 
 class GitignoreSyncTask(RenderFileTask):

@@ -1,4 +1,4 @@
-""" Provides tasks for Rust projects that build using Cargo. """
+"""Provides tasks for Rust projects that build using Cargo."""
 
 from __future__ import annotations
 

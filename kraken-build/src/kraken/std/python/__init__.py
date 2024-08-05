@@ -14,6 +14,7 @@ from .tasks.pycln_task import PyclnTask, pycln
 from .tasks.pylint_task import PylintTask, pylint
 from .tasks.pytest_task import CoverageFormat, PytestTask, pytest
 from .tasks.pyupgrade_task import PyUpgradeCheckTask, PyUpgradeTask, pyupgrade
+from .tasks.ruff_task import RuffTask, ruff
 from .tasks.update_lockfile_task import update_lockfile_task
 from .tasks.update_pyproject_task import update_pyproject_task
 from .version import git_version_to_python_version
@@ -56,6 +57,8 @@ __all__ = [
     "pyupgrade",
     "PyUpgradeTask",
     "PyUpgradeCheckTask",
+    "ruff",
+    "RuffTask",
     "update_lockfile_task",
     "update_pyproject_task",
 ]

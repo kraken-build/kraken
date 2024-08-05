@@ -4,19 +4,15 @@ buildscript(requirements=["kraken-build>=0.33.2"])
 
 import os
 
+from kraken.build import project
 from kraken.std import python
-from kraken.std.git import git_describe
+from kraken.std.git import git_describe, gitignore
 
 
 def configure_project() -> None:
     from kraken.build import project
 
-    python.pyupgrade(python_version="3.10", version_spec="==3.15.0")
-    python.pycln(version_spec="==2.4.0")
-
-    python.black(additional_args=["--config", "pyproject.toml"], version_spec="==23.12.1")
-    python.flake8(version_spec="==6.1.0")
-    python.isort(version_spec="==5.13.2")
+    python.ruff()
     python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
 
     if project.directory.joinpath("tests").is_dir():
@@ -45,6 +41,7 @@ def configure_project() -> None:
             credentials=(os.environ["TESTPYPI_USER"], os.environ["TESTPYPI_PASSWORD"])
             if "TESTPYPI_USER" in os.environ
             else None,
+            is_package_source=False,
         )
     )
 
@@ -90,13 +87,8 @@ def configure_project() -> None:
             )
 
 
-from kraken.build import project
-
-try:
-    project.subproject("docs")
-except ImportError:
-    pass
-
+gitignore()
+project.subproject("docs")
 for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
     with subproject.as_current():
         configure_project()

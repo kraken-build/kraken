@@ -15,6 +15,7 @@ import databind.json
 
 from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
+from kraken.core.address import Address
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
 
@@ -194,7 +195,7 @@ class ZipArchiveWriter(ArchiveWriter):
 def dist(
     *,
     name: str,
-    dependencies: Sequence[str | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
+    dependencies: Sequence[str | Address | Task] | Mapping[str | Address, Mapping[str, Any] | IndividualDistOptions],
     output_file: str | Path,
     archive_type: str | None = None,
     prefix: str | None = None,
@@ -222,13 +223,13 @@ def dist(
 
     if isinstance(dependencies, Sequence):
         dependencies = cast(
-            Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
+            Mapping[str | Address, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
         )
     dependencies_map = {
         k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
         for k, v in dependencies.items()
     }
-    dependencies_set = project.resolve_tasks(dependencies_map)
+    dependencies_set = TaskSet(project.context.resolve_tasks(dependencies_map, project))
 
     # This associates the IndividualDistOptions specified in *dependencies* to the Resource(s)
     # provided by the task(s).
@@ -238,7 +239,7 @@ def dist(
         .map(
             lambda resources: get_configured_resources(
                 resources,
-                dependencies_map,
+                {str(k): v for k, v in dependencies_map.items()},
                 dependencies_set,
             )
         )

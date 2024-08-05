@@ -1,4 +1,4 @@
-""" Implements Maturin as a build system for kraken-std. """
+"""Implements Maturin as a build system for kraken-std."""
 
 from __future__ import annotations
 
@@ -12,9 +12,10 @@ from pathlib import Path
 from loguru import logger
 
 from kraken.common.path import is_relative_to
+from kraken.common.toml import TomlFile
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import Pyproject, PyprojectHandler
+from ..pyproject import PyprojectHandler
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
@@ -53,7 +54,7 @@ class MaturinZigTarget:
 
 class _MaturinBuilder:
     def __init__(
-        self, entry_point: str, get_pyproject_reader: Callable[[Pyproject], PyprojectHandler], project_directory: Path
+        self, entry_point: str, get_pyproject_reader: Callable[[TomlFile], PyprojectHandler], project_directory: Path
     ) -> None:
         self._entry_point = entry_point
         self._get_pyproject_reader = get_pyproject_reader
@@ -185,13 +186,13 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
 
     # PythonBuildSystem
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> MaturinPoetryPyprojectHandler:
+    def get_pyproject_reader(self, pyproject: TomlFile) -> MaturinPoetryPyprojectHandler:
         return MaturinPoetryPyprojectHandler(pyproject)
 
     def get_managed_environment(self) -> ManagedEnvironment:
         return MaturinPoetryManagedEnvironment(self.project_directory)
 
-    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
+    def update_pyproject(self, settings: PythonSettings, pyproject: TomlFile) -> None:
         super().update_pyproject(settings, pyproject)
         handler = self.get_pyproject_reader(pyproject)
         handler.synchronize_project_section_to_poetry_state()

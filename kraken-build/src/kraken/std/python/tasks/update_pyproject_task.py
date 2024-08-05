@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from kraken.common.toml import TomlFile
 from kraken.core import Project, Property, TaskStatus
 from kraken.std.python.buildsystem import PythonBuildSystem
 from kraken.std.util.render_file_task import RenderFileTask
 
-from ..pyproject import Pyproject
 from ..settings import PythonSettings, python_settings
 
 
@@ -21,7 +21,7 @@ class UpdatePyprojectTask(RenderFileTask):
         self.content.setcallable(lambda: self.get_file_contents(self.file.get()))
 
     def get_file_contents(self, file: Path) -> str:
-        pyproject = Pyproject.read(file)
+        pyproject = TomlFile.read(file)
         settings = self.settings.get()
         assert settings.build_system
         settings.build_system.update_pyproject(settings, pyproject)

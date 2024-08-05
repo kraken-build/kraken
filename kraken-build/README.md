@@ -63,7 +63,7 @@ $ slap venv -a
 
 You may want to use a released version of `krakenw` to interact in the repository however:
 
-    $ krakenw python.install
+    $ krakenw run python.install
     $ krakenw run fmt lint test
 
 ### Releases

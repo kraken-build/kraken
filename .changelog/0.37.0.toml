@@ -1,0 +1,37 @@
+release-date = "2024-08-02"
+
+[[entries]]
+id = "7e50c02f-8a42-4877-a64c-21fedb04dab5"
+type = "refactor"
+description = "Renamed `Pyproject` into `TomlFile` for better capturing what it does and moved it to `kraken.common.toml`."
+author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "00907a4a-2abe-43a5-a134-d96aaf0bdbdb"
+type = "docs"
+description = "Fixing typo in README"
+author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "b7f209cb-7ff7-414d-b368-bde8cb57109d"
+type = "refactor"
+description = "move `kraken.std.git.gitignore.parser` to `kraken.common.gitignore`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bbdd557d-b4c2-4ba6-9adc-66c18f51a44c"
+type = "hygiene"
+description = "Eliminate `nr-io-graphviz` dependency and update `databind` to min `4.5.0`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "0a74ab07-f895-48e8-8842-6c5382ba8402"
+type = "refactor"
+description = "Eliminate `nr-stream` dependency"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2293b312-487a-41ce-80c0-9f39214fac09"
+type = "fix"
+description = "Add missing `py.typed` marker for `kraken.build` module"
+author = "@NiklasRosenstein"
