@@ -1,4 +1,9 @@
 [[entries]]
+id = "b6fb5e00-0bed-4e07-8cf3-c16c394d40fe"
+type = "improvement"
+description = "Replace `rich` logger with `loguru` which produces nicer log formatting and requires less setup"
+
+[[entries]]
 id = "5f259115-ab4d-43d1-b23f-6b2436f26bb2"
 type = "feature"
 description = "Add `buildscript(interpreter_constraint)` argument"
