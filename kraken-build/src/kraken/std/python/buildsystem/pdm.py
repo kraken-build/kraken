@@ -141,6 +141,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         # `truststore` package (see https://github.com/pdm-project/pdm/issues/3076 for more information).
         # On these systems, if these variables are set, we configure the certificates in the PDM configuration
         # instead.
+        ca_certs: str | None
         if sys.platform != "linux":
             ca_certs = next(filter(None, (os.environ.get(k) for k in ["SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"])), None)
         else:
