@@ -118,6 +118,8 @@ class PythonSettings:
                 upload_url = "https://test.pypi.org/legacy"
             elif index_url.endswith("/simple"):
                 upload_url = index_url[: -len("/simple")]
+            elif index_url.endswith("/simple/"):
+                upload_url = index_url[: -len("/simple/")]
             else:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
