@@ -1,0 +1,5 @@
+
+[[entries]]
+id = "b6fb5e00-0bed-4e07-8cf3-c16c394d40fe"
+type = "improvement"
+description = "Replace `rich` logger with `loguru` which produces nicer log formatting and requires less setup"
