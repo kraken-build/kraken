@@ -8,17 +8,11 @@ import abc
 import contextlib
 import dataclasses
 import enum
+import logging
 import shlex
 from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
-
-from loguru import logger
-
-if TYPE_CHECKING:
-    from loguru import Logger
-else:
-    Logger = object  # satisfy typeapi introspection for Task objects
 
 from kraken.common import Supplier
 from kraken.core.address import Address
@@ -210,7 +204,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
 
     #: A logger that is bound to the task's address. Use this logger to log messages related to the task,
     #: for example when implementing :meth:`finalize`, :meth:`prepare` or :meth:`execute`.
-    logger: Logger
+    logger: logging.Logger
 
     def __init__(self, name: str, project: Project) -> None:
         from kraken.core.system.project import Project
@@ -219,7 +213,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(project, Project), type(project)
         KrakenObject.__init__(self, name, project)
         PropertyContainer.__init__(self)
-        self.logger = self._create_logger()
+        self.logger = logging.getLogger(f"{str(self.address)} [{type(self).__module__}.{type(self).__qualname__}]")
         self._outputs: list[Any] = []
         self.__tags: dict[str, set[TaskTag]] = {}
         self.__relationships: list[_Relationship[Address | Task]] = []
@@ -452,18 +446,6 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         return None
-
-    def _create_logger(self) -> Logger:
-        return logger.bind(task_name=str(self.address), task_type=f"{type(self).__module__}.{type(self).__qualname__}")
-
-    def __getstate__(self) -> Any:
-        state = vars(self).copy()
-        state.pop("logger")  # Loguru loggers cannot be pickled
-        return state
-
-    def __setstate__(self, state: Any) -> None:
-        vars(self).update(state)
-        self.logger = self._create_logger()
 
 
 class GroupTask(Task):
