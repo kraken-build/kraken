@@ -22,8 +22,8 @@ Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.poetry.dependencies]
-loguru = "^0.7.2"
 kraken-build = "0.37.3"
+loguru = "^0.7.2"
 packaging = "^23.1"
 python = ">=3.10"
 termcolor = "^2.3.0"

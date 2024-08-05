@@ -13,6 +13,8 @@ from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
+from loguru import logger
+
 if TYPE_CHECKING:
     from loguru import Logger
 else:
