@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import logging
 import os
 import re
 import subprocess
@@ -11,9 +12,9 @@ from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import ClassVar
 
-from loguru import logger
 from typing_extensions import NotRequired, TypedDict
 
+logger = logging.getLogger(__name__)
 DEFAULT_CACHE_PATH = Path("~/.cache/krakenw/python-interpreters.json")
 
 
