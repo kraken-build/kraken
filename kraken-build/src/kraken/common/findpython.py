@@ -104,7 +104,7 @@ def get_candidates(
 def _get_candidates(
     path_list: Sequence[str | Path] | None = None, check_pyenv: bool = True
 ) -> Iterator[InterpreterCandidate]:
-    """ Internal. Implementation of `get_candidates()` without Pyenv shim detection."""
+    """Internal. Implementation of `get_candidates()` without Pyenv shim detection."""
 
     if path_list is None:
         path_list = os.environ["PATH"].split(os.pathsep)
@@ -190,7 +190,9 @@ def get_python_interpreter_version(python_bin: str) -> str:
 
 
 def evaluate_candidates(
-    candidates: Iterable[InterpreterCandidate], cache: InterpreterVersionCache | None = None, ignore_shims: bool = True,
+    candidates: Iterable[InterpreterCandidate],
+    cache: InterpreterVersionCache | None = None,
+    ignore_shims: bool = True,
 ) -> list[Interpreter]:
     """
     Evaluates Python interpreter candidates and returns the deduplicated list of interpreters that were found.
