@@ -410,9 +410,9 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
 
 
 @exit_on_known_exceptions(BuildEnvError, exit_code=2)
-def main() -> NoReturn:
+def main(krakenw_args: list[str] | None = None) -> NoReturn:
     parser = _get_argument_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args=krakenw_args)
     logging_options = LoggingOptions.collect(args)
     logging_options.init_logging()
     env_options = EnvOptions.collect(args)
