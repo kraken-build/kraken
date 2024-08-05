@@ -40,4 +40,4 @@ def test__issue_263__local_dependency_is_considered_relative_to_project_root() -
             assert excinfo.value.code == 0
 
         # We expect that the example_project/subproject/.kraken.py creates a file.
-        assert (Path(tmp) / EXAMPLE_PROJECT / "subproject" / "answer.txt").read_text() == "42"
+        assert (Path(tmp) / EXAMPLE_PROJECT.name / "subproject" / "answer.txt").read_text() == "42"

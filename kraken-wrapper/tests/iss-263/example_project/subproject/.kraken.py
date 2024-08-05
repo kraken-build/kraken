@@ -1,4 +1,6 @@
-from pathlib import Path
 from dependency import answer_to_the_universe
+from kraken.build import project
 
-Path("answer.txt").write_text(str(answer_to_the_universe()))
+path = project.directory / "answer.txt"
+print("Writing file", path)
+path.write_text(str(answer_to_the_universe()))
