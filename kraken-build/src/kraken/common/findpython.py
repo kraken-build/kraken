@@ -10,12 +10,9 @@ import subprocess
 import sys
 from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
 from typing_extensions import NotRequired, TypedDict
-
-if TYPE_CHECKING:
-    import rich.table
 
 logger = logging.getLogger(__name__)
 DEFAULT_CACHE_PATH = Path("~/.cache/krakenw/python-interpreters.json")
@@ -217,22 +214,21 @@ def evaluate_candidates(
     return interpreters
 
 
-def build_rich_table(interpreters: Iterable[Interpreter]) -> rich.table.Table:
+def print_interpreters(interpreters: Iterable[Interpreter]) -> None:
     """
-    Gets a table of all viable Python interpreters on the system.
-
-    Requires that the `rich` package is installed.
+    Prints the interpeter information to stdout, colored.
     """
 
-    import rich.table
+    from kraken.common import Color, colored
 
-    tb = rich.table.Table("Path", "Version")
     for interpreter in interpreters:
+        prefix = "  "
         version = interpreter["version"]
+        version_color: Color = "grey"
         if interpreter.get("selected"):
-            version += " *"
-        tb.add_row(interpreter["path"], version)
-    return tb
+            prefix = " *"
+            version_color = "cyan"
+        print(colored(prefix, "grey"), colored(interpreter["path"], "green"), f"({colored(version, version_color)})")
 
 
 def match_version_constraint(constraint: str, version: str) -> bool:
@@ -248,19 +244,6 @@ def match_version_constraint(constraint: str, version: str) -> bool:
 def main() -> None:
     import argparse
 
-    try:
-        import rich
-        import rich.table
-
-        def tabulate(interpreters: Iterable[Interpreter]) -> None:
-            rich.print(build_rich_table(interpreters))
-
-    except ImportError:
-
-        def tabulate(interpreters: Iterable[Interpreter]) -> None:
-            for interpreter in interpreters:
-                print(interpreter)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--constraint", help="Find a Python interpreter with the given constraint.")
     args = parser.parse_args()
@@ -272,7 +255,7 @@ def main() -> None:
             if match_version_constraint(args.constraint, interpreter["version"]):
                 interpreter["selected"] = True
 
-    tabulate(interpreters)
+    print_interpreters(interpreters)
 
 
 if __name__ == "__main__":

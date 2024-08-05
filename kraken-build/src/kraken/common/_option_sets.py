@@ -1,9 +1,11 @@
 import argparse
+import inspect
 import logging
+import sys
 from dataclasses import dataclass
 from typing import ClassVar
 
-logger = logging.getLogger(__name__)
+from loguru import logger
 
 
 @dataclass(frozen=True)
@@ -41,25 +43,40 @@ class LoggingOptions:
         )
 
     def init_logging(self, force_color: bool = False) -> None:
-        import logging
-
-        from rich.console import Console
-        from rich.logging import RichHandler
-
         verbosity = self.verbosity - self.quietness
         if verbosity > 1:
-            level = logging.DEBUG
+            level = "DEBUG"
         elif verbosity > 0:
-            level = logging.INFO
+            level = "INFO"
         elif verbosity == 0:
-            level = logging.WARNING
+            level = "WARNING"
         elif verbosity < 0:
-            level = logging.ERROR
+            level = "ERROR"
         else:
             assert False, verbosity
 
-        console = Console(force_terminal=True if force_color else None)
-        logging.basicConfig(level=level, format="%(message)s", handlers=[RichHandler(console=console)])
+        # Intercept standard logs and send them to Loguru.
+        class InterceptHandler(logging.Handler):
+            def emit(self, record: logging.LogRecord) -> None:
+                # Get corresponding Loguru level if it exists.
+                level: str | int
+                try:
+                    level = logger.level(record.levelname).name
+                except ValueError:
+                    level = record.levelno
+
+                # Find caller from where originated the logged message.
+                frame, depth = inspect.currentframe(), 0
+                while frame and (depth == 0 or frame.f_code.co_filename == logging.__file__):
+                    frame = frame.f_back
+                    depth += 1
+
+                logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+
+        logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
+
+        logger.remove()
+        logger.add(sys.stderr, level=level)
 
 
 @dataclass

@@ -14,6 +14,7 @@ from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
+from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
@@ -32,7 +33,6 @@ else:
 
 T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
-logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -247,7 +247,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         if name not in self.__tags:
             self.__tags[name] = set()
 
-        logger.debug("Adding tag %r (reason: %r, origin: %r) to %s", name, reason, origin, self.address)
+        logger.debug("Adding tag {!r} (reason: {!r}, origin: {!r}) to {}", name, reason, origin, self.address)
         self.__tags[name].add(TaskTag(name, reason, origin))
 
     def remove_tag(self, tag: TaskTag) -> None:
@@ -258,10 +258,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         try:
             self.__tags[tag.name].discard(tag)
         except KeyError:
-            logger.debug("Attempted to remove tag %r from %s, but it does not exist", tag, self.address)
+            logger.debug("Attempted to remove tag {!r} from {}, but it does not exist", tag, self.address)
             pass
         else:
-            logger.debug("Removed tag %r from %s", tag, self.address)
+            logger.debug("Removed tag {!r} from {}", tag, self.address)
 
     def get_tags(self, name: str) -> Collection[TaskTag]:
         """
@@ -539,7 +539,7 @@ class BackgroundTask(Task):
             pass
         else:
             logger.warning(
-                'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
+                'BackgroundTask.teardown() did not get called on task "{}". This may cause some issues, such '
                 "as an error during serialization or zombie processes.",
                 self.address,
             )
