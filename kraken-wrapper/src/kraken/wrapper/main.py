@@ -228,7 +228,6 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
-    import rich
     from kraken.common import findpython
 
     if argv:
@@ -236,8 +235,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
         sys.exit(1)
 
     interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
-    table = findpython.build_rich_table(interpreters)
-    rich.print(table)
+    findpython.print_interpreters(interpreters)
     sys.exit(0)
 
 
