@@ -22,6 +22,11 @@ from . import ManagedEnvironment, PythonBuildSystem
 
 logger = logging.getLogger(__name__)
 
+# NOTE: We can't inline this expression where we need it because Mypy understands the expression and will permanently
+#       turn off a code path on the corresponding systme, which can lead to type errors downstream (typically
+#       unreachable code).
+_is_linux = sys.platform == "linux"
+
 
 class PdmPyprojectHandler(PyprojectHandler):
     """
@@ -141,8 +146,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         # `truststore` package (see https://github.com/pdm-project/pdm/issues/3076 for more information).
         # On these systems, if these variables are set, we configure the certificates in the PDM configuration
         # instead.
-        ca_certs: str | None
-        if sys.platform != "linux":
+        if not _is_linux:
             ca_certs = next(filter(None, (os.environ.get(k) for k in ["SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"])), None)
         else:
             ca_certs = None
