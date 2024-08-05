@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-
-from loguru import logger
 
 from kraken.core import Project
 from kraken.std.python.pyproject import PackageIndex
 
 from .buildsystem import PythonBuildSystem, detect_build_system
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import contextlib
 import json
+import logging
 import subprocess as sp
 from typing import Any, TypeAlias, TypedDict, cast
 
-from loguru import logger
-
 from kraken.common import flatten
+
+logger = logging.getLogger(__name__)
 
 
 class DockerServiceManager:

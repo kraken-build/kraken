@@ -1,10 +1,12 @@
+import logging
 import time
 from collections.abc import Collection
 
 import httpx
-from loguru import logger
 
 from kraken.common import http
+
+logger = logging.getLogger(__name__)
 
 
 def http_probe(method: str, url: str, timeout: float = 60, status_codes: Collection[int] | None = None) -> None:

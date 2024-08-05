@@ -1,18 +1,20 @@
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import subprocess as sp
 import sys
 from collections.abc import Iterable, MutableMapping
 
-from loguru import logger
 
 from kraken.common.pyenv import VirtualEnvInfo, get_current_venv
 from kraken.core import Project, Task, TaskRelationship, TaskStatus
 from kraken.std.python.buildsystem import ManagedEnvironment
 
 from ..settings import python_settings
+
+logger = logging.getLogger(__name__)
 
 
 class EnvironmentAwareDispatchTask(Task):

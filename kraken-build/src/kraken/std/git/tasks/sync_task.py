@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Literal
 
@@ -9,6 +10,8 @@ from kraken.std.git.gitignore.generated import join_generated_section, split_gen
 from kraken.std.util.render_file_task import RenderFileTask
 
 from ..gitignore.gitignore_io import gitignore_io_fetch_cached
+
+logger = logging.getLogger(__name__)
 
 
 class GitignoreSyncTask(RenderFileTask):

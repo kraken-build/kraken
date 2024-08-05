@@ -14,9 +14,10 @@ from json import dumps, loads
 from pathlib import Path
 from typing import cast
 
-from loguru import logger
-
 from kraken.common import http
+
+logger = logging.getLogger(__name__)
+
 
 GITIGNORE_API_URL = "https://www.toptal.com/developers/gitignore/api/"
 

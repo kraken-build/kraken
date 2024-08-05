@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -7,6 +8,8 @@ from enum import Enum
 from typing import Any, ClassVar, TypeAlias
 
 from kraken.common.toml import TomlFile
+
+logger = logging.getLogger(__name__)
 
 
 class _PackageIndexPriority(str, Enum):

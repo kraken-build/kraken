@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
@@ -14,6 +15,8 @@ __all__ = [
     "kraken_ctx",
     "kraken_project",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(name="kraken_ctx")

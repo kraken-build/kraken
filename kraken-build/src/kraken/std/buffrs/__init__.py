@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from typing import cast
 
 from kraken.core import Project
 
 from .tasks import BuffrsInstallTask, BuffrsLoginTask, BuffrsPublishTask
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["buffrs_login", "buffrs_publish"]
 

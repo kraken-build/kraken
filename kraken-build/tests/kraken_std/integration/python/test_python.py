@@ -1,4 +1,5 @@
 import filecmp
+import logging
 import os
 import shutil
 import tarfile
@@ -12,7 +13,6 @@ from unittest.mock import patch
 import httpx
 import pytest
 import tomli
-from loguru import logger
 
 from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
@@ -24,6 +24,7 @@ from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 
+logger = logging.getLogger(__name__)
 PYPISERVER_PORT = 23213
 USER_NAME = "integration-test-user"
 USER_PASS = "password-for-integration-test"

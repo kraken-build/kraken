@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import subprocess
 from dataclasses import dataclass, fields
@@ -12,7 +13,8 @@ from typing import Any
 
 import tomli
 import tomli_w
-from loguru import logger
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

@@ -1,4 +1,5 @@
 import contextlib
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +9,8 @@ from kraken.std.cargo import CargoProject
 
 from ..config import CargoRegistry
 from .cargo_build_task import CargoBuildTask
+
+logger = logging.getLogger(__name__)
 
 
 class CargoPublishTask(CargoBuildTask):

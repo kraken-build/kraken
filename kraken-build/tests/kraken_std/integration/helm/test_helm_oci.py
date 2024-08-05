@@ -1,15 +1,17 @@
+import logging
 import tempfile
 import time
 from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from loguru import logger
 
 from kraken.common import http
 from kraken.core import Project
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
 from tests.kraken_std.util.docker import DockerServiceManager
+
+logger = logging.getLogger(__name__)
 
 USER_NAME = "user"
 USER_PASS = "user"

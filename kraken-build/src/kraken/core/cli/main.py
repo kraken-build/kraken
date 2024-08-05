@@ -5,6 +5,7 @@ import builtins
 import contextlib
 import io
 import json
+import logging
 import os
 import pdb
 import sys
@@ -13,7 +14,6 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
-from loguru import logger
 from kraken.common.graphviz import render_to_browser
 from kraken.common.graphviz import GraphvizWriter
 
@@ -43,7 +43,7 @@ from kraken.core.system.task import GroupTask, Task
 
 BUILD_SCRIPT = Path(".kraken.py")
 BUILD_SUPPORT_DIRECTORY = "build-support"
-
+logger = logging.getLogger(__name__)
 print = partial(builtins.print, flush=True)
 
 

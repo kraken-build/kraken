@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import tomli
 import tomli_w
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

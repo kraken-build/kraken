@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import shlex
 import subprocess
@@ -10,10 +11,11 @@ from typing import ClassVar, Literal, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
-from loguru import logger
 
 from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, BuildEnvError, general_get_installed_distributions
 from ._lockfile import Distribution
+
+logger = logging.getLogger(__name__)
 
 
 def find_python_interpreter(constraint: str) -> str:

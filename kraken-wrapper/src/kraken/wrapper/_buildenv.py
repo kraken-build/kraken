@@ -4,6 +4,7 @@ import abc
 import dataclasses
 import datetime
 import json
+import logging
 import subprocess
 from collections.abc import Sequence
 from pathlib import Path
@@ -12,6 +13,8 @@ from typing import Any, NoReturn
 from kraken.common import EnvironmentType, NotSet, RequirementSpec, datetime_to_iso8601, iso8601_to_datetime
 
 from ._lockfile import Distribution
+
+logger = logging.getLogger(__name__)
 
 KRAKEN_MAIN_IMPORT_SNIPPET = """
 try:

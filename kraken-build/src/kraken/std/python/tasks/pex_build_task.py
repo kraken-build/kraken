@@ -1,23 +1,18 @@
-from __future__ import annotations
-
 import hashlib
+import logging
 import shlex
 import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
-
-from loguru import logger
-
-if TYPE_CHECKING:
-    from loguru import Logger
+from typing import Literal
 
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskStatus
 from kraken.std.util.url import inject_url_credentials, redact_url_password
 
+logger = logging.getLogger(__name__)
 default_index_url: str | None = None
 
 
@@ -102,7 +97,7 @@ def _build_pex(
     python: Path | None = None,
     index_url: str | None = None,
     verbose: bool = False,
-    log: Logger | None = None,
+    log: logging.Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
 
@@ -149,7 +144,7 @@ def _build_pex(
     if verbose:
         command.append("-v")
 
-    (log or logger).info("Building PEX $ %s", " ".join(map(shlex.quote, safe_command)))
+    (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, safe_command)))
     subprocess.run(command, check=True)
 
 

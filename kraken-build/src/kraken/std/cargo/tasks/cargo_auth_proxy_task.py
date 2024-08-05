@@ -1,19 +1,21 @@
 from __future__ import annotations
 
 import contextlib
+import logging
 from collections.abc import Iterator, Sequence
 from pathlib import Path
 from urllib.parse import urlparse
 
 import tomli
 import tomli_w
-from loguru import logger
 
 from kraken.common import atomic_file_swap, not_none
 from kraken.core import BackgroundTask, Property, TaskStatus
 from kraken.std.cargo.config import CargoRegistry
 from kraken.std.git.config import dump_gitconfig, load_gitconfig
 from kraken.std.mitm import start_mitmweb_proxy
+
+logger = logging.getLogger(__name__)
 
 
 class CargoAuthProxyTask(BackgroundTask):

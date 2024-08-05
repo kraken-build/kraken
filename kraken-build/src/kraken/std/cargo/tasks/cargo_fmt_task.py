@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import logging
 import shutil
 import subprocess as sp
 
-from loguru import logger
-
 from kraken.core import Property, Task, TaskStatus
 from kraken.std.cargo.config import CargoConfig
+
+logger = logging.getLogger(__name__)
 
 
 class CargoFmtTask(Task):
@@ -82,12 +83,12 @@ class CargoFmtTask(Task):
     def is_using_rust_nightly() -> bool:
         rustc = shutil.which("rustc")
         if rustc is None:
-            logger.warning("rustc is not installed, could not determine the active rust version")
+            logger.warn("rustc is not installed, could not determine the active rust version")
             return False
 
         result = sp.run([rustc, "--version"], stdout=sp.PIPE, stderr=sp.DEVNULL)
         if result.returncode != 0:
-            logger.warning("rustc --version is not installed, could not determine the active rust version")
+            logger.warn("rustc --version is not installed, could not determine the active rust version")
             return False
 
         return "-nightly" in result.stdout.decode("utf-8")
