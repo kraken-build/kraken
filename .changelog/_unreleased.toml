@@ -1,0 +1,6 @@
+[[entries]]
+id = "5f259115-ab4d-43d1-b23f-6b2436f26bb2"
+type = "feature"
+description = "Add `buildscript(interpreter_constraint)` argument"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"

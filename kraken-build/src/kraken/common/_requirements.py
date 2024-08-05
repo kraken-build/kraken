@@ -236,7 +236,7 @@ class RequirementSpec:
             requirements=tuple(map(parse_requirement, metadata.requirements)),
             index_url=metadata.index_url,
             extra_index_urls=tuple(metadata.extra_index_urls),
-            interpreter_constraint=DEFAULT_INTERPRETER_CONSTRAINT,
+            interpreter_constraint=metadata.interpreter_constraint or DEFAULT_INTERPRETER_CONSTRAINT,
             pythonpath=tuple(metadata.additional_sys_paths) + (DEFAULT_BUILD_SUPPORT_FOLDER,),
         )
 
@@ -246,4 +246,5 @@ class RequirementSpec:
             extra_index_urls=list(self.extra_index_urls),
             requirements=[str(x) for x in self.requirements],
             additional_sys_paths=[x for x in self.pythonpath if x != DEFAULT_BUILD_SUPPORT_FOLDER],
+            interpreter_constraint=DEFAULT_INTERPRETER_CONSTRAINT,
         )
