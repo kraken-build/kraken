@@ -39,7 +39,16 @@ class VenvBuildEnv(BuildEnv):
 
     INSTALLER_NAME: ClassVar[str] = "Pip"
 
-    def __init__(self, path: Path, incremental: bool = False, show_pip_logs: bool = False) -> None:
+    def __init__(self, project_root: Path, path: Path, incremental: bool = False, show_pip_logs: bool = False) -> None:
+        """
+        Args:
+            project_root: Path for resolving relative local requirements.
+            path: Path where the virtual env will be created.
+            incremental: Whether install operations can re-use an existing state of the virtual environment.
+            show_pip_logs: Keep Pip logs attached to the terminal. Otherwise they're piped to a file.
+        """
+
+        self._project_root = project_root
         self._path = path
         self._venv = VirtualEnvInfo(self._path)
         self._incremental = incremental
@@ -116,7 +125,7 @@ class VenvBuildEnv(BuildEnv):
         # Must enable transitive resolution because lock files are not currently cross platform (see kraken-wrapper#2).
         # if not transitive:
         #     command += ["--no-deps"]
-        command += requirements.to_args()
+        command += requirements.to_args(base_dir=self._project_root)
         return command
 
     def _install_pythonpath(self, venv_dir: Path, pythonpath: list[str]) -> None:

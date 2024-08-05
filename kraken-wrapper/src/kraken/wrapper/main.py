@@ -443,6 +443,7 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
     config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
+        project.directory,
         project.directory / BUILDENV_PATH,
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,
