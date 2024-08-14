@@ -1,0 +1,5 @@
+[[entries]]
+id = "cf6a4820-5e32-47fe-beb1-206329e6bc11"
+type = "fix"
+description = "Fix `dist()` function not using `TaskSet` correctly (regression introduced in 0.37.0, 8840ec5), add `TaskSet.build()` to compensate"
+author = "@NiklasRosenstein"

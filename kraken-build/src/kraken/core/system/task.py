@@ -23,6 +23,7 @@ from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
 
 if TYPE_CHECKING:
+    from kraken.core.system.context import Context
     from kraken.core.system.project import Project
 else:
     # Type hint evaluation in typeapi tries to fully resolve forward references to a type. In order to allow the
@@ -567,6 +568,43 @@ class BackgroundTask(Task):
 class TaskSet(Collection[Task]):
     """Represents a collection of tasks."""
 
+    @staticmethod
+    def build(
+        context: Context | Project,
+        selector: str | Address | Task | Iterable[str | Address | Task],
+        project: Project | None = None,
+    ) -> TaskSet:
+        """
+        For each item in *selector*, resolve tasks using [`Context.resolve_tasks()`]. If a selector is a string,
+        assign the resolved tasks to a partition by that selector value.
+
+        Args:
+            context: A Kraken context or project to resolve the *selector* in. If it is a project, string selectors
+                are treated relative to the project.
+            selector: A single selector string or task, or a sequence thereof. Note that selectors of type [`Address`]
+                are converted to string partitions.
+        """
+
+        from kraken.core.system.project import Project
+
+        if isinstance(context, Project):
+            project = context
+            context = context.context
+        else:
+            project = None
+
+        if isinstance(selector, (str, Address, Task)):
+            selector = [selector]
+
+        result = TaskSet()
+        for item in selector:
+            if isinstance(item, (str, Address)):
+                result.add(context.resolve_tasks([item], project), partition=str(item))
+            else:
+                result.add([item])
+
+        return result
+
     def __init__(self, tasks: Iterable[Task] = ()) -> None:
         self._tasks = set(tasks)
         self._partition_to_task_map: dict[str, set[Task]] = {}
@@ -579,7 +617,7 @@ class TaskSet(Collection[Task]):
         return len(self._tasks)
 
     def __repr__(self) -> str:
-        return f"TaskSet(length={len(self._tasks)})"
+        return f"TaskSet(length={len(self._tasks)}, pttm={self._partition_to_task_map}, ttpm={self._task_to_partition_map})"
 
     def __contains__(self, __x: object) -> bool:
         return __x in self._tasks
@@ -659,10 +697,15 @@ class TaskSetPartitions:
     def __getitem__(self, partition: str) -> Collection[Task]: ...
 
     @overload
+    def __getitem__(self, partition: Address) -> Collection[Task]: ...
+
+    @overload
     def __getitem__(self, partition: Task) -> Collection[str]: ...
 
-    def __getitem__(self, partition: str | Task) -> Collection[str] | Collection[Task]:
+    def __getitem__(self, partition: str | Address | Task) -> Collection[str] | Collection[Task]:
         if isinstance(partition, str):
             return self._ptt.get(partition) or ()
+        elif isinstance(partition, Address):
+            return self._ptt.get(str(partition)) or ()
         else:
             return self._ttp.get(partition) or ()
