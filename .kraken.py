@@ -17,7 +17,10 @@ def configure_project() -> None:
 
     if project.directory.joinpath("tests").is_dir():
         # Explicit list of test directories, Pytest skips the build directory if not specified explicitly.
-        python.pytest(ignore_dirs=["src/tests/integration"], include_dirs=["src/kraken/build"])
+        if project.directory.name == "kraken-build":
+            python.pytest(ignore_dirs=["src/tests/integration"], include_dirs=["src/kraken/build"])
+        elif project.directory.name == "kraken-wrapper":
+            python.pytest(doctest_modules=False)
 
     if project.directory.joinpath("tests/integration").is_dir():
         python.pytest(
