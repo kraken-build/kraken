@@ -185,7 +185,7 @@ class ConfigModel:
         logger.info("saving default_installer=%r in %s", env_type.name, self._path)
 
     def get_default_installer(self) -> EnvironmentType:
-        default = EnvironmentType.VENV
+        default = EnvironmentType.UV
         if value := self._config.get("default_installer"):
             try:
                 return EnvironmentType[value]

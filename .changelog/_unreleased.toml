@@ -1,0 +1,5 @@
+[[entries]]
+id = "cef04ded-99dc-42c0-8a69-79915a368d74"
+type = "improvement"
+description = "Use UV as the default installer for Kraken build-time virtual environments"
+author = "@NiklasRosenstein"
