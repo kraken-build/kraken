@@ -1,0 +1,5 @@
+[[entries]]
+id = "e3dd07f8-7520-45b9-9407-9f650e4d333c"
+type = "feature"
+description = "Extend pytest task to accept sequence"
+author = "@sebimarkgraf"
