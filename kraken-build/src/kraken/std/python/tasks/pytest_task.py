@@ -58,7 +58,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
             "pytest",
             "-vv",
             str(self.project.directory / self.settings.source_directory),
-            *map(lambda t: str(self.project.directory / t), tests_dir),
+            *[str(self.project.directory / path) for path in tests_dir],
             *[str(self.project.directory / path) for path in self.include_dirs.get()],
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
