@@ -56,7 +56,10 @@ class PytestTask(EnvironmentAwareDispatchTask):
             return TaskStatus.failed("no test directory configured and none could be detected")
 
         if self.include_dirs.get():
-            warnings.warn("Setting include dirs is deprecated and will lead to an error in the future. Please, set multiple test directories instead.", DeprecationWarning)
+            warnings.warn(
+                "Setting include dirs is deprecated and will lead to an error in the future. Please, set multiple test directories instead.",
+                DeprecationWarning,
+            )
 
         command = [
             "pytest",
