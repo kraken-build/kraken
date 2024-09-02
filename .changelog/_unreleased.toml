@@ -15,3 +15,9 @@ id = "2d36cc17-ab77-476d-9187-9f509e51735d"
 type = "fix"
 description = "Use `fsdecode()` on result from `find_uv_bin()` for enhanced compatbility"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6262db32-1e87-471b-b4fb-b99ef55eea56"
+type = "fix"
+description = "Fix `inject_url_credentials()` to not drop port"
+author = "@NiklasRosenstein"
