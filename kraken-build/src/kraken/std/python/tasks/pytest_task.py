@@ -32,7 +32,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["pytest"]
 
     tests_dir: Property[Sequence[Path] | Path]
-    include_dirs: Property[Sequence[Path]] = Property.default(())
+    include_dirs: Property[Sequence[Path]] = Property.default(())  # NOTE: Deprecated in favour of `tests_dir`
     ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
