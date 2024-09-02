@@ -184,4 +184,12 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
 
         return PDMPythonBuildSystem(project_directory)
 
-    return None
+    if "[tool.uv]" not in pyproject_content:
+        logger.info(
+            "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
+            project_directory,
+        )
+
+    from kraken.std.python.buildsystem.uv import UVPythonBuildSystem
+
+    return UVPythonBuildSystem(project_directory)
