@@ -9,6 +9,7 @@ from __future__ import annotations
 from hashlib import md5
 import logging
 from os import fsdecode
+import os
 import shutil
 import subprocess as sp
 from collections.abc import Sequence
@@ -228,6 +229,13 @@ class UVPythonBuildSystem(PythonBuildSystem):
         """
 
         with tempfile.TemporaryDirectory() as tempdir:
+            env = os.environ.copy()
+
+            # Make sure that UV is on the path for `pyproject-build` to find it.
+            assert Path(self.uv_bin).name == "uv"
+            if shutil.which("uv") != self.uv_bin:
+                env["PATH"] = str(Path(self.uv_bin).parent) + os.pathsep + env["PATH"]
+
             command = [
                 self.uv_bin,
                 "tool",
@@ -238,9 +246,9 @@ class UVPythonBuildSystem(PythonBuildSystem):
                 "--outdir",
                 tempdir,
                 "--installer",
-                self.uv_bin,
+                "uv",
             ]
-            sp.check_call(command, cwd=self.project_directory)
+            sp.check_call(command, cwd=self.project_directory, env=env)
             logger.info("Running %s in '%s'", command, self.project_directory)
 
             src_files = list(Path(tempdir).iterdir())
