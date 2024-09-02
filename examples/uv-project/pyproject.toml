@@ -1,0 +1,17 @@
+[project]
+name = "uv-project"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.10"
+dependencies = [
+    "tqdm>=4.66.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "types-tqdm>=4.66.0.20240417",
+]

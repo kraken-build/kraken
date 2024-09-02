@@ -20,6 +20,7 @@ from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
+from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
@@ -80,7 +81,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
 
 @pytest.mark.parametrize(
     "project_dir",
-    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project"],
+    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project", "uv-project"],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_install_lint_and_publish(
@@ -178,6 +179,7 @@ M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
         ("slap-project", PoetryPyprojectHandler, "^3.6"),
         ("pdm-project", PdmPyprojectHandler, ">=3.9"),
         ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.7"),
+        ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
