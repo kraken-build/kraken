@@ -5,6 +5,7 @@ import os
 import shlex
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
+import warnings
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -53,6 +54,9 @@ class PytestTask(EnvironmentAwareDispatchTask):
         if not tests_dir or len(tests_dir) == 0:
             print("error: no test directory configured and none could be detected")
             return TaskStatus.failed("no test directory configured and none could be detected")
+
+        if self.include_dirs.get():
+            warnings.warn("Setting include dirs is deprecated and will lead to an error in the future. Please, set multiple test directories instead.", DeprecationWarning)
 
         command = [
             "pytest",

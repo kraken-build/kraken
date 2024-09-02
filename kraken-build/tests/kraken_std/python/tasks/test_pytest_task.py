@@ -1,6 +1,5 @@
 from kraken.core import Project
 
-# Renamed import to prevent name collision
 from kraken.std.python import pytest as pytest_task
 
 FAKE_TEST = """
