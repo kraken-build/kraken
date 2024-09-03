@@ -1,4 +1,4 @@
-""" This module provides an experimental new functional API for defining Kraken tasks.
+"""This module provides an experimental new functional API for defining Kraken tasks.
 
 !!! warning
     This API is unstable and should be used with caution.

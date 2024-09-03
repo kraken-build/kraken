@@ -38,7 +38,6 @@ class FetchTarballTask(Task):
         return None
 
     def execute(self) -> TaskStatus | None:
-
         print(f"Downloading {self.url.get()} ...")
         with tempfile.TemporaryDirectory() as tmp, Path(tmp).joinpath("archive").open("wb") as f:
             with httpx.stream("GET", self.url.get(), follow_redirects=True, timeout=60) as response:

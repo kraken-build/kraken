@@ -32,7 +32,6 @@ class ProtocTask(Task):
         self.generators.setmap(lambda v: [*v, (language, output_dir)])
 
     def execute(self) -> TaskStatus | None:
-
         # TODO: Re-organize proto_dir to be prefixed with a `proto/` directory that is not contained
         #       in the `--proto_path` argument. This is necessary to ensure we generate imports in
         #       a `proto/` namespace package.

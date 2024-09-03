@@ -1,4 +1,4 @@
-""" New-style API and template for defining the tasks for an entire Python project."""
+"""New-style API and template for defining the tasks for an entire Python project."""
 
 import logging
 import re
@@ -270,7 +270,8 @@ def python_project(
         black = black_tasks(
             paths=source_paths,
             config=BlackConfig(
-                line_length=line_length, exclude_directories=concat(exclude_lint_directories, exclude_format_directories)
+                line_length=line_length,
+                exclude_directories=concat(exclude_lint_directories, exclude_format_directories),
             ),
             version_spec=black_version_spec,
         )

@@ -1,4 +1,4 @@
-""" This module provides facilities for Kraken-infused Python projects.
+"""This module provides facilities for Kraken-infused Python projects.
 
 __Features__
 

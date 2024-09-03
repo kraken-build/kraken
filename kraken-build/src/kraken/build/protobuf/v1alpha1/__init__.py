@@ -1,4 +1,4 @@
-""" Provides an API for defining a Protobuf project that uses [Buffrs][] for dependency management, [Buf][] for
+"""Provides an API for defining a Protobuf project that uses [Buffrs][] for dependency management, [Buf][] for
 linting and code-generation capabilities with [grpcio-tools][].
 
 [Buffrs]: https://github.com/helsing-ai/buffrs
