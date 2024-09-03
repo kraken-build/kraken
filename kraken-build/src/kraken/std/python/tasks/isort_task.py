@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
-import dataclasses
-from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import Supplier

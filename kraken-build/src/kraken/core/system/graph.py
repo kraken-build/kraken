@@ -226,7 +226,7 @@ class TaskGraph(Graph):
                 else:
                     set_non_strict_edge_for_removal(failed_task_path, out_task_path)
 
-        return cast("DiGraph[Address]", restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]
+        return cast("DiGraph[Address]", restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]  # noqa: E501
 
     # Public API
 

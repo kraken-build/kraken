@@ -1,6 +1,6 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from itertools import filterfalse, tee
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 T_co = TypeVar("T_co", covariant=True)
 

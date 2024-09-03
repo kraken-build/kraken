@@ -6,17 +6,17 @@ Support for Python projects managed by [UV](https://docs.astral.sh/uv/guides/pro
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from hashlib import md5
 import logging
-from os import fsdecode
 import os
 import shutil
 import subprocess as sp
-from collections.abc import Sequence
-from pathlib import Path
 import tempfile
-from typing import TYPE_CHECKING, Annotated, Any, Iterable, MutableMapping, TypeVar
+from collections.abc import Iterable, MutableMapping, Sequence
+from dataclasses import dataclass
+from hashlib import md5
+from os import fsdecode
+from pathlib import Path
+from typing import TYPE_CHECKING, Annotated, Any, TypeVar
 from urllib.parse import urlparse
 
 from kraken.common.sanitize import sanitize_http_basic_auth
@@ -62,7 +62,7 @@ class PipIndex:
         return self.url
 
     @staticmethod
-    def of(index: PackageIndex) -> "PipIndex":
+    def of(index: PackageIndex) -> PipIndex:
         credentials = index.credentials if isinstance(index, PythonSettings._PackageIndex) else None
         return PipIndex(index.index_url, credentials)
 
@@ -73,7 +73,7 @@ class PipIndexes:
     supplemental: list[PipIndex]
 
     @staticmethod
-    def from_package_indexes(indexes: Iterable[T_PackageIndex]) -> "PipIndexes":
+    def from_package_indexes(indexes: Iterable[T_PackageIndex]) -> PipIndexes:
         default_index = next((idx for idx in indexes if idx.priority == PackageIndex.Priority.default), None)
         primary_index = next((idx for idx in indexes if idx.priority == PackageIndex.Priority.primary), None)
         remainder = [idx for idx in indexes if idx not in (default_index, primary_index)]

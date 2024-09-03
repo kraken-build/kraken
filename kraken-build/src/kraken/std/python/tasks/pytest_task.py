@@ -5,7 +5,6 @@ import os
 import shlex
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
-import warnings
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -32,7 +31,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     description = "Run unit tests using Pytest."
     python_dependencies = ["pytest"]
 
-    paths: Property[Sequence[str]]
+    paths: Property[Sequence[str | Path]]
     ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
@@ -42,7 +41,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
-        command = ["pytest", "-vv", *self.paths.get()]
+        command = ["pytest", "-vv", *map(str, self.paths.get())]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
         if self.coverage.is_filled():
@@ -73,7 +72,7 @@ def pytest(
     name: str = "pytest",
     group: str = "test",
     project: Project | None = None,
-    paths: Sequence[str] | None = None,
+    paths: Sequence[str | Path] | None = None,
     ignore_dirs: Sequence[Path | str] = (),
     allow_no_tests: bool = False,
     doctest_modules: bool = True,

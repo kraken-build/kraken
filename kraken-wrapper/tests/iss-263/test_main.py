@@ -4,16 +4,16 @@ This tests for [#263 &mdash; local dependency is not considered relative to the 
 [263]: https://github.com/kraken-build/kraken/issues/263
 """
 
+import os
+import shutil
 from collections.abc import Iterator
 from contextlib import contextmanager
-import os
 from pathlib import Path
-import shutil
 from tempfile import TemporaryDirectory
 
 import pytest
-from kraken.wrapper.main import main
 
+from kraken.wrapper.main import main
 
 EXAMPLE_PROJECT = Path(__file__).parent / "example_project"
 DEPENDENCY = Path(__file__).parent / "dependency"

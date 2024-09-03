@@ -19,8 +19,8 @@ from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
-from kraken.std.python.pyproject import Pyproject, PyprojectHandler
 from kraken.std.python.buildsystem.uv import UvPyprojectHandler
+from kraken.std.python.pyproject import PyprojectHandler
 from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir

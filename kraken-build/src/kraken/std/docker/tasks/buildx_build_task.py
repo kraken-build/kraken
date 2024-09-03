@@ -59,7 +59,10 @@ class BuildxBuildTask(BaseBuildTask):
         if self.cache_repo.get():
             # NOTE (@NiklasRosenstein): Buildx does not allow leading underscores, while Kaniko and Artifactory do.
             command += ["--cache-from", f"type=registry,ref={not_none(self.cache_repo.get())}"]
-            command += ["--cache-to", f"type=registry,ref={not_none(self.cache_repo.get())},mode=max,ignore-error=true,image-manifest=true,oci-mediatypes=true"]
+            command += [
+                "--cache-to",
+                f"type=registry,ref={not_none(self.cache_repo.get())},mode=max,ignore-error=true,image-manifest=true,oci-mediatypes=true",  # noqa: E501
+            ]
         if not self.cache.get():
             command += ["--no-cache"]
         if cache_from := self.cache_from.get():

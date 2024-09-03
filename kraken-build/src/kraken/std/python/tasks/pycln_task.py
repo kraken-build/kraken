@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import dataclasses
 import re
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
-from typing import MutableMapping
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property
-from kraken.std.python.settings import python_settings
 from kraken.core.system.task import TaskStatus
+from kraken.std.python.settings import python_settings
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask

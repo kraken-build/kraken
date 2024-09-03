@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
-from typing import MutableMapping
 
 from kraken.common import Supplier
 from kraken.core import Project, Property

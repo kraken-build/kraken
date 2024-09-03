@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from pytest import raises
 
 from kraken.core.system.project import Project

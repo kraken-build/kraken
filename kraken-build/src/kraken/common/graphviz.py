@@ -4,11 +4,10 @@ import http.server
 import logging
 import subprocess as sp
 import tempfile
+import typing as t
 import webbrowser
 from pathlib import Path
 from typing import overload
-
-import typing as t
 
 logger = logging.getLogger(__name__)
 

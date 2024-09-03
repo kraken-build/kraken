@@ -619,7 +619,7 @@ class TaskSet(Collection[Task]):
         return len(self._tasks)
 
     def __repr__(self) -> str:
-        return f"TaskSet(length={len(self._tasks)}, pttm={self._partition_to_task_map}, ttpm={self._task_to_partition_map})"
+        return f"TaskSet(length={len(self._tasks)}, pttm={self._partition_to_task_map}, ttpm={self._task_to_partition_map})"  # noqa: E501
 
     def __contains__(self, __x: object) -> bool:
         return __x in self._tasks
