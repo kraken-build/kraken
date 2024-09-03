@@ -36,6 +36,8 @@ from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, sta
 from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
 from kraken.core.system.context import Context
 from kraken.core.system.errors import BuildError, ProjectNotFoundError
+from kraken.core.system.executor.default import DefaultGraphExecutor, DefaultTaskExecutor
+from kraken.core.system.executor.parallel import ParallelTaskExecutor
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
@@ -261,6 +263,17 @@ def run(
         build_options=build_options,
         graph_options=graph_options,
     )
+
+    if build_options.jobs == 1:
+        context.executor = DefaultGraphExecutor(DefaultTaskExecutor())
+    else:
+        task_executor = ParallelTaskExecutor(
+            build_logs_dir=build_options.build_dir / "logs",
+            max_workers=None if build_options.jobs == 0 else build_options.jobs,
+        )
+        context.executor = DefaultGraphExecutor(
+            task_executor=task_executor,
+        )
 
     context.observer = ColoredDefaultPrintingExecutorObserver()
     graph.mark_tasks_as_skipped(
