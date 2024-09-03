@@ -1,4 +1,4 @@
-""" Defines the Kraken executor API. """
+"""Defines the Kraken executor API."""
 
 from __future__ import annotations
 

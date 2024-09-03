@@ -1,5 +1,6 @@
+from kraken.common.toml import TomlFile
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
-from kraken.std.python.pyproject import PackageIndex, Pyproject
+from kraken.std.python.pyproject import PackageIndex
 
 EXAMPLE_PDM_PYPROJECT = """
 [project]
@@ -14,19 +15,19 @@ verify_ssl = true
 
 
 def test__PdmPyprojectHandler__getters() -> None:
-    handler = PdmPyprojectHandler(Pyproject.read_string(EXAMPLE_PDM_PYPROJECT))
+    handler = PdmPyprojectHandler(TomlFile.read_string(EXAMPLE_PDM_PYPROJECT))
     assert handler.get_name() == "pdm-project"
     assert handler.get_version() == "0.1.0"
 
 
 def test__PdmPyprojectHandler__set_version() -> None:
-    handler = PdmPyprojectHandler(Pyproject.read_string(EXAMPLE_PDM_PYPROJECT))
+    handler = PdmPyprojectHandler(TomlFile.read_string(EXAMPLE_PDM_PYPROJECT))
     handler.set_version("2.0.0")
     assert handler.raw["project"]["version"] == "2.0.0"
 
 
 def test__PdmPyprojectHandler__get_package_indexes() -> None:
-    handler = PdmPyprojectHandler(Pyproject.read_string(EXAMPLE_PDM_PYPROJECT))
+    handler = PdmPyprojectHandler(TomlFile.read_string(EXAMPLE_PDM_PYPROJECT))
     assert handler.get_package_indexes() == [
         PackageIndex(
             alias="private",
@@ -38,13 +39,13 @@ def test__PdmPyprojectHandler__get_package_indexes() -> None:
 
 
 def test__PdmPyprojectHandler__set_package_indexes__to_empty_list() -> None:
-    handler = PdmPyprojectHandler(Pyproject.read_string(EXAMPLE_PDM_PYPROJECT))
+    handler = PdmPyprojectHandler(TomlFile.read_string(EXAMPLE_PDM_PYPROJECT))
     handler.set_package_indexes([])
     assert handler.raw["tool"]["pdm"]["source"] == []
 
 
 def test__PdmPyprojectHandler__set_package_indexes__to_various_indexes() -> None:
-    handler = PdmPyprojectHandler(Pyproject.read_string(EXAMPLE_PDM_PYPROJECT))
+    handler = PdmPyprojectHandler(TomlFile.read_string(EXAMPLE_PDM_PYPROJECT))
     handler.set_package_indexes(
         [
             PackageIndex("a", "https://a.com", PackageIndex.Priority.primary, True),

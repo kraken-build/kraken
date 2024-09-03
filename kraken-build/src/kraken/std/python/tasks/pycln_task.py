@@ -4,10 +4,12 @@ import dataclasses
 import re
 from collections.abc import Sequence
 from pathlib import Path
+from typing import MutableMapping
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property
 from kraken.std.python.settings import python_settings
+from kraken.core.system.task import TaskStatus
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -26,8 +28,9 @@ class PyclnTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
-        command = [self.pycln_bin.get(), "--exclude", "^$"]
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
+        command = [self.pycln_bin.get(), "--exclude", "^$", str(self.settings.source_directory)]
+        command += self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += [str(p) for p in self.additional_files.get()]
         if self.check_only.get():

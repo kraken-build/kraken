@@ -5,9 +5,10 @@ import hashlib
 import logging
 import platform
 from pathlib import Path
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import urlparse
 
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
+from kraken.std.util.url import inject_url_credentials
 
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
 from ._buildenv_uv import UvBuildEnv
@@ -21,6 +22,7 @@ logger = logging.getLogger(__name__)
 class BuildEnvManager:
     def __init__(
         self,
+        project_root: Path,
         path: Path,
         auth: AuthModel,
         default_type: EnvironmentType = EnvironmentType.VENV,
@@ -28,10 +30,17 @@ class BuildEnvManager:
         incremental: bool = False,
         show_install_logs: bool = False,
     ) -> None:
+        """
+        Args:
+            project_root: Path for resolving relative local requirements.
+            path: Path to the directory that contains the build environment (virtual env).
+        """
+
         assert (
             default_hash_algorithm in hashlib.algorithms_available
         ), f"hash algoritm {default_hash_algorithm!r} is not available"
 
+        self._project_root = project_root
         self._path = path
         self._auth = auth
         self._metadata_store = BuildEnvMetadataStore(path.parent / (path.name + ".meta"))
@@ -47,10 +56,7 @@ class BuildEnvManager:
             return url
 
         logger.info('Injecting username and password into index url "%s"', url)
-        domain = parsed_url.netloc.rpartition("@")[-1]
-        parsed_url = parsed_url._replace(netloc=f"{quote(credentials.username)}:{quote(credentials.password)}@{domain}")
-        url = urlunparse(parsed_url)
-        return url
+        return inject_url_credentials(url, *credentials)
 
     def exists(self) -> bool:
         if self._metadata_store.get() is None:
@@ -69,12 +75,13 @@ class BuildEnvManager:
         allow_incremental: bool = True,
     ) -> None:
         """
-        :param requirements: The requirements to build the environment with.
-        :param env_type: The environment type to use. If not specified, falls back to the last used or default.
-        :param transitive: If set to `False`, it indicates that the *requirements* are fully resolved and the
-            build environment installer does not need to resolve transitve dependencies.
-        :param allow_incremental: Allow incremental builds if the environment already exists. Set to False if
-            the environment type changes.
+        Args:
+            requirements: The requirements to build the environment with.
+            env_type: The environment type to use. If not specified, falls back to the last used or default.
+            transitive: If set to `False`, it indicates that the *requirements* are fully resolved and the
+                        build environment installer does not need to resolve transitve dependencies.
+            allow_incremental: Allow incremental builds if the environment already exists. Set to False if
+                               the environment type changes.
         """
 
         if env_type is None:
@@ -94,7 +101,7 @@ class BuildEnvManager:
         env.build(requirements, transitive)
         hash_algorithm = self.get_hash_algorithm()
         metadata = BuildEnvMetadata(
-            datetime.datetime.utcnow(),
+            datetime.datetime.now(datetime.timezone.utc),
             env.get_type(),
             requirements.to_hash(hash_algorithm),
             hash_algorithm,
@@ -116,7 +123,7 @@ class BuildEnvManager:
             metadata = self._metadata_store.get()
             env_type = self._default_type if metadata is None else metadata.environment_type
         return _get_environment_for_type(
-            env_type, self._path, self._incremental and allow_incremental, self._show_install_logs
+            env_type, self._project_root, self._path, self._incremental and allow_incremental, self._show_install_logs
         )
 
     def set_locked(self, lockfile: Lockfile) -> None:
@@ -133,7 +140,8 @@ class BuildEnvManager:
 
 def _get_environment_for_type(
     environment_type: EnvironmentType,
-    base_path: Path,
+    project_root: Path,
+    path: Path,
     incremental: bool,
     show_install_logs: bool,
 ) -> BuildEnv:
@@ -141,13 +149,15 @@ def _get_environment_for_type(
     match environment_type:
         case EnvironmentType.VENV:
             return VenvBuildEnv(
-                base_path,
+                project_root,
+                path,
                 incremental=incremental,
                 show_pip_logs=show_install_logs,
             )
         case EnvironmentType.UV:
             return UvBuildEnv(
-                base_path,
+                project_root,
+                path,
                 incremental=incremental,
                 show_pip_logs=show_install_logs,
             )

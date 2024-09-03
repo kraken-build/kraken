@@ -41,6 +41,7 @@ class PexBuildTask(Task):
     #: `findpython` module). If any of the given Python versions is not available, it will cause an error unless
     #: it is trailed by a question mark. Example: `["3.10", "3.11", "3.12?"]`
     python_versions: Property[Sequence[str]] = Property.default_factory(list)
+    verbose: Property[bool] = Property.default(False)
 
     #: The path to the built PEX file will be written to this property.
     output_file: Property[Path] = Property.output()
@@ -60,6 +61,7 @@ class PexBuildTask(Task):
                     self.python_shebang.get() or "",
                     str(self.sh_boot.get()),
                     ":".join(self.python_versions.get()),
+                    # note: "verbose" is intentionally not hashed as it has no effect on the build result
                 ]
             ).encode()
         ).hexdigest()
@@ -94,6 +96,7 @@ class PexBuildTask(Task):
                 python_shebang=self.python_shebang.get(),
                 sh_boot=self.sh_boot.get(),
                 python_versions=self.python_versions.get(),
+                verbose=self.verbose.get(),
             )
         except subprocess.CalledProcessError as exc:
             return TaskStatus.from_exit_code(exc.cmd, exc.returncode)
@@ -116,6 +119,7 @@ def _build_pex(
     python_shebang: str | None = None,
     sh_boot: bool = True,
     python_versions: Sequence[str] = (),
+    verbose: bool = False,
     log: logging.Logger | None = None,
 ) -> None:
     """Invokes the `pex` CLI to build a PEX file and write it to :param:`output_file`.
@@ -139,7 +143,7 @@ def _build_pex(
     if pex_binary is not None:
         command = [str(pex_binary)]
     else:
-        command = [str(python or sys.executable), "-m", "pex", "-v"]
+        command = [str(python or sys.executable), "-m", "pex"]
 
     command += [
         "--pip-version",
@@ -204,6 +208,9 @@ def _build_pex(
     if index_url is not None:
         command += ["--index-url", index_url]
         safe_command += ["--index-url", redact_url_password(index_url)]
+
+    if verbose:
+        command.append("-v")
 
     (log or logging).info("Building PEX $ %s", " ".join(map(shlex.quote, safe_command)))
     subprocess.run(command, check=True)

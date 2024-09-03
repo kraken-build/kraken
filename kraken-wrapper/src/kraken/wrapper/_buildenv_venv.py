@@ -11,6 +11,7 @@ from typing import ClassVar, Literal, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
+from kraken.common.sanitize import sanitize_http_basic_auth
 
 from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, BuildEnvError, general_get_installed_distributions
 from ._lockfile import Distribution
@@ -39,7 +40,16 @@ class VenvBuildEnv(BuildEnv):
 
     INSTALLER_NAME: ClassVar[str] = "Pip"
 
-    def __init__(self, path: Path, incremental: bool = False, show_pip_logs: bool = False) -> None:
+    def __init__(self, project_root: Path, path: Path, incremental: bool = False, show_pip_logs: bool = False) -> None:
+        """
+        Args:
+            project_root: Path for resolving relative local requirements.
+            path: Path where the virtual env will be created.
+            incremental: Whether install operations can re-use an existing state of the virtual environment.
+            show_pip_logs: Keep Pip logs attached to the terminal. Otherwise they're piped to a file.
+        """
+
+        self._project_root = project_root
         self._path = path
         self._venv = VirtualEnvInfo(self._path)
         self._incremental = incremental
@@ -75,6 +85,7 @@ class VenvBuildEnv(BuildEnv):
         assert exc is not None
         exit_code = exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1
         command_str = "$ " + " ".join(map(shlex.quote, command))
+        command_str = sanitize_http_basic_auth(command_str)
 
         if log_file:
             assert offset is not None
@@ -92,10 +103,10 @@ class VenvBuildEnv(BuildEnv):
                 "'%s' failed (exit code: %d, command: %s). Check the output above for more information.",
                 operation_name,
                 exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
-                "$ " + " ".join(map(shlex.quote, command)),
+                "$ " + command_str,
             )
 
-        raise BuildEnvError(f"The command {command} failed.") from exc
+        raise BuildEnvError(f"The command failed: {command_str}") from exc
 
     def _get_create_venv_command(self, python_bin: Path, path: Path) -> list[str]:
         """Returns the command to create a virtual environment."""
@@ -116,7 +127,7 @@ class VenvBuildEnv(BuildEnv):
         # Must enable transitive resolution because lock files are not currently cross platform (see kraken-wrapper#2).
         # if not transitive:
         #     command += ["--no-deps"]
-        command += requirements.to_args()
+        command += requirements.to_args(base_dir=self._project_root)
         return command
 
     def _install_pythonpath(self, venv_dir: Path, pythonpath: list[str]) -> None:
@@ -219,7 +230,11 @@ class VenvBuildEnv(BuildEnv):
         env = os.environ.copy()
         command = self._get_install_command(self._path, requirements, env)
         logger.info("Installing dependencies.")
-        logger.debug("Installing into build environment with %s: %s", self.INSTALLER_NAME, " ".join(command))
+        logger.debug(
+            "Installing into build environment with %s: %s",
+            self.INSTALLER_NAME,
+            sanitize_http_basic_auth(" ".join(command)),
+        )
         self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.

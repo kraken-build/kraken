@@ -1,0 +1,25 @@
+release-date = "2024-09-02"
+
+[[entries]]
+id = "e3dd07f8-7520-45b9-9407-9f650e4d333c"
+type = "feature"
+description = "Extend pytest task to accept a sequence of paths that contain test files."
+author = "@sebimarkgraf"
+
+[[entries]]
+id = "eca4a4bb-fef4-4692-8799-402d874a5807"
+type = "feature"
+description = "Add Python build-system support for Uv (https://docs.astral.sh/uv/guides/projects/)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "2d36cc17-ab77-476d-9187-9f509e51735d"
+type = "fix"
+description = "Use `fsdecode()` on result from `find_uv_bin()` for enhanced compatbility"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6262db32-1e87-471b-b4fb-b99ef55eea56"
+type = "fix"
+description = "Fix `inject_url_credentials()` to not drop port"
+author = "@NiklasRosenstein"

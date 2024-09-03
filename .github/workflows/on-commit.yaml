@@ -6,22 +6,10 @@ on:
 
 env:
   COLUMNS: 200
-  PYTEST_FLAGS: --numprocesses auto
+  PYTEST_FLAGS: --numprocesses 4
+  SLAP_VERBOSE: more
 
 jobs:
-
-  # == Validate data embedded in the Kraken standard library ==
-
-  gitignore-io-up-to-date:
-    runs-on: arc-amd64-small
-    steps:
-    - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "3.10" }
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-    - run: python -m kraken.std.git.gitignore.gitignore_io
-    - run: git diff --exit-code
 
   # == Documentation ==
 
@@ -68,87 +56,91 @@ jobs:
 
   # == Unit tests, linting, and type checking ==
 
-  # test:
-  #   runs-on: arc-amd64-small
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ["3.10", "3.11", "3.12", "3.x"]
-  #       tasks: ["check lint", "test"]
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: NiklasRosenstein/slap@gha/install/v1
-  #   - uses: actions/setup-python@v5
-  #     with: { python-version: "${{ matrix.python-version }}" }
-  #   - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
-  #   - run: rustup update
-
-  #   - name: Restore Kraken build cache
-  #     uses: actions/cache/restore@v4
-  #     with:
-  #       path: build
-  #       key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-  #   - name: Restore Venv
-  #     uses: actions/cache/restore@v4
-  #     with:
-  #       path: .venvs/
-  #       key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-  #   # Explicitly mention python.install to ensure that Pip install is rerun.
-  #   - run: krakenw run python.install ${{ matrix.tasks }} -vv
-
-  #   - name: Save Venv
-  #     uses: actions/cache/save@v4
-  #     with:
-  #       path: .venvs/
-  #       key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-  #   - name: Save Kraken build cache
-  #     uses: actions/cache/save@v4
-  #     with:
-  #       path: build
-  #       key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-  # == Try running Kraken as defined in the kraken.yaml file ==
-
-  selftest:
+  test:
     runs-on: arc-amd64-small
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.x"]
+        tasks: ["check lint", "test"]
     steps:
     - uses: actions/checkout@v4
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm
+    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
     - run: rustup update
+    - run: slap config --venv-type=uv
 
-    - name: Restore cache
+    - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
       with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+        path: build
+        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
 
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+    - name: Restore Venv
+      uses: actions/cache/restore@v4
+      with:
+        path: .venvs/
+        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
-    - run: kraken run python.install fmt lint test -vv
-    - run: kraken q ls
-    - run: kraken q tree
-    - run: kraken q viz
-    - run: kraken q d python.mypy
+    # Explicitly mention python.install to ensure that Pip install is rerun.
+    - run: krakenw run python.install ${{ matrix.tasks }} -vv
 
-    - name: Save cache
+    - name: Save Venv
       uses: actions/cache/save@v4
       with:
-        path: |
-          build
-          .venvs
-        key: build-cache:${{ runner.os }}:selftest
+        path: .venvs/
+        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
+
+    - name: Save Kraken build cache
+      uses: actions/cache/save@v4
+      with:
+        path: build
+        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
+
+  # == Try running Kraken as defined in the kraken.yaml file ==
+
+  # selftest:
+  #   runs-on: arc-amd64-small
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       python-version: ["3.10", "3.11", "3.12", "3.x"]
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #   - uses: NiklasRosenstein/slap@gha/install/v1
+  #   - uses: actions/setup-python@v5
+  #     with: { python-version: "${{ matrix.python-version }}" }
+  #   - run: pip install pipx && pipx install poetry && pipx install pdm
+  #   - run: rustup update
+
+  #   - name: Restore cache
+  #     uses: actions/cache/restore@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
+
+  #   # - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
+  #   - run: slap install --link --no-venv-check ${{ matrix.only }}
+
+  #   - run: kraken run python.install fmt lint test -vv
+  #   - run: kraken q ls
+  #   - run: kraken q tree
+  #   - run: kraken q viz
+  #   - run: kraken q d python.mypy
+
+  #   - run: krakenw run python.install fmt lint test -vv
+
+  #   - name: Save cache
+  #     uses: actions/cache/save@v4
+  #     with:
+  #       path: |
+  #         build
+  #         .venvs
+  #       key: build-cache:${{ runner.os }}:selftest
 
   # uv-installer:
   #   runs-on: arc-amd64-small

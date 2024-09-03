@@ -17,6 +17,7 @@ class BuildscriptMetadata:
     extra_index_urls: list[str] = field(default_factory=list)
     requirements: list[str] = field(default_factory=list)
     additional_sys_paths: list[str] = field(default_factory=list)
+    interpreter_constraint: str | None = None
 
     def requires(self, requirement: str) -> None:
         self.requirements.append(requirement)
@@ -103,6 +104,7 @@ def buildscript(
     extra_index_urls: "Sequence[str] | None" = None,
     requirements: "Sequence[str] | None" = None,
     additional_sys_paths: "Sequence[str] | None" = None,
+    interpreter_constraint: str | None = None,
 ) -> BuildscriptMetadata:
     """
     Use this function to the dependencies and additional install options for the build environment of your Kraken
@@ -135,6 +137,7 @@ def buildscript(
         requirements: A list of Python package requirements to install. This usually contains at least `kraken-build`
             or some internal extension module that in turn depends on `kraken-build`.
         additional_sys_paths: Additional system paths to add to the Python environment.
+        interpreter_constraint: Constraints for the Python interpreter that the build must be run with.
     """
 
     from kraken.core import Project
@@ -147,6 +150,7 @@ def buildscript(
         extra_index_urls=list(extra_index_urls or ()),
         requirements=list(requirements or ()),
         additional_sys_paths=list(additional_sys_paths or ()),
+        interpreter_constraint=interpreter_constraint,
     )
 
     if _global.mode == _Mode.RAISE:

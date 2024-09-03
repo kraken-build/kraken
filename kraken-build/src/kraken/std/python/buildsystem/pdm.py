@@ -1,4 +1,4 @@
-""" Implements PDM as a build system for kraken-std. """
+"""Implements PDM as a build system for kraken-std."""
 
 from __future__ import annotations
 
@@ -8,26 +8,30 @@ import shutil
 import subprocess as sp
 from collections.abc import Sequence
 from pathlib import Path
+import sys
 from typing import Any
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
+from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
-from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
+from kraken.std.python.pyproject import PackageIndex, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
 
 logger = logging.getLogger(__name__)
 
+# NOTE: We can't inline this expression where we need it because Mypy understands the expression and will permanently
+#       turn off a code path on the corresponding systme, which can lead to type errors downstream (typically
+#       unreachable code).
+_is_linux = sys.platform == "linux"
+
 
 class PdmPyprojectHandler(PyprojectHandler):
     """
     Implements the PyprojectHandler interface for PDM projects.
     """
-
-    def __init__(self, pyproj: Pyproject) -> None:
-        super().__init__(pyproj)
 
     # PyprojectHandler
 
@@ -117,7 +121,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> PdmPyprojectHandler:
+    def get_pyproject_reader(self, pyproject: TomlFile) -> PdmPyprojectHandler:
         return PdmPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
@@ -126,7 +130,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
     def get_managed_environment(self) -> ManagedEnvironment:
         return PDMManagedEnvironment(self.project_directory)
 
-    def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
+    def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         command = ["pdm", "update"]
         sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
@@ -135,23 +139,47 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         return True
 
     def login(self, settings: PythonSettings) -> None:
+        # PDM does not support SSL_CERT_FILE or REQUESTS_CA_BUNDLE directly on non-Linux because it uses the
+        # `truststore` package (see https://github.com/pdm-project/pdm/issues/3076 for more information).
+        # On these systems, if these variables are set, we configure the certificates in the PDM configuration
+        # instead.
+        if not _is_linux:
+            ca_certs = next(filter(None, (os.environ.get(k) for k in ["SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"])), None)
+        else:
+            ca_certs = None
+
         for index in settings.package_indexes.values():
-            if index.is_package_source and index.credentials:
+            if index.is_package_source and (index.credentials or ca_certs):
                 commands = [
                     ["pdm", "config", f"pypi.{index.alias}.url", index.index_url],
-                    [
-                        "pdm",
-                        "config",
-                        f"pypi.{index.alias}.username",
-                        index.credentials[0],
-                    ],
-                    [
-                        "pdm",
-                        "config",
-                        f"pypi.{index.alias}.password",
-                        index.credentials[1],
-                    ],
                 ]
+                if index.credentials:
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.username",
+                            index.credentials[0],
+                        ]
+                    )
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.password",
+                            index.credentials[1],
+                        ]
+                    )
+                if ca_certs is not None:
+                    # See https://pdm-project.org/latest/usage/config/#configure-https-certificates
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.ca_certs",
+                            os.path.abspath(ca_certs),
+                        ]
+                    )
                 for command in commands:
                     safe_command = command[:-1] + ["MASKED"]
                     logger.info("$ %s", safe_command)

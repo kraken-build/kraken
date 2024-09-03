@@ -1,8 +1,7 @@
 import subprocess
 from pathlib import Path
 
-from termcolor import colored
-
+from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskStatus
 from kraken.std.python.settings import python_settings
 

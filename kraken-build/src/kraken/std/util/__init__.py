@@ -1,4 +1,4 @@
-""" General utility tasks. """
+"""General utility tasks."""
 
 from __future__ import annotations
 

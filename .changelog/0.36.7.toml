@@ -1,0 +1,7 @@
+release-date = "2024-06-04"
+
+[[entries]]
+id = "351c8537-cb84-48a2-a571-49419a50af9b"
+type = "improvement"
+description = "Change `DEFAULT_INTERPETER_CONSTRAINT` from `>=3.10,<3.11` to `>=3.10` -- Kraken is compatible with Python 3.11 and 3.12 due to the Dill 0.3.8 release for quite some time now, but we have forgotten to update this value."
+author = "@NiklasRosenstein"

@@ -1,4 +1,4 @@
-""" Activate or de-activate a Python virtual environment by updating environment variables. """
+"""Activate or de-activate a Python virtual environment by updating environment variables."""
 
 import dataclasses
 import os

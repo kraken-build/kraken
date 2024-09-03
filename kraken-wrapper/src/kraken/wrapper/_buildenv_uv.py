@@ -1,3 +1,4 @@
+from os import fsdecode
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -24,14 +25,14 @@ class UvBuildEnv(_VenvBuildEnv):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._uv_bin = find_uv_bin()
+        self._uv_bin = fsdecode(find_uv_bin())
 
     def _get_create_venv_command(self, python_bin: Path, path: Path) -> list[str]:
         return [self._uv_bin, "venv", str(path)]
 
     def _get_install_command(self, venv_dir: Path, requirements: RequirementSpec, env: dict[str, str]) -> list[str]:
         env["VIRTUAL_ENV"] = str(venv_dir)
-        return [self._uv_bin, "pip", "install", *requirements.to_args()]
+        return [self._uv_bin, "pip", "install", *requirements.to_args(base_dir=self._project_root)]
 
     def get_type(self) -> EnvironmentType:
         return EnvironmentType.UV

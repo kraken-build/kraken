@@ -4,6 +4,7 @@ import os
 from collections.abc import Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import Supplier
@@ -73,7 +74,7 @@ class Flake8Task(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [
             self.flake8_bin.get(),
             *self.paths.get(),

@@ -7,9 +7,9 @@ from pytest import mark
 
 from kraken.common import not_none, safe_rmpath
 from kraken.core.address import Address
+from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver
 from kraken.core.cli.main import _load_build_state
 from kraken.core.cli.option_sets import BuildOptions, GraphOptions
-from kraken.core.system.executor.colored import ColoredDefaultPrintingExecutorObserver
 from kraken.core.system.task import Task, TaskStatus, TaskStatusType
 from tests.kraken_core.conftest import chdir_context
 

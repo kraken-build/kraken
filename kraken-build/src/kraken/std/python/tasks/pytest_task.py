@@ -3,8 +3,9 @@ from __future__ import annotations
 import enum
 import os
 import shlex
-from collections.abc import Sequence
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
+import warnings
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -40,7 +41,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str] | TaskStatus:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = ["pytest", "-vv", *self.paths.get()]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         command += ["--log-cli-level", "INFO"]
@@ -73,7 +74,6 @@ def pytest(
     group: str = "test",
     project: Project | None = None,
     paths: Sequence[str] | None = None,
-    include_dirs: Sequence[str] = (),
     ignore_dirs: Sequence[Path | str] = (),
     allow_no_tests: bool = False,
     doctest_modules: bool = True,
@@ -92,7 +92,7 @@ def pytest(
 
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
-    task.paths = [*paths, *include_dirs]
+    task.paths = [*paths]
     task.ignore_dirs = list(map(Path, ignore_dirs))
     task.allow_no_tests = allow_no_tests
     task.doctest_modules = doctest_modules

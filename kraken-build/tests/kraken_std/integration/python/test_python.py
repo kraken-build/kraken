@@ -13,12 +13,14 @@ import httpx
 import pytest
 import tomli
 
+from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
 from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.pyproject import Pyproject, PyprojectHandler
+from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
@@ -80,7 +82,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
 
 @pytest.mark.parametrize(
     "project_dir",
-    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project"],
+    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project", "uv-project"],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_install_lint_and_publish(
@@ -141,7 +143,7 @@ def test__python_project_upgrade_python_version_string(
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    pyproject = TomlFile.read(original_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
@@ -176,6 +178,7 @@ def test__python_project_upgrade_python_version_string(
         ("pdm-project", PdmPyprojectHandler, ">=3.10"),
         ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.10"),
         ("rust-pdm-project", PdmPyprojectHandler, ">=3.10"),
+        ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -189,7 +192,7 @@ def test__python_pyproject_reads_correct_data(
     new_dir = kraken_project.directory / project_dir
     shutil.copytree(example_dir(project_dir), new_dir)
 
-    pyproject = Pyproject.read(new_dir / "pyproject.toml")
+    pyproject = TomlFile.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
     assert local_build_system is not None
     local = local_build_system.get_pyproject_reader(pyproject)
@@ -220,7 +223,7 @@ def test__python_project_coverage(
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)
 
-    pyproject = Pyproject.read(original_dir / "pyproject.toml")
+    pyproject = TomlFile.read(original_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None

@@ -14,5 +14,5 @@ def inject_url_credentials(url: str, username: str, password: str) -> str:
     """Injects a username and password into a URL."""
 
     parsed = urlparse(url)
-    replaced = parsed._replace(netloc=f"{username}:{password}@{parsed.hostname}")
+    replaced = parsed._replace(netloc=f"{username}:{password}@{parsed.netloc}")
     return replaced.geturl()

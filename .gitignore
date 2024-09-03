@@ -1,6 +1,10 @@
+# GENERATED-CONTENT-START
+# Kraken
+/build
+# GENERATED-CONTENT-END
+
 /.vscode
 /dist
-build/
 .venv/
 .venvs/
 *.egg-info/
@@ -8,3 +12,5 @@ __pycache__/
 poetry.lock
 .dmypy.json
 /result
+.DS_Store
+.direnv/

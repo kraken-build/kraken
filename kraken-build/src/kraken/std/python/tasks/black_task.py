@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
+import dataclasses
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -62,8 +64,11 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
-        command = [self.black_bin.get(), *self.paths.get()]
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
+        command = [self.black_bin.get(), str(self.settings.source_directory)]
+        command += self.settings.get_tests_directory_as_args()
+        command += [str(directory) for directory in self.settings.lint_enforced_directories]
+        command += [str(p) for p in self.paths.get()]
         if self.check_only.get():
             command += ["--check", "--diff"]
         config = self.config.get()

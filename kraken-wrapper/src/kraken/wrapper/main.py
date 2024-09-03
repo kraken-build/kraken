@@ -19,11 +19,11 @@ from kraken.common import (
     LoggingOptions,
     RequirementSpec,
     TomlConfigFile,
+    colored,
     datetime_to_iso8601,
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
-from termcolor import colored
 
 from . import __version__
 from ._buildenv import BuildEnvError
@@ -36,7 +36,7 @@ BUILDENV_PATH = Path("build/.kraken/venv")
 BUILDSCRIPT_FILENAME = ".kraken.py"
 BUILD_SUPPORT_DIRECTORY = "build-support"
 LOCK_FILENAME = ".kraken.lock"
-_FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: 731
+_FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: E731
 logger = logging.getLogger(__name__)
 
 
@@ -244,7 +244,6 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
-    import rich
     from kraken.common import findpython
 
     if argv:
@@ -252,8 +251,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
         sys.exit(1)
 
     interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
-    table = findpython.build_rich_table(interpreters)
-    rich.print(table)
+    findpython.print_interpreters(interpreters)
     sys.exit(0)
 
 
@@ -444,9 +442,9 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
 
 
 @exit_on_known_exceptions(BuildEnvError, exit_code=2)
-def main() -> NoReturn:
+def main(krakenw_args: list[str] | None = None) -> NoReturn:
     parser = _get_argument_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args=krakenw_args)
     logging_options = LoggingOptions.collect(args)
     logging_options.init_logging()
     env_options = EnvOptions.collect(args)
@@ -483,6 +481,7 @@ def main() -> NoReturn:
     config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
+        project.directory,
         project.directory / BUILDENV_PATH,
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,

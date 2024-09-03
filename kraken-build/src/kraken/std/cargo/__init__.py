@@ -1,4 +1,4 @@
-""" Provides tasks for Rust projects that build using Cargo. """
+"""Provides tasks for Rust projects that build using Cargo."""
 
 from __future__ import annotations
 
@@ -427,6 +427,7 @@ def cargo_publish(
     project: Project | None = None,
     version: str | None = None,
     cargo_toml_file: Path = Path("Cargo.toml"),
+    allow_overwrite: bool = False,
 ) -> CargoPublishTask:
     """Creates a task that publishes the create to the specified *registry*.
 
@@ -459,6 +460,7 @@ def cargo_publish(
     task.version = version
     task.cargo_toml_file = cargo_toml_file
     task.depends_on(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
+    task.allow_overwrite = allow_overwrite
     return task
 
 

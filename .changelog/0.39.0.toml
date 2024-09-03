@@ -1,0 +1,14 @@
+release-date = "2024-08-19"
+
+[[entries]]
+id = "48a06299-f287-49b8-8c91-1f74cfa56f2f"
+type = "feature"
+description = "Cargo Publishing : Skip publishing packages that already exists in the registry"
+author = "@jcaille"
+
+[[entries]]
+id = "d31095f1-d13b-4e39-929c-038dc4164ddb"
+type = "fix"
+description = "Replace use of deprecated `datetime.utcnow()` with `datetime.now(timezone.utc)`"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"

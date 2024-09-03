@@ -39,7 +39,7 @@ def test__secrets_can_be_accessed_at_build_time_and_are_not_present_in_the_final
     if backend == "kaniko":
         dockerfile_content += "\nRUN ls /kaniko/secrets\nRUN ls /run/secrets"
 
-    image_tag = "kraken-integration-tests/test-secrets:latest"
+    image_tag = f"kraken-integration-tests/test-secrets-{backend}:latest"
 
     with tempfile.TemporaryDirectory() as tempdir, contextlib.ExitStack() as exit_stack:
         kraken_project.directory = Path(tempdir)

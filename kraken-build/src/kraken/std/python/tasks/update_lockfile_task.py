@@ -3,10 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from kraken.common import Supplier
+from kraken.common.toml import TomlFile
 from kraken.core import Project, Property, Task, TaskStatus
 
 from ..buildsystem import PythonBuildSystem
-from ..pyproject import Pyproject
 from ..settings import PythonSettings, python_settings
 
 
@@ -27,7 +27,7 @@ class UpdateLockfileTask(Task):
         if not build_system:
             return TaskStatus.failed("no build system configured")
         settings = self.settings.get()
-        pyproject = Pyproject.read(self.pyproject_toml.get())
+        pyproject = TomlFile.read(self.pyproject_toml.get())
         return build_system.update_lockfile(settings, pyproject)
 
 

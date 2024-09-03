@@ -27,6 +27,7 @@ class RenderFileTask(Task):
     file: Property[Path]
     content: Property[str | bytes]
     encoding: Property[str] = Property.default(DEFAULT_ENCODING)
+    overwrite: Property[bool] = Property.default(True)
 
     def create_check(
         self,
@@ -49,6 +50,8 @@ class RenderFileTask(Task):
 
     def prepare(self) -> TaskStatus:
         file = self.file.get()
+        if not self.overwrite.get() and file.exists():
+            return TaskStatus.skipped(f"{file} already exists")
         if file.is_file() and file.read_bytes() == as_bytes(self.content.get(), self.encoding.get()):
             return TaskStatus.up_to_date(f'"{try_relative_to(file)}" is up to date')
         return TaskStatus.pending()
@@ -76,12 +79,14 @@ def render_file(
     file: str | Path | Supplier[Path],
     content: str | Supplier[str],
     encoding: str | Supplier[str] = DEFAULT_ENCODING,
+    overwrite: bool | Supplier[bool] = True,
 ) -> tuple[RenderFileTask, CheckFileContentsTask | None]:
     project = project or Project.current()
     render_task = project.task(name, task_class or RenderFileTask, description=description, group=group)
     render_task.file = Path(file) if isinstance(file, str) else file
     render_task.content = content
     render_task.encoding = encoding
+    render_task.overwrite = overwrite
 
     if create_check:
         check_task = render_task.create_check(

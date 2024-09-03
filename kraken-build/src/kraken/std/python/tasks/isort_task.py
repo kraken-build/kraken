@@ -4,6 +4,8 @@ import os
 from collections.abc import Sequence
 from configparser import ConfigParser
 from dataclasses import dataclass
+import dataclasses
+from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import Supplier
@@ -52,8 +54,13 @@ class IsortTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
-        command = [self.isort_bin.get(), *self.paths.get()]
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
+        command = [
+            self.isort_bin.get(),
+            str(self.settings.source_directory),
+        ] + self.settings.get_tests_directory_as_args()
+        command += [str(directory) for directory in self.settings.lint_enforced_directories]
+        command += [str(p) for p in self.paths.get()]
         if self.check_only.get():
             command += ["--check-only", "--diff"]
         if self.__config_file:

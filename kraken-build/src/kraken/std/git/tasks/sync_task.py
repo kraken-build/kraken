@@ -4,12 +4,12 @@ import logging
 from pathlib import Path
 from typing import Literal
 
+from kraken.common.gitignore import GitignoreEntry, GitignoreFile
 from kraken.core import Project, Property
 from kraken.std.git.gitignore.generated import join_generated_section, split_generated_section
 from kraken.std.util.render_file_task import RenderFileTask
 
 from ..gitignore.gitignore_io import gitignore_io_fetch_cached
-from ..gitignore.parser import GitignoreEntry, GitignoreFile
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +53,13 @@ class GitignoreSyncTask(RenderFileTask):
             user1, user2 = user2, user1
 
         # Replace the generated content.
-        generated = GitignoreFile.parse(self.generated_content.get())
+        generated = GitignoreFile()
         if tokens := self.gitignore_io_tokens.get():
             generated += GitignoreFile.parse(
                 gitignore_io_fetch_cached(tokens, backfill=self.gitignore_io_allow_http_request_backfill.get())
             )
+        # User-provided generated content, allowing for overrides to API-generated content.
+        generated += GitignoreFile.parse(self.generated_content.get())
 
         # Ensure there's at least one blank space between sections.
         if user1 and generated and (user1[-1] != "" and generated[0] != ""):

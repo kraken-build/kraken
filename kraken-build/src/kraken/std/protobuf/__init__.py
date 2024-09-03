@@ -1,4 +1,4 @@
-""" Lint and format Protobuf files with `buf`. Requires that `buf` is preinstalled. """
+"""Lint and format Protobuf files with `buf`. Requires that `buf` is preinstalled."""
 
 from __future__ import annotations
 

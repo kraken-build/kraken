@@ -1,0 +1,13 @@
+release-date = "2024-07-04"
+
+[[entries]]
+id = "92aa4100-c459-4ca1-8fbe-d79aec3b419f"
+type = "feature"
+description = "Enable Ruff through RuffTask for formatting and linting"
+author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "d4b25ed1-3720-4c9a-9aeb-06c23ac5d0aa"
+type = "fix"
+description = "Allow auth check against any host with jfrog in the name"
+author = "alex.spencer@helsing.ai"

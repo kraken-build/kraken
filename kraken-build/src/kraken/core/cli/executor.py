@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-from termcolor import colored as _colored
-
+from kraken.common import Color, colored as _colored
 from kraken.core import Graph, Task, TaskGraph, TaskStatus, TaskStatusType
 from kraken.core.system.executor.default import DefaultPrintingExecutorObserver
 
-COLORS_BY_STATUS = {
+COLORS_BY_STATUS: dict[TaskStatusType, Color] = {
     TaskStatusType.PENDING: "magenta",
     TaskStatusType.FAILED: "red",
     TaskStatusType.INTERRUPTED: "red",
@@ -25,7 +24,7 @@ def status_to_text(status: TaskStatus, colored: bool = True) -> str:
     else:
         message = status.type.name
     if status.message:
-        message += f" ({status.message})"
+        message += _colored(f" ({status.message})", "light_grey")
     return message
 
 

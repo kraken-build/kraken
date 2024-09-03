@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
+from typing import MutableMapping
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
+from kraken.core.system.task import TaskStatus
 from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -20,7 +22,7 @@ class PylintTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command(self) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [
             self.pylint_bin.get(),
             str(self.settings.source_directory),
