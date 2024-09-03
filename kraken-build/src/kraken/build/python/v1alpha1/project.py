@@ -22,6 +22,8 @@ from kraken.std.python.version import git_version_to_python_version
 T = TypeVar("T")
 logger = logging.getLogger(__name__)
 
+PythonTool = Literal["ruff", "mypy", "pylint", "black", "isort", "flake8", "pycln", "pyupgrade", "pytest"]
+
 
 class PythonCodegen(Protocol):
     """Protocol for functions that produce a task to generate Python code."""
@@ -94,6 +96,7 @@ def python_project(
     line_length: int = 120,
     enforce_project_version: str | None = None,
     detect_git_version_build_type: Literal["release", "develop", "branch"] = "develop",
+    enable: Sequence[PythonTool] = ("ruff", "mypy", "pytest"),
     pyupgrade_keep_runtime_typing: bool = False,
     pycln_remove_all_unused_imports: bool = False,
     pytest_ignore_dirs: Sequence[str] = (),
@@ -106,6 +109,7 @@ def python_project(
     mypy_version_spec: str = ">=1.8.0,<2.0.0",
     pycln_version_spec: str = ">=2.4.0,<3.0.0",
     pyupgrade_version_spec: str = ">=3.15.0,<4.0.0",
+    ruff_version_spec: str = ">=0.6.0,<0.7.0",
     codegen: Sequence[PythonCodegen] = (),
 ) -> "PythonProject":
     """
@@ -149,6 +153,7 @@ def python_project(
             the version number will be derived from the most recent tag and the distance to the current commit. If
             the current commit is tagged, the version number will be the tag name anyway. When set to `"branch"`, the
             version number will be derived from the distance to the most recent tag and include the SHA of the commit.
+        enable: A list of tools to enable for the project. The default is `["ruff", "mypy", "pytest"]`.
         pyupgrade_keep_runtime_typing: Whether to not replace `typing` type hints. This is required for example
             for projects using Typer as it does not support all modern type hints at runtime.
         pycln_remove_all_unused_imports: Remove all unused imports, including these with side effects.
@@ -179,6 +184,7 @@ def python_project(
     from kraken.std.python.tasks.pyupgrade_task import pyupgrade as pyupgrade_task
     from kraken.std.python.tasks.update_lockfile_task import update_lockfile_task
     from kraken.std.python.tasks.update_pyproject_task import update_pyproject_task
+    from kraken.std.python.tasks.ruff_task import ruff as ruff_task
 
     if additional_lint_directories is None:
         additional_lint_directories = []
@@ -243,64 +249,85 @@ def python_project(
 
     # === Python tooling
 
-    pyupgrade_task(
-        python_version=python_version,
-        keep_runtime_typing=pyupgrade_keep_runtime_typing,
-        exclude=[Path(x) for x in concat(exclude_lint_directories, exclude_format_directories)],
-        paths=source_paths,
-        version_spec=pyupgrade_version_spec,
-    )
+    if "pyupgrade" in enable:
+        pyupgrade_task(
+            python_version=python_version,
+            keep_runtime_typing=pyupgrade_keep_runtime_typing,
+            exclude=[Path(x) for x in concat(exclude_lint_directories, exclude_format_directories)],
+            paths=source_paths,
+            version_spec=pyupgrade_version_spec,
+        )
 
-    pycln_task(
-        paths=source_paths,
-        exclude_directories=concat(exclude_lint_directories, exclude_format_directories),
-        remove_all_unused_imports=pycln_remove_all_unused_imports,
-        version_spec=pycln_version_spec,
-    )
+    if "pycln" in enable:
+        pycln_task(
+            paths=source_paths,
+            exclude_directories=concat(exclude_lint_directories, exclude_format_directories),
+            remove_all_unused_imports=pycln_remove_all_unused_imports,
+            version_spec=pycln_version_spec,
+        )
 
-    black = black_tasks(
-        paths=source_paths,
-        config=BlackConfig(
-            line_length=line_length, exclude_directories=concat(exclude_lint_directories, exclude_format_directories)
-        ),
-        version_spec=black_version_spec,
-    )
+    if "black" in enable:
+        black = black_tasks(
+            paths=source_paths,
+            config=BlackConfig(
+                line_length=line_length, exclude_directories=concat(exclude_lint_directories, exclude_format_directories)
+            ),
+            version_spec=black_version_spec,
+        )
+    else:
+        black = None
 
-    isort = isort_tasks(
-        paths=source_paths,
-        config=IsortConfig(
-            profile="black",
-            line_length=line_length,
-            extend_skip=concat(exclude_lint_directories, exclude_format_directories),
-        ),
-        version_spec=isort_version_spec,
-    )
-    isort.format.depends_on(black.format)
+    if "isort" in enable:
+        isort = isort_tasks(
+            paths=source_paths,
+            config=IsortConfig(
+                profile="black",
+                line_length=line_length,
+                extend_skip=concat(exclude_lint_directories, exclude_format_directories),
+            ),
+            version_spec=isort_version_spec,
+        )
+        if "black" in enable:
+            assert black is not None
+            isort.format.depends_on(black.format, mode="order-only")
 
-    flake8 = flake8_tasks(
-        paths=source_paths,
-        config=Flake8Config(
-            max_line_length=line_length,
-            extend_ignore=flake8_extend_ignore,
-            exclude=concat(exclude_lint_directories, exclude_format_directories),
-        ),
-        version_spec=flake8_version_spec,
-        additional_requirements=flake8_additional_requirements,
-    )
-    flake8.depends_on(black.format, isort.format, mode="order-only")
+    if "flake8" in enable:
+        flake8 = flake8_tasks(
+            paths=source_paths,
+            config=Flake8Config(
+                max_line_length=line_length,
+                extend_ignore=flake8_extend_ignore,
+                exclude=concat(exclude_lint_directories, exclude_format_directories),
+            ),
+            version_spec=flake8_version_spec,
+            additional_requirements=flake8_additional_requirements,
+        )
+        if "black" in enable:
+            assert black is not None
+            flake8.depends_on(black.format, mode="order-only")
+        if "isort" in enable:
+            assert isort is not None
+            flake8.depends_on(isort.format, mode="order-only")
 
-    mypy_task(
-        paths=source_paths,
-        config=MypyConfig(
-            mypy_path=[source_directory],
-            exclude_directories=exclude_lint_directories,
-            global_overrides={},
-            module_overrides={},
-        ),
-        version_spec=mypy_version_spec,
-        python_version=python_version,
-        use_daemon=mypy_use_daemon,
-    ).depends_on(*codegen_tasks)
+    if "ruff" in enable:
+        ruff_task(
+            additional_args=[f"--line-length={line_length}"],
+            version_spec=ruff_version_spec,
+        )
+
+    if "mypy" in enable:
+        mypy_task(
+            paths=source_paths,
+            config=MypyConfig(
+                mypy_path=[source_directory],
+                exclude_directories=exclude_lint_directories,
+                global_overrides={},
+                module_overrides={},
+            ),
+            version_spec=mypy_version_spec,
+            python_version=python_version,
+            use_daemon=mypy_use_daemon,
+        ).depends_on(*codegen_tasks)
 
     # TODO(@niklas): Improve this heuristic to check whether Coverage reporting should be enabled.
     if "pytest-cov" in str(dict(pyproject)):
@@ -308,13 +335,14 @@ def python_project(
     else:
         coverage = None
 
-    pytest_task(
-        paths=source_paths,
-        ignore_dirs=pytest_ignore_dirs,
-        coverage=coverage,
-        doctest_modules=True,
-        allow_no_tests=True,
-    ).depends_on(*codegen_tasks)
+    if "pytest" in enable:
+        pytest_task(
+            paths=source_paths,
+            ignore_dirs=pytest_ignore_dirs,
+            coverage=coverage,
+            doctest_modules=True,
+            allow_no_tests=True,
+        ).depends_on(*codegen_tasks)
 
     if not enforce_project_version:
         try:
