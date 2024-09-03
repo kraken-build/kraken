@@ -141,3 +141,21 @@ id = "4560750d-452d-43f0-af08-d791aaf5134a"
 type = "improvement"
 description = "Upgrade keyring to v25"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "fb3fcc4a-a38a-445f-b124-571395b7ac86"
+type = "feature"
+description = "Introduce `kraken.std.python.project.python_project()` function which creates all tasks for a Python project."
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "ae70e553-81c2-4eb2-a6f3-210ca6c24992"
+type = "breaking change"
+description = "Default project groups `lint` now only depends on `check` for order instead of strictly"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "4cb0fe80-d359-4302-8893-c0fd62bf0631"
+type = "improvement"
+description = "Raise `EmptyGitRepositoryError` and `NotAGitRepositoryError` respectively in `git_describe()`"
+author = "@NiklasRosenstein"
