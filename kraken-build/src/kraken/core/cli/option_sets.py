@@ -20,6 +20,7 @@ class BuildOptions:
     additional_state_dirs: list[Path]
     no_load_project: bool
     state_name: str
+    jobs: int = 1
 
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser) -> None:
@@ -67,6 +68,14 @@ class BuildOptions:
             action="store_true",
             help="do not load the root project. this is only useful when loading an existing build state",
         )
+        group.add_argument(
+            "-J",
+            "--jobs",
+            metavar="N",
+            type=int,
+            help="Experimental. Specify the number of jobs to run in parallel. If not specified, the default is 1 "
+            "to run tasks sequentially. A value of 0 will use the number of CPUs available on the system.",
+        )
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> BuildOptions:
@@ -77,6 +86,7 @@ class BuildOptions:
             state_dir=args.state_dir or args.build_dir / BUILD_STATE_DIR,
             additional_state_dirs=args.additional_state_dir or [],
             no_load_project=args.no_load_project,
+            jobs=args.jobs,
         )
 
 
