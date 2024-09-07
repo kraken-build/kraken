@@ -355,6 +355,10 @@ def python_project(
             logger.info("Empty Git repository found in %s, not enforcing a project version", project.directory)
             enforce_project_version = None
         else:
+            if git_version.dirty:
+                # Remove the dirty flag as that will propagate into the version metadata.
+                logger.warning("Git repository for project %s has uncommitted changes.", project.directory)
+                git_version.dirty = False
             match detect_git_version_build_type:
                 case "release" | "develop":
                     if (
