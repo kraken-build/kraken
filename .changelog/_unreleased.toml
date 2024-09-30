@@ -3,3 +3,9 @@ id = "e3a86670-bb39-4619-ba18-711851919eaf"
 type = "fix"
 description = "Bump twine version so metadata version 2.4 is supported"
 author = "uluc.sengil@helsing.ai"
+
+[[entries]]
+id = "cbae7d73-09aa-442f-b099-27a4ae23b3c3"
+type = "improvement"
+description = "Allows to use uv with maturin"
+author = "thomas.pellissier-tanon@helsing.ai"

@@ -81,7 +81,15 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
 
 @pytest.mark.parametrize(
     "project_dir",
-    ["poetry-project", "slap-project", "pdm-project", "rust-poetry-project", "rust-pdm-project", "uv-project"],
+    [
+        "poetry-project",
+        "slap-project",
+        "pdm-project",
+        "uv-project",
+        "rust-poetry-project",
+        "rust-pdm-project",
+        "rust-uv-project",
+    ],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_project_install_lint_and_publish(
