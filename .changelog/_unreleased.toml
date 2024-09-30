@@ -1,0 +1,5 @@
+[[entries]]
+id = "d8ada304-d3fe-43f0-b4fa-7d655949cdbc"
+type = "improvement"
+description = "Always run `uv sync`"
+author = "thomas.pellissier-tanon@helsing.ai"

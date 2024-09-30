@@ -301,3 +301,6 @@ class UvManagedEnvironment(ManagedEnvironment):
         unsafe_command = [self.uv_bin, "sync"] + indexes.to_unsafe_args()
         logger.info("Running %s in '%s'", safe_command, self.project_directory)
         sp.check_call(unsafe_command, cwd=self.project_directory)
+
+    def always_install(self) -> bool:
+        return True
