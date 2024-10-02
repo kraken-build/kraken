@@ -63,7 +63,7 @@ pytest = ">=6.0.0"
 types-Deprecated = "^1.2.9"
 types-requests = "^2.28.0"
 pytest-xdist = {version = "^3.5.0", extras = ["psutil"]}
-mitmproxy = "^10.2.4"
+mitmproxy = "^11.0.0"
 types-networkx = "^3.2.1.20240703"
 requests-mock = "^1.12.1"
 
