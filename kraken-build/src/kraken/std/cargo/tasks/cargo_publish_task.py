@@ -24,7 +24,7 @@ class CargoPublishTask(CargoBuildTask):
     #: Path to the Cargo configuration file (defaults to `.cargo/config.toml`).
     cargo_config_file: Property[Path] = Property.default(".cargo/config.toml")
 
-    #: Name of the package to publish (only requried for publishing packages from workspace)
+    #: Name of the package to publish (only required for publishing packages from workspace)
     package_name: Property[str | None] = Property.default(None)
 
     #: The registry to publish the package to.
@@ -118,6 +118,17 @@ class CargoPublishTask(CargoBuildTask):
                 self._push_version_to_path_deps(fixed_version_string, manifest.dependencies.data, registry.alias)
             if manifest.build_dependencies:
                 self._push_version_to_path_deps(fixed_version_string, manifest.build_dependencies.data, registry.alias)
+
+            if manifest.workspace:
+                if manifest.workspace.dependencies:
+                    self._push_version_to_path_deps(
+                        fixed_version_string, manifest.workspace.dependencies.data, registry.alias
+                    )
+                if manifest.workspace.build_dependencies:
+                    self._push_version_to_path_deps(
+                        fixed_version_string, manifest.workspace.build_dependencies.data, registry.alias
+                    )
+
         return manifest.to_toml_string()
 
     def _push_version_to_path_deps(
