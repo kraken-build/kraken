@@ -48,8 +48,8 @@ class PoetryPyprojectHandler(PyprojectHandler):
         if packages is None:
             package_name = self._poetry_section["name"]
             return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
-        else:
-            return [self.Package(include=x["include"], from_=x.get("from")) for x in packages or ()]
+
+        return [self.Package(include=p["include"], from_=p.get("from")) for p in packages]
 
     # PyprojectHandler
 
