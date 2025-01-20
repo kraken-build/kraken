@@ -8,6 +8,7 @@ import shutil
 import subprocess as sp
 from collections.abc import Callable, Collection
 from dataclasses import dataclass
+from itertools import chain
 from pathlib import Path
 
 from kraken.common.path import is_relative_to
@@ -18,6 +19,7 @@ from ..pyproject import PyprojectHandler
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
+from .uv import UvPythonBuildSystem
 from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
 
 logger = logging.getLogger(__name__)
@@ -55,7 +57,10 @@ class MaturinZigTarget:
 
 class _MaturinBuilder:
     def __init__(
-        self, entry_point: str, get_pyproject_reader: Callable[[TomlFile], PyprojectHandler], project_directory: Path
+        self,
+        entry_point: Collection[str],
+        get_pyproject_reader: Callable[[TomlFile], PyprojectHandler],
+        project_directory: Path,
     ) -> None:
         self._entry_point = entry_point
         self._get_pyproject_reader = get_pyproject_reader
@@ -86,13 +91,12 @@ class _MaturinBuilder:
         # We run the actual build
         build_env = {**os.environ, **self._build_env}
         if self._default_build:
-            command = [self._entry_point, "run", "maturin", "build", "--release"]
+            command = [*self._entry_point, "maturin", "build", "--release"]
             logger.info("%s", command)
             sp.check_call(command, cwd=self._project_directory, env=build_env)
         for target in self._zig_targets:
             command = [
-                self._entry_point,
-                "run",
+                *self._entry_point,
                 "maturin",
                 "build",
                 "--release",
@@ -171,7 +175,7 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
-        self._builder = _MaturinBuilder("poetry", self.get_pyproject_reader, self.project_directory)
+        self._builder = _MaturinBuilder(["poetry", "run"], self.get_pyproject_reader, self.project_directory)
 
     def disable_default_build(self) -> None:
         self._builder.disable_default_build()
@@ -200,9 +204,6 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
 
     def build(self, output_directory: Path) -> list[Path]:
         return self._builder.build(output_directory)
-
-    def get_lockfile(self) -> Path | None:
-        return self.project_directory / "poetry.lock"
 
 
 class MaturinPoetryManagedEnvironment(PoetryManagedEnvironment):
@@ -233,7 +234,7 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
-        self._builder = _MaturinBuilder("pdm", self.get_pyproject_reader, self.project_directory)
+        self._builder = _MaturinBuilder(["pdm", "run"], self.get_pyproject_reader, self.project_directory)
 
     def disable_default_build(self) -> None:
         self._builder.disable_default_build()
@@ -253,10 +254,54 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
     def build(self, output_directory: Path) -> list[Path]:
         return self._builder.build(output_directory)
 
-    def get_lockfile(self) -> Path | None:
-        return self.project_directory / "pdm.lock"
-
 
 class MaturinPdmManagedEnvironment(PDMManagedEnvironment):
     def always_install(self) -> bool:
         return True
+
+
+class MaturinUvPythonBuildSystem(UvPythonBuildSystem):
+    """A maturin-backed version of the UV build system, that invokes the maturin build-backend.
+    Can be enabled by adding the following to the local pyproject.yaml:
+    ```toml
+    [build-system]
+    requires = ["maturin~=1.0"]
+    build-backend = "maturin"
+    ```
+    """
+
+    name = "Maturin UV"
+
+    def __init__(self, project_directory: Path, uv_bin: Path | None = None) -> None:
+        super().__init__(project_directory, uv_bin)
+        # We use the build requirement to do custom Maturin builds
+        self._builder = _MaturinBuilder(
+            [
+                self.uv_bin,
+                "tool",
+                "run",
+                *chain.from_iterable(("--with", r) for r in self._get_build_requirements()),
+            ],
+            self.get_pyproject_reader,
+            self.project_directory,
+        )
+
+    def disable_default_build(self) -> None:
+        self._builder.disable_default_build()
+
+    def enable_zig_build(self, targets: Collection[MaturinZigTarget]) -> None:
+        """
+        :param targets: Collection of MaturinTargets to cross-compile to using zig.
+        """
+        self._builder.enable_zig_build(targets)
+
+    def add_build_environment_variable(self, key: str, value: str) -> None:
+        self._builder.add_build_environment_variable(key, value)
+
+    def build(self, output_directory: Path) -> list[Path]:
+        return self._builder.build(output_directory)
+
+    def _get_build_requirements(self) -> Collection[str]:
+        pyproject_toml = self.project_directory / "pyproject.toml"
+        toml = TomlFile.read(pyproject_toml)
+        return toml.get("build-system", {}).get("requires", [])  # type: ignore[no-any-return]

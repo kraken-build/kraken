@@ -1,0 +1,10 @@
+[project]
+name = "rust-uv-project"
+version = "0.1.0"
+description = ""
+authors = []
+requires-python = ">=3.8"
+
+[build-system]
+requires = ["maturin~=1.0"]
+build-backend = "maturin"

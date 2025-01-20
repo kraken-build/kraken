@@ -25,7 +25,7 @@ class BuildEnvManager:
         project_root: Path,
         path: Path,
         auth: AuthModel,
-        default_type: EnvironmentType = EnvironmentType.VENV,
+        default_type: EnvironmentType = EnvironmentType.UV,
         default_hash_algorithm: str = "sha256",
         incremental: bool = False,
         show_install_logs: bool = False,

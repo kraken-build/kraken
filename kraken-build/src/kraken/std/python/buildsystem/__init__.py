@@ -174,22 +174,31 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         return PoetryPythonBuildSystem(project_directory)
 
     if "maturin" in pyproject_content:
-        if "[tool.poetry]" in pyproject_content:
+        if "[tool.poetry" in pyproject_content:
             from .maturin import MaturinPoetryPythonBuildSystem
 
             return MaturinPoetryPythonBuildSystem(project_directory)
-        else:
+        elif "[tool.pdm" in pyproject_content:
             from .maturin import MaturinPdmPythonBuildSystem
 
             return MaturinPdmPythonBuildSystem(project_directory)
+        else:
+            from .maturin import MaturinUvPythonBuildSystem
+
+            if "[tool.uv" not in pyproject_content:
+                logger.warning(
+                    "Got no hint as to the Python dependency system used in the project '%s', falling back to UV (experimental)",
+                    project_directory,
+                )
+            return MaturinUvPythonBuildSystem(project_directory)
 
     if "pdm" in pyproject_content:
         from .pdm import PDMPythonBuildSystem
 
         return PDMPythonBuildSystem(project_directory)
 
-    if "[tool.uv]" not in pyproject_content:
-        logger.info(
+    if "[tool.uv" not in pyproject_content:
+        logger.warning(
             "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
             project_directory,
         )

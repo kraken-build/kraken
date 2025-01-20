@@ -27,7 +27,7 @@ loguru = "^0.7.2"
 packaging = "^23.1"
 python = ">=3.10"
 termcolor = "^2.3.0"
-uv = "^0.4.2"
+uv = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = ">=6.0.0"
