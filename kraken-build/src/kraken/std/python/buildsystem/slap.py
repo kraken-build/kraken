@@ -72,6 +72,7 @@ class SlapPythonBuildSystem(PythonBuildSystem):
     def build(self, output_directory: Path) -> list[Path]:
         with tempfile.TemporaryDirectory() as tempdir:
             command = ["slap", "publish", "--dry", "-b", tempdir]
+            logger.info("Running %s in '%s'", command, self.project_directory)
             sp.check_call(command, cwd=self.project_directory)
             src_files = list(Path(tempdir).iterdir())
             dst_files = [output_directory / path.name for path in src_files]

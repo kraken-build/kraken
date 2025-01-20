@@ -35,3 +35,10 @@ id = "2293b312-487a-41ce-80c0-9f39214fac09"
 type = "fix"
 description = "Add missing `py.typed` marker for `kraken.build` module"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "602b5b4d-4b83-4234-8d32-033c93307912"
+type = "breaking change"
+description = "Remove a lot of long deprecated APIs"
+author = "@NiklasRosenstein"
+pr = "https://github.com/kraken-build/kraken/pull/268"

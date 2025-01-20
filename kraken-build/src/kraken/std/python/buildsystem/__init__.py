@@ -110,12 +110,16 @@ class PythonBuildSystem(abc.ABC):
             for path, content in revert_files.items():
                 path.write_text(content)
 
-    @abc.abstractmethod
     def build(self, output_directory: Path) -> list[Path]:
         """Build one or more distributions of the project managed by this build system.
 
         :param output_directory: The directory where the distributions should be placed.
         """
+
+        raise NotImplementedError
+
+    def build_v2(self, settings: PythonSettings, output_directory: Path) -> list[Path]:
+        return self.build(output_directory)
 
     @abc.abstractmethod
     def get_pyproject_reader(self, pyproject: TomlFile) -> PyprojectHandler:
@@ -184,4 +188,12 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
 
         return PDMPythonBuildSystem(project_directory)
 
-    return None
+    if "[tool.uv]" not in pyproject_content:
+        logger.info(
+            "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
+            project_directory,
+        )
+
+    from kraken.std.python.buildsystem.uv import UvPythonBuildSystem
+
+    return UvPythonBuildSystem(project_directory)

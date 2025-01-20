@@ -71,7 +71,7 @@ def publish(
     group: str | None = "publish",
     project: Project | None = None,
     after: list[Task] | None = None,
-    twine_version: str = ">=5.0.0,<6.0.0",
+    twine_version: str = ">=6.0.0,<7.0.0",
 ) -> PublishTask:
     """Create a publish task for the specified registry."""
 

@@ -1,8 +1,0 @@
-release-date = "2024-08-02"
-
-[[entries]]
-id = "602b5b4d-4b83-4234-8d32-033c93307912"
-type = "breaking change"
-description = "Remove a lot of long deprecated APIs"
-author = "@NiklasRosenstein"
-pr = "https://github.com/kraken-build/kraken/pull/268"

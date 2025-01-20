@@ -14,7 +14,7 @@ jobs:
   # == Documentation ==
 
   documentation:
-    runs-on: arc-amd64-small
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
@@ -57,7 +57,7 @@ jobs:
   # == Unit tests, linting, and type checking ==
 
   test:
-    runs-on: arc-amd64-small
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -102,7 +102,7 @@ jobs:
   # == Try running Kraken as defined in the kraken.yaml file ==
 
   # selftest:
-  #   runs-on: arc-amd64-small
+  #   runs-on: ubuntu-latest
   #   strategy:
   #     fail-fast: false
   #     matrix:
@@ -143,7 +143,7 @@ jobs:
   #       key: build-cache:${{ runner.os }}:selftest
 
   # uv-installer:
-  #   runs-on: arc-amd64-small
+  #   runs-on: ubuntu-latest
   #   steps:
   #   - uses: actions/checkout@v4
   #   - uses: NiklasRosenstein/slap@gha/install/v1
@@ -152,7 +152,7 @@ jobs:
   #   - run: krakenw run fmt lint
 
   examples-docker-manual:
-    runs-on: arc-amd64-small
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:

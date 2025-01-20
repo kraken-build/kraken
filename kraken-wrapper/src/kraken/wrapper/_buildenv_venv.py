@@ -11,6 +11,7 @@ from typing import ClassVar, Literal, NoReturn
 
 from kraken.common import EnvironmentType, RequirementSpec, findpython, safe_rmpath
 from kraken.common.pyenv import VirtualEnvInfo
+from kraken.common.sanitize import sanitize_http_basic_auth
 
 from ._buildenv import KRAKEN_MAIN_IMPORT_SNIPPET, BuildEnv, BuildEnvError, general_get_installed_distributions
 from ._lockfile import Distribution
@@ -84,6 +85,7 @@ class VenvBuildEnv(BuildEnv):
         assert exc is not None
         exit_code = exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1
         command_str = "$ " + " ".join(map(shlex.quote, command))
+        command_str = sanitize_http_basic_auth(command_str)
 
         if log_file:
             assert offset is not None
@@ -101,10 +103,10 @@ class VenvBuildEnv(BuildEnv):
                 "'%s' failed (exit code: %d, command: %s). Check the output above for more information.",
                 operation_name,
                 exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
-                "$ " + " ".join(map(shlex.quote, command)),
+                "$ " + command_str,
             )
 
-        raise BuildEnvError(f"The command {command} failed.") from exc
+        raise BuildEnvError(f"The command failed: {command_str}") from exc
 
     def _get_create_venv_command(self, python_bin: Path, path: Path) -> list[str]:
         """Returns the command to create a virtual environment."""
@@ -217,7 +219,11 @@ class VenvBuildEnv(BuildEnv):
         env = os.environ.copy()
         command = self._get_install_command(self._path, requirements, env)
         logger.info("Installing dependencies.")
-        logger.debug("Installing into build environment with %s: %s", self.INSTALLER_NAME, " ".join(command))
+        logger.debug(
+            "Installing into build environment with %s: %s",
+            self.INSTALLER_NAME,
+            sanitize_http_basic_auth(" ".join(command)),
+        )
         self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
         # Make sure the pythonpath from the requirements is encoded into the enviroment.

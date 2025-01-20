@@ -1,0 +1,19 @@
+release-date = "2024-09-03"
+
+[[entries]]
+id = "8ae7fa14-f255-4059-99ea-c52940f72ca9"
+type = "improvement"
+description = "Add -v flag when running `pyproject-build` in `UvPythonBuildSystem`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6a1cbffa-a820-4a37-a83a-7e1d7529a2d8"
+type = "feature"
+description = "Add `PythonBuildSystem.build_v2()` which receives the settings in addition to the output directory"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "f0dfe9d1-5e1c-4d86-bdf8-d083a8f30576"
+type = "fix"
+description = "Pass `UV_INDEX_URL` and `UV_EXTRA_INDEX_URL` env variables when invoking `pyproject-build`"
+author = "@NiklasRosenstein"

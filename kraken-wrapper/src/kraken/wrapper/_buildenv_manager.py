@@ -5,9 +5,10 @@ import hashlib
 import logging
 import platform
 from pathlib import Path
-from urllib.parse import quote, urlparse, urlunparse
+from urllib.parse import urlparse
 
 from kraken.common import EnvironmentType, RequirementSpec, not_none, safe_rmpath
+from kraken.std.util.url import inject_url_credentials
 
 from ._buildenv import BuildEnv, BuildEnvMetadata, BuildEnvMetadataStore
 from ._buildenv_uv import UvBuildEnv
@@ -55,10 +56,7 @@ class BuildEnvManager:
             return url
 
         logger.info('Injecting username and password into index url "%s"', url)
-        domain = parsed_url.netloc.rpartition("@")[-1]
-        parsed_url = parsed_url._replace(netloc=f"{quote(credentials.username)}:{quote(credentials.password)}@{domain}")
-        url = urlunparse(parsed_url)
-        return url
+        return inject_url_credentials(url, *credentials)
 
     def exists(self) -> bool:
         if self._metadata_store.get() is None:

@@ -5,6 +5,7 @@ import os
 import shlex
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
+import warnings
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
@@ -30,8 +31,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
     description = "Run unit tests using Pytest."
     python_dependencies = ["pytest"]
 
-    tests_dir: Property[Path]
-    include_dirs: Property[Sequence[Path]] = Property.default(())
+    tests_dir: Property[Sequence[Path] | Path]
+    include_dirs: Property[Sequence[Path]] = Property.default(())  # NOTE: Deprecated in favour of `tests_dir`
     ignore_dirs: Property[Sequence[Path]] = Property.default_factory(list)
     allow_no_tests: Property[bool] = Property.default(False)
     doctest_modules: Property[bool] = Property.default(True)
@@ -46,14 +47,25 @@ class PytestTask(EnvironmentAwareDispatchTask):
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         tests_dir = self.tests_dir.get_or(None)
         tests_dir = tests_dir or self.settings.get_tests_directory()
-        if not tests_dir:
+
+        if isinstance(tests_dir, Path):
+            tests_dir = [tests_dir]
+
+        if not tests_dir or len(tests_dir) == 0:
             print("error: no test directory configured and none could be detected")
             return TaskStatus.failed("no test directory configured and none could be detected")
+
+        if self.include_dirs.get():
+            warnings.warn(
+                "Setting include dirs is deprecated and will lead to an error in the future. Please, set multiple test directories instead.",
+                DeprecationWarning,
+            )
+
         command = [
             "pytest",
             "-vv",
             str(self.project.directory / self.settings.source_directory),
-            str(self.project.directory / tests_dir),
+            *[str(self.project.directory / path) for path in tests_dir],
             *[str(self.project.directory / path) for path in self.include_dirs.get()],
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
@@ -86,7 +98,7 @@ def pytest(
     name: str = "pytest",
     group: str = "test",
     project: Project | None = None,
-    tests_dir: Path | str | None = None,
+    tests_dir: Sequence[Path | str] | Path | str | None = None,
     include_dirs: Sequence[Path | str] = (),
     ignore_dirs: Sequence[Path | str] = (),
     allow_no_tests: bool = False,
@@ -96,7 +108,12 @@ def pytest(
 ) -> PytestTask:
     project = project or Project.current()
     task = project.task(name, PytestTask, group=group)
-    task.tests_dir = Path(tests_dir) if tests_dir is not None else None
+
+    if isinstance(tests_dir, Sequence):
+        task.tests_dir = list(map(Path, tests_dir))
+    else:
+        task.tests_dir = Path(tests_dir) if tests_dir is not None else None
+
     task.include_dirs = list(map(Path, include_dirs))
     task.ignore_dirs = list(map(Path, ignore_dirs))
     task.allow_no_tests = allow_no_tests

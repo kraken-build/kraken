@@ -31,3 +31,12 @@ id = "7b0576b8-d990-44c1-ab5b-395f06ab1e5f"
 type = "improvement"
 description = "Permit PyPI index URLs with trailing slash (e.g. `.../simple/`) in `PythonSettings.add_package_index()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a403dc03-77d0-4ff5-af16-70d6c8fce366"
+type = "fix"
+description = "Relative local dependencies in `buildscript(requirements)` are now resolved relative to the project root where `buildscript()` is called."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/263",
+]

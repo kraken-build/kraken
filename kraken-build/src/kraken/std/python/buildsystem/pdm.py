@@ -33,9 +33,6 @@ class PdmPyprojectHandler(PyprojectHandler):
     Implements the PyprojectHandler interface for PDM projects.
     """
 
-    def __init__(self, pyproj: TomlFile) -> None:
-        super().__init__(pyproj)
-
     # PyprojectHandler
 
     def get_package_indexes(self) -> list[PackageIndex]:
