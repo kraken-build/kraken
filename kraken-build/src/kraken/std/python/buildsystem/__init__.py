@@ -185,7 +185,7 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         else:
             from .maturin import MaturinUvPythonBuildSystem
 
-            if "[tool.uv]" not in pyproject_content:
+            if "[tool.uv" not in pyproject_content:
                 logger.warning(
                     "Got no hint as to the Python dependency system used in the project '%s', falling back to UV (experimental)",
                     project_directory,
@@ -197,7 +197,7 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
 
         return PDMPythonBuildSystem(project_directory)
 
-    if "[tool.uv]" not in pyproject_content:
+    if "[tool.uv" not in pyproject_content:
         logger.warning(
             "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
             project_directory,
