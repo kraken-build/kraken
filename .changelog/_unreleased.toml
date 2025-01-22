@@ -9,3 +9,9 @@ id = "a0af4cfe-6ac0-4c38-a500-fc34b112fa3e"
 type = "hygiene"
 description = "Configure ruff to sort imports"
 author = "scott@stevenson.io"
+
+[[entries]]
+id = "4d8a687f-14ae-4644-904a-80b1aef3421b"
+type = "improvement"
+description = "Support management of package indexes for uv"
+author = "antoine.broyelle@helsing.ai"

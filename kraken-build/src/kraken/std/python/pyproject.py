@@ -20,10 +20,16 @@ class _PackageIndexPriority(str, Enum):
     https://python-poetry.org/docs/repositories/#project-configuration
     """
 
+    # in decreasing order of priority
     default = "default"
     primary = "primary"
     secondary = "secondary"  # Do not use
     supplemental = "supplemental"
+    explicit = "explicit"
+
+    @property
+    def level(self) -> int:
+        return list(_PackageIndexPriority).index(self)
 
 
 @dataclass
@@ -132,6 +138,9 @@ class PyprojectHandler(ABC):
     @dataclass(frozen=True)
     class Package:
         include: str
+        # Why do we need the extra `from_` if it's only used by PythonBuildSystem.bump_version to concatenate it
+        # to `include`: package_dir = self.project_directory / (package.from_ or "") / package.include
+        # Then if the dataclass only has one field its existence is no longer needed.
         from_: str | None = None
 
     @abstractmethod

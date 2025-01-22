@@ -13,11 +13,9 @@ import subprocess as sp
 import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass
-from hashlib import md5
 from os import fsdecode
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Iterable, MutableMapping, TypeVar
-from urllib.parse import urlparse
+from typing import TYPE_CHECKING, Annotated, Any, Iterable, TypeVar
 
 from kraken.common.sanitize import sanitize_http_basic_auth
 from kraken.common.toml import TomlFile
@@ -39,14 +37,17 @@ else:
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
-T_PackageIndex = TypeVar("T_PackageIndex", bound=PackageIndex)
 Safe = Annotated[T, "safe"]
 Unsafe = Annotated[T, "unsafe"]
 
 
 @dataclass
-class PipIndex:
+class UvIndex:
+    # https://docs.astral.sh/uv/configuration/indexes/#defining-an-index
     url: str
+    name: str | None = None
+    default: bool = False
+    explicit: bool = False
     credentials: tuple[str, str] | None = None
 
     @property
@@ -62,136 +63,147 @@ class PipIndex:
         return self.url
 
     @staticmethod
-    def of(index: PackageIndex) -> "PipIndex":
+    def of(index: PackageIndex) -> "UvIndex":
         credentials = index.credentials if isinstance(index, PythonSettings._PackageIndex) else None
-        return PipIndex(index.index_url, credentials)
+        return UvIndex(
+            index.index_url,
+            name=index.alias if index.alias != "" else None,
+            default=index.priority == index.Priority.default or index.priority == index.Priority.primary,
+            explicit=index.priority == index.Priority.explicit,
+            credentials=credentials,
+        )
 
 
 @dataclass
-class PipIndexes:
-    primary: PipIndex | None
-    supplemental: list[PipIndex]
+class UvIndexes:
+    indexes: list[UvIndex]
 
-    @staticmethod
-    def from_package_indexes(indexes: Iterable[T_PackageIndex]) -> "PipIndexes":
-        default_index = next((idx for idx in indexes if idx.priority == PackageIndex.Priority.default), None)
-        primary_index = next((idx for idx in indexes if idx.priority == PackageIndex.Priority.primary), None)
-        remainder = [idx for idx in indexes if idx not in (default_index, primary_index)]
+    def __post_init__(self) -> None:
+        if len([index for index in self.indexes if index.default]) > 1:
+            raise ValueError("There can be only one default index.")
 
-        if default_index and primary_index:
-            logger.warning(
-                "Cannot have 'default' and 'primary' index for a UV project. The 'primary' index (%s) will be used "
-                "as the first of the 'supplemental' indexes instead.",
-                primary_index.alias,
-            )
-            remainder.insert(0, primary_index)
-            primary_index = None
-
-        elif primary_index and not default_index:
-            default_index, primary_index = primary_index, None
-
-        return PipIndexes(
-            primary=PipIndex.of(default_index) if default_index is not None else None,
-            supplemental=[PipIndex.of(idx) for idx in remainder],
-        )
+    @classmethod
+    def from_package_indexes(cls, indexes: Iterable[PackageIndex]) -> "UvIndexes":
+        indexes = sorted(indexes, key=lambda index: index.priority.level)
+        return cls([UvIndex.of(index) for index in indexes])
 
     def to_safe_args(self) -> list[str]:
         """Create a list of arguments for UV with sensitive information masked."""
-
-        args = []
-        if self.primary is not None:
-            args += ["--index-url", self.primary.safe_url]
-        for index in self.supplemental:
-            args += ["--extra-index-url", index.safe_url]
+        args: list[str] = []
+        for index in self.indexes:
+            args += ["--default-index" if index.default else "--index", index.safe_url]
         return args
 
     def to_unsafe_args(self) -> list[str]:
         """Create a list of arguments for UV with sensitive information in plaintext."""
 
-        args = []
-        if self.primary is not None:
-            args += ["--index-url", self.primary.unsafe_url]
-        for index in self.supplemental:
-            args += ["--extra-index-url", index.unsafe_url]
+        args: list[str] = []
+        for index in self.indexes:
+            args += ["--default-index" if index.default else "--index", index.unsafe_url]
         return args
 
-    def to_config(self, config: MutableMapping[str, Any]) -> None:
+    def to_config(self) -> list[dict[str, Any]]:
         """Inject UV configuration for indexes into a configuration."""
-
-        if self.primary is None:
-            config.pop("index-url", None)
-        else:
-            config["index-url"] = self.primary.url
-
-        if not self.supplemental:
-            config.pop("extra-index-url", None)
-        else:
-            config["extra-index-url"] = [idx.url for idx in self.supplemental]
+        entries: list[dict[str, str | bool]] = []
+        for index in self.indexes:
+            entry: dict[str, Any] = {}
+            if index.name is not None and index.name != "":
+                entry["name"] = index.name
+            entry["url"] = index.url
+            if index.default:
+                entry["default"] = True
+            if index.explicit:
+                entry["explicit"] = True
+            entries.append(entry)
+        return entries
 
     def to_env(self) -> dict[str, str]:
+        """Convert UV configuration for indexes into environment variables."""
+
         env = {}
-        if self.primary is not None:
-            env["UV_INDEX_URL"] = self.primary.unsafe_url
-        if self.supplemental:
-            env["UV_EXTRA_INDEX_URL"] = os.pathsep.join(idx.unsafe_url for idx in self.supplemental)
+        uv_indexes = []
+        for index in self.indexes:
+            if index.default:
+                # https://docs.astral.sh/uv/configuration/environment/#uv_default_index
+                env["UV_DEFAULT_INDEX"] = index.unsafe_url
+            else:
+                # https://docs.astral.sh/uv/configuration/environment/#uv_index
+                uv_indexes.append(
+                    (f"{index.name}=" if index.name is not None and index.name != "" else "") + index.unsafe_url
+                )
+
+        if len(uv_indexes) != 0:
+            env["UV_INDEX"] = " ".join(uv_indexes)
         return env
 
 
 class UvPyprojectHandler(PyprojectHandler):
     """Implements the PyprojectHandler interface for UV projects."""
 
-    # TODO: Support `uv.toml` configuration file?
-
-    # PyprojectHandler
+    # TODO: Support global `uv.toml` configuration file?
 
     def get_package_indexes(self) -> list[PackageIndex]:
-        """Maps the UV [`index-url`][1] and [`extra-index-url`][2] options to Kraken's concept of package indices.
-        Note that UV does not support the concept of "aliases" for package indices, so instead the package index alias
-        is ignored and generated automatically based on the hostname and URL hash.
+        """Maps the UV [`index`][1] table, [`index-url`][2] and [`extra-index-url`][3] options to Kraken's concept of
+        package indices. Note that UV does not support the concept of "aliases" for package indices, so instead
+        the package index alias is ignored and generated automatically based on the hostname and URL hash.
 
-        [1]: https://docs.astral.sh/uv/reference/settings/#index-url
-        [2]: https://docs.astral.sh/uv/reference/settings/#extra-index-url
+        [1]: https://docs.astral.sh/uv/reference/settings/#index
+        [2]: https://docs.astral.sh/uv/reference/settings/#index-url
+        [3]: https://docs.astral.sh/uv/reference/settings/#extra-index-url
         """
 
-        def gen_alias(url: str) -> str:
-            hostname = urlparse(url).hostname
-            assert hostname is not None, "expected hostname in package index URL"
-            return f"hostname-{md5(url.encode()).hexdigest()[:5]}"
-
         indexes: list[PackageIndex] = []
-        config: dict[str, Any] = self.raw.get("tool", {}).get("uv", {})
-
-        if index_url := config.get("index-url"):
+        for index in self.raw.get("tool", {}).get("uv", {}).get("index", []):
             indexes.append(
                 PackageIndex(
-                    alias=gen_alias(index_url),
+                    alias=index.get("name", ""),
+                    index_url=index["url"],
+                    priority=PackageIndex.Priority.default
+                    if index.get("default", False)
+                    else PackageIndex.Priority.explicit
+                    if index.get("explicit", False)
+                    else PackageIndex.Priority.supplemental,
+                    verify_ssl=True,
+                )
+            )
+
+        if index_url := self.raw.get("tool", {}).get("uv", {}).get("index-url"):
+            indexes.append(
+                PackageIndex(
+                    alias="",  # unnamed index
                     index_url=index_url,
+                    # can it be default is there is already one above ?
                     priority=PackageIndex.Priority.default,
                     verify_ssl=True,
                 )
             )
 
-        for index_url in config.get("extra-index-url", []):
+        for index_url in self.raw.get("tool", {}).get("uv", {}).get("extra-index-url", []):
             indexes.append(
                 PackageIndex(
-                    alias=gen_alias(index_url),
+                    alias="",  # unnamed index
                     index_url=index_url,
                     priority=PackageIndex.Priority.supplemental,
                     verify_ssl=True,
                 )
             )
-
         return indexes
 
     def set_package_indexes(self, indexes: Sequence[PackageIndex]) -> None:
         """Counterpart to [`get_package_indexes()`], check there."""
+        root_config = self.raw.get("tool", {}).get("uv", {})
 
-        config: dict[str, Any] = self.raw.setdefault("tool", {}).setdefault("uv", {})
-        PipIndexes.from_package_indexes(indexes).to_config(config)
+        # deprecated fields
+        root_config.pop("index-url", None)
+        root_config.pop("extra-index-url", None)
+
+        config = self.raw.setdefault("tool", {}).setdefault("uv", {}).setdefault("index", [])
+        config.clear()
+        config.extend(UvIndexes.from_package_indexes(indexes).to_config())
 
     def get_packages(self) -> list[PyprojectHandler.Package]:
-        # TODO: Detect packages in the project.
-        return []
+        package_name = self.raw["project"]["name"]
+        return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
 
 
 class UvPythonBuildSystem(PythonBuildSystem):
@@ -217,7 +229,7 @@ class UvPythonBuildSystem(PythonBuildSystem):
         return UvManagedEnvironment(self.project_directory, self.uv_bin)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
-        indexes = PipIndexes.from_package_indexes(settings.package_indexes.values())
+        indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
         safe_command = [self.uv_bin, "lock"] + indexes.to_safe_args()
         unsafe_command = [self.uv_bin, "lock"] + indexes.to_unsafe_args()
         logger.info("Running %s in '%s'", safe_command, self.project_directory)
@@ -225,6 +237,8 @@ class UvPythonBuildSystem(PythonBuildSystem):
         return TaskStatus.succeeded()
 
     def requires_login(self) -> bool:
+        # TODO: implement when uv supports keyring
+        # https://github.com/astral-sh/uv/issues/8810
         return False
 
     # TODO: Implement bump_version()
@@ -244,9 +258,9 @@ class UvPythonBuildSystem(PythonBuildSystem):
             if shutil.which("uv") != self.uv_bin:
                 env["PATH"] = str(Path(self.uv_bin).parent) + os.pathsep + env["PATH"]
 
-            # We can't pass the --index-url and --extra-index-url options to UV via the pyproject-build CLI,
+            # We can't pass the --default-index and --index options to UV via the pyproject-build CLI,
             # so we need to use environment variables.
-            indexes = PipIndexes.from_package_indexes(settings.package_indexes.values())
+            indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
             env.update(indexes.to_env())
 
             command = [
@@ -296,7 +310,7 @@ class UvManagedEnvironment(ManagedEnvironment):
         return self.env_path
 
     def install(self, settings: PythonSettings) -> None:
-        indexes = PipIndexes.from_package_indexes(settings.package_indexes.values())
+        indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
         safe_command = [self.uv_bin, "sync"] + indexes.to_safe_args()
         unsafe_command = [self.uv_bin, "sync"] + indexes.to_unsafe_args()
         logger.info("Running %s in '%s'", safe_command, self.project_directory)
