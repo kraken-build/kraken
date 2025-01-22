@@ -25,6 +25,7 @@ from kraken.std.cargo import (
     cargo_registry,
     cargo_sync_config,
 )
+
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 

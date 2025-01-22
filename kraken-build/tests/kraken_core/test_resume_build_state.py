@@ -11,6 +11,7 @@ from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver
 from kraken.core.cli.main import _load_build_state
 from kraken.core.cli.option_sets import BuildOptions, GraphOptions
 from kraken.core.system.task import Task, TaskStatus, TaskStatusType
+
 from tests.kraken_core.conftest import chdir_context
 
 logger = logging.getLogger(__name__)
