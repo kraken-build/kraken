@@ -14,12 +14,13 @@ from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
+from loguru import logger
+
 from kraken.common import Supplier
 from kraken.core.address import Address
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
-from loguru import logger
 
 if TYPE_CHECKING:
     from kraken.core.system.context import Context

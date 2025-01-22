@@ -8,6 +8,7 @@ from typing import Any, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
+
 from kraken.common import EnvironmentType, http
 from kraken.common.http import ReadTimeout
 

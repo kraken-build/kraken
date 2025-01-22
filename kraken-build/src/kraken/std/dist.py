@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Literal, Union, cast
 
 import databind.json
+
 from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
 from kraken.core.address import Address

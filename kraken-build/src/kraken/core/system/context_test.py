@@ -1,10 +1,11 @@
 from pathlib import Path
 
+from pytest import raises
+
 from kraken.core.address import AddressResolutionError
 from kraken.core.system.context import Context, TaskResolutionException
 from kraken.core.system.project import Project
 from kraken.core.system.task import VoidTask
-from pytest import raises
 
 
 def test__Context__resolve_tasks(kraken_ctx: Context, kraken_project: Project) -> None:

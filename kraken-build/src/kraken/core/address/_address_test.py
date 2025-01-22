@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import dill  # type: ignore[import-untyped]
-from kraken.core.address import Address
 from pytest import raises
+
+from kraken.core.address import Address
 
 
 def test__Address__reuse() -> None:

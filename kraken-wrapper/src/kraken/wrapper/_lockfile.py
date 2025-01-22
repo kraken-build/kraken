@@ -5,8 +5,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-from kraken.common import LocalRequirement, PipRequirement, RequirementSpec
 from packaging.requirements import Requirement as ParsedRequirement
+
+from kraken.common import LocalRequirement, PipRequirement, RequirementSpec
 
 
 @dataclasses.dataclass(frozen=True)

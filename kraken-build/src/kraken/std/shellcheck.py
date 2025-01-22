@@ -9,9 +9,10 @@ from posixpath import basename
 from shutil import copyfileobj
 from tarfile import open as TarFile
 
+from requests import get
+
 from kraken.common import not_none
 from kraken.core import Property, Task, TaskStatus
-from requests import get
 
 
 class ShellcheckTask(Task):

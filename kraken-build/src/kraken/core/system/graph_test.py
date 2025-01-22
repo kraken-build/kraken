@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 import pytest
+
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.task import GroupTask, TaskStatus, VoidTask

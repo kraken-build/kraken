@@ -1,4 +1,5 @@
 import pytest
+
 from kraken.core.system.project import Project
 from kraken.core.system.task import VoidTask
 

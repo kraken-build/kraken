@@ -1,9 +1,10 @@
 import textwrap
 
+from pytest import raises
+
 from kraken.core import BuildError, Project
 from kraken.std.git import gitignore
 from kraken.std.git.tasks.sync_task import GitignoreSyncTask
-from pytest import raises
 
 NO_GENERATED_CONTENT = """
 # This is a comment

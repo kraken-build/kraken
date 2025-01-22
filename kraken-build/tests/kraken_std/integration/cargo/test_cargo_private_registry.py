@@ -13,6 +13,8 @@ import unittest.mock
 from pathlib import Path
 
 import pytest
+from requests_mock import Mocker
+
 from kraken.core import BuildError
 from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.std.cargo import (
@@ -23,8 +25,6 @@ from kraken.std.cargo import (
     cargo_registry,
     cargo_sync_config,
 )
-from requests_mock import Mocker
-
 from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 

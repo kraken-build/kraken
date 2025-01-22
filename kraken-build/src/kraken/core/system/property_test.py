@@ -3,9 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, Optional, Union
 
+from pytest import mark, raises
+
 from kraken.common.supplier import OfSupplier, VoidSupplier
 from kraken.core.system.property import Property, PropertyContainer
-from pytest import mark, raises
 
 
 def test__Property_value_adapter_order_is_semantically_revelant() -> None:

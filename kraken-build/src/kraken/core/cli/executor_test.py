@@ -1,4 +1,5 @@
 import termcolor
+
 from kraken.core.cli.executor import COLORS_BY_STATUS
 from kraken.core.system.task import TaskStatusType
 

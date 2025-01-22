@@ -12,6 +12,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 import pytest
+
 from kraken.wrapper.main import main
 
 EXAMPLE_PROJECT = Path(__file__).parent / "example_project"
