@@ -1,8 +1,9 @@
 import tarfile
-from kraken.core import Project, Task, Property
+
+from kraken.core import Project, Property, Task
 from kraken.core.system.task import TaskStatus
-from kraken.std.dist import dist
 from kraken.std.descriptors.resource import Resource
+from kraken.std.dist import dist
 
 
 def test_dist(kraken_project: Project) -> None:

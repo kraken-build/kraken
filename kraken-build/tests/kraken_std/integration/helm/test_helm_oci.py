@@ -5,10 +5,10 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-
 from kraken.common import http
 from kraken.core import Project
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
+
 from tests.kraken_std.util.docker import DockerServiceManager
 
 logger = logging.getLogger(__name__)

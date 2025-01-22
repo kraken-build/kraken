@@ -8,7 +8,6 @@ from urllib.parse import urlparse
 
 import tomli
 import tomli_w
-
 from kraken.common import atomic_file_swap, not_none
 from kraken.core import BackgroundTask, Property, TaskStatus
 from kraken.std.cargo.config import CargoRegistry

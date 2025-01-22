@@ -3,7 +3,6 @@ import time
 from collections.abc import Collection
 
 import httpx
-
 from kraken.common import http
 
 logger = logging.getLogger(__name__)

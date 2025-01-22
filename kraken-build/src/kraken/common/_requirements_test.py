@@ -1,8 +1,7 @@
 from pathlib import Path
 
-from pytest import raises
-
 from kraken.common import LocalRequirement, PipRequirement, parse_requirement
+from pytest import raises
 
 
 def test__parse_requirement__can_handle_various_pip_requirements() -> None:

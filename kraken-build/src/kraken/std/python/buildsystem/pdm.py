@@ -6,9 +6,9 @@ import logging
 import os
 import shutil
 import subprocess as sp
+import sys
 from collections.abc import Sequence
 from pathlib import Path
-import sys
 from typing import Any
 
 from kraken.common import NotSet

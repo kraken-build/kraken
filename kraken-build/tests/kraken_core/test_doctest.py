@@ -6,9 +6,8 @@ from collections.abc import Iterator
 from importlib import import_module
 from pathlib import Path
 
-import pytest
-
 import kraken.core
+import pytest
 
 # NOTE(NiklasRosenstein): We do the doctest manually instead of relying on `pytest --doctest-modules` because
 #       it does not handle PEP420 implicit namespace packages very well.

@@ -6,7 +6,6 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import dill  # type: ignore[import-untyped]
-
 from kraken.common import pluralize
 from kraken.core import Context, TaskGraph
 

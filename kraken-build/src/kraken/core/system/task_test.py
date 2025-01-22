@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from pytest import raises
 
 from kraken.core.system.project import Project
 from kraken.core.system.property import Property
 from kraken.core.system.task import Task, TaskRelationship, TaskSet, VoidTask
+from pytest import raises
 
 
 def test__Task__get_relationships_lineage_through_properties(kraken_project: Project) -> None:

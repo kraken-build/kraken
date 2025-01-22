@@ -2,7 +2,6 @@
 
 import httpx
 import requests
-
 from kraken.common import http
 
 

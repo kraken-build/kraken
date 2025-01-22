@@ -1,5 +1,4 @@
 from kraken.core import Project
-
 from kraken.std.python import pytest as pytest_task
 
 FAKE_TEST = """

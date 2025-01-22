@@ -3,10 +3,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from textwrap import dedent
 
-from pytest import mark, raises
-
 from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli.main import main
+from pytest import mark, raises
+
 from tests.kraken_core.conftest import chdir_context
 
 

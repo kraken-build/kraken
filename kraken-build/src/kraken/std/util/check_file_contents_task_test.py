@@ -1,11 +1,10 @@
 import os
 import unittest.mock
 
-from pytest import CaptureFixture
-
 from kraken.core import Project
 from kraken.core.system.task import TaskStatus
 from kraken.std.util.check_file_contents_task import CheckFileContentsTask
+from pytest import CaptureFixture
 
 
 @unittest.mock.patch.dict(os.environ, {"ANSI_COLORS_DISABLED": "1"})

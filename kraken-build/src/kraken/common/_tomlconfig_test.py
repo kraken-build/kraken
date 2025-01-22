@@ -4,9 +4,8 @@ from tempfile import TemporaryDirectory
 from textwrap import dedent
 
 import tomli
-from pytest import fixture
-
 from kraken.common._tomlconfig import TomlConfigFile
+from pytest import fixture
 
 
 @fixture

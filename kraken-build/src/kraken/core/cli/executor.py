@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-from kraken.common import Color, colored as _colored
+from kraken.common import Color
+from kraken.common import colored as _colored
 from kraken.core import Graph, Task, TaskGraph, TaskStatus, TaskStatusType
 from kraken.core.system.executor.default import DefaultPrintingExecutorObserver
 

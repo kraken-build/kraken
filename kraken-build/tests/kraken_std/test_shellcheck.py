@@ -1,5 +1,4 @@
 import pytest
-
 from kraken.core import BuildError, Project
 from kraken.std.shellcheck import shellcheck
 

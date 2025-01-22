@@ -1,8 +1,6 @@
 from collections.abc import Generator
 
 from _pytest.capture import CaptureFixture, CaptureResult
-from pytest import raises
-
 from kraken.core.system.executor import GraphExecutorObserver
 from kraken.core.system.executor.default import (
     TASKS_SKIPPED_DUE_TO_FAILING_DEPENDENCIES_TITLE,
@@ -13,6 +11,7 @@ from kraken.core.system.executor.default import (
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
 from kraken.core.system.task import Task, TaskStatus, VoidTask
+from pytest import raises
 
 
 class MyTask(Task):

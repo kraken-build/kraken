@@ -94,6 +94,9 @@ enable_error_code = "ignore-without-code, possibly-undefined"
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
 [tool.pytest.ini_options]
 markers = [
   "integration",

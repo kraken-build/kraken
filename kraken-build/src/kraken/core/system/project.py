@@ -5,7 +5,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
 
-
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.task import GroupTask, Task

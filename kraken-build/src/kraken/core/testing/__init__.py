@@ -7,7 +7,6 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-
 from kraken.core.system.context import Context
 from kraken.core.system.project import Project
 

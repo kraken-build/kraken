@@ -6,7 +6,6 @@ from typing import Any
 
 import requests
 import requests.auth
-
 from kraken.common import atomic_file_swap, not_none
 from kraken.core import Project, Property, TaskStatus
 from kraken.std.cargo import CargoProject

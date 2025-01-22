@@ -1,6 +1,7 @@
+from pathlib import Path
+
 import pytest
 from kraken.core import Context, Project
-from pathlib import Path
 
 
 def test_import_current_context_and_project_from_kraken_build() -> None:

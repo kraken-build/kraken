@@ -3,9 +3,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 
-from pytest import raises
-
 from kraken.core.address import Address, AddressResolutionError, AddressSpace, resolve_address
+from pytest import raises
 
 
 @dataclass(init=False, repr=False)

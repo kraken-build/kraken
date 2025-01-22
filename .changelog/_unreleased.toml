@@ -3,3 +3,9 @@ id = "5edb6a12-7001-4c4a-8fca-cf95cfd88b7b"
 type = "improvement"
 description = "Run CI with Python 3.13"
 author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "a0af4cfe-6ac0-4c38-a500-fc34b112fa3e"
+type = "hygiene"
+description = "Configure ruff to sort imports"
+author = "scott@stevenson.io"

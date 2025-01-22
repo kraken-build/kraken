@@ -21,6 +21,7 @@ from operator import concat
 from pathlib import Path
 from typing import Any, ClassVar, TypeVar, cast
 
+from kraken.common import NotSet, Supplier, not_none
 from typeapi import (
     AnnotatedTypeHint,
     ClassTypeHint,
@@ -30,8 +31,6 @@ from typeapi import (
     UnionTypeHint,
     get_annotations,
 )
-
-from kraken.common import NotSet, Supplier, not_none
 
 T = TypeVar("T")
 U = TypeVar("U")

@@ -14,9 +14,6 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
-from kraken.common.graphviz import render_to_browser
-from kraken.common.graphviz import GraphvizWriter
-
 from kraken.common import (
     BuildscriptMetadata,
     ColorOptions,
@@ -29,6 +26,7 @@ from kraken.common import (
     not_none,
     propagate_argparse_formatter_to_subparser,
 )
+from kraken.common.graphviz import GraphvizWriter, render_to_browser
 from kraken.common.pyenv import get_distributions
 from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize

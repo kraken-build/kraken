@@ -6,7 +6,6 @@ from typing import Literal
 
 import tomli
 import tomli_w
-
 from kraken.core import Project, Property
 from kraken.std.util.render_file_task import RenderFileTask
 

@@ -3,12 +3,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 
-from pytest import fixture
-
 from kraken.common._buildscript import BuildscriptMetadata
 from kraken.common._generic import not_none
 from kraken.common._runner import CurrentDirectoryProjectFinder, GitAwareProjectFinder, PythonScriptRunner
 from kraken.core import Project
+from pytest import fixture
 
 
 @fixture

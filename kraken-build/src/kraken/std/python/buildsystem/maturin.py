@@ -19,8 +19,8 @@ from ..pyproject import PyprojectHandler
 from ..settings import PythonSettings
 from . import ManagedEnvironment
 from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
-from .uv import UvPythonBuildSystem
 from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
+from .uv import UvPythonBuildSystem
 
 logger = logging.getLogger(__name__)
 

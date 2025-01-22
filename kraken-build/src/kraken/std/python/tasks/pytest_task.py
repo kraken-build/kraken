@@ -3,9 +3,9 @@ from __future__ import annotations
 import enum
 import os
 import shlex
+import warnings
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
-import warnings
 
 from kraken.common import flatten
 from kraken.core import Project, Property, TaskStatus
