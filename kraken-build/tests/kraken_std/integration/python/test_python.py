@@ -105,13 +105,14 @@ def test__python_project_install_lint_and_publish(
     shutil.copytree(example_dir(project_dir), tempdir / project_dir)
     shutil.copytree(example_dir(consumer_dir), tempdir / consumer_dir)
 
-    # TODO (@NiklasRosenstein): Make sure Poetry installs the environment locally so it gets cleaned up
-    #       with the temporary directory.
-
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
+    # TODO: mock the `os.environ` dict instead of mutating the global one
     os.environ["LOCAL_PACKAGE_INDEX"] = pypiserver
     os.environ["LOCAL_USER"] = USER_NAME
     os.environ["LOCAL_PASSWORD"] = USER_PASS
+    # Make sure Poetry installs the environment locally so it gets cleaned up
+    os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "1"
+
     kraken_ctx.load_project(directory=tempdir / project_dir)
     kraken_ctx.execute([":lint", ":publish"])
 

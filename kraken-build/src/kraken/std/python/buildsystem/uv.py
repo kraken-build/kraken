@@ -13,10 +13,11 @@ import subprocess as sp
 import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass
-from os import fsdecode
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Iterable, TypeVar
+from typing import Annotated, Any, Iterable, TypeVar
 
+from kraken.common import NotSet
+from kraken.common.pyenv import get_current_venv
 from kraken.common.sanitize import sanitize_http_basic_auth
 from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
@@ -25,15 +26,6 @@ from kraken.std.python.settings import PythonSettings
 from kraken.std.util.url import inject_url_credentials
 
 from . import ManagedEnvironment, PythonBuildSystem
-
-# "uv" is a dependency of Kraken, so we can use it's packaged version.
-if TYPE_CHECKING:
-
-    def find_uv_bin() -> str: ...
-
-else:
-    from uv.__main__ import find_uv_bin
-
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -215,9 +207,8 @@ class UvPythonBuildSystem(PythonBuildSystem):
 
     name = "UV"
 
-    def __init__(self, project_directory: Path, uv_bin: Path | None = None) -> None:
+    def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
-        self.uv_bin = str(uv_bin or Path(fsdecode(find_uv_bin())).absolute())
 
     def get_pyproject_reader(self, pyproject: TomlFile) -> UvPyprojectHandler:
         return UvPyprojectHandler(pyproject)
@@ -226,14 +217,11 @@ class UvPythonBuildSystem(PythonBuildSystem):
         return True
 
     def get_managed_environment(self) -> ManagedEnvironment:
-        return UvManagedEnvironment(self.project_directory, self.uv_bin)
+        return UvManagedEnvironment(self.project_directory)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
-        indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
-        safe_command = [self.uv_bin, "lock"] + indexes.to_safe_args()
-        unsafe_command = [self.uv_bin, "lock"] + indexes.to_unsafe_args()
-        logger.info("Running %s in '%s'", safe_command, self.project_directory)
-        sp.check_call(unsafe_command, cwd=self.project_directory)
+        command = ["uv", "lock", "--package"]
+        sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
 
     def requires_login(self) -> bool:
@@ -253,18 +241,13 @@ class UvPythonBuildSystem(PythonBuildSystem):
         with tempfile.TemporaryDirectory() as tempdir:
             env: dict[str, str] = {}
 
-            # Make sure that UV is on the path for `pyproject-build` to find it.
-            assert Path(self.uv_bin).name == "uv"
-            if shutil.which("uv") != self.uv_bin:
-                env["PATH"] = str(Path(self.uv_bin).parent) + os.pathsep + env["PATH"]
-
             # We can't pass the --default-index and --index options to UV via the pyproject-build CLI,
             # so we need to use environment variables.
             indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
             env.update(indexes.to_env())
 
             command = [
-                self.uv_bin,
+                "uv",
                 "tool",
                 "run",
                 "--from",
@@ -296,25 +279,51 @@ class UvPythonBuildSystem(PythonBuildSystem):
 
 
 class UvManagedEnvironment(ManagedEnvironment):
-    def __init__(self, project_directory: Path, uv_bin: str) -> None:
+    def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
-        self.uv_bin = uv_bin
-        self.env_path = project_directory / ".venv"
+        self._env_path: Path | None | NotSet = NotSet.Value
+
+    def _get_uv_environment_path(self) -> Path | None:
+        """Uses `uv run` to determines the location of the venv."""
+
+        # Ensure we de-activate any environment that might be active when Kraken is invoked. Otherwise,
+        # Poetry would fall back to that environment.
+        environ = os.environ.copy()
+        venv = get_current_venv(environ)
+        if venv:
+            venv.deactivate(environ)
+
+        command = ["uv", "run", "bash", "-c", "printenv VIRTUAL_ENV"]
+        logger.debug("Detecting virtual environment ... %s", " ".join(command))
+        try:
+            response = sp.check_output(command, cwd=self.project_directory, env=environ).decode().strip()
+        except sp.CalledProcessError as exc:
+            if exc.returncode != 1:
+                raise
+            return None
+
+        logger.debug("Virtual environment detected: %s", response)
+        return Path(response)
 
     # ManagedEnvironment
 
     def exists(self) -> bool:
-        return self.env_path.is_dir()
+        try:
+            return self.get_path().is_dir()
+        except RuntimeError:
+            return False
 
     def get_path(self) -> Path:
-        return self.env_path
+        if self._env_path is NotSet.Value:
+            self._env_path = self._get_uv_environment_path()
+        if self._env_path is None:
+            raise RuntimeError("Managed environment does not exist")
+        return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
-        safe_command = [self.uv_bin, "sync"] + indexes.to_safe_args()
-        unsafe_command = [self.uv_bin, "sync"] + indexes.to_unsafe_args()
-        logger.info("Running %s in '%s'", safe_command, self.project_directory)
-        sp.check_call(unsafe_command, cwd=self.project_directory)
+        command = ["uv", "sync", "--all-extras", "--frozen"]
+        logger.info("%s", command)
+        sp.check_call(command, cwd=self.project_directory)
 
     def always_install(self) -> bool:
         return True

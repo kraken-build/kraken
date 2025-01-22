@@ -15,3 +15,9 @@ id = "4d8a687f-14ae-4644-904a-80b1aef3421b"
 type = "improvement"
 description = "Support management of package indexes for uv"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "06add927-62e1-4503-b82f-88000bd29da1"
+type = "improvement"
+description = "Remove `uv` as a direct dependency"
+author = "antoine.broyelle@helsing.ai"

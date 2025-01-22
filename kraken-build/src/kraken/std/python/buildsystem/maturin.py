@@ -272,16 +272,11 @@ class MaturinUvPythonBuildSystem(UvPythonBuildSystem):
 
     name = "Maturin UV"
 
-    def __init__(self, project_directory: Path, uv_bin: Path | None = None) -> None:
-        super().__init__(project_directory, uv_bin)
+    def __init__(self, project_directory: Path) -> None:
+        super().__init__(project_directory)
         # We use the build requirement to do custom Maturin builds
         self._builder = _MaturinBuilder(
-            [
-                self.uv_bin,
-                "tool",
-                "run",
-                *chain.from_iterable(("--with", r) for r in self._get_build_requirements()),
-            ],
+            ["uv", "tool", "run", *chain.from_iterable(("--with", r) for r in self._get_build_requirements())],
             self.get_pyproject_reader,
             self.project_directory,
         )

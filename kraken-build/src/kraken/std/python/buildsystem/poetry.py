@@ -211,8 +211,8 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             if exc.returncode != 1:
                 raise
             return None
-        else:
-            return Path(response)
+
+        return Path(response)
 
     def _get_all_poetry_known_environment_paths(self) -> list[Path]:
         """Uses `poetry env list --full-path` to get the path to all relevant virtual environments that are known
@@ -225,8 +225,8 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             if exc.returncode != 1:
                 raise
             return []
-        else:
-            return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
+
+        return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
 
     def _get_poetry_environment_path(self) -> Path | None:
         # Run the two Poetry commands we need to run in parallel to improve load times.
@@ -249,8 +249,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
 
     def exists(self) -> bool:
         try:
-            self.get_path()
-            return True
+            return self.get_path().is_dir()
         except RuntimeError:
             return False
 
@@ -258,7 +257,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         if self._env_path is NotSet.Value:
             self._env_path = self._get_poetry_environment_path()
         if self._env_path is None:
-            raise RuntimeError("managed environment does not exist")
+            raise RuntimeError("Managed environment does not exist")
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
