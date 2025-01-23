@@ -68,7 +68,7 @@ jobs:
     - uses: NiklasRosenstein/slap@gha/install/v1
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
+    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install uv && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
     - run: rustup update
     - run: slap config --venv-type=uv
 
