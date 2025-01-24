@@ -21,3 +21,9 @@ id = "06add927-62e1-4503-b82f-88000bd29da1"
 type = "improvement"
 description = "Remove `uv` as a direct dependency in kraken-build"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "3faaa1ff-aafc-4fee-bbd6-dd91a258d483"
+type = "fix"
+description = "Fixes build of Maturin projects that use UV to properly build wheels using Maturin"
+author = "thomas.pellissier-tanon@helsing.ai"

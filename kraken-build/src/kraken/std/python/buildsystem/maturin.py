@@ -293,7 +293,7 @@ class MaturinUvPythonBuildSystem(UvPythonBuildSystem):
     def add_build_environment_variable(self, key: str, value: str) -> None:
         self._builder.add_build_environment_variable(key, value)
 
-    def build(self, output_directory: Path) -> list[Path]:
+    def build_v2(self, settings: PythonSettings, output_directory: Path) -> list[Path]:
         return self._builder.build(output_directory)
 
     def _get_build_requirements(self) -> Collection[str]:

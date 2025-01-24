@@ -27,7 +27,6 @@ from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 
 logger = logging.getLogger(__name__)
-PYPISERVER_PORT = 23213
 USER_NAME = "integration-test-user"
 USER_PASS = "password-for-integration-test"
 
@@ -125,13 +124,17 @@ def test__python_project_install_lint_and_publish(
     # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
 
-    # For debugging purposes, peer into the pypiserver state.
-    print()
-    print(f"=== {pypiserver}")
-    print(httpx.get(pypiserver, auth=(USER_NAME, USER_PASS), follow_redirects=True).content)
+    # For debugging
+    package_state = httpx.get(f"{pypiserver}/{project_dir}", auth=(USER_NAME, USER_PASS), follow_redirects=True).text
     print(f"=== {pypiserver}/{project_dir}")
-    print(httpx.get(f"{pypiserver}/{project_dir}", auth=(USER_NAME, USER_PASS), follow_redirects=True).content)
-    print()
+    print(package_state)
+
+    # Test that expected artifacts are emitted
+    project_file_name = project_dir.replace("-", "_").lower()
+    if project_dir.startswith("rust-"):
+        assert f"{project_file_name}-0.1.0-cp39-abi3-manylinux_2_34_x86_64" in package_state
+    else:
+        assert f"{project_file_name}-0.1.0-py3-none-any.whl" in package_state
 
     kraken_ctx.execute([":python.install"])
     # TODO (@NiklasRosenstein): Test importing the consumer project.
@@ -189,7 +192,7 @@ M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
         ("poetry-project", PoetryPyprojectHandler, "^3.7"),
         ("slap-project", PoetryPyprojectHandler, "^3.6"),
         ("pdm-project", PdmPyprojectHandler, ">=3.9"),
-        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.7"),
+        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.9"),
         ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
