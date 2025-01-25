@@ -21,3 +21,9 @@ id = "1898e101-4ef2-44c0-9832-c1b2ca0c39b6"
 type = "fix"
 description = "Address tool.poetry.dev-dependencies deprecation warnings"
 author = "scott@stevenson.io"
+
+[[entries]]
+id = "faea65a7-ef87-457c-8c7b-523bab205e00"
+type = "improvement"
+description = "Use `uv tool` instead of `pex` to run Python tools"
+author = "scott@stevenson.io"

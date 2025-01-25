@@ -7,7 +7,6 @@ from pathlib import Path
 from kraken.common import Supplier
 from kraken.core import Project, Property
 from kraken.core.system.task import TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -17,7 +16,7 @@ class BlackTask(EnvironmentAwareDispatchTask):
 
     python_dependencies = ["black"]
 
-    black_bin: Property[str] = Property.default("black")
+    black_cmd: Property[Sequence[str]] = Property.default(["black"])
     check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
@@ -26,7 +25,7 @@ class BlackTask(EnvironmentAwareDispatchTask):
     # EnvironmentAwareDispatchTask
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
-        command = [self.black_bin.get(), str(self.settings.source_directory)]
+        command = [*self.black_cmd.get(), str(self.settings.source_directory)]
         command += self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         command += [str(p) for p in self.additional_files.get()]
@@ -64,28 +63,26 @@ def black(
     """Creates two black tasks, one to check and another to format. The check task will be grouped under `"lint"`
     whereas the format task will be grouped under `"fmt"`.
 
-    :param version_spec: If specified, the Black tool will be installed as a PEX and does not need to be installed
+    :param version_spec: If specified, the Black tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 
     project = project or Project.current()
 
     if version_spec is not None:
-        black_bin = pex_build(
-            "black", requirements=[f"black{version_spec}"], console_script="black", project=project
-        ).output_file.map(str)
+        black_cmd = Supplier.of(["uv", "tool", "run", "--from", f"black{version_spec}", "black"])
     else:
-        black_bin = Supplier.of("black")
+        black_cmd = Supplier.of(["black"])
 
     check_task = project.task(f"{name}.check", BlackTask, group="lint")
-    check_task.black_bin = black_bin
+    check_task.black_cmd = black_cmd
     check_task.check_only = True
     check_task.config_file = config_file
     check_task.additional_args = additional_args
     check_task.additional_files = additional_files
 
     format_task = project.task(name, BlackTask, group="fmt")
-    format_task.black_bin = black_bin
+    format_task.black_cmd = black_cmd
     format_task.check_only = False
     format_task.config_file = config_file
     format_task.additional_args = additional_args

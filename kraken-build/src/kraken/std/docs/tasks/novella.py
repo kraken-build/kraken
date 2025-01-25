@@ -2,21 +2,22 @@
 
 import subprocess
 from collections.abc import Sequence
+from itertools import chain
 from pathlib import Path
 
+from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 
 class NovellaTask(Task):
     """Build or serve documentation with Novella."""
 
-    novella_bin: Property[Path]
+    novella_cmd: Property[Sequence[str]]
     docs_dir: Property[Path | None] = Property.default(None)
     args: Property[Sequence[str]] = Property.default(())
 
     def execute(self) -> TaskStatus | None:
-        command = [str(self.novella_bin.get())]
+        command = list(self.novella_cmd.get())
         if self.docs_dir.get():
             command += ["--directory", str(self.docs_dir.get())]
         command += self.args.get()
@@ -37,12 +38,18 @@ def novella(
     serve_task: str | None = None,
 ) -> tuple[NovellaTask, NovellaTask | None]:
     project = project or Project.current()
-    novella_bin = pex_build(
-        console_script="novella",
-        requirements=[f"novella{novella_version}", *additional_requirements],
-        project=project,
-        venv="prepend",
-    ).output_file
+
+    novella_cmd = Supplier.of(
+        [
+            "uv",
+            "tool",
+            "run",
+            "--from",
+            f"novella=={novella_version}",
+            *chain.from_iterable(("--with", r) for r in additional_requirements),
+            "novella",
+        ]
+    )
 
     if docs_dir is not None:
         docs_dir = project.directory / docs_dir
@@ -52,7 +59,7 @@ def novella(
         build_task = name
 
     _build_task = project.task(build_task, NovellaTask)
-    _build_task.novella_bin = novella_bin
+    _build_task.novella_cmd = novella_cmd
     _build_task.docs_dir = docs_dir
     _build_task.args = build_args
     if build_group is not None:
@@ -63,7 +70,7 @@ def novella(
             assert name is not None, "need one of serve_task/name"
             serve_task = f"{name}.serve"
         _serve_task = project.task(serve_task, NovellaTask)
-        _serve_task.novella_bin = novella_bin
+        _serve_task.novella_cmd = novella_cmd
         _serve_task.docs_dir = docs_dir
         _serve_task.args = serve_args
     else:

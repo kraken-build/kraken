@@ -60,6 +60,7 @@ pytest = ">=6.0.0"
 mitmproxy = "^11.0.0"
 types-networkx = "^3.2.1.20240703"
 requests-mock = "^1.12.1"
+types-requests = "^2.32.0.20241016"
 
 # Slap configuration
 # ------------------

@@ -9,7 +9,6 @@ from typing import Literal
 
 from kraken.common import Supplier
 from kraken.core import Project, Task
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
@@ -178,13 +177,11 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    mitmweb_bin = pex_build(
-        "mitmweb", requirements=["mitmproxy>=10.0.0,<11.0.0"], console_script="mitmweb"
-    ).output_file.map(lambda p: str(p.absolute()))
+    mitmweb_cmd = Supplier.of(["uv", "tool", "run", "--from", "mitmproxy>=10.0.0,<11.0.0", "mitmweb"])
 
     task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
-    task.mitmweb_bin = mitmweb_bin
+    task.mitmweb_cmd = mitmweb_cmd
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)

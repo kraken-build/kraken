@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import subprocess
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from pathlib import Path
 
+from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskRelationship
 from kraken.core.system.task import TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from ..settings import python_settings
 
@@ -15,7 +15,7 @@ class PublishTask(Task):
     """Publishes Python distributions to one or more indexes using :mod:`twine`."""
 
     description = "Upload the distributions of your Python project. [index url: %(index_upload_url)s]"
-    twine_bin: Property[Path]
+    twine_cmd: Property[Sequence[str]]
     index_upload_url: Property[str]
     index_credentials: Property[tuple[str, str] | None] = Property.default(None)
     distributions: Property[list[Path]]
@@ -35,7 +35,7 @@ class PublishTask(Task):
         credentials = self.index_credentials.get()
         repository_url = self.index_upload_url.get().rstrip("/") + "/"
         command = [
-            str(self.twine_bin.get()),
+            *self.twine_cmd.get(),
             "upload",
             "--repository-url",
             repository_url,
@@ -80,13 +80,11 @@ def publish(
     if package_index not in settings.package_indexes:
         raise ValueError(f"package index {package_index!r} is not defined")
 
-    twine_bin = pex_build(
-        "twine", requirements=[f"twine{twine_version}"], console_script="twine", project=project
-    ).output_file
+    twine_cmd = Supplier.of(["uv", "tool", "run", "--from", f"twine{twine_version}", "twine"])
 
     index = settings.package_indexes[package_index]
     task = project.task(name, PublishTask, group=group)
-    task.twine_bin = twine_bin
+    task.twine_cmd = twine_cmd
     task.index_upload_url = index.upload_url
     task.index_credentials = index.credentials
     task.distributions = distributions

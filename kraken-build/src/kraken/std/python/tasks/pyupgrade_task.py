@@ -9,7 +9,6 @@ from tempfile import TemporaryDirectory
 
 from kraken.common.supplier import Supplier
 from kraken.core import Project, Property, TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .. import python_settings
 from .base_task import EnvironmentAwareDispatchTask
@@ -19,7 +18,7 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
     description = "Upgrades to newer Python syntax sugars with pyupgrade."
     python_dependencies = ["pyupgrade"]
 
-    pyupgrade_bin: Property[str] = Property.default("pyupgrade")
+    pyupgrade_cmd: Property[Sequence[str]] = Property.default(["pyupgrade"])
     keep_runtime_typing: Property[bool] = Property.default(False)
     additional_files: Property[Sequence[Path]] = Property.default_factory(list)
     python_version: Property[str]
@@ -30,7 +29,7 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
         return self.run_pyupgrade(self.additional_files.get(), ("--exit-zero-even-if-changed",))
 
     def run_pyupgrade(self, files: Iterable[Path], extra: Iterable[str]) -> list[str]:
-        command = [self.pyupgrade_bin.get(), f"--py{self.python_version.get_or('3').replace('.', '')}-plus", *extra]
+        command = [*self.pyupgrade_cmd.get(), f"--py{self.python_version.get_or('3').replace('.', '')}-plus", *extra]
         if self.keep_runtime_typing.get():
             command.append("--keep-runtime-typing")
         command.extend(str(f) for f in files)
@@ -99,18 +98,16 @@ def pyupgrade(
     version_spec: str | None = None,
 ) -> PyUpgradeTasks:
     """
-    :param version_spec: If specified, the pyupgrade tool will be installed as a PEX and does not need to be installed
+    :param version_spec: If specified, the pyupgrade tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 
     project = project or Project.current()
 
     if version_spec is not None:
-        pyupgrade_bin = pex_build(
-            "pyupgrade", requirements=[f"pyupgrade{version_spec}"], console_script="pyupgrade", project=project
-        ).output_file.map(str)
+        pyupgrade_cmd = Supplier.of(["uv", "tool", "run", "--from", f"pyupgrade{version_spec}", "pyupgrade"])
     else:
-        pyupgrade_bin = Supplier.of("pyupgrade")
+        pyupgrade_cmd = Supplier.of(["pyupgrade"])
 
     settings = python_settings(project)
 
@@ -128,13 +125,13 @@ def pyupgrade(
     ]
 
     check_task = project.task(f"{name}.check", PyUpgradeCheckTask, group="lint")
-    check_task.pyupgrade_bin = pyupgrade_bin
+    check_task.pyupgrade_cmd = pyupgrade_cmd
     check_task.additional_files = filtered_files
     check_task.keep_runtime_typing = keep_runtime_typing
     check_task.python_version = python_version
 
     format_task = project.task(name, PyUpgradeTask, group="fmt")
-    format_task.pyupgrade_bin = pyupgrade_bin
+    format_task.pyupgrade_cmd = pyupgrade_cmd
     format_task.additional_files = filtered_files
     format_task.keep_runtime_typing = keep_runtime_typing
     format_task.python_version = python_version

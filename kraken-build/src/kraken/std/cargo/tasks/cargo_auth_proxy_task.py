@@ -38,7 +38,7 @@ class CargoAuthProxyTask(BackgroundTask):
     proxy_cert_file: Property[Path] = Property.output()
 
     #: Path to the mitmweb binary.
-    mitmweb_bin: Property[str] = Property.default("mitmweb")
+    mitmweb_cmd: Property[Sequence[str]] = Property.default(["mitmweb"])
 
     #: Additional args for the mitmproxy.
     #: We pass `--no-http2` by default as that breaks Cargo HTTP/2 multiplexing. See
@@ -99,7 +99,7 @@ class CargoAuthProxyTask(BackgroundTask):
             auth[host] = registry.read_credentials
 
         proxy_url, cert_file = start_mitmweb_proxy(
-            auth=auth, mitmweb_bin=self.mitmweb_bin.get(), additional_args=self.mitmproxy_additional_args.get()
+            auth=auth, mitmweb_cmd=self.mitmweb_cmd.get(), additional_args=self.mitmproxy_additional_args.get()
         )
         self.proxy_url.set(proxy_url)
         self.proxy_cert_file.set(cert_file)
