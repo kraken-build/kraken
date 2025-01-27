@@ -31,7 +31,7 @@ author = "thomas.pellissier-tanon@helsing.ai"
 [[entries]]
 id = "00ded573-ed92-4aab-b480-e21589718bbd"
 type = "fix"
-description = "Remove used of deprecated flag to be removed in pip 25.1"
+description = "Remove use of deprecated flag to be removed in pip 25.1"
 author = "scott@stevenson.io"
 
 [[entries]]
@@ -45,3 +45,9 @@ id = "dddb0086-94f2-4b18-b73d-9816b2fc296f"
 type = "improvement"
 description = "[uv] Inject index environment variables to subprocesses"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "4d8e2872-d32f-4747-b2d6-aa5c1cb4ec75"
+type = "fix"
+description = "Rename deprecated tool.poetry.dev-dependencies section"
+author = "scott@stevenson.io"

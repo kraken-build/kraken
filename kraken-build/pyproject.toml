@@ -56,7 +56,7 @@ typing-extensions = ">=4.6.0"
 loguru = "^0.7.2"
 uv = "^0.5.20"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 localimport = "^1.7.6"
 pyartifactory = "^2.0.0"
 pytest = ">=6.0.0"
