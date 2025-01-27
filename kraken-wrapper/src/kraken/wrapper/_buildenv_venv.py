@@ -121,7 +121,6 @@ class VenvBuildEnv(BuildEnv):
             "pip",
             "install",
             "--disable-pip-version-check",
-            "--no-python-version-warning",
             "--no-input",
         ]
         # Must enable transitive resolution because lock files are not currently cross platform (see kraken-wrapper#2).

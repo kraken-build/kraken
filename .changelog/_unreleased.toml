@@ -27,3 +27,9 @@ id = "3faaa1ff-aafc-4fee-bbd6-dd91a258d483"
 type = "fix"
 description = "Fixes build of Maturin projects that use UV to properly build wheels using Maturin"
 author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "00ded573-ed92-4aab-b480-e21589718bbd"
+type = "fix"
+description = "Remove used of deprecated flag to be removed in pip 25.1"
+author = "scott@stevenson.io"
