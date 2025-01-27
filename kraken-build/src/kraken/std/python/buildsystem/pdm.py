@@ -132,6 +132,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
 
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         command = ["pdm", "update"]
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
 
@@ -182,7 +183,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
                     )
                 for command in commands:
                     safe_command = command[:-1] + ["MASKED"]
-                    logger.info("$ %s", safe_command)
+                    logger.info("Run '%s'", " ".join(safe_command))
 
                     code = sp.call(command)
                     if code != 0:
@@ -196,13 +197,13 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["pdm", "build"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
 
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         os.makedirs(output_directory, exist_ok=True)
-        for src, dst in zip(src_files, dst_files):
+        for src, dst in zip(src_files, dst_files, strict=True):
             shutil.move(str(src), dst)
 
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
@@ -224,7 +225,7 @@ class PDMManagedEnvironment(ManagedEnvironment):
         """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments."""
 
         get_command = ["pdm", "venv", "--path", "in-project"]
-        logger.debug("$ %s", get_command)
+        logger.info("Run '%s'", " ".join(get_command))
         try:
             return Path(sp.check_output(get_command, cwd=self.project_directory, stderr=sp.PIPE).decode().strip())
         except sp.CalledProcessError as exc:
@@ -233,12 +234,12 @@ class PDMManagedEnvironment(ManagedEnvironment):
                 return None
 
         create_command = ["pdm", "venv", "create"]
-        logger.info("$ %s", create_command)
+        logger.info("Run '%s'", " ".join(create_command))
         sp.check_call(create_command, cwd=self.project_directory)
 
         # Make sure we use the in-project environment.
         use_command = ["pdm", "use", "--venv", "in-project"]
-        logger.info("$ %s", use_command)
+        logger.info("Run '%s'", " ".join(use_command))
         sp.check_call(use_command, cwd=self.project_directory)
 
         path = self._get_pdm_environment_path(create=False)
@@ -267,5 +268,5 @@ class PDMManagedEnvironment(ManagedEnvironment):
         self._get_pdm_environment_path(create=True)
 
         command = ["pdm", "install"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)

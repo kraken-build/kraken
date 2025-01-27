@@ -65,7 +65,7 @@ class SlapPythonBuildSystem(PythonBuildSystem):
         # TODO (@NiklasRosenstein): We should find a way to revert the changes to the worktree
         #       that this command does.
         command = ["slap", "release", version]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         yield
 
@@ -74,9 +74,10 @@ class SlapPythonBuildSystem(PythonBuildSystem):
             command = ["slap", "publish", "--dry", "-b", tempdir]
             logger.info("Running %s in '%s'", command, self.project_directory)
             sp.check_call(command, cwd=self.project_directory)
+
             src_files = list(Path(tempdir).iterdir())
             dst_files = [output_directory / path.name for path in src_files]
-            for src, dst in zip(src_files, dst_files):
+            for src, dst in zip(src_files, dst_files, strict=True):
                 shutil.move(str(src), dst)
         return dst_files
 
@@ -99,6 +100,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
     def get_path(self) -> Path:
         if self._env_path is NotSet.Value:
             command = ["slap", "venv", "-p"]
+            logger.info("Run '%s'", " ".join(command))
             try:
                 self._env_path = Path(
                     sp.check_output(command, cwd=self.project_directory, stderr=sp.DEVNULL).decode().strip()
@@ -115,7 +117,7 @@ class SlapManagedEnvironment(ManagedEnvironment):
         # Ensure that an environment exists.
         if not self.exists():
             command = ["slap", "venv", "-ac"]
-            logger.info("%s", command)
+            logger.info("Run '%s'", " ".join(command))
             sp.check_call(command, cwd=self.project_directory)
 
         # Install into the environment.
@@ -131,5 +133,5 @@ class SlapManagedEnvironment(ManagedEnvironment):
                 command += [option, spec]
                 safe_command += [option, safe_spec]
 
-        logger.info("%s", safe_command)
+        logger.info("Run '%s'", " ".join(safe_command))
         sp.check_call(command, cwd=self.project_directory)

@@ -147,6 +147,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         command = ["poetry", "update"]
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
 
@@ -158,7 +159,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             if index.is_package_source and index.credentials:
                 command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], index.credentials[1]]
                 safe_command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], "MASKED"]
-                logger.info("$ %s", safe_command)
+                logger.info("Run '%s'", " ".join(safe_command))
                 code = sp.call(command)
                 if code != 0:
                     raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
@@ -171,11 +172,11 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["poetry", "build"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
-        for src, dst in zip(src_files, dst_files):
+        for src, dst in zip(src_files, dst_files, strict=True):
             shutil.move(str(src), dst)
 
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
@@ -205,6 +206,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             venv.deactivate(environ)
 
         command = ["poetry", "env", "info", "-p"]
+        logger.info("Run '%s'", " ".join(command))
         try:
             response = sp.check_output(command, cwd=self.project_directory, env=environ).decode().strip()
         except sp.CalledProcessError as exc:
@@ -262,5 +264,5 @@ class PoetryManagedEnvironment(ManagedEnvironment):
 
     def install(self, settings: PythonSettings) -> None:
         command = ["poetry", "install", "--no-interaction"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)

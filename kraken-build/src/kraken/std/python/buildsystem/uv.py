@@ -18,7 +18,6 @@ from typing import Annotated, Any, Iterable, TypeVar
 
 from kraken.common import NotSet
 from kraken.common.pyenv import get_current_venv
-from kraken.common.sanitize import sanitize_http_basic_auth
 from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
 from kraken.std.python.pyproject import PackageIndex, PyprojectHandler
@@ -220,8 +219,7 @@ class UvPythonBuildSystem(PythonBuildSystem):
         return UvManagedEnvironment(self.project_directory)
 
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
-        command = ["uv", "lock", "--package"]
-        sp.check_call(command, cwd=self.project_directory)
+        _run_with_uv_indexes(["uv", "lock", "--upgrade"], settings, self.project_directory)
         return TaskStatus.succeeded()
 
     def requires_login(self) -> bool:
@@ -239,13 +237,6 @@ class UvPythonBuildSystem(PythonBuildSystem):
         """
 
         with tempfile.TemporaryDirectory() as tempdir:
-            env: dict[str, str] = {}
-
-            # We can't pass the --default-index and --index options to UV via the pyproject-build CLI,
-            # so we need to use environment variables.
-            indexes = UvIndexes.from_package_indexes(settings.package_indexes.values())
-            env.update(indexes.to_env())
-
             command = [
                 "uv",
                 "tool",
@@ -259,17 +250,11 @@ class UvPythonBuildSystem(PythonBuildSystem):
                 "--installer",
                 "uv",
             ]
-            logger.info(
-                "Running %s in '%s' with env %s",
-                command,
-                self.project_directory,
-                sanitize_http_basic_auth(str(env)),
-            )
-            sp.check_call(command, cwd=self.project_directory, env={**os.environ, **env})
+            _run_with_uv_indexes(command, settings, self.project_directory)
 
             src_files = list(Path(tempdir).iterdir())
             dst_files = [output_directory / path.name for path in src_files]
-            for src, dst in zip(src_files, dst_files):
+            for src, dst in zip(src_files, dst_files, strict=True):
                 shutil.move(str(src), dst)
 
         return dst_files
@@ -293,7 +278,8 @@ class UvManagedEnvironment(ManagedEnvironment):
         if venv:
             venv.deactivate(environ)
 
-        command = ["uv", "run", "bash", "-c", "printenv VIRTUAL_ENV"]
+        # Run inside venv without updating lock file and venv. Therefore this doesn't require index credentials.
+        command = ["uv", "run", "--frozen", "--no-sync", "bash", "-c", "printenv VIRTUAL_ENV"]
         logger.debug("Detecting virtual environment ... %s", " ".join(command))
         try:
             response = sp.check_output(command, cwd=self.project_directory, env=environ).decode().strip()
@@ -302,7 +288,7 @@ class UvManagedEnvironment(ManagedEnvironment):
                 raise
             return None
 
-        logger.debug("Virtual environment detected: %s", response)
+        logger.info("Virtual environment detected: %s", response)
         return Path(response)
 
     # ManagedEnvironment
@@ -321,9 +307,17 @@ class UvManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        command = ["uv", "sync", "--all-extras", "--frozen"]
-        logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
+        _run_with_uv_indexes(["uv", "sync", "--all-extras"], settings, self.project_directory)
 
     def always_install(self) -> bool:
         return True
+
+
+def _run_with_uv_indexes(command: list[str], settings: PythonSettings, work_dir: Path) -> None:
+    """
+    Inject indexes and credentials via environment variables until uv supports keyring:
+    https://github.com/astral-sh/uv/issues/8810.
+    """
+    logger.info("Run '%s' in %s.", " ".join(command), work_dir)
+    env_vars = UvIndexes.from_package_indexes(settings.package_indexes.values()).to_env()
+    sp.run(command, cwd=work_dir, env={**os.environ, **env_vars}, check=True)

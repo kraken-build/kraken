@@ -106,7 +106,6 @@ def test__python_project_install_lint_and_publish(
 
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
     # TODO: mock the `os.environ` dict instead of mutating the global one
-    os.environ["UV_DEFAULT_INDEX"] = pypiserver
     os.environ["LOCAL_PACKAGE_INDEX"] = pypiserver
     os.environ["LOCAL_USER"] = USER_NAME
     os.environ["LOCAL_PASSWORD"] = USER_PASS

@@ -39,3 +39,9 @@ id = "c34f7131-4e5d-482f-b654-bd08976c59fc"
 type = "fix"
 description = "Remove --log-cli-level INFO when calling pytest. This option can be added back by the users via their configuration files."
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "dddb0086-94f2-4b18-b73d-9816b2fc296f"
+type = "improvement"
+description = "[uv] Inject index environment variables to subprocesses"
+author = "antoine.broyelle@helsing.ai"
