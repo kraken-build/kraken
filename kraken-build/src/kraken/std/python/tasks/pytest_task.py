@@ -69,7 +69,6 @@ class PytestTask(EnvironmentAwareDispatchTask):
             *[str(self.project.directory / path) for path in self.include_dirs.get()],
         ]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
-        command += ["--log-cli-level", "INFO"]
         if self.coverage.is_filled():
             coverage_file = f"coverage{self.coverage.get().get_suffix()}"
             command += [
