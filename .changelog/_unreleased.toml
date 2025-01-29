@@ -3,3 +3,9 @@ id = "69495c76-ca33-4089-87df-ee64b280c939"
 type = "improvement"
 description = "publish from CI"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a46ae7eb-bfd4-4a1c-b8b3-e6d2ebc5e3a9"
+type = "fix"
+description = "Maturin: set always the venv interpreter on all compilations - fixes Windows cross-compilations"
+author = "thomas.pellissier-tanon@helsing.ai"

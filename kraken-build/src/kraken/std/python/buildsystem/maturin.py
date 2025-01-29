@@ -6,7 +6,7 @@ import logging
 import os
 import shutil
 import subprocess as sp
-from collections.abc import Callable, Collection
+from collections.abc import Collection
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
@@ -17,7 +17,7 @@ from kraken.common.toml import TomlFile
 from ...cargo.manifest import CargoMetadata
 from ..pyproject import PyprojectHandler
 from ..settings import PythonSettings
-from . import ManagedEnvironment
+from . import ManagedEnvironment, PythonBuildSystem
 from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
 from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
 from .uv import UvPythonBuildSystem
@@ -56,15 +56,9 @@ class MaturinZigTarget:
 
 
 class _MaturinBuilder:
-    def __init__(
-        self,
-        entry_point: Collection[str],
-        get_pyproject_reader: Callable[[TomlFile], PyprojectHandler],
-        project_directory: Path,
-    ) -> None:
+    def __init__(self, entry_point: Collection[str], build_system: PythonBuildSystem) -> None:
         self._entry_point = entry_point
-        self._get_pyproject_reader = get_pyproject_reader
-        self._project_directory = project_directory
+        self._build_system = build_system
         self._default_build = True
         self._zig_targets: Collection[MaturinZigTarget] = []
         self._build_env: dict[str, str] = {}
@@ -83,7 +77,7 @@ class _MaturinBuilder:
 
     def build(self, output_directory: Path) -> list[Path]:
         # We clean up target dir
-        metadata = CargoMetadata.read(self._project_directory)
+        metadata = CargoMetadata.read(self._build_system.project_directory)
         dist_dir = metadata.target_directory / "wheels"
         if dist_dir.exists():
             shutil.rmtree(dist_dir)
@@ -93,7 +87,7 @@ class _MaturinBuilder:
         if self._default_build:
             command = [*self._entry_point, "maturin", "build", "--release"]
             logger.info("%s", command)
-            sp.check_call(command, cwd=self._project_directory, env=build_env)
+            sp.check_call(command, cwd=self._build_system.project_directory, env=build_env)
         for target in self._zig_targets:
             command = [
                 *self._entry_point,
@@ -105,6 +99,8 @@ class _MaturinBuilder:
                 target.target,
                 "--features",
                 ",".join(target.zig_features),
+                "--interpreter",
+                str(self._build_system.get_managed_environment().get_path() / "bin" / "python"),
             ]
             if not target.manylinux:
                 command.append("--manylinux")
@@ -120,7 +116,7 @@ class _MaturinBuilder:
                 target_build_env["RUSTFLAGS"] = target.rustflags
             if target.ld_library_path is not None:
                 target_build_env["LD_LIBRARY_PATH"] = target.ld_library_path
-            sp.check_call(command, cwd=self._project_directory, env=target_build_env)
+            sp.check_call(command, cwd=self._build_system.project_directory, env=target_build_env)
 
         # We get the output files
         src_files = list(dist_dir.iterdir())
@@ -175,7 +171,7 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
-        self._builder = _MaturinBuilder(["poetry", "run"], self.get_pyproject_reader, self.project_directory)
+        self._builder = _MaturinBuilder(["poetry", "run"], self)
 
     def disable_default_build(self) -> None:
         self._builder.disable_default_build()
@@ -234,7 +230,7 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
 
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
-        self._builder = _MaturinBuilder(["pdm", "run"], self.get_pyproject_reader, self.project_directory)
+        self._builder = _MaturinBuilder(["pdm", "run"], self)
 
     def disable_default_build(self) -> None:
         self._builder.disable_default_build()
@@ -277,8 +273,7 @@ class MaturinUvPythonBuildSystem(UvPythonBuildSystem):
         # We use the build requirement to do custom Maturin builds
         self._builder = _MaturinBuilder(
             ["uv", "tool", "run", *chain.from_iterable(("--with", r) for r in self._get_build_requirements())],
-            self.get_pyproject_reader,
-            self.project_directory,
+            self,
         )
 
     def disable_default_build(self) -> None:
