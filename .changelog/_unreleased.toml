@@ -57,3 +57,9 @@ id = "e3edc5a7-39ec-4e05-89c8-d06bf8cb0ee8"
 type = "feature"
 description = "Enabling `UvPyprojectHandler` to properly bump versions for path dependencies"
 author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "19bd61b5-7cda-499e-9e8a-a4b913141392"
+type = "fix"
+description = "Avoid reading pyproject.toml when installing Kraken venv to avoid conflicts between indexes"
+author = "thomas.pellissier-tanon@helsing.ai"
