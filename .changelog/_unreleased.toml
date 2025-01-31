@@ -3,3 +3,9 @@ id = "62408706-cb66-49ed-95cf-d44382829ed6"
 type = "hygiene"
 description = "Remove unused dependencies"
 author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "18cfdd07-b11d-4d22-906f-bc4080cda316"
+type = "improvement"
+description = "Directly call `uv build` even when no `[build-system]` is specified in the `pyproject.toml`"
+author = "antoine.broyelle@helsing.ai"

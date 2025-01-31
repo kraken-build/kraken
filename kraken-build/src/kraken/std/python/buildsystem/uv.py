@@ -8,9 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 import subprocess as sp
-import tempfile
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -282,29 +280,10 @@ class UvPythonBuildSystem(PythonBuildSystem):
 
         [build]: https://pypi.org/project/build/
         """
-
-        with tempfile.TemporaryDirectory() as tempdir:
-            command = [
-                "uv",
-                "tool",
-                "run",
-                "--from",
-                "build>=1.0.0,<2.0.0",
-                "pyproject-build",
-                "-v",
-                "--outdir",
-                tempdir,
-                "--installer",
-                "uv",
-            ]
-            _run_with_uv_indexes(command, settings, self.project_directory)
-
-            src_files = list(Path(tempdir).iterdir())
-            dst_files = [output_directory / path.name for path in src_files]
-            for src, dst in zip(src_files, dst_files, strict=True):
-                shutil.move(str(src), dst)
-
-        return dst_files
+        _run_with_uv_indexes(
+            ["uv", "build", f"--out-dir={output_directory.absolute()}"], settings, self.project_directory
+        )
+        return list(f for f in output_directory.iterdir() if f.is_file() and not f.name.startswith("."))
 
     def get_lockfile(self) -> Path | None:
         return self.project_directory / "uv.lock"
