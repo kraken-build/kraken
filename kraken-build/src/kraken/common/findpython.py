@@ -10,9 +10,9 @@ import subprocess
 import sys
 from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, TypedDict
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
 DEFAULT_CACHE_PATH = Path("~/.cache/krakenw/python-interpreters.json")

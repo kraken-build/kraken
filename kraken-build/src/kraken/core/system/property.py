@@ -44,7 +44,7 @@ class PropertyConfig:
     .. code:: Example
 
         from kraken.core.system.property import Object, Property, output
-        from typing_extensions import Annotated
+        from typing import Annotated
 
         class MyObj(Object):
             a: Annotated[Property[int], PropertyConfig(output=True)]
