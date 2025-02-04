@@ -1,0 +1,5 @@
+[[entries]]
+id = "4f5b1b3d-422f-4466-be88-2ef688bcff11"
+type = "breaking change"
+description = "Remove pex build task"
+author = "scott@stevenson.io"
