@@ -8,7 +8,7 @@ authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
 python = "^3.7"
 poetry-project = { version = "0.1.0", source = "local" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 mypy = "^0.971"
 
 [build-system]

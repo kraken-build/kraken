@@ -23,7 +23,7 @@ keywords = []
 python = "^3.6"
 slap-project = { version = "0.1.0", source = "local" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "*"
 
 [tool.slap]

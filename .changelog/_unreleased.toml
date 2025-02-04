@@ -15,3 +15,9 @@ id = "f4662450-3fb1-401a-815c-260b9eff6dbe"
 type = "fix"
 description = "Primary index is not treated as default by uv"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "1898e101-4ef2-44c0-9832-c1b2ca0c39b6"
+type = "fix"
+description = "Address tool.poetry.dev-dependencies deprecation warnings"
+author = "scott@stevenson.io"

@@ -8,7 +8,7 @@ authors = []
 python = "^3.9"
 rust-poetry-project = { version = "0.1.0", source = "local" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 mypy = "^1.0"
 
 [build-system]
