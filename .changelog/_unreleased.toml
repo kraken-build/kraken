@@ -15,3 +15,9 @@ id = "f4662450-3fb1-401a-815c-260b9eff6dbe"
 type = "fix"
 description = "Primary index is not treated as default by uv"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "cd8e92ee-4a72-4720-869a-2977878d378a"
+type = "breaking change"
+description = "Remove buf_lint and buf_format tasks"
+author = "thomas.pellissier-tanon@helsing.ai"

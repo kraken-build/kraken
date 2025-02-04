@@ -50,7 +50,6 @@ nav:
     - lang/cargo.md
     - lang/docker.md
     - lang/helm.md
-    - lang/protobuf.md
     - lang/python.md
   - API Documentation:
     - api/kraken.build.md
@@ -64,7 +63,6 @@ nav:
     - api/kraken.std.git.md
     - api/kraken.std.helm.md
     - api/kraken.std.mitm.md
-    - api/kraken.std.protobuf.md
     - api/kraken.std.python.md
     - api/kraken.std.sccache.md
     - api/kraken.std.shellcheck.md
