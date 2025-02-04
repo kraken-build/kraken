@@ -9,3 +9,9 @@ id = "18cfdd07-b11d-4d22-906f-bc4080cda316"
 type = "improvement"
 description = "Directly call `uv build` even when no `[build-system]` is specified in the `pyproject.toml`"
 author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "f4662450-3fb1-401a-815c-260b9eff6dbe"
+type = "fix"
+description = "Primary index is not treated as default by uv"
+author = "antoine.broyelle@helsing.ai"

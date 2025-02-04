@@ -57,7 +57,7 @@ class UvIndex:
         return UvIndex(
             index.index_url,
             name=index.alias if index.alias != "" else None,
-            default=index.priority == index.Priority.default or index.priority == index.Priority.primary,
+            default=index.priority == index.Priority.default,
             explicit=index.priority == index.Priority.explicit,
             credentials=credentials,
         )
