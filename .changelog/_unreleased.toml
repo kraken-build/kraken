@@ -19,5 +19,5 @@ author = "antoine.broyelle@helsing.ai"
 [[entries]]
 id = "77dc091d-98c6-45bf-b373-ac5c87e2919b"
 type = "breaking change"
-description = "Remove cargo_sqlx* and cargo_generate_deb_package tasks"
+description = "Remove cargo_sqlx* and cargo_generate_deb_package tasks (no longer used at our knowledge)"
 author = "thomas.pellissier-tanon@helsing.ai"
