@@ -26,7 +26,7 @@ inject_auth_addon_file = Path(__file__).parent / "mitm_addon.py"
 
 def start_mitmweb_proxy(
     auth: Mapping[str, tuple[str, str]],
-    mitmweb_bin: str = "mitmweb",
+    mitmweb_cmd: Sequence[str] = ("mitmweb",),
     additional_args: Sequence[str] = (),
 ) -> tuple[str, Path]:
     """
@@ -41,7 +41,7 @@ def start_mitmweb_proxy(
     controller = DaemonController("kraken.mitmweb", daemon_state_file)
     started = controller.run(
         command=[
-            mitmweb_bin,
+            *mitmweb_cmd,
             "--no-web-open-browser",
             "--web-port",
             str(mitmweb_ui_port),

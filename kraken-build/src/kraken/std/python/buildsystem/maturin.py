@@ -158,7 +158,7 @@ class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
     """A maturin-backed version of the Poetry build system, that invokes the maturin build-backend.
     Can be enabled by adding the following to the local pyproject.yaml:
     ```toml
-    [tool.poetry.dev-dependencies]
+    [tool.poetry.group.dev.dependencies]
     maturin = "^1.0"
 
     [build-system]

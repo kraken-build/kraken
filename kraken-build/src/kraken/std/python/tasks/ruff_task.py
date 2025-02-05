@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
+from itertools import chain
 from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property
 from kraken.core.system.task import TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -18,14 +18,14 @@ class RuffTask(EnvironmentAwareDispatchTask):
     description = "Lint Python source files with Ruff."
     python_dependencies = ["ruff"]
 
-    ruff_bin: Property[str] = Property.default("ruff")
+    ruff_cmd: Property[Sequence[str]] = Property.default(["ruff"])
     ruff_task: Property[Sequence[str]] = Property.default_factory(list)
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [
-            self.ruff_bin.get(),
+            *self.ruff_cmd.get(),
             *self.ruff_task.get(),
             str(self.settings.source_directory),
             *self.settings.get_tests_directory_as_args(),
@@ -60,43 +60,48 @@ def ruff(
     :param project: Project used for the generated ruff tasks. If not specified will consider `Project.current()`.
     :param config_file: Configuration file to consider.
     :param additional_args: Additional arguments to pass to all ruff tasks.
-    :param additional_requirements: Additional requirements to pass to pex_build.
-    :param version_spec: If specified, the Ruff tool will be installed as a PEX and does not need to be installed
+    :param additional_requirements: Additional requirements to pass to `uv tool run`.
+    :param version_spec: If specified, the ruff tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 
     project = project or Project.current()
 
     if version_spec is not None:
-        ruff_bin = pex_build(
-            "ruff",
-            requirements=[f"ruff{version_spec}", *additional_requirements],
-            console_script="ruff",
-            project=project,
-        ).output_file.map(str)
+        ruff_cmd = Supplier.of(
+            [
+                "uv",
+                "tool",
+                "run",
+                "--from",
+                f"ruff{version_spec}",
+                *chain.from_iterable(("--with", r) for r in additional_requirements),
+                "ruff",
+            ]
+        )
     else:
-        ruff_bin = Supplier.of("ruff")
+        ruff_cmd = Supplier.of(["ruff"])
 
     check_task = project.task(f"{name}.check", RuffTask, group="lint")
-    check_task.ruff_bin = ruff_bin
+    check_task.ruff_cmd = ruff_cmd
     check_task.ruff_task = ["check"]
     check_task.config_file = config_file
     check_task.additional_args = additional_args
 
     fix_task = project.task(f"{name}.fix", RuffTask, group="fmt")
-    fix_task.ruff_bin = ruff_bin
+    fix_task.ruff_cmd = ruff_cmd
     fix_task.ruff_task = ["check", "--fix"]
     fix_task.config_file = config_file
     fix_task.additional_args = additional_args
 
     format_task = project.task(f"{name}.fmt", RuffTask, group="fmt")
-    format_task.ruff_bin = ruff_bin
+    format_task.ruff_cmd = ruff_cmd
     format_task.ruff_task = ["format"]
     format_task.config_file = config_file
     format_task.additional_args = additional_args
 
     format_check_task = project.task(f"{name}.fmt.check", RuffTask, group="lint")
-    format_check_task.ruff_bin = ruff_bin
+    format_check_task.ruff_cmd = ruff_cmd
     format_check_task.ruff_task = ["format", "--check"]
     format_check_task.config_file = config_file
     format_check_task.additional_args = additional_args
