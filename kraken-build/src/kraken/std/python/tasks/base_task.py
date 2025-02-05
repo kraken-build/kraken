@@ -64,7 +64,7 @@ class EnvironmentAwareDispatchTask(Task):
         if self.python_dependencies and shutil.which(command[0], path=env.get("PATH")) is None:
             logger.warning("Some Python dependencies of %s are not installed.", self.name)
             logger.warning("To run this task successfully you should add to the `pyproject.toml` file:")
-            logger.warning("[tool.poetry.dev-dependencies]")
+            logger.warning("[tool.poetry.group.dev.dependencies]")
             for dep in self.python_dependencies:
                 logger.warning('%s = "*"', dep)
             return TaskStatus.failed("The %s dependencies are missing" % self.python_dependencies)

@@ -291,6 +291,8 @@ def test__python_project_can_lint_lint_enforced_directories(
     python.settings.python_settings(
         project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
     )
+    python.install(project=kraken_project)
+
     for linter, version in {
         "black": "23.12.1",
         "flake8": "6.1.0",

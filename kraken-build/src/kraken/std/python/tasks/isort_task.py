@@ -7,7 +7,6 @@ from pathlib import Path
 from kraken.common import Supplier
 from kraken.core import Project, Property
 from kraken.core.system.task import TaskStatus
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -15,7 +14,7 @@ from .base_task import EnvironmentAwareDispatchTask
 class IsortTask(EnvironmentAwareDispatchTask):
     python_dependencies = ["isort"]
 
-    isort_bin: Property[str] = Property.default("isort")
+    isort_cmd: Property[Sequence[str]] = Property.default(["isort"])
     check_only: Property[bool] = Property.default(False)
     config_file: Property[Path]
     additional_files: Property[Sequence[Path]] = Property.default_factory(list)
@@ -24,7 +23,7 @@ class IsortTask(EnvironmentAwareDispatchTask):
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [
-            self.isort_bin.get(),
+            *self.isort_cmd.get(),
             str(self.settings.source_directory),
         ] + self.settings.get_tests_directory_as_args()
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
@@ -59,7 +58,7 @@ def isort(
     version_spec: str | None = None,
 ) -> IsortTasks:
     """
-    :param version_spec: If specified, the isort tool will be installed as a PEX and does not need to be installed
+    :param version_spec: If specified, the isort tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 
@@ -68,20 +67,18 @@ def isort(
     project = project or Project.current()
 
     if version_spec is not None:
-        isort_bin = pex_build(
-            "isort", requirements=[f"isort{version_spec}"], console_script="isort", project=project
-        ).output_file.map(str)
+        isort_cmd = Supplier.of(["uv", "tool", "run", "--from", f"isort{version_spec}", "isort"])
     else:
-        isort_bin = Supplier.of("isort")
+        isort_cmd = Supplier.of(["isort"])
 
     check_task = project.task(f"{name}.check", IsortTask, group="lint")
-    check_task.isort_bin = isort_bin
+    check_task.isort_cmd = isort_cmd
     check_task.check_only = True
     check_task.config_file = config_file
     check_task.additional_files = additional_files
 
     format_task = project.task(name, IsortTask, group="fmt")
-    format_task.isort_bin = isort_bin
+    format_task.isort_cmd = isort_cmd
     format_task.check_only = False
     format_task.config_file = config_file
     format_task.additional_files = additional_files

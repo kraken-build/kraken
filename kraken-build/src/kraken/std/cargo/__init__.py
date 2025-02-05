@@ -9,7 +9,6 @@ from typing import Literal
 
 from kraken.common import Supplier
 from kraken.core import Project, Task
-from kraken.std.python.tasks.pex_build_task import pex_build
 
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
@@ -18,13 +17,8 @@ from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
-from .tasks.cargo_generate_deb import CargoGenerateDebPackage
 from .tasks.cargo_login import CargoLoginTask
 from .tasks.cargo_publish_task import CargoPublishTask
-from .tasks.cargo_sqlx_database_create import CargoSqlxDatabaseCreateTask
-from .tasks.cargo_sqlx_database_drop import CargoSqlxDatabaseDropTask
-from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
-from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
 from .tasks.cargo_test_task import CargoTestTask
 from .tasks.cargo_update_task import CargoUpdateTask
@@ -36,12 +30,9 @@ __all__ = [
     "cargo_clippy",
     "cargo_deny",
     "cargo_fmt",
-    "cargo_generate_deb_package",
     "cargo_login",
     "cargo_publish",
     "cargo_registry",
-    "cargo_sqlx_migrate",
-    "cargo_sqlx_prepare",
     "cargo_sync_config",
     "cargo_update",
     "CargoAuthProxyTask",
@@ -51,10 +42,6 @@ __all__ = [
     "CargoProject",
     "CargoPublishTask",
     "CargoRegistry",
-    "CargoSqlxDatabaseCreateTask",
-    "CargoSqlxDatabaseDropTask",
-    "CargoSqlxMigrateTask",
-    "CargoSqlxPrepareTask",
     "CargoSyncConfigTask",
     "CargoTestTask",
     "cargo_check_toolchain_version",
@@ -77,71 +64,6 @@ def cargo_config(*, project: Project | None = None, nightly: bool = False) -> Ca
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
     return config
-
-
-def cargo_sqlx_database_create(
-    *,
-    name: str = "sqlxDatabaseCreate",
-    project: Project | None = None,
-    database_url: str | None = None,
-) -> CargoSqlxDatabaseCreateTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxDatabaseCreateTask)
-    task.database_url = database_url
-    return task
-
-
-def cargo_sqlx_database_drop(
-    *,
-    name: str = "sqlxDatabaseDrop",
-    project: Project | None = None,
-    database_url: str | None = None,
-) -> CargoSqlxDatabaseDropTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxDatabaseDropTask)
-    task.database_url = database_url
-    return task
-
-
-def cargo_sqlx_migrate(
-    *,
-    name: str = "sqlxMigrate",
-    project: Project | None = None,
-    base_directory: Path | None = None,
-    database_url: str | None = None,
-    migrations: Path | None = None,
-) -> CargoSqlxMigrateTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxMigrateTask)
-    task.base_directory = base_directory
-    task.database_url = database_url
-    task.migrations = migrations
-    return task
-
-
-def cargo_sqlx_prepare(
-    *,
-    name: str = "sqlxPrepare",
-    project: Project | None = None,
-    check: bool,
-    base_directory: Path | None = None,
-    database_url: str | None = None,
-    migrations: Path | None = None,
-) -> CargoSqlxPrepareTask:
-    project = project or Project.current()
-    name = f"{name}Check" if check else name
-    task = project.task(name, CargoSqlxPrepareTask, group="check" if check else None)
-    task.check = check
-    task.base_directory = base_directory
-    task.database_url = database_url
-    task.migrations = migrations
-
-    # Preparing or checking sqlx metadata calls `cargo metadata`, which can require the auth proxy
-    # Without the auth proxy, cargo sqlx commands would fail with a cryptic error
-    # See https://github.com/launchbadge/sqlx/pull/2222 for details
-    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
-
-    return task
 
 
 def cargo_registry(
@@ -178,13 +100,11 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
-    mitmweb_bin = pex_build(
-        "mitmweb", requirements=["mitmproxy>=10.0.0,<11.0.0"], console_script="mitmweb"
-    ).output_file.map(lambda p: str(p.absolute()))
+    mitmweb_cmd = Supplier.of(["uv", "tool", "run", "--from", "mitmproxy>=10.0.0,<11.0.0", "mitmweb"])
 
     task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
-    task.mitmweb_bin = mitmweb_bin
+    task.mitmweb_cmd = mitmweb_cmd
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
@@ -485,11 +405,4 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
     project = project or Project.current()
     task = project.task(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group)
     task.target = target
-    return task
-
-
-def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
-    project = project or Project.current()
-    task = project.task("cargoGenerateDeb", CargoGenerateDebPackage)
-    task.package_name = package_name
     return task

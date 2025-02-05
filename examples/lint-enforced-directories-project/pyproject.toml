@@ -7,7 +7,7 @@ authors = ["Josh Cowling <josh.cowling@helsing.ai>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "*"
 flake8 = "*"
 isort = "*"
