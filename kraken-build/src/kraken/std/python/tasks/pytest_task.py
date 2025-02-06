@@ -61,10 +61,20 @@ class PytestTask(EnvironmentAwareDispatchTask):
                 DeprecationWarning,
             )
 
+        if (
+            self.settings.source_directory not in tests_dir
+            and self.settings.source_directory not in self.include_dirs.get()
+            and list((self.project.directory / self.settings.source_directory).rglob("*_test.py"))
+        ):
+            warnings.warn(
+                f"Some test files are detected inside the source directory '{self.settings.source_directory }'. "
+                f"These tests will be skipped. Consider adding '{self.settings.source_directory }' to `tests_dir`.",
+                DeprecationWarning,
+            )
+
         command = [
             "pytest",
             "-vv",
-            str(self.project.directory / self.settings.source_directory),
             *[str(self.project.directory / path) for path in tests_dir],
             *[str(self.project.directory / path) for path in self.include_dirs.get()],
         ]
