@@ -67,8 +67,8 @@ class PytestTask(EnvironmentAwareDispatchTask):
             and list((self.project.directory / self.settings.source_directory).rglob("*_test.py"))
         ):
             warnings.warn(
-                f"Some test files are detected inside the source directory '{self.settings.source_directory }'. "
-                f"These tests will be skipped. Consider adding '{self.settings.source_directory }' to `tests_dir`.",
+                f"Some test files are detected inside the source directory '{self.settings.source_directory}'. "
+                f"These tests will be skipped. Consider adding '{self.settings.source_directory}' to `tests_dir`.",
                 DeprecationWarning,
             )
 
