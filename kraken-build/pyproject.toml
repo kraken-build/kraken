@@ -51,7 +51,7 @@ tomlkit = "^0.13.0"
 typeapi = "^2.0.0"
 typing-extensions = ">=4.6.0"
 loguru = "^0.7.2"
-uv = "^0.5.20"
+uv = "^0.6.0"
 
 [tool.poetry.group.dev.dependencies]
 localimport = "^1.7.6"
