@@ -171,7 +171,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
 @pytest.fixture(scope="session")
 def private_registry(docker_service_manager: DockerServiceManager) -> str:
     container = docker_service_manager.run(
-        "ghcr.io/d-e-s-o/cargo-http-registry:latest",
+        "ghcr.io/d-e-s-o/cargo-http-registry:sha-2edffd8",  # TODO(Tpt): hardcoded because latest docker images are broken
         [
             "/tmp/test-registry",
             "--addr",
@@ -181,9 +181,7 @@ def private_registry(docker_service_manager: DockerServiceManager) -> str:
         detach=True,
     )
 
-    host = "localhost"
-    port = container.ports["35504/tcp"][0]["HostPort"]
-    index_url = f"http://{host}:{port}/git"
+    index_url = f"http://0.0.0.0:35504/git"
     logger.info("Started local cargo registry at %s", index_url)
     time.sleep(5)
     return index_url
