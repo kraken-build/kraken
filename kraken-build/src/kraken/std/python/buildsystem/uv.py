@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import shutil
 import subprocess as sp
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -280,9 +281,12 @@ class UvPythonBuildSystem(PythonBuildSystem):
 
         [build]: https://pypi.org/project/build/
         """
-        _run_with_uv_indexes(
-            ["uv", "build", f"--out-dir={output_directory.absolute()}"], settings, self.project_directory
-        )
+        # Making sure the build directory is clean
+        dist_dir = output_directory.absolute()
+        if dist_dir.exists():
+            shutil.rmtree(dist_dir)
+
+        _run_with_uv_indexes(["uv", "build", f"--out-dir={dist_dir}"], settings, self.project_directory)
         return list(f for f in output_directory.iterdir() if f.is_file() and not f.name.startswith("."))
 
     def get_lockfile(self) -> Path | None:
