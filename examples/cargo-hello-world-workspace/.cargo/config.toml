@@ -1,0 +1,11 @@
+# This file is partially managed by Kraken. Comments and manually added repositories are not preserved.
+[registries.crates-io]
+protocol = "sparse"
+
+[net]
+git-fetch-with-cli = true
+
+[registry]
+global-credential-providers = [
+    "cargo:token",
+]

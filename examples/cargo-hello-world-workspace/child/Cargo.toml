@@ -1,0 +1,7 @@
+[package]
+name = "hello-world-child"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+hello-world-parent.path = "../parent"

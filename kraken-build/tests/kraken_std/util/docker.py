@@ -92,3 +92,8 @@ class Container:
     def output(self) -> bytes:
         assert self._output is not None, "Did not capture output of container"
         return self._output
+
+    def stop(self) -> None:
+        """Stop the container"""
+        assert self._data is not None, "Not a live container"
+        sp.call(["docker", "stop", cast(str, self._data["Id"])])
