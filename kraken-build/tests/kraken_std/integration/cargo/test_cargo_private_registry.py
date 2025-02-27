@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import fcntl
 import logging
 import os
 import random
@@ -10,7 +11,9 @@ import shutil
 import subprocess as sp
 import time
 import unittest.mock
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import pytest
 from requests_mock import Mocker
@@ -155,6 +158,49 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
                 time.sleep(10)
 
 
+def publish_workspace(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
+    # Copy the Cargo project files to a temporary directory.
+    workspace_dir = tempdir.joinpath("cargo-hello-world-workspace")
+    shutil.copytree(example_dir("cargo-hello-world-workspace"), workspace_dir)
+
+    cargo_registry_id = "private-repo"
+    publish_version = ".".join(str(random.randint(0, 999)) for _ in range(3))
+    logger.info("==== Publish version is %s", publish_version)
+
+    with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
+        # Build the library and publish it to the registry.
+        logger.info(
+            "Publishing cargo-hello-world-workspace to Cargo repository %r (%r)",
+            repository.name,
+            repository.index_url,
+        )
+
+        with kraken_ctx() as ctx, kraken_project(ctx) as project:
+            project.directory = workspace_dir
+            cargo_registry(
+                cargo_registry_id,
+                repository.index_url,
+                read_credentials=repository.creds,
+                publish_token=repository.token,
+            )
+            cargo_auth_proxy()
+            task = cargo_sync_config()
+            task.git_fetch_with_cli.set(True)
+            cargo_publish(
+                cargo_registry_id,
+                package_name="hello-world-parent",
+                version=publish_version,
+                cargo_toml_file=project.directory / "parent" / "Cargo.toml",
+            )
+            cargo_publish(
+                cargo_registry_id,
+                package_name="hello-world-child",
+                version=publish_version,
+                cargo_toml_file=project.directory / "child" / "Cargo.toml",
+            )
+            project.context.execute(["fmt", "lint", "publish"])
+
+
 # NOTE(@niklas): It would be better if we could just create a new Cargo registry for each test instead of scoping
 #       it to the session, however somehow `cargo publish` chooses the server's internal port for the
 #       `/api/v1/crates/new` request even if we configure the host port instead.
@@ -169,24 +215,26 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
 #       API endpoint. Until we can find a way to change this behavior, we need the container port and the host port
 #       to be the same, which prevents us from running multiple test-scoped fixtures in parallel.
 @pytest.fixture(scope="session")
-def private_registry(docker_service_manager: DockerServiceManager) -> str:
-    container = docker_service_manager.run(
-        "ghcr.io/d-e-s-o/cargo-http-registry:latest",
-        [
-            "/tmp/test-registry",
-            "--addr",
-            "0.0.0.0:35504",
-        ],
-        ports=["35504:35504"],
-        detach=True,
-    )
+def private_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
+    with file_lock(
+        Path("/tmp/kraken_cargo_private_registry_lock")
+    ):  # We hardcode a port, only a single instance must exist at the same time
+        container = docker_service_manager.run(
+            "ghcr.io/d-e-s-o/cargo-http-registry:sha-2edffd8",  # TODO(Tpt): hardcoded because latest docker images are broken
+            [
+                "/tmp/test-registry",
+                "--addr",
+                "0.0.0.0:35504",
+            ],
+            ports=["35504:35504"],
+            detach=True,
+        )
 
-    host = "localhost"
-    port = container.ports["35504/tcp"][0]["HostPort"]
-    index_url = f"http://{host}:{port}/git"
-    logger.info("Started local cargo registry at %s", index_url)
-    time.sleep(5)
-    return index_url
+        index_url = "http://0.0.0.0:35504/git"
+        logger.info("Started local cargo registry at %s", index_url)
+        time.sleep(5)
+        yield index_url
+        container.stop()
 
 
 def test__private_cargo_registry_publish_and_consume(tempdir: Path, private_registry: str) -> None:
@@ -194,6 +242,13 @@ def test__private_cargo_registry_publish_and_consume(tempdir: Path, private_regi
         "kraken-std-cargo-integration-test", private_registry, None, "xxxxxxxxxxxxxxxxxxxxxx"
     )
     publish_lib_and_build_app(repository, tempdir)
+
+
+def test__private_cargo_registry_publish_workspace(tempdir: Path, private_registry: str) -> None:
+    repository = CargoRepositoryWithAuth(
+        "kraken-std-cargo-integration-test", private_registry, None, "xxxxxxxxxxxxxxxxxxxxxx"
+    )
+    publish_workspace(repository, tempdir)
 
 
 def test__mock_cargo_registry_skips_publish_if_exists(tempdir: Path, requests_mock: Mocker) -> None:
@@ -205,3 +260,13 @@ def test__mock_cargo_registry_skips_publish_if_exists(tempdir: Path, requests_mo
 
     repository = CargoRepositoryWithAuth("kraken-std-cargo-integration-test", index_url, None, "xxxxxxxxxxxxxxxxxxxxxx")
     skip_publish_lib(repository, tempdir)
+
+
+@contextmanager
+def file_lock(path: Path) -> Iterator[None]:
+    with path.open("w") as fp:
+        fcntl.lockf(fp, fcntl.LOCK_EX)
+        try:
+            yield None
+        finally:
+            fcntl.lockf(fp, fcntl.LOCK_UN)

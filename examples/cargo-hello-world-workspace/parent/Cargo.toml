@@ -1,0 +1,6 @@
+[package]
+name = "hello-world-parent"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]

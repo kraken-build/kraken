@@ -131,6 +131,7 @@ class CargoPublishTask(CargoBuildTask):
                 if "path" in dependency:
                     dependency["version"] = f"={version_string}"
                     dependency["registry"] = registry_alias
+                    del dependency["path"]
 
     def execute(self) -> TaskStatus:
         with contextlib.ExitStack() as stack:
