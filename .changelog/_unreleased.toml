@@ -1,0 +1,5 @@
+[[entries]]
+id = "89d2dbc4-712b-40ee-8a7e-76da48299725"
+type = "fix"
+description = "Change python.install with uv: add --locked and remove --all-extras"
+author = "joe.early@helsing.ai"
