@@ -113,6 +113,7 @@ def test__python_project_install_lint_and_publish(
     os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "1"
 
     kraken_ctx.load_project(directory=tempdir / project_dir)
+    print((tempdir / project_dir).iterdir())
     kraken_ctx.execute([":lint", ":publish"])
 
     # Try to run the "consumer" project.
