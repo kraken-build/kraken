@@ -337,7 +337,12 @@ class UvManagedEnvironment(ManagedEnvironment):
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
-        _run_with_uv_indexes(["uv", "sync", "--locked"], settings, self.project_directory)
+        # --locked is used only when uv.lock is present
+        _run_with_uv_indexes(
+            ["uv", "sync"] + (["--locked"] if (self.project_directory / "uv.lock").is_file() else []),
+            settings,
+            self.project_directory,
+        )
 
     def always_install(self) -> bool:
         return True
