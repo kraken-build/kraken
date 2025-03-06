@@ -338,8 +338,11 @@ class UvManagedEnvironment(ManagedEnvironment):
 
     def install(self, settings: PythonSettings) -> None:
         # --locked is used only when uv.lock is present
+        cmd = ["uv", "sync"] 
+        if (self.project_directory / "uv.lock").is_file()
+            cmd.append("--locked")
         _run_with_uv_indexes(
-            ["uv", "sync"] + (["--locked"] if (self.project_directory / "uv.lock").is_file() else []),
+           cmd,
             settings,
             self.project_directory,
         )
