@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from pathlib import Path
 from typing import MutableMapping
@@ -20,6 +21,13 @@ class PylintTask(EnvironmentAwareDispatchTask):
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        warnings.warn(
+            "python.pylint will be removed in a future version. Please use python.ruff instead.",
+            DeprecationWarning,
+        )
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [

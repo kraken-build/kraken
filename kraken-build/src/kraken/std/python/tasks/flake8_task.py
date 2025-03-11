@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from collections.abc import MutableMapping, Sequence
 from itertools import chain
 from pathlib import Path
@@ -24,6 +25,13 @@ class Flake8Task(EnvironmentAwareDispatchTask):
     additional_args: Property[list[str]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        warnings.warn(
+            "python.flake8 will be removed in a future version. Please use python.ruff instead.",
+            DeprecationWarning,
+        )
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [

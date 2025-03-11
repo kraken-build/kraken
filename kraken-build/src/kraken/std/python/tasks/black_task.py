@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import warnings
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
@@ -23,6 +24,13 @@ class BlackTask(EnvironmentAwareDispatchTask):
     additional_files: Property[Sequence[Path]] = Property.default_factory(list)
 
     # EnvironmentAwareDispatchTask
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        warnings.warn(
+            "python.black will be removed in a future version. Please use python.ruff instead.",
+            DeprecationWarning,
+        )
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         command = [*self.black_cmd.get(), str(self.settings.source_directory)]

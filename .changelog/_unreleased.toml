@@ -1,0 +1,5 @@
+[[entries]]
+id = "ba7787a9-707b-4c79-91c1-6c3f0a0b4b05"
+type = "deprecation"
+description = "Deprecate python.(black|flake8|isort|pycln|pylint|pypgrade)"
+author = "thomas.pellissier-tanon@helsing.ai"
