@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import warnings
 from collections.abc import Collection, Iterable, MutableMapping, Sequence
 from difflib import unified_diff
 from pathlib import Path
@@ -24,6 +25,14 @@ class PyUpgradeTask(EnvironmentAwareDispatchTask):
     python_version: Property[str]
 
     # EnvironmentAwareDispatchTask
+
+    def __init__(self, name: str, project: Project) -> None:
+        super().__init__(name, project)
+        warnings.warn(
+            "python.pyupgrade will be removed in a future version. Please use python.ruff instead.",
+            DeprecationWarning,
+            stacklevel=4,
+        )
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         return self.run_pyupgrade(self.additional_files.get(), ("--exit-zero-even-if-changed",))

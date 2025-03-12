@@ -59,6 +59,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
             warnings.warn(
                 "Setting include dirs is deprecated and will lead to an error in the future. Please, set multiple test directories instead.",
                 DeprecationWarning,
+                stacklevel=4,
             )
 
         if (
@@ -70,6 +71,7 @@ class PytestTask(EnvironmentAwareDispatchTask):
                 f"Some test files are detected inside the source directory '{self.settings.source_directory}'. "
                 f"These tests will be skipped. Consider adding '{self.settings.source_directory}' to `tests_dir`.",
                 DeprecationWarning,
+                stacklevel=4,
             )
 
         command = [

@@ -7,15 +7,9 @@ Lint, format and test Python code.
 
 __Supported tools__
 
-* Black
-* Flake8
-* isort
 * Mypy
-* Pycln
-* Pylint
 * Pytest
-* Pyupgrade
-* ruff
+* Ruff
 
 __Supported build systems (for installing/building)__
 
