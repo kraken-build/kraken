@@ -30,6 +30,7 @@ class PyclnTask(EnvironmentAwareDispatchTask):
         warnings.warn(
             "python.pycln will be removed in a future version. Please use python.ruff instead.",
             DeprecationWarning,
+            stacklevel=4,
         )
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
