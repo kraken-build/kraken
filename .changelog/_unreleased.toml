@@ -3,3 +3,9 @@ id = "ba7787a9-707b-4c79-91c1-6c3f0a0b4b05"
 type = "deprecation"
 description = "Deprecate python.(black|flake8|isort|pycln|pylint|pypgrade)"
 author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "b638e597-7705-4fd9-8714-e6d37ef8af8b"
+type = "fix"
+description = "Cargo: Properly change dev-dependencies path on release"
+author = "thomas.pellissier-tanon@helsing.ai"

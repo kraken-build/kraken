@@ -232,6 +232,7 @@ class CargoManifest:
     workspace: Workspace | None
     dependencies: Dependencies | None
     build_dependencies: Dependencies | None
+    dev_dependencies: Dependencies | None
     bin: list[Bin]
 
     @classmethod
@@ -245,13 +246,16 @@ class CargoManifest:
     @classmethod
     def of(cls, path: Path, data: dict[str, Any]) -> CargoManifest:
         return cls(
-            path,
-            data,
-            Package.from_json(data["package"]) if "package" in data else None,
-            Workspace.from_json(data["workspace"]) if "workspace" in data else None,
-            Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
-            Dependencies.from_json(data["build-dependencies"]) if "build-dependencies" in data else None,
-            [Bin.from_json(x) for x in data.get("bin", [])],
+            _path=path,
+            _data=data,
+            package=Package.from_json(data["package"]) if "package" in data else None,
+            workspace=Workspace.from_json(data["workspace"]) if "workspace" in data else None,
+            dependencies=Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
+            build_dependencies=Dependencies.from_json(data["build-dependencies"])
+            if "build-dependencies" in data
+            else None,
+            dev_dependencies=Dependencies.from_json(data["dev-dependencies"]) if "dev-dependencies" in data else None,
+            bin=[Bin.from_json(x) for x in data.get("bin", [])],
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -268,6 +272,8 @@ class CargoManifest:
             result["dependencies"] = self.dependencies.to_json()
         if self.build_dependencies:
             result["build-dependencies"] = self.build_dependencies.to_json()
+        if self.dev_dependencies:
+            result["dev-dependencies"] = self.dev_dependencies.to_json()
         return result
 
     def to_toml_string(self) -> str:
