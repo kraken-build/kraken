@@ -118,6 +118,8 @@ class CargoPublishTask(CargoBuildTask):
                 self._push_version_to_path_deps(fixed_version_string, manifest.dependencies.data, registry.alias)
             if manifest.build_dependencies:
                 self._push_version_to_path_deps(fixed_version_string, manifest.build_dependencies.data, registry.alias)
+            if manifest.dev_dependencies:
+                self._push_version_to_path_deps(fixed_version_string, manifest.dev_dependencies.data, registry.alias)
         return manifest.to_toml_string()
 
     def _push_version_to_path_deps(
