@@ -1,0 +1,5 @@
+[[entries]]
+id = "e64939c7-c061-46c3-a148-a81a2b0a4e97"
+type = "deprecation"
+description = "Deprecate Maturin + PDM project support"
+author = "thomas.pellissier-tanon@helsing.ai"
