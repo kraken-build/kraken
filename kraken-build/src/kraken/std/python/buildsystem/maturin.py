@@ -6,6 +6,7 @@ import logging
 import os
 import shutil
 import subprocess as sp
+import warnings
 from collections.abc import Collection
 from dataclasses import dataclass
 from itertools import chain
@@ -231,6 +232,11 @@ class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         super().__init__(project_directory)
         self._builder = _MaturinBuilder(["pdm", "run"], self)
+        warnings.warn(
+            "Maturin + PDM project support is deprecated and will be removed in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     def disable_default_build(self) -> None:
         self._builder.disable_default_build()
