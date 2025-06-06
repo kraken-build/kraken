@@ -72,11 +72,11 @@ This output tells you the following:
 
 Kraken-wrapper supports different installers that can materialize your build environment. The default is `VENV` which uses the `venv` module from the Python standard library to create a virtual environment and then `pip` to install requirements.
 
-Since `v0.34.0`, Kraken-wrapper also supports the `UV` installer which uses [uv](https://astral.sh/blog/uv) to create the virtual environment and install requirements. Uv is a new project in its early stages, but is generally faster than the `VENV` installer by a factor of 10-20x. To use the `UV` installer, you have the following options:
+Since `v0.34.0`, Kraken-wrapper also supports the `UV` installer which uses [uv](https://astral.sh/blog/uv) to create the virtual environment and install requirements. In `v0.40.5`, `UV` was set to the default installer, replacing `VENV`, as it is generally faster than the `VENV` installer by a factor of 10-20x. To use the legacy `VENV` installer, you have the following options:
 
-1. Set the `KRAKENW_USE=UV` environment variable.
-2. Pass the `--use=UV` option to the `krakenw` command when installing your environment.
-3. Run `krakenw config --installer=UV` to set UV as the default installer in `~/.config/krakenw/config.toml`.
+1. Set the `KRAKENW_USE=VENV` environment variable.
+2. Pass the `--use=VENV` option to the `krakenw` command when installing your environment.
+3. Run `krakenw config --installer=VENV` to set venv as the default installer in `~/.config/krakenw/config.toml`.
 
 ## Credentials managment
 
