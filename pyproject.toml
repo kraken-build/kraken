@@ -1,0 +1,2 @@
+[tool.uv.workspace]
+members = ["kraken-build", "kraken-wrapper"]
