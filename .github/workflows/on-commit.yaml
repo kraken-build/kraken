@@ -7,7 +7,6 @@ on:
 env:
   COLUMNS: 200
   PYTEST_FLAGS: --numprocesses 4
-  SLAP_VERBOSE: more
 
 jobs:
 
@@ -21,10 +20,17 @@ jobs:
       id-token: write
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
 
-    - run: pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
-    - run: pipx install mksync
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.7.13"
+        python-version: "${{ matrix.python-version }}"
+
+    - name: Install kraken-wrapper
+      run: |
+        uv tool install kraken-wrapper==0.34.1
+        uv tool install mksync==0.1.4
 
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
@@ -36,7 +42,7 @@ jobs:
         cd docs
         for fn in docs/cli/*.md; do mksync -i $fn; done
         mksync -i docs/changelog.md
-    - run: krakenw run mkdocs.build --no-save
+        krakenw run mkdocs.build --no-save
 
     - name: Save Kraken build cache
       uses: actions/cache/save@v4
@@ -65,12 +71,20 @@ jobs:
         tasks: ["check lint", "test"]
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install uv && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
+
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.7.13"
+        python-version: "${{ matrix.python-version }}"
+
+    - name: Install tools
+      run: |
+        uv tool install poetry
+        uv tool install pdm
+        uv tool install kraken-wrapper==0.34.1
+
     - run: rustup update
-    - run: slap config --venv-type=uv
 
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
@@ -81,7 +95,7 @@ jobs:
     - name: Restore Venv
       uses: actions/cache/restore@v4
       with:
-        path: .venvs/
+        path: .venv/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     # Explicitly mention python.install to ensure that Pip install is rerun.
@@ -159,11 +173,14 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-    - run: cd examples/docker-manual && kraken run :dockerBuild :sub:helloWorld
+
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.7.13"
+        python-version: "${{ matrix.python-version }}"
+
+    - run: cd examples/docker-manual && uv run kraken run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
@@ -175,13 +192,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: NiklasRosenstein/slap@gha/install/v1
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v6
         with:
-          python-version: "3.10"
+          version: "0.7.13"
+          python-version: "${{ matrix.python-version }}"
+
       - name: Build dist
-        run: slap publish --dry --build-directory dist/
+        run:
+          uv build kraken-build
+          uv build kraken-wrapper
+
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
