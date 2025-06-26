@@ -1,0 +1,12 @@
+[project]
+name = "examples"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13.5"
+dependencies = [
+    "kraken-wrapper"
+]
+
+[tool.uv.sources]
+kraken-wrapper = { path = "../kraken-wrapper" }

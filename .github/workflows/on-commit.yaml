@@ -180,7 +180,7 @@ jobs:
         version: "0.7.13"
         python-version: "${{ matrix.python-version }}"
 
-    - run: cd examples/docker-manual && uv run --with ../kraken-wrapper krakenw run :dockerBuild :sub:helloWorld
+    - run: cd examples/docker-manual && uv run krakenw run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
