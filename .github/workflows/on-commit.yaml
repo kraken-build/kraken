@@ -42,8 +42,7 @@ jobs:
         cd docs
         for fn in docs/cli/*.md; do mksync -i $fn; done
         mksync -i docs/changelog.md
-        #krakenw run mkdocs.build --no-save
-        kraken run mkdocs.build --no-save
+        krakenw run mkdocs.build --no-save
 
     - name: Save Kraken build cache
       uses: actions/cache/save@v4
@@ -100,9 +99,7 @@ jobs:
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     # Explicitly mention python.install to ensure that Pip install is rerun.
-    - run: |
-        #krakenw run python.install ${{ matrix.tasks }} -vv
-        kraken run python.install ${{ matrix.tasks }} -vv
+    - run: krakenw run python.install ${{ matrix.tasks }} -vv
 
     - name: Save Venv
       uses: actions/cache/save@v4

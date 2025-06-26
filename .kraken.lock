@@ -1,6 +1,6 @@
 [requirements]
 requirements = [
-    "kraken-build>=0.33.2",
+    "kraken-build @ kraken-build",
 ]
 pythonpath = [
     "build-support",
