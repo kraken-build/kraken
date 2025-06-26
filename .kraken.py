@@ -13,7 +13,7 @@ def configure_project() -> None:
     from kraken.build import project
 
     python.ruff(additional_args=["--exclude", "tests/iss-263/example_project"])
-    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
+    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.16.1")
 
     if project.directory.joinpath("tests").is_dir():
         # Explicit list of test directories, Pytest skips the build directory if not specified explicitly.
