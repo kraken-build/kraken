@@ -38,7 +38,7 @@ dev-dependencies = [
 ]
 
 [tool.uv.sources]
-kraken-build = { workspace = true }
+kraken-build = { path = "../kraken-build" }
 
 [tool.mypy]
 explicit_package_bases = true

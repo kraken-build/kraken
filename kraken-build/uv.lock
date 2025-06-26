@@ -7,12 +7,6 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 
-[manifest]
-members = [
-    "kraken-build",
-    "kraken-wrapper",
-]
-
 [[package]]
 name = "aioquic"
 version = "1.2.0"
@@ -575,7 +569,7 @@ name = "importlib-metadata"
 version = "8.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "zipp", marker = "python_full_version < '3.12'" },
+    { name = "zipp" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/76/66/650a33bd90f786193e4de4b3ad86ea60b53c89b669a5c7be931fac31cdb0/importlib_metadata-8.7.0.tar.gz", hash = "sha256:d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000", size = 56641, upload-time = "2025-04-27T15:29:01.736Z" }
 wheels = [
@@ -687,7 +681,7 @@ wheels = [
 [[package]]
 name = "kraken-build"
 version = "0.44.1"
-source = { editable = "kraken-build" }
+source = { editable = "." }
 dependencies = [
     { name = "databind" },
     { name = "dill" },
@@ -746,37 +740,6 @@ dev = [
     { name = "requests-mock", specifier = ">=1.12.1,<2.0.0" },
     { name = "types-networkx", specifier = ">=3.2.1.20240703,<4.0.0" },
     { name = "types-requests", specifier = ">=2.32.0.20241016,<3.0.0" },
-]
-
-[[package]]
-name = "kraken-wrapper"
-version = "0.44.1"
-source = { editable = "kraken-wrapper" }
-dependencies = [
-    { name = "kraken-build" },
-    { name = "loguru" },
-    { name = "packaging" },
-    { name = "uv" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-xdist" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "kraken-build", editable = "kraken-build" },
-    { name = "loguru", specifier = ">=0.7.2,<0.8.0" },
-    { name = "packaging", specifier = ">=23.1,<24.0" },
-    { name = "uv", specifier = ">=0.6.0,<0.7.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=6.0.0,<7.0.0" },
-    { name = "pytest-xdist", specifier = ">=3.5.0" },
 ]
 
 [[package]]
