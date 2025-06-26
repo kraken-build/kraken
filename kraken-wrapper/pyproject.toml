@@ -33,7 +33,8 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 
 [tool.uv]
 dev-dependencies = [
-  "pytest>=6.0.0,<7.0.0"
+  "pytest>=6.0.0,<7.0.0",
+  "pytest-xdist>=3.5.0",
 ]
 
 [tool.uv.sources]

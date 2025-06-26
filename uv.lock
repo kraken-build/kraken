@@ -762,6 +762,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "pytest" },
+    { name = "pytest-xdist" },
 ]
 
 [package.metadata]
@@ -773,7 +774,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=6.0.0,<7.0.0" }]
+dev = [
+    { name = "pytest", specifier = ">=6.0.0,<7.0.0" },
+    { name = "pytest-xdist", specifier = ">=3.5.0" },
+]
 
 [[package]]
 name = "ldap3"
