@@ -1,0 +1,20 @@
+[tools]
+"pipx:kraken-wrapper" = "0.34.1"
+"pipx:mksync" = "0.1.4"
+"pipx:pdm" = "2.25.4"
+"pipx:poetry" = "2.1.3"
+"pipx:slap-cli" = "1.15.0"
+uv = "0.7.13"
+
+[tasks.update-docs]
+description = "Run `mksync` over doc files to inject command synopses and generate the changelog."
+run = """bash -c '
+set -x
+cd docs
+for fn in docs/cli/*.md; do uv run mksync -i $fn; done
+uv run mksync -i docs/changelog.md
+'"""
+
+[tasks.build-docs]
+depends = ["update-docs"]
+run = "krakenw run mkdocs.build --no-save -vv"
