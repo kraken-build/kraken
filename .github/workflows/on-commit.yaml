@@ -82,6 +82,7 @@ jobs:
       run: |
         uv tool install poetry
         uv tool install pdm
+        uv tool install slap-cli==1.15.0
         uv tool install kraken-wrapper==0.34.1
 
     - run: rustup update
