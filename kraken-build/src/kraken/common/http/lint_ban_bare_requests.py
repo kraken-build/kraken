@@ -60,7 +60,7 @@ class BareCallsVisitor(ast.NodeVisitor):
 
 class BanBareCalls:
     """
-    Detects occurences of bare httpx or requests function calls.
+    Detects occurrences of bare httpx or requests function calls.
     These are discouraged, as using the corresponding calls from the kraken.common.http usually work better
     in corporate networks.
     """

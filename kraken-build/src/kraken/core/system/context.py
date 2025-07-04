@@ -89,7 +89,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         observer: GraphExecutorObserver | None = None,
     ) -> None:
         """
-        :param build_directory: The directory in which all files generated durin the build should be stored.
+        :param build_directory: The directory in which all files generated during the build should be stored.
         :param project_finder: This project finder should only search within the directory it was given, not
             around or in parent folders. Defaults to :class:`CurrentDirectoryProjectFinder`.
         :param executor: The executor to use when the graph is executed.

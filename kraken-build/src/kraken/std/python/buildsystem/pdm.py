@@ -23,7 +23,7 @@ from . import ManagedEnvironment, PythonBuildSystem
 logger = logging.getLogger(__name__)
 
 # NOTE: We can't inline this expression where we need it because Mypy understands the expression and will permanently
-#       turn off a code path on the corresponding systme, which can lead to type errors downstream (typically
+#       turn off a code path on the corresponding system, which can lead to type errors downstream (typically
 #       unreachable code).
 _is_linux = sys.platform == "linux"
 

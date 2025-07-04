@@ -7,7 +7,7 @@ def test__gitignore_io_cache_for_every_token() -> None:
     assert set(load_token_cache()) == set(TOKENS)
 
 
-def test__gitignore_io_fetch_cached__errors_without_backfil_on_missing_token() -> None:
+def test__gitignore_io_fetch_cached__errors_without_backfill_on_missing_token() -> None:
     with pytest.raises(ValueError) as excinfo:
         gitignore_io_fetch_cached(["missing-token"], backfill=False)
     assert str(excinfo.value) == (

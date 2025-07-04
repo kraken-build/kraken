@@ -113,7 +113,7 @@ class VenvBuildEnv(BuildEnv):
         return [str(python_bin), "-m", "venv", str(path), "--upgrade-deps"]
 
     def _get_install_command(self, venv_dir: Path, requirements: RequirementSpec, env: dict[str, str]) -> list[str]:
-        """Return sthe command to install the given requirements into the virtual environment."""
+        """Return the command to install the given requirements into the virtual environment."""
         python_bin = venv_dir / "bin" / "python"
         command = [
             str(python_bin),
@@ -225,7 +225,7 @@ class VenvBuildEnv(BuildEnv):
         )
         self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
-        # Make sure the pythonpath from the requirements is encoded into the enviroment.
+        # Make sure the pythonpath from the requirements is encoded into the environment.
         self._install_pythonpath(self._path, list(requirements.pythonpath))
 
     def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:

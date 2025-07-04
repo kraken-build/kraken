@@ -9,37 +9,41 @@ from kraken.core import Property, Task, TaskStatus
 from kraken.core.system.task import TaskStatusType
 
 
-def check_file_status(file_path: Path) -> CommitedFileStatus:
+def check_file_status(file_path: Path) -> CommittedFileStatus:
     file_path = file_path.absolute()
     if not file_path.exists():
-        return CommitedFileStatus.MISSING
+        return CommittedFileStatus.MISSING
     ls_files = subprocess.run(
         ["git", "ls-files", "--", str(file_path)], capture_output=True, text=True, cwd=file_path.parent
     ).stdout.strip()
     if ls_files != file_path.name:
-        return CommitedFileStatus.NOT_COMMITTED
-    return CommitedFileStatus.COMMITED
+        return CommittedFileStatus.NOT_COMMITTED
+    return CommittedFileStatus.COMMITTED
 
 
-class CommitedFileStatus(enum.Enum):
+class CommittedFileStatus(enum.Enum):
     """
-    Represents the status of a file that is supposed to be commited.
+    Represents the status of a file that is supposed to be committed.
     """
 
-    COMMITED = enum.auto()
+    COMMITTED = enum.auto()
     NOT_COMMITTED = enum.auto()
     MISSING = enum.auto()
 
     def to_description(self, file_path: Path) -> str:
         match self:
-            case CommitedFileStatus.COMMITED:
+            case CommittedFileStatus.COMMITTED:
                 return f"'{file_path}' exists and is committed"
-            case CommitedFileStatus.NOT_COMMITTED:
+            case CommittedFileStatus.NOT_COMMITTED:
                 return f"'{file_path}' exists but is not committed"
-            case CommitedFileStatus.MISSING:
+            case CommittedFileStatus.MISSING:
                 return f"'{file_path}' does not exist"
             case _:
                 assert False
+
+
+# For backwards compatibility; typo was fixed in v0.45.0
+CommitedFileStatus = CommittedFileStatus
 
 
 class CheckFileTask(Task):
@@ -62,9 +66,9 @@ class CheckFileTask(Task):
         status = check_file_status(self.project.directory / self.file_to_check.get())
         success: bool
         match status:
-            case CommitedFileStatus.COMMITED:
+            case CommittedFileStatus.COMMITTED:
                 success = self.state.get() == "present"
-            case CommitedFileStatus.NOT_COMMITTED | CommitedFileStatus.MISSING:
+            case CommittedFileStatus.NOT_COMMITTED | CommittedFileStatus.MISSING:
                 success = self.state.get() != "present"
             case _:
                 assert False, f"Unknown status: {status}"

@@ -24,7 +24,7 @@ class CargoPublishTask(CargoBuildTask):
     #: Path to the Cargo configuration file (defaults to `.cargo/config.toml`).
     cargo_config_file: Property[Path] = Property.default(".cargo/config.toml")
 
-    #: Name of the package to publish (only requried for publishing packages from workspace)
+    #: Name of the package to publish (only required for publishing packages from workspace)
     package_name: Property[str | None] = Property.default(None)
 
     #: The registry to publish the package to.

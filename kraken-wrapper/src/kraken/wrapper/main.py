@@ -106,7 +106,7 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         extra_distributions.discard("pip")  # We'll always have that in a virtual env.
 
     if extra_distributions:
-        logger.warning("Found extra distributions in your Kraken build enviroment: %s", ", ".join(extra_distributions))
+        logger.warning("Found extra distributions in your Kraken build environment: %s", ", ".join(extra_distributions))
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
@@ -240,7 +240,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
 
 
 def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
-    """Print the status of the environent as a nicely formatted table."""
+    """Print the status of the environment as a nicely formatted table."""
 
     hash_algorithm = manager.get_hash_algorithm()
 
@@ -428,7 +428,7 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
     argv: list[str] = args.cmd[1:] + args.args
 
     if cmd in ("a", "auth"):
-        # The `auth` comand does not require any current project information, it can be used globally.
+        # The `auth` command does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
 
     if cmd in ("config",):

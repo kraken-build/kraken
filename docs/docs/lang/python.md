@@ -27,7 +27,7 @@ create a virtual environment and install the project into it).
 Build systems implemented for Kraken will take care of the installation, ensuring that the Python package indexes
 registered in the build script are made available to the installation process.
 
-Kraken assumes that these package managers or build systems are installed locally by the user and accesible in the `$PATH`.
+Kraken assumes that these package managers or build systems are installed locally by the user and accessible in the `$PATH`.
 If you use a custom installation, make sure these tools are available in there.
 
 ### Poetry
