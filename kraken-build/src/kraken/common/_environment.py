@@ -1,9 +1,14 @@
 import enum
 from collections.abc import Mapping, MutableMapping
 
+from deprecated import deprecated
+
 KRAKEN_ENVIRONMENT_TYPE_VARIABLE = "_KRAKEN_COMMONS_ENVIRONMENT_TYPE"
 
 
+@deprecated(
+    reason="Starting with kraken-wrapper v0.45.0, the environment type can no longer be selected and only Uv is supported."
+)
 class EnvironmentType(enum.Enum):
     """
     This enumeration describes the type of environment that is being used to run Kraken in.

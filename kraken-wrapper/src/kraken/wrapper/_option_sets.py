@@ -25,10 +25,7 @@ class EnvOptions:
             "--use",
             choices=[v.name for v in EnvironmentType if v.is_wrapped()],
             default=os.getenv("KRAKENW_USE"),
-            help="use the specified environment type. If the environment type changes it will trigger a reinstall.\n"
-            "Defaults to the value of the KRAKENW_USE environment variable. If that variable is unset, and\nif a build "
-            "environment already exists, that environment's type will be used. The default\nenvironment type that is "
-            "used for new environments is VENV. [env: KRAKENW_USE=...]",
+            help="deprecated since v0.45.0.",
         )
         group.add_argument(
             "--status",

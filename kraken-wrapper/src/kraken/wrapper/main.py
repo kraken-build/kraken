@@ -11,6 +11,8 @@ from pathlib import Path
 from textwrap import indent
 from typing import NamedTuple, NoReturn
 
+from deprecated import deprecated
+
 from kraken.common import (
     AsciiTable,
     BuildscriptMetadata,
@@ -28,7 +30,7 @@ from kraken.common.exceptions import exit_on_known_exceptions
 from . import __version__
 from ._buildenv import BuildEnvError
 from ._buildenv_manager import BuildEnvManager
-from ._config import DEFAULT_CONFIG_PATH, AuthModel, ConfigModel
+from ._config import DEFAULT_CONFIG_PATH, AuthModel
 from ._lockfile import Lockfile, calculate_lockfile
 from ._option_sets import AuthOptions, EnvOptions
 
@@ -102,9 +104,6 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
     distributions = environment.get_installed_distributions()
     lockfile, extra_distributions = calculate_lockfile(project.requirements, distributions)
 
-    if environment.get_type() == EnvironmentType.VENV:
-        extra_distributions.discard("pip")  # We'll always have that in a virtual env.
-
     if extra_distributions:
         logger.warning("Found extra distributions in your Kraken build environment: %s", ", ".join(extra_distributions))
 
@@ -131,23 +130,20 @@ def _get_auth_argument_parser(prog: str) -> argparse.ArgumentParser:
     return parser
 
 
+@deprecated(reason="krakenw config command has been removed in v0.45.0")
 def config_main(prog: str, argv: list[str]) -> NoReturn:
-    """`krakenw config` subcommand."""
+    """Deprecated. Do not use."""
 
-    config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
-    config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
-
-    parser = argparse.ArgumentParser(prog=prog)
+    parser = argparse.ArgumentParser(prog=prog, description="deprecated, do not use.")
     parser.add_argument(
         "--installer",
         choices=[x.name for x in EnvironmentType if x.is_wrapped()],
-        help="Set the installer to use for the build environment.",
+        help="deprecated, has no effect.",
     )
     args = parser.parse_args(argv)
 
     if args.installer is not None:
-        config.set_default_installer(EnvironmentType[args.installer])
-        config_file.save()
+        logger.warning("The `krakenw config` command is deprecated and will be removed in a future version.")
         sys.exit(0)
 
     parser.print_usage()
@@ -256,7 +252,7 @@ def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
     if manager.exists():
         metadata = manager.get_metadata()
         environment = manager.get_environment()
-        table.rows.append(("Environment", str(environment.get_path()), environment.get_type().name))
+        table.rows.append(("Environment", str(environment.get_path())))
         table.rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
         table.rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
         table.rows.append(("    Requirements hash", "", metadata.requirements_hash))
@@ -270,7 +266,6 @@ def _ensure_installed(
     project: Project,
     reinstall: bool,
     upgrade: bool,
-    env_type: EnvironmentType | None = None,
 ) -> None:
     exists = manager.exists()
     install = reinstall or upgrade or not exists
@@ -280,7 +275,6 @@ def _ensure_installed(
     allow_incremental = True
 
     if not exists:
-        env_type = env_type or env_type or manager.get_environment().get_type()
         operation = "Initializing"
     elif upgrade:
         operation = "Upgrading"
@@ -288,19 +282,6 @@ def _ensure_installed(
         operation = "Reinstalling"
     else:
         operation = "Reusing"
-
-    current_type = manager.get_environment().get_type()
-    if env_type is not None:
-        type_changed = exists and env_type != current_type
-        if not install and type_changed:
-            install = True
-            manager.remove()
-            operation = "Re-initializing"
-            reason = f"type changed from {current_type.name} to {env_type.name}"
-            allow_incremental = False
-        elif install and type_changed:
-            reason = f"type changed from {current_type.name} to {env_type.name}"
-            allow_incremental = False
 
     if not install and exists:
         metadata = manager.get_metadata()
@@ -327,23 +308,21 @@ def _ensure_installed(
             source_file = project.lockfile_path
             transitive = False
 
-        env_type = env_type or manager.get_environment().get_type()
         logger.info(
-            "%s build environment from %s (%s)%s using installer %s.",
+            "%s build environment from %s (%s)%s.",
             operation,
             source_name,
             os.path.relpath(source_file),
             f" ({reason})" if reason else "",
-            env_type.name,
         )
 
         tstart = time.perf_counter()
-        manager.install(source, env_type, transitive, allow_incremental)
+        manager.install(source, transitive, allow_incremental)
         duration = time.perf_counter() - tstart
         logger.info("Operation complete after %.3fs.", duration)
 
     else:
-        logger.info("%s build environment of type %s", operation, current_type.name)
+        logger.info("%s build environment", operation)
 
 
 class Project(NamedTuple):
@@ -464,7 +443,6 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
     # The project details and build environment manager are relevant for any command that we are delegating.
     # This includes the built-in `lock` command.
     config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
-    config = ConfigModel(config_file, DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
     manager = BuildEnvManager(
         project.directory,
@@ -472,7 +450,6 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
         incremental=env_options.incremental,
         show_install_logs=env_options.show_install_logs,
-        default_type=config.get_default_installer(),
     )
 
     # Execute environment operations before delegating the command.
@@ -498,7 +475,6 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
             project,
             env_options.reinstall,
             env_options.upgrade,
-            env_options.use,
         )
 
     if cmd is None:

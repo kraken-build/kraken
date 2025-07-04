@@ -52,6 +52,7 @@ typeapi = "^2.0.0"
 typing-extensions = ">=4.6.0"
 loguru = "^0.7.2"
 uv = "^0.6.0"
+deprecated = "^1.2.18"
 
 [tool.poetry.group.dev.dependencies]
 localimport = "^1.7.6"
@@ -64,6 +65,7 @@ types-requests = "^2.32.0.20241016"
 
 # Slap configuration
 # ------------------
+types-deprecated = "^1.2.15.20250304"
 
 [tool.slap]
 typed = true

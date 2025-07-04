@@ -2,7 +2,7 @@ from os import fsdecode
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from kraken.common import EnvironmentType, RequirementSpec
+from kraken.common import RequirementSpec
 
 from ._buildenv_venv import VenvBuildEnv as _VenvBuildEnv
 
@@ -33,6 +33,3 @@ class UvBuildEnv(_VenvBuildEnv):
     def _get_install_command(self, venv_dir: Path, requirements: RequirementSpec, env: dict[str, str]) -> list[str]:
         env["VIRTUAL_ENV"] = str(venv_dir)
         return [self._uv_bin, "pip", "install", "--no-config", *requirements.to_args(base_dir=self._project_root)]
-
-    def get_type(self) -> EnvironmentType:
-        return EnvironmentType.UV

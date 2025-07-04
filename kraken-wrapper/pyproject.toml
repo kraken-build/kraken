@@ -27,9 +27,11 @@ loguru = "^0.7.2"
 packaging = "^23.1"
 python = ">=3.10,<3.14"
 uv = "^0.6.0"
+deprecated = "^1.2.18"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=6.0.0"
+types-deprecated = "^1.2.15.20250304"
 
 [tool.poetry.scripts]
 krakenw = "kraken.wrapper.main:main"
