@@ -18,6 +18,12 @@ description = "Run `typos` in CI and fix typos in codebase"
 author = "@NiklasRosenstein"
 
 [[entries]]
+id = "50a658a1-1bd2-4088-b7c7-c2670371f69e"
+type = "improvement"
+description = "Use Uv instead of Poetry in `pyproject.toml`"
+author = "@NiklasRosenstein"
+
+[[entries]]
 id = "fe2b3657-efb3-41e2-a336-95574ed1645b"
 type = "deprecation"
 description = "Remove support for `VENV` build manager in a backwards-compatible way (will use Uv anyway)"

@@ -1,46 +1,46 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[tool.hatch.build.targets.wheel]
+packages = ["src/kraken"]
+
+[project]
 name = "kraken-wrapper"
 version = "0.44.1"
-description = ""
-authors = ["Niklas Rosenstein <rosensteinniklas@gmail.com>"]
-license = "MIT"
+description = "krakenw ensures a consistent and reproducible environment for your project's build orchestrated by Kraken."
 readme = "README.md"
-packages = [
-  {include = "kraken/wrapper", from = "src"},
+requires-python = ">=3.10,<3.14"
+license = "MIT"
+authors = [
+  {name = "Niklas Rosenstein", email = "rosensteinniklas@gmail.com"},
 ]
-classifiers = []
-keywords = []
+dependencies = [
+  "deprecated>=1.2.18",
+  "kraken-build==0.44.1",
+  "loguru>=0.7.2,<0.8.0",
+  "packaging>=23.1,<24.0",
+  "uv>=0.6.0,<0.7.0",
+]
 
-[tool.poetry.urls]
+[project.scripts]
+krakenw = "kraken.wrapper.main:main"
+
+[project.urls]
 "Bug Tracker" = "https://github.com/kraken-build/kraken-build/issues"
 Documentation = "https://kraken-build.github.io/kraken-build/"
 Homepage = "https://kraken-build.github.io/kraken-build/"
 Repository = "https://github.com/kraken-build/kraken-build/"
 
-[tool.poetry.dependencies]
-kraken-build = "0.44.1"
-loguru = "^0.7.2"
-packaging = "^23.1"
-python = ">=3.10,<3.14"
-uv = "^0.6.0"
-deprecated = "^1.2.18"
+[tool.uv]
+dev-dependencies = [
+  "pytest>=6.0.0,<7.0.0",
+  "pytest-xdist>=3.5.0",
+  "types-deprecated>=1.2.15.20250304",
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = ">=6.0.0"
-types-deprecated = "^1.2.15.20250304"
-
-[tool.poetry.scripts]
-krakenw = "kraken.wrapper.main:main"
-
-[tool.slap]
-typed = true
-
-# Linter/Formatter configuration
-# ------------------------------
+[tool.uv.sources]
+kraken-build = { path = "../kraken-build" }
 
 [tool.mypy]
 explicit_package_bases = true
