@@ -35,3 +35,10 @@ id = "e9b71e05-1606-422d-9f83-7fede0992905"
 type = "hygiene"
 description = "Remove conditional import of kraken main procedure that has not changed since v0.9.0"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bb486cf0-c42a-48c2-b6c2-2c6fe9167861"
+type = "refactor"
+description = "Refactor virtual environment managed in kraken-wrapper to make use of `uv pip freeze` instead of the homegrown `kraken query env` command, which is slower and more brittle."
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"

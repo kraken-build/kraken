@@ -17,7 +17,6 @@ class EnvOptions:
     reinstall: bool
     uninstall: bool
     incremental: bool
-    show_install_logs: bool
     no_keyring: bool
 
     @staticmethod
@@ -61,8 +60,7 @@ class EnvOptions:
             "--show-install-logs",
             action="store_true",
             default=os.getenv("KARKENW_SHOW_INSTALL_LOGS") == "1",
-            help="show Pip install logs instead of piping them to the build/.venv.log/ directory.\n"
-            "[env: KARKENW_SHOW_INSTALL_LOGS=1]",
+            help="deprecated since v0.45.0. has no effect" "[env: KARKENW_SHOW_INSTALL_LOGS=1]",
         )
 
         group = parser.add_argument_group("authentication")
@@ -81,13 +79,18 @@ class EnvOptions:
                 "deprecated option KRAKENW_USE/--use was specified. the option is deprecated since krakenw v0.45.0"
             )
 
+        if args.show_install_logs:
+            logger.warning(
+                "deprecated option KARKENW_SHOW_INSTALL_LOGS/--show-install-logs was specified. the option is "
+                "deprecated since krakenw v0.45.0"
+            )
+
         return cls(
             status=args.status,
             upgrade=args.upgrade,
             reinstall=args.reinstall,
             uninstall=args.uninstall,
             incremental=args.incremental,
-            show_install_logs=args.show_install_logs,
             no_keyring=args.no_keyring,
         )
 
