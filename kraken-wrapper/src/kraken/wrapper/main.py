@@ -240,23 +240,26 @@ def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
     hash_algorithm = manager.get_hash_algorithm()
 
     table = AsciiTable()
+
     table.headers = ["Key", "Source", "Value"]
-    table.rows.append(("Requirements", str(project.requirements_path), project.requirements.to_hash(hash_algorithm)))
+    rows: list[tuple[str, str, str]] = table.rows  # type: ignore[assignment]  # Upcast
+
+    rows.append(("Requirements", str(project.requirements_path), project.requirements.to_hash(hash_algorithm)))
     if project.lockfile:
-        table.rows.append(("Lockfile", str(project.lockfile_path), "-"))
-        table.rows.append(("  Requirements hash", "", project.lockfile.requirements.to_hash(hash_algorithm)))
-        table.rows.append(("  Pinned hash", "", project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm)))
+        rows.append(("Lockfile", str(project.lockfile_path), "-"))
+        rows.append(("  Requirements hash", "", project.lockfile.requirements.to_hash(hash_algorithm)))
+        rows.append(("  Pinned hash", "", project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm)))
     else:
-        table.rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
+        rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
     if manager.exists():
         metadata = manager.get_metadata()
         environment = manager.get_environment()
-        table.rows.append(("Environment", str(environment.get_path())))
-        table.rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
-        table.rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
-        table.rows.append(("    Requirements hash", "", metadata.requirements_hash))
+        rows.append(("Environment", str(environment.get_path()), ""))
+        rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
+        rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
+        rows.append(("    Requirements hash", "", metadata.requirements_hash))
     else:
-        table.rows.append(("Environment", str(manager.get_environment().get_path()), "n/a"))
+        rows.append(("Environment", str(manager.get_environment().get_path()), "n/a"))
     table.print()
 
 
