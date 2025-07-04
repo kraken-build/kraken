@@ -60,7 +60,7 @@ class EnvOptions:
             "--show-install-logs",
             action="store_true",
             default=os.getenv("KARKENW_SHOW_INSTALL_LOGS") == "1",
-            help="deprecated since v0.45.0. has no effect" "[env: KARKENW_SHOW_INSTALL_LOGS=1]",
+            help="deprecated since v0.45.0. has no effect [env: KARKENW_SHOW_INSTALL_LOGS=1]",
         )
 
         group = parser.add_argument_group("authentication")
