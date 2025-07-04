@@ -175,7 +175,7 @@ class ArchiveWriter(abc.ABC):
 
 class TarArchiveWriter(ArchiveWriter):
     def __init__(self, path: Path, type_: Literal["", "gz", "bz2", "xz"]) -> None:
-        self._archive = tarfile.open(path, mode="w:" + type_)  # type: ignore[arg-type]
+        self._archive = tarfile.open(path, mode="w:" + type_)  # type: ignore[call-overload]
 
     def close(self) -> None:
         self._archive.close()
