@@ -70,7 +70,7 @@ class UvVirtualEnv:
     def try_version(self) -> str | None:
         try:
             return self.version()
-        except (subprocess.CalledProcessError, RuntimeError):
+        except (subprocess.CalledProcessError, FileNotFoundError, RuntimeError):
             return None
 
     def program(self, program: str) -> Path:
