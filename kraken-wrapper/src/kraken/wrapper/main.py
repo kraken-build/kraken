@@ -28,8 +28,7 @@ from kraken.common import (
 from kraken.common.exceptions import exit_on_known_exceptions
 
 from . import __version__
-from ._buildenv import BuildEnvError
-from ._buildenv_manager import BuildEnvManager
+from ._buildenv import BuildEnvError, BuildEnvManager
 from ._config import DEFAULT_CONFIG_PATH, AuthModel
 from ._lockfile import Lockfile, calculate_lockfile
 from ._option_sets import AuthOptions, EnvOptions
