@@ -29,3 +29,9 @@ type = "deprecation"
 description = "Remove support for `VENV` build manager in a backwards-compatible way (will use Uv anyway)"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "e9b71e05-1606-422d-9f83-7fede0992905"
+type = "hygiene"
+description = "Remove conditional import of kraken main procedure that has not changed since v0.9.0"
+author = "@NiklasRosenstein"

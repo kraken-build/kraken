@@ -37,12 +37,7 @@ from ._lockfile import Distribution, Lockfile
 
 logger = logging.getLogger(__name__)
 
-KRAKEN_MAIN_IMPORT_SNIPPET = """
-try:
-    from kraken.core.cli.main import main  # >= 0.9.0
-except ImportError:
-    from kraken.cli.main import main  # < 0.9.0
-""".strip()
+KRAKEN_MAIN_IMPORT_SNIPPET = "from kraken.core.cli.main import main"  # >= 0.9.0
 
 
 @dataclasses.dataclass(frozen=True)
