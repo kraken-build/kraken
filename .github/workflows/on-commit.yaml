@@ -162,7 +162,7 @@ jobs:
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: cd examples/docker-manual && uv ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
+    - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
