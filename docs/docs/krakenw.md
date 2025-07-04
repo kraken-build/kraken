@@ -47,15 +47,15 @@ The build environment, lock file and `.kraken.py` file may run out of sync. You 
 
 ```
 $ krakenw --status
-Key                    Source                                           Value                                                           
+Key                    Source                                           Value
 ---------------------  -----------------------------------------------  ----------------------------------------------------------------
 Requirements           /home/niklas/git/kraken/.kraken.py               653652d98e5ae05d045dc0348db23bfad63ed0224c82d0c835047a7afe1ff4dc
-Lockfile               /home/niklas/git/kraken/.kraken.lock             -                                                               
+Lockfile               /home/niklas/git/kraken/.kraken.lock             -
   Requirements hash                                                     653652d98e5ae05d045dc0348db23bfad63ed0224c82d0c835047a7afe1ff4dc
   Pinned hash                                                           a71eab8ae7fd3e3f2059fb272598682c159d86e8c97a941da2cd44ec8179c9c5
-Environment            /home/niklas/git/kraken/build/.kraken/venv       VENV                                                            
-  Metadata             /home/niklas/git/kraken/build/.kraken/venv.meta  -                                                               
-    Created at                                                          2024-02-15T22:25:53.903815                                      
+Environment            /home/niklas/git/kraken/build/.kraken/venv
+  Metadata             /home/niklas/git/kraken/build/.kraken/venv.meta  -
+    Created at                                                          2024-02-15T22:25:53.903815
     Requirements hash                                                   a71eab8ae7fd3e3f2059fb272598682c159d86e8c97a941da2cd44ec8179c9c5
 ```
 
@@ -67,16 +67,6 @@ This output tells you the following:
     * (2) the hash sum of the pinned requirements, which must match with the hash sum of the installed packages in the build environment.
 * The path to the build environment and the hash sum of the installed packages in the build environment, as well as the
     installer that was used for the build environment. For more information on available installers, see below.
-
-## Installers
-
-Kraken-wrapper supports different installers that can materialize your build environment. The default is `VENV` which uses the `venv` module from the Python standard library to create a virtual environment and then `pip` to install requirements.
-
-Since `v0.34.0`, Kraken-wrapper also supports the `UV` installer which uses [uv](https://astral.sh/blog/uv) to create the virtual environment and install requirements. Uv is a new project in its early stages, but is generally faster than the `VENV` installer by a factor of 10-20x. To use the `UV` installer, you have the following options:
-
-1. Set the `KRAKENW_USE=UV` environment variable.
-2. Pass the `--use=UV` option to the `krakenw` command when installing your environment.
-3. Run `krakenw config --installer=UV` to set UV as the default installer in `~/.config/krakenw/config.toml`.
 
 ## Credentials management
 
@@ -121,7 +111,6 @@ Krakenw considers the following environment variables:
 
 | Variable | Effect |
 | -------- | ------ |
-| `KRAKENW_USE` | The installer to use for the build environment. Can be `VENV` or `UV`. |
 | `KRAKENW_REINSTALL` | If set to `1`, the build environment will be reinstalled. This is analogous to passing `--reinstall` on the CLI. |
 | `KRAKENW_INCREMENTAL` | If set to `1`, the latest requirements will be installed into the existing environment without first deleting it. This is analogous to passing `--incremental` on the CLI. |
 | `KRAKENW_NO_KEYRING` | If set to `1`, the keyring package will not be used to store credentials. This is analogous to passing `--no-keyring` on the CLI. |

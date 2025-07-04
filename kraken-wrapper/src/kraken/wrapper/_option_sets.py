@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import logging
 import os
 
 from kraken.common import EnvironmentType
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -13,7 +16,6 @@ class EnvOptions:
     upgrade: bool
     reinstall: bool
     uninstall: bool
-    use: EnvironmentType | None
     incremental: bool
     show_install_logs: bool
     no_keyring: bool
@@ -74,19 +76,23 @@ class EnvOptions:
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> EnvOptions:
+        if args.use:
+            logger.warning(
+                "deprecated option KRAKENW_USE/--use was specified. the option is deprecated since krakenw v0.45.0"
+            )
+
         return cls(
             status=args.status,
             upgrade=args.upgrade,
             reinstall=args.reinstall,
             uninstall=args.uninstall,
-            use=EnvironmentType[args.use] if args.use else None,
             incremental=args.incremental,
             show_install_logs=args.show_install_logs,
             no_keyring=args.no_keyring,
         )
 
     def any(self) -> bool:
-        return bool(self.status or self.upgrade or self.reinstall or self.uninstall or self.use)
+        return bool(self.status or self.upgrade or self.reinstall or self.uninstall)
 
 
 @dataclasses.dataclass(frozen=True)

@@ -1,0 +1,5 @@
+[[entries]]
+id = "1d451852-d94f-4e00-adca-89b778017e6b"
+type = "hygiene"
+description = "Remove abstraction over build environments, there is only one `BuildEnv` implementation now and that is Uv"
+author = "@NiklasRosenstein"
