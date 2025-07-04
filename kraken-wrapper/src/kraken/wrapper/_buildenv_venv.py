@@ -103,7 +103,7 @@ class VenvBuildEnv(BuildEnv):
                 "'%s' failed (exit code: %d, command: %s). Check the output above for more information.",
                 operation_name,
                 exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
-                "$ " + command_str,
+                command_str,
             )
 
         raise BuildEnvError(f"The command failed: {command_str}") from exc
@@ -215,15 +215,18 @@ class VenvBuildEnv(BuildEnv):
             logger.info("Reusing virtual environment at %s", self._path)
 
         # Install requirements.
-        env = os.environ.copy()
-        command = self._get_install_command(self._path, requirements, env)
-        logger.info("Installing dependencies.")
-        logger.debug(
-            "Installing into build environment with %s: %s",
-            self.INSTALLER_NAME,
-            sanitize_http_basic_auth(" ".join(command)),
-        )
-        self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
+        if not requirements.requirements:
+            logger.info("No requirements specified, skipping install step.")
+        else:
+            env = os.environ.copy()
+            command = self._get_install_command(self._path, requirements, env)
+            logger.info("Installing dependencies.")
+            logger.debug(
+                "Installing into build environment with %s: %s",
+                self.INSTALLER_NAME,
+                sanitize_http_basic_auth(" ".join(command)),
+            )
+            self._run_command(command, operation_name="Install dependencies", log_file=install_log, env=env)
 
         # Make sure the pythonpath from the requirements is encoded into the environment.
         self._install_pythonpath(self._path, list(requirements.pythonpath))
