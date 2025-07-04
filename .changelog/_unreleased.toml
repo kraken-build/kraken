@@ -16,3 +16,9 @@ id = "dbb56b0e-6634-4c45-ae99-3936c397b12a"
 type = "improvement"
 description = "Run `typos` in CI and fix typos in codebase"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "50a658a1-1bd2-4088-b7c7-c2670371f69e"
+type = "improvement"
+description = "Use Uv instead of Poetry in `pyproject.toml`"
+author = "@NiklasRosenstein"

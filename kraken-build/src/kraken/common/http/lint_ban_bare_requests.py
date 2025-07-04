@@ -28,7 +28,7 @@ See https://github.com/kraken-build/kraken-std/pull/132
 
 class BareCallsVisitor(ast.NodeVisitor):
     def __init__(self, disallowed_module: str) -> None:
-        self.bare_calls: list[ast.AST] = []
+        self.bare_calls: list[ast.Call] = []
         self.disallowed_module = disallowed_module
 
     def visit_Call(self, node: ast.Call) -> None:

@@ -7,7 +7,6 @@ on:
 env:
   COLUMNS: 200
   PYTEST_FLAGS: --numprocesses 4
-  SLAP_VERBOSE: more
 
 jobs:
 
@@ -72,8 +71,6 @@ jobs:
     # We have Rust code in the examples/ which will be built as part of our tests.
     - run: rustup update
 
-    - run: slap config --venv-type=uv
-
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
       with:
@@ -83,7 +80,7 @@ jobs:
     - name: Restore Venv
       uses: actions/cache/restore@v4
       with:
-        path: .venvs/
+        path: .venv/
         key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
 
     # Explicitly mention python.install to ensure that Pip install is rerun.
@@ -165,8 +162,7 @@ jobs:
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-    - run: cd examples/docker-manual && ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
+    - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
@@ -179,12 +175,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+
       - name: Build dist
-        run: slap publish --dry --build-directory dist/
+        run:
+          uv build kraken-build
+          uv build kraken-wrapper
+
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
