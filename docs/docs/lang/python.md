@@ -38,7 +38,7 @@ If you use a custom installation, make sure these tools are available in there.
 
 ### Slap
 
-* **Package index credentials**: [TODO] The installation processs passes the extra index URLs to `slap install` using the
+* **Package index credentials**: [TODO] The installation process passes the extra index URLs to `slap install` using the
 `--package-index` option.
   * [TODO] Should we add an option to permanently add a package index to the Slap configuration and then keep it in
     sync with a task?

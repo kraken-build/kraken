@@ -156,7 +156,7 @@ class CargoPublishTask(CargoBuildTask):
     @classmethod
     def _check_package_existence(cls, package_name: str, version: str, registry: CargoRegistry) -> TaskStatus | None:
         """
-        Checks wether the given `package_name`@`version` is indexed in the provided `registry`.
+        Checks whether the given `package_name`@`version` is indexed in the provided `registry`.
 
         Checking is done by reading from the registry's index HTTP API, following the
         [Index Format](https://doc.rust-lang.org/cargo/reference/registry-index.html) documentation
