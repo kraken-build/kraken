@@ -110,13 +110,12 @@ class UvVirtualEnv:
             str(self.python_bin),
             "--exact",
             "--no-config",
-            "--",
-            *requirements,
         ]
         if index_url:
             command += ["--index-url", index_url]
         for url in extra_index_urls:
             command += ["--extra-index-url", url]
+        command += ["--"]
         command += requirements
 
         logger.debug("Installing into build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
