@@ -49,6 +49,13 @@ jobs:
 
   # == Unit tests, linting, and type checking ==
 
+  typos:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - run: typos
+
   test:
     runs-on: ubuntu-latest
     strategy:

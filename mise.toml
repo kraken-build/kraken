@@ -4,6 +4,7 @@
 "pipx:pdm" = "2.25.4"
 "pipx:poetry" = "2.1.3"
 "pipx:slap-cli" = "1.15.0"
+typos = "1.33.1"
 uv = "0.7.13"
 
 [tasks.update-docs]
