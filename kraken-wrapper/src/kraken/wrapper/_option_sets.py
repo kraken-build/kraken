@@ -77,7 +77,9 @@ class EnvOptions:
     @classmethod
     def collect(cls, args: argparse.Namespace) -> EnvOptions:
         if args.use:
-            logger.warning("deprecated option --use was specified. the option is deprecated since krakenw v0.45.0")
+            logger.warning(
+                "deprecated option KRAKENW_USE/--use was specified. the option is deprecated since krakenw v0.45.0"
+            )
 
         return cls(
             status=args.status,
