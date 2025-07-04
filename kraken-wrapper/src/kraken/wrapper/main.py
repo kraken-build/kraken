@@ -379,7 +379,7 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     Running ``krakenw run test-examples`` will translate into ``kraken run -p .. examples:test-examples``
     due to the :class:`GitAwareProjectFinder` finding ``/`` as the Kraken project root.
 
-    Note that if the ``examples/`` wanted to be its own Kraken project, independant of the project at ``//``,
+    Note that if the ``examples/`` wanted to be its own Kraken project, independent of the project at ``//``,
     you can add a line spelling ``# ::krakenw-root`` to the ``.kraken.py`` file. In that case, the
     :class:`GitAwareProjectFinder` will consider that directory the root Kraken project (assuming your CWD
     is somewhere within it).
