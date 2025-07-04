@@ -335,6 +335,7 @@ version = "0.44.1"
 source = { directory = "../kraken-build" }
 dependencies = [
     { name = "databind" },
+    { name = "deprecated" },
     { name = "dill" },
     { name = "httpx" },
     { name = "keyring" },
@@ -354,6 +355,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "databind", specifier = ">=4.5.0,<5.0.0" },
+    { name = "deprecated", specifier = ">=1.2.18" },
     { name = "dill", specifier = ">=0.3.8,<0.4.0" },
     { name = "httpx", specifier = ">=0.28.0,<0.29.0" },
     { name = "keyring", specifier = ">=25.0.0,<26.0.0" },
@@ -376,6 +378,7 @@ dev = [
     { name = "pytest", specifier = ">=6.0.0,<7.0.0" },
     { name = "pytest-xdist", specifier = ">=3.0.0,<4.0.0" },
     { name = "requests-mock", specifier = ">=1.12.1,<2.0.0" },
+    { name = "types-deprecated", specifier = ">=1.2.15.20250304" },
     { name = "types-networkx", specifier = ">=3.2.1.20240703,<4.0.0" },
     { name = "types-requests", specifier = ">=2.32.0.20241016,<3.0.0" },
 ]
@@ -385,6 +388,7 @@ name = "kraken-wrapper"
 version = "0.44.1"
 source = { editable = "." }
 dependencies = [
+    { name = "deprecated" },
     { name = "kraken-build" },
     { name = "loguru" },
     { name = "packaging" },
@@ -395,10 +399,12 @@ dependencies = [
 dev = [
     { name = "pytest" },
     { name = "pytest-xdist" },
+    { name = "types-deprecated" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "deprecated", specifier = ">=1.2.18" },
     { name = "kraken-build", directory = "../kraken-build" },
     { name = "loguru", specifier = ">=0.7.2,<0.8.0" },
     { name = "packaging", specifier = ">=23.1,<24.0" },
@@ -409,6 +415,7 @@ requires-dist = [
 dev = [
     { name = "pytest", specifier = ">=6.0.0,<7.0.0" },
     { name = "pytest-xdist", specifier = ">=3.5.0" },
+    { name = "types-deprecated", specifier = ">=1.2.15.20250304" },
 ]
 
 [[package]]
@@ -659,6 +666,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e6/4c/6c35c2d97e6292d715bd93953a4a6114fc091492bd58cad1fdaebbc4ee12/typeapi-2.2.4.tar.gz", hash = "sha256:daa80767520c0957a320577e4f729c0ba6921c708def31f4c6fd8d611908fd7b", size = 121923, upload-time = "2025-01-29T11:40:14.68Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b6/33/38da585b06978d262cc2b2b45bc57ee75f0ce5e0b4ef1cab1b86461e9298/typeapi-2.2.4-py3-none-any.whl", hash = "sha256:bd6d5e5907fa47e0303bf254e7cc8712d4be4eb26d7ffaedb67c9e7844c53bb8", size = 26387, upload-time = "2025-01-29T11:40:12.328Z" },
+]
+
+[[package]]
+name = "types-deprecated"
+version = "1.2.15.20250304"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0e/67/eeefaaabb03b288aad85483d410452c8bbcbf8b2bd876b0e467ebd97415b/types_deprecated-1.2.15.20250304.tar.gz", hash = "sha256:c329030553029de5cc6cb30f269c11f4e00e598c4241290179f63cda7d33f719", size = 8015, upload-time = "2025-03-04T02:48:17.894Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4d/e3/c18aa72ab84e0bc127a3a94e93be1a6ac2cb281371d3a45376ab7cfdd31c/types_deprecated-1.2.15.20250304-py3-none-any.whl", hash = "sha256:86a65aa550ea8acf49f27e226b8953288cd851de887970fbbdf2239c116c3107", size = 8553, upload-time = "2025-03-04T02:48:16.666Z" },
 ]
 
 [[package]]

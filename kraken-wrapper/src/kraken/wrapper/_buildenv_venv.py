@@ -147,9 +147,6 @@ class VenvBuildEnv(BuildEnv):
     def get_path(self) -> Path:
         return self._path
 
-    def get_type(self) -> EnvironmentType:
-        return EnvironmentType.VENV
-
     def get_installed_distributions(self) -> list[Distribution]:
         python = self._venv.get_bin("python")
         return general_get_installed_distributions([str(python), "-c", f"{KRAKEN_MAIN_IMPORT_SNIPPET}\nmain()"])
@@ -234,7 +231,10 @@ class VenvBuildEnv(BuildEnv):
     def dispatch_to_kraken_cli(self, argv: list[str]) -> NoReturn:
         python = self._venv.get_bin("python")
         command = [str(python), "-c", f"{KRAKEN_MAIN_IMPORT_SNIPPET}\nmain()", *argv]
+
         env = os.environ.copy()
-        self.get_type().set(env)
+        # We only support UV environments from v0.45.0.
+        EnvironmentType.UV.set(env)
         env["PATH"] = str(self._venv.get_bin_directory()) + os.pathsep + env.get("PATH", "")
+
         sys.exit(subprocess.call(command, env=env))

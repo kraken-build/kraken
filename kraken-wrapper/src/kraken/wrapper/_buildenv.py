@@ -10,7 +10,7 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any, NoReturn
 
-from kraken.common import EnvironmentType, NotSet, RequirementSpec, datetime_to_iso8601, iso8601_to_datetime
+from kraken.common import NotSet, RequirementSpec, datetime_to_iso8601, iso8601_to_datetime
 
 from ._lockfile import Distribution
 
@@ -26,10 +26,6 @@ except ImportError:
 
 class BuildEnv(abc.ABC):
     """Interface for the build environment."""
-
-    @abc.abstractmethod
-    def get_type(self) -> EnvironmentType:
-        """Return the type of build environment that this is."""
 
     @abc.abstractmethod
     def get_path(self) -> Path:
@@ -53,7 +49,6 @@ class BuildEnv(abc.ABC):
 @dataclasses.dataclass(frozen=True)
 class BuildEnvMetadata:
     created_at: datetime.datetime
-    environment_type: EnvironmentType
     requirements_hash: str
     hash_algorithm: str
 
@@ -61,7 +56,6 @@ class BuildEnvMetadata:
     def from_json(cls, data: dict[str, Any]) -> BuildEnvMetadata:
         return cls(
             created_at=iso8601_to_datetime(data["created_at"]),
-            environment_type=EnvironmentType[data["environment_type"]],
             requirements_hash=data["requirements_hash"],
             hash_algorithm=data["hash_algorithm"],
         )
@@ -69,7 +63,6 @@ class BuildEnvMetadata:
     def to_json(self) -> dict[str, Any]:
         return {
             "created_at": datetime_to_iso8601(self.created_at),
-            "environment_type": self.environment_type.name,
             "requirements_hash": self.requirements_hash,
             "hash_algorithm": self.hash_algorithm,
         }
