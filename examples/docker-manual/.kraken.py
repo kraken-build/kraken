@@ -1,5 +1,7 @@
+## ::krakenw-root
+
 from kraken.common import buildscript
-buildscript(additional_sys_paths=["."])
+buildscript(requirements=["kraken-build @ ../../kraken-wrapper"], additional_sys_paths=["."])
 
 from kraken.build import project
 from my_tasks import WriteDockerfileTask, DockerBuildTask

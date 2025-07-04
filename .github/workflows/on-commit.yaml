@@ -172,6 +172,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        call-target: ["krakenw", "kraken"]
     steps:
     - uses: actions/checkout@v4
 
@@ -181,7 +182,7 @@ jobs:
         version: "0.7.13"
         python-version: "${{ matrix.python-version }}"
 
-    - run: cd examples/docker-manual && uv run krakenw run :dockerBuild :sub:helloWorld
+    - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
