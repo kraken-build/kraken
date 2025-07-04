@@ -14,6 +14,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
+from deprecated import deprecated
+
 from kraken.common import (
     BuildscriptMetadata,
     ColorOptions,
@@ -563,7 +565,17 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
         render_to_browser(buffer.getvalue())
 
 
+@deprecated(
+    reason="kraken-wrapper uses `uv pip freeze` since v0.45.0, the `kraken query env` command will be removed in "
+    "an upcoming version."
+)
 def env() -> None:
+    logger.warning(
+        "The `kraken query env` command is deprecated. This probably means you are using an older version "
+        "of kraken-wrapper (unless you directly called this command). You should upgrade your version "
+        "of kraken-wrapper."
+    )
+
     dists = sorted(get_distributions().values(), key=lambda dist: dist.name)
     print(json.dumps([dist.to_json() for dist in dists], sort_keys=True))
 

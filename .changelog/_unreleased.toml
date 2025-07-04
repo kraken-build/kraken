@@ -42,3 +42,9 @@ type = "refactor"
 description = "Refactor virtual environment managed in kraken-wrapper to make use of `uv pip freeze` instead of the homegrown `kraken query env` command, which is slower and more brittle."
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "ebf85acd-413b-4c10-a083-73c6eae8cf37"
+type = "deprecation"
+description = "Add deprecation warning to `kraken query env` command"
+author = "@NiklasRosenstein"
