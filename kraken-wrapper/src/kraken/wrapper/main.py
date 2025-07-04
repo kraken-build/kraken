@@ -360,7 +360,7 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     and returns it. The project information includes the requirements for the project as well as the
     parsed lockfile, if present.
 
-    We use the :class:`GitAwareProjectFinder` in it's :func:`default <GitAwareProjectFinder.default>`
+    We use the :class:`GitAwareProjectFinder` in its :func:`default <GitAwareProjectFinder.default>`
     configuration to determine the root directory of the Kraken project. This is later used to add the
     ``-p, --project-dir`` option when invoking the project's underlying Kraken installation, as well as
     adding to relative task and project selectors.

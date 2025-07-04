@@ -216,7 +216,7 @@ class VenvBuildEnv(BuildEnv):
 
         # Install requirements.
         if not requirements.requirements:
-            logger.info("No requirements specfied, skipping install step.")
+            logger.info("No requirements specified, skipping install step.")
         else:
             env = os.environ.copy()
             command = self._get_install_command(self._path, requirements, env)
