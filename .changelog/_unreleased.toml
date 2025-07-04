@@ -10,3 +10,9 @@ type = "fix"
 description = "Fix error when calling `uv pip install` when no requirements are specified in `buildscript()` call. (It will error later when it cannot call Kraken, but that is a better error)"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "50a658a1-1bd2-4088-b7c7-c2670371f69e"
+type = "improvement"
+description = "Use Uv instead of Poetry in `pyproject.toml`"
+author = "@NiklasRosenstein"
