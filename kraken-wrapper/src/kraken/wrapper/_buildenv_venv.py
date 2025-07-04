@@ -103,7 +103,7 @@ class VenvBuildEnv(BuildEnv):
                 "'%s' failed (exit code: %d, command: %s). Check the output above for more information.",
                 operation_name,
                 exc.returncode if isinstance(exc, subprocess.CalledProcessError) else -1,
-                "$ " + command_str,
+                command_str,
             )
 
         raise BuildEnvError(f"The command failed: {command_str}") from exc
