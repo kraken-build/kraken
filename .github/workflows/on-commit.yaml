@@ -162,8 +162,7 @@ jobs:
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-    - run: cd examples/docker-manual && ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
+    - run: cd examples/docker-manual && uv ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
   publish:
     runs-on: ubuntu-latest
