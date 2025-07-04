@@ -78,7 +78,7 @@ Since `v0.34.0`, Kraken-wrapper also supports the `UV` installer which uses [uv]
 2. Pass the `--use=UV` option to the `krakenw` command when installing your environment.
 3. Run `krakenw config --installer=UV` to set UV as the default installer in `~/.config/krakenw/config.toml`.
 
-## Credentials managment
+## Credentials management
 
 The `krakenw auth` command can be used to store credentials for a given hostname in the system keyring. Any `index_url` or `extra_index_url` in your build script's requirements that matches the hostname will use these credentials to authenticate with the package index.
 

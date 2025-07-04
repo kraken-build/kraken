@@ -38,7 +38,7 @@ class BuildEnvManager:
 
         assert (
             default_hash_algorithm in hashlib.algorithms_available
-        ), f"hash algoritm {default_hash_algorithm!r} is not available"
+        ), f"hash algorithm {default_hash_algorithm!r} is not available"
 
         self._project_root = project_root
         self._path = path

@@ -146,7 +146,7 @@ class AuthOptions:
             "--verbose",
             action="store_true",
             default=False,
-            help="show curl queries to use when authenicating hosts",
+            help="show curl queries to use when authenticating hosts",
         )
 
     @classmethod

@@ -20,7 +20,7 @@ def is_relative_to(apath: Path, bpath: Path) -> bool:
 def try_relative_to(apath: Path, bpath: "Path | None" = None) -> Path:
     """
     Tries to compute the relative path of *apath* relative to *bpath*. Returns the original *apath* if the
-    relative path can be be computed, for exmaple if we would need to go at least one directory up to reach
+    relative path can be be computed, for example if we would need to go at least one directory up to reach
     *apath* relative to *bpath*.
     """
 

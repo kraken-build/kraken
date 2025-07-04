@@ -182,7 +182,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
     """
     A Kraken Task is a unit of work that can be executed.
 
-    Tasks goe through a number of stages during its lifetime:
+    Tasks go through a number of stages during its lifetime:
 
     * Creation and configuration
     * Finalization (:meth:`finalize`) -- Mutations to properties of the task are locked after this.

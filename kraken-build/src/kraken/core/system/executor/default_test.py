@@ -58,7 +58,7 @@ def trim_printed_result(captured: CaptureResult[str]) -> str:
 def test__DefaultExecutor__print_correct_failures_with_dependencies(
     kraken_project: Project, capsys: Generator[CaptureFixture[str], None, None]
 ) -> None:
-    """This test tests if when a task failed, successor tasks with depedencies will be printed as failed.
+    """This test tests if when a task failed, successor tasks with dependencies will be printed as failed.
 
     ```
     A -> B -> C -> D

@@ -18,7 +18,7 @@ class GraphvizWriter:
     def __init__(self, out: t.TextIO, indent: str = "\t") -> None:
         """
         :param out: The output file to write to.
-        :param indent: The string to use for every level of indendation.
+        :param indent: The string to use for every level of indentation.
         """
 
         self._out = out
@@ -72,7 +72,7 @@ class GraphvizWriter:
         self._edge_type.append(self._edge_type[-1])
 
     def end(self) -> None:
-        """Close a previouly opened block. Raises an :class:`AssertionError` if called too many times."""
+        """Close a previously opened block. Raises an :class:`AssertionError` if called too many times."""
         assert self._level >= 1, "called end() too many times"
         self._level -= 1
         self._edge_type.pop()
@@ -92,7 +92,7 @@ class GraphvizWriter:
         self._out.write(";\n")
 
     def edge(self, source: str | t.Sequence[str], target: str | t.Sequence[str], **attrs: str | None) -> None:
-        """Draw one or multiple edges in the current contect from source to target. Specifying multiple
+        """Draw one or multiple edges in the current context from source to target. Specifying multiple
         nodes on either side will generate the cross product of edges between all nodes."""
         if isinstance(source, str):
             source = [source]

@@ -233,7 +233,7 @@ def evaluate_candidates(
 
 def print_interpreters(interpreters: Iterable[Interpreter]) -> None:
     """
-    Prints the interpeter information to stdout, colored.
+    Prints the interpreter information to stdout, colored.
     """
 
     from kraken.common import Color, colored

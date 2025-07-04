@@ -51,7 +51,7 @@ class PythonBuildSystem(abc.ABC):
     @abc.abstractmethod
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         """Resolve all dependencies of the project and write the exact versions into
-        the correspondig lock file. In the case of Poetry it is poetry.lock."""
+        the corresponding lock file. In the case of Poetry it is poetry.lock."""
 
     @abc.abstractmethod
     def requires_login(self) -> bool:

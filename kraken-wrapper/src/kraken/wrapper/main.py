@@ -106,7 +106,7 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         extra_distributions.discard("pip")  # We'll always have that in a virtual env.
 
     if extra_distributions:
-        logger.warning("Found extra distributions in your Kraken build enviroment: %s", ", ".join(extra_distributions))
+        logger.warning("Found extra distributions in your Kraken build environment: %s", ", ".join(extra_distributions))
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
@@ -240,7 +240,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
 
 
 def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
-    """Print the status of the environent as a nicely formatted table."""
+    """Print the status of the environment as a nicely formatted table."""
 
     hash_algorithm = manager.get_hash_algorithm()
 
@@ -379,7 +379,7 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     Running ``krakenw run test-examples`` will translate into ``kraken run -p .. examples:test-examples``
     due to the :class:`GitAwareProjectFinder` finding ``/`` as the Kraken project root.
 
-    Note that if the ``examples/`` wanted to be its own Kraken project, independant of the project at ``//``,
+    Note that if the ``examples/`` wanted to be its own Kraken project, independent of the project at ``//``,
     you can add a line spelling ``# ::krakenw-root`` to the ``.kraken.py`` file. In that case, the
     :class:`GitAwareProjectFinder` will consider that directory the root Kraken project (assuming your CWD
     is somewhere within it).
@@ -452,7 +452,7 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
     argv: list[str] = args.cmd[1:] + args.args
 
     if cmd in ("a", "auth"):
-        # The `auth` comand does not require any current project information, it can be used globally.
+        # The `auth` command does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
 
     if cmd in ("config",):

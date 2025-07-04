@@ -425,7 +425,7 @@ class TaskGraph(Graph):
         :param reason: A reason to attach to the `"skip"` tag.
         :param origin: An origin to attach to the `"skip"` tag.
         :param reset: Enable this to remove the `"skip"` tags of the same *origin* are removed from all mentioned
-            tasks (including transtive dependencies for *recursive_tasks*) the graph first. Note that this does not
+            tasks (including transitive dependencies for *recursive_tasks*) the graph first. Note that this does not
             unset any pre-existing task statuses.
         """
 
@@ -459,7 +459,7 @@ class TaskGraph(Graph):
         # (2) We mark the subgraphs (i.e. predecessors) of all recursive_tasks with the color "blue". These are tasks
         #     that can potentially be skipped as well, but we are not sure yet.
         #
-        # (3) We walk back through the entire task graph from its leafs, discoloring any "blue" task that we encounter.
+        # (3) We walk back through the entire task graph from its leaves, discoloring any "blue" task that we encounter.
         #     If we encounter a "red" task, we keep it colored and ignore its subgraph.
 
         red_tasks = {*tasks, *recursive_tasks}

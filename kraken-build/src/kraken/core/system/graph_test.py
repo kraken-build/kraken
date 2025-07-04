@@ -330,7 +330,7 @@ def test__TaskGraph__mark_tasks_as_skipped__does_not_skip_task_required_by_anoth
     assert [t.name for t in c.get_tags("skip")] == []
 
 
-def test__TaskGraph__mark_tasks_as_skipped__does_skip_task_if_requierd_by_another_skipped_task(
+def test__TaskGraph__mark_tasks_as_skipped__does_skip_task_if_required_by_another_skipped_task(
     kraken_project: Project, caplog: Any
 ) -> None:
     """This test builds a TaskGraph that would have the `mark_tasks_as_skipped()` method pass through a recursively

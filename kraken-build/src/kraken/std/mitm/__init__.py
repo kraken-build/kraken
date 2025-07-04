@@ -31,7 +31,7 @@ def start_mitmweb_proxy(
 ) -> tuple[str, Path]:
     """
     Ensure that a `mitmweb` process with the given *auth* configuration and *additional_args* is running. If a
-    process is already running that doens't match the spec, it will be stopped and a new one will be started.
+    process is already running that doesn't match the spec, it will be stopped and a new one will be started.
 
     Note:
         This process is managed globally and the state is stored under `~/.mitmproxy`. Switching between projects
