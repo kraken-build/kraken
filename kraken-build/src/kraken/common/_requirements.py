@@ -47,7 +47,7 @@ class Requirement(abc.ABC):
 
 @dataclasses.dataclass(frozen=True)
 class PipRequirement(Requirement):
-    """Represents a Pip requriement."""
+    """Represents a Pip requirement."""
 
     name: str
     spec: str | None

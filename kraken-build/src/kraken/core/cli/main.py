@@ -140,7 +140,7 @@ def _load_build_state(
         )
 
     # For consistency, we always act as if Kraken was run from the project root directory.
-    # Using the `subproject_directory`, we later fitler down which tasks are selected / how relative
+    # Using the `subproject_directory`, we later filter down which tasks are selected / how relative
     # task references on the CLI are resolved.
     os.chdir(root_directory)
 
@@ -570,7 +570,7 @@ def env() -> None:
 
 def on_exception(exc: BaseException) -> int:
     """
-    Called when an exception occurrs in #main_internal() to handle common errors and provide better error messages.
+    Called when an exception occurs in #main_internal() to handle common errors and provide better error messages.
     """
 
     issues_url = "https://github.com/kraken-build/kraken-build/issues"

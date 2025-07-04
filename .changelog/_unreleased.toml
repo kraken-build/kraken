@@ -10,3 +10,9 @@ type = "fix"
 description = "Fix error when calling `uv pip install` when no requirements are specified in `buildscript()` call. (It will error later when it cannot call Kraken, but that is a better error)"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "dbb56b0e-6634-4c45-ae99-3936c397b12a"
+type = "improvement"
+description = "Run `typos` in CI and fix typos in codebase"
+author = "@NiklasRosenstein"

@@ -116,7 +116,7 @@ class Address(metaclass=AddressMeta):
     The elements of an address can only contain characters matching the :data:`Address.Element.VALIDATION_REGEX`.
 
     Asterisks are accepted to permit glob pattern matching on the addressable space, where one asterisk (`*`) is
-    intended to match only within the same hierarchical level (aka. wildcard), wheras a double asterisk (`**`) is
+    intended to match only within the same hierarchical level (aka. wildcard), whereas a double asterisk (`**`) is
     used to match any number of levels (aka. recursive wildcard). A trailing question mark on each element is allowed
     to permit that address resolution fails at that element.
 
@@ -575,7 +575,7 @@ class Address(metaclass=AddressMeta):
             >>> Address("..").parent
             Address('..:..')
 
-        The container status of the address is perserved.
+        The container status of the address is preserved.
 
             >>> Address(":a:b").parent
             Address(':a')

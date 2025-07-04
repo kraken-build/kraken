@@ -21,10 +21,7 @@ jobs:
       id-token: write
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
-
-    - run: pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
-    - run: pipx install mksync
+    - uses: jdx/mise-action@v2
 
     - name: Restore Kraken build cache
       uses: actions/cache/restore@v4
@@ -32,11 +29,7 @@ jobs:
         path: build
         key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
 
-    - run: |
-        cd docs
-        for fn in docs/cli/*.md; do mksync -i $fn; done
-        mksync -i docs/changelog.md
-    - run: krakenw run mkdocs.build --no-save
+    - run: mise run build-docs
 
     - name: Save Kraken build cache
       uses: actions/cache/save@v4
@@ -56,6 +49,13 @@ jobs:
 
   # == Unit tests, linting, and type checking ==
 
+  typos:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - run: typos
+
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -65,11 +65,13 @@ jobs:
         tasks: ["check lint", "test"]
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
+    - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: pip install pipx && pipx install poetry && pipx install pdm && pipx install uv && pipx install kraken-wrapper==0.34.1 && krakenw config --installer=UV
+
+    # We have Rust code in the examples/ which will be built as part of our tests.
     - run: rustup update
+
     - run: slap config --venv-type=uv
 
     - name: Restore Kraken build cache
@@ -160,7 +162,7 @@ jobs:
         call-target: ["krakenw", "kraken"]
     steps:
     - uses: actions/checkout@v4
-    - uses: NiklasRosenstein/slap@gha/install/v1
+    - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
     - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
@@ -176,7 +178,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: NiklasRosenstein/slap@gha/install/v1
+      - uses: jdx/mise-action@v2
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:

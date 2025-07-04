@@ -73,7 +73,7 @@ def gitignore_extend(
     Extend the Gitignore task's generated content section by the given *pattern*s.
 
     Args:
-        project: The project to look for the Gitignore task configuraton in. If it is not specified, it will be
+        project: The project to look for the Gitignore task configuration in. If it is not specified, it will be
                  searched in the currently active project and any of its parents (often the Gitignore tasks only exist
                  on the root project).
         patterns: The patterns to add to the config.

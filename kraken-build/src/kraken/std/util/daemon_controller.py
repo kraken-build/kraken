@@ -245,7 +245,7 @@ class DaemonController:
         logger.debug("Spawning fork to start daemon %s", self.name)
         pid = spawn_fork(start_daemon)
         if status := wait_for_child_process(pid, 10.0):
-            raise Exception("An unexpected error ocurred when starting daemon %r (exit code %s).", self.name, status)
+            raise Exception("An unexpected error occurred when starting daemon %r (exit code %s).", self.name, status)
         return True
 
     def stop(self) -> bool:

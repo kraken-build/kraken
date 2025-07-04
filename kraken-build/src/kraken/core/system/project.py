@@ -112,7 +112,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     @property
     def build_directory(self) -> Path:
         """Returns the recommended build directory for the project; this is a directory inside the context
-        build directory ammended by the project name."""
+        build directory amended by the project name."""
 
         return self.context.build_directory / str(self.address).replace(":", "/").lstrip("/")
 
