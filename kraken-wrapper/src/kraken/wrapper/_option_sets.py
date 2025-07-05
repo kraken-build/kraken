@@ -59,8 +59,8 @@ class EnvOptions:
         group.add_argument(
             "--show-install-logs",
             action="store_true",
-            default=os.getenv("KARKENW_SHOW_INSTALL_LOGS") == "1",
-            help="deprecated since v0.45.0. has no effect [env: KARKENW_SHOW_INSTALL_LOGS=1]",
+            default=os.getenv("KRAKENW_SHOW_INSTALL_LOGS") == "1",
+            help="deprecated since v0.45.0. has no effect [env: KRAKENW_SHOW_INSTALL_LOGS=1]",
         )
 
         group = parser.add_argument_group("authentication")
@@ -81,7 +81,7 @@ class EnvOptions:
 
         if args.show_install_logs:
             logger.warning(
-                "deprecated option KARKENW_SHOW_INSTALL_LOGS/--show-install-logs was specified. the option is "
+                "deprecated option KRAKENW_SHOW_INSTALL_LOGS/--show-install-logs was specified. the option is "
                 "deprecated since krakenw v0.45.0"
             )
 

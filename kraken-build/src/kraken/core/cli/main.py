@@ -566,14 +566,13 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
 
 
 @deprecated(
-    reason="kraken-wrapper uses `uv pip freeze` since v0.45.0, the `kraken query env` command will be removed in "
+    reason="kraken-wrapper uses `uv pip freeze` since v0.45.0. `kraken query env` will be removed in "
     "an upcoming version."
 )
 def env() -> None:
     logger.warning(
         "The `kraken query env` command is deprecated. This probably means you are using an older version "
-        "of kraken-wrapper (unless you directly called this command). You should upgrade your version "
-        "of kraken-wrapper."
+        "of kraken-wrapper (unless you directly called this command). You should upgrade kraken-wrapper."
     )
 
     dists = sorted(get_distributions().values(), key=lambda dist: dist.name)

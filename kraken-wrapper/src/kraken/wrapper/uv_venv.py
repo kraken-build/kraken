@@ -87,7 +87,7 @@ class UvVirtualEnv:
         command = [UV_BIN, "venv", str(self.path)]
         if python is not None:
             command.append("--python")
-            command.append(str(python))
+            command.append(os.fspath(python))
         logger.debug("Creating virtual environment at path '%s' using UV (%s)", self.path, UV_BIN)
         subprocess.check_call(command)
 
@@ -107,7 +107,7 @@ class UvVirtualEnv:
             "pip",
             "install",
             "--python",
-            str(self.python_bin),
+            os.fspath(self.python_bin),
             "--exact",
             "--no-config",
         ]
@@ -132,7 +132,7 @@ class UvVirtualEnv:
             "freeze",
             "--no-config",
             "--python",
-            str(self.python_bin),
+            os.fspath(self.python_bin),
             "--exclude-editable",
         ]
 
@@ -149,20 +149,20 @@ class UvVirtualEnv:
         """
 
         # Inspect the environment's sysconfig.
-        command = [str(self.python_bin), "-c", "from sysconfig import get_path; print(get_path('purelib'))"]
+        command = [os.fspath(self.python_bin), "-c", "from sysconfig import get_path; print(get_path('purelib'))"]
         site_packages = Path(subprocess.check_output(command).decode().strip())
 
         pth_file = site_packages / filename
         if pythonpath:
             logger.debug("Writing .pth file at %s", pth_file)
-            pth_file.write_text("\n".join(str(Path(path).absolute()) for path in pythonpath))
+            pth_file.write_text("\n".join(os.fspath(Path(path).absolute()) for path in pythonpath))
         elif pth_file.is_file():
             logger.debug("Removing .pth file at %s", pth_file)
             pth_file.unlink()
 
     def activate(self, environ: MutableMapping[str, str]) -> None:
-        environ["PATH"] = str(self.bin_dir.absolute()) + os.pathsep + environ["PATH"]
-        environ["VIRTUAL_ENV"] = str(self.path.absolute())
+        environ["PATH"] = os.fspath(self.bin_dir.absolute()) + os.pathsep + environ["PATH"]
+        environ["VIRTUAL_ENV"] = os.fspath(self.path.absolute())
         environ["VIRTUAL_ENV_PROMPT"] = f"({self.path.name})"
 
     def deactivate(self, environ: MutableMapping[str, str]) -> None:
