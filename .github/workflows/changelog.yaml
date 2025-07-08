@@ -21,7 +21,7 @@ jobs:
   assert-new-changelog-entries:
     name: "At least one new changelog entry must be added"
     runs-on: ubuntu-latest
-    if: github.base_ref != '' && !contains(github.event.pull_request.labels.*.name, 'no changelog') && github.event.pull_request.user.login != 'renovate'
+    if: github.base_ref != '' && !contains(github.event.pull_request.labels.*.name, 'no changelog') && github.event.pull_request.user.login != 'renovate[bot]'
     steps:
       - uses: actions/checkout@v4
       - name: View PR author
