@@ -18,6 +18,7 @@ from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
+from kraken.core.system.artifact import Artifact
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
@@ -412,6 +413,16 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
             prop: Property[Any] = getattr(self, key)
             if not self.__schema__[key].is_output:
                 prop.finalize()
+
+    def consumes(self) -> Iterable[Artifact]:
+        """Return all artifacts consumed by this task."""
+
+        return ()
+
+    def produces(self) -> Iterable[Artifact]:
+        """Return all artifacts produced by this task."""
+
+        return ()
 
     def prepare(self) -> TaskStatus | None:
         """

@@ -54,3 +54,9 @@ id = "d6c6b43d-8501-4883-880d-802c273dc687"
 type = "improvement"
 description = "Improve readability of log format (vertical alignment, colors and only show module and line number if verbosity >= 3)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "665e1499-b48e-419f-b0a4-8a49bd7446c4"
+type = "feature"
+description = "Add `Task.consumes()` and `Task.produces()` API"
+author = "@NiklasRosenstein"
