@@ -183,7 +183,7 @@ class VirtualEnvManager:
             safe_rmpath(self._path)
 
         if reinstall and self._venv.exists():
-            logger.info("Destroying existing virtual environment at %s", self._path)
+            logger.debug("Destroying existing virtual environment at %s", self._path)
             self._venv.remove()
 
         if self._venv.exists():
@@ -194,9 +194,9 @@ class VirtualEnvManager:
             # Python we're currently running with.
 
             if requirements.interpreter_constraint is not None:
-                logger.info("Using Python interpreter constraint: %s", requirements.interpreter_constraint)
+                logger.debug("Using Python interpreter constraint: %s", requirements.interpreter_constraint)
                 original_python = find_python_interpreter(requirements.interpreter_constraint)
-                logger.info("Using Python interpreter at %s", original_python)
+                logger.debug("Using Python interpreter at %s", original_python)
             else:
                 logger.info(
                     "No interpreter constraint specified, using current Python interpreter (%s)",
