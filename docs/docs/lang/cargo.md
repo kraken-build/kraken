@@ -44,3 +44,4 @@ __Build graph__
 
 * `PROXY_PY_TIMEOUT`
 * `KRAKEN_CARGO_BUILD_FLAGS`
+* `KRAKEN_UV_BIN`

@@ -28,10 +28,9 @@ from kraken.common import (
 from kraken.common.exceptions import exit_on_known_exceptions
 
 from . import __version__
-from ._buildenv import BuildEnvError, BuildEnvManager
 from ._config import DEFAULT_CONFIG_PATH, AuthModel
-from ._lockfile import Lockfile, calculate_lockfile
 from ._option_sets import AuthOptions, EnvOptions
+from .venv_manager import Lockfile, VirtualEnvError, VirtualEnvManager
 
 BUILDENV_PATH = Path("build/.kraken/venv")
 BUILDSCRIPT_FILENAME = ".kraken.py"
@@ -91,7 +90,7 @@ def _get_lock_argument_parser(prog: str) -> argparse.ArgumentParser:
     return parser
 
 
-def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project) -> NoReturn:
+def lock(prog: str, argv: list[str], manager: VirtualEnvManager, project: Project) -> NoReturn:
     parser = _get_lock_argument_parser(prog)
     parser.parse_args(argv)
 
@@ -99,12 +98,7 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         logger.error("cannot lock without a build environment")
         sys.exit(1)
 
-    environment = manager.get_environment()
-    distributions = environment.get_installed_distributions()
-    lockfile, extra_distributions = calculate_lockfile(project.requirements, distributions)
-
-    if extra_distributions:
-        logger.warning("Found extra distributions in your Kraken build environment: %s", ", ".join(extra_distributions))
+    lockfile = manager.get_lockfile(project.requirements)
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
@@ -234,7 +228,7 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
     sys.exit(0)
 
 
-def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
+def _print_env_status(manager: VirtualEnvManager, project: Project) -> None:
     """Print the status of the environment as a nicely formatted table."""
 
     hash_algorithm = manager.get_hash_algorithm()
@@ -253,18 +247,17 @@ def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
         rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
     if manager.exists():
         metadata = manager.get_metadata()
-        environment = manager.get_environment()
-        rows.append(("Environment", str(environment.get_path()), ""))
+        rows.append(("Environment", str(manager._path), ""))
         rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
         rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
         rows.append(("    Requirements hash", "", metadata.requirements_hash))
     else:
-        rows.append(("Environment", str(manager.get_environment().get_path()), "n/a"))
+        rows.append(("Environment", str(manager._path), "n/a"))
     table.print()
 
 
 def _ensure_installed(
-    manager: BuildEnvManager,
+    manager: VirtualEnvManager,
     project: Project,
     reinstall: bool,
     upgrade: bool,
@@ -274,7 +267,6 @@ def _ensure_installed(
 
     operation: str
     reason: str | None = None
-    allow_incremental = True
 
     if not exists:
         operation = "Initializing"
@@ -303,12 +295,10 @@ def _ensure_installed(
             source_name = "requirements"
             source = project.requirements
             source_file = project.requirements_path
-            transitive = True
         else:
             source_name = "lock file"
             source = project.lockfile.to_pinned_requirement_spec()
             source_file = project.lockfile_path
-            transitive = False
 
         logger.info(
             "%s build environment from %s (%s)%s.",
@@ -319,7 +309,7 @@ def _ensure_installed(
         )
 
         tstart = time.perf_counter()
-        manager.install(source, transitive, allow_incremental)
+        manager.install(source, reinstall)
         duration = time.perf_counter() - tstart
         logger.info("Operation complete after %.3fs.", duration)
 
@@ -412,7 +402,7 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     return Project(script.parent, script, requirements, lockfile_path, lockfile)
 
 
-@exit_on_known_exceptions(BuildEnvError, exit_code=2)
+@exit_on_known_exceptions(VirtualEnvError, exit_code=2)
 def main(krakenw_args: list[str] | None = None) -> NoReturn:
     parser = _get_argument_parser()
     args = parser.parse_args(args=krakenw_args)
@@ -446,12 +436,10 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
     # This includes the built-in `lock` command.
     config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
-    manager = BuildEnvManager(
+    manager = VirtualEnvManager(
         project.directory,
         project.directory / BUILDENV_PATH,
         AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
-        incremental=env_options.incremental,
-        show_install_logs=env_options.show_install_logs,
     )
 
     # Execute environment operations before delegating the command.
@@ -491,8 +479,7 @@ def main(krakenw_args: list[str] | None = None) -> NoReturn:
             argv += ["-p", str(project.directory)]
         command = [cmd, *argv]
         logger.info("$ %s", " ".join(map(shlex.quote, ["kraken"] + command)))
-        environment = manager.get_environment()
-        environment.dispatch_to_kraken_cli(command)
+        manager.dispatch_to_kraken_cli(command)
 
 
 if __name__ == "__main__":

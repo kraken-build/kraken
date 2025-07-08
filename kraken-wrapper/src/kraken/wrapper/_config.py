@@ -146,8 +146,8 @@ class AuthModel:
                     hints.append("Credential check resulted in unknown 401 unauthorised error")
             elif result.status_code in (404, 302):
                 hints.append(
-                    f"""Authentication URL incorrect (HTTP response {result.status_code}).
-Please check host.auth_check_url_suffix value in {self._path}"""
+                    f"Authentication URL incorrect (HTTP response {result.status_code}). "
+                    f"Please check host.auth_check_url_suffix value in {self._path}"
                 )
 
             return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))
