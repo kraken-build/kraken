@@ -146,7 +146,7 @@ class VirtualEnvManager:
     def get_lockfile(self, requirements: RequirementSpec) -> Lockfile:
         return Lockfile(requirements=requirements, pinned={dist.name: dist.version for dist in self._venv.freeze()})
 
-    def install(self, requirements: RequirementSpec) -> None:
+    def install(self, requirements: RequirementSpec, reinstall: bool) -> None:
         """
         Ensure that the virtual environment managed by this instance conforms to the specified requirements.
 
@@ -181,6 +181,10 @@ class VirtualEnvManager:
             logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This happens")
             logger.warning("by pressing Ctrl+C during its installation, or if you've recently upgraded kraken-wrapper.")
             safe_rmpath(self._path)
+
+        if reinstall and self._venv.exists():
+            logger.info("Destroying existing virtual environment at %s", self._path)
+            self._venv.remove()
 
         if self._venv.exists():
             logger.info("Reusing virtual environment at %s", self._path)

@@ -309,7 +309,7 @@ def _ensure_installed(
         )
 
         tstart = time.perf_counter()
-        manager.install(source)
+        manager.install(source, reinstall)
         duration = time.perf_counter() - tstart
         logger.info("Operation complete after %.3fs.", duration)
 
