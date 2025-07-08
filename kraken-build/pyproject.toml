@@ -48,7 +48,7 @@ Repository = "https://github.com/kraken-build/kraken-build/"
 [tool.uv]
 dev-dependencies = [
   "localimport>=1.7.6,<2.0.0",
-  "pytest>=6.0.0,<7.0.0",
+  "pytest>=8.4.1,<8.5.0",
   "pytest-xdist>=3.0.0,<4.0.0",
   "mitmproxy>=11.0.0,<12.0.0",
   "types-networkx>=3.2.1.20240703,<4.0.0",
