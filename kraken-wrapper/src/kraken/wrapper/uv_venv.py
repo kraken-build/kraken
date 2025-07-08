@@ -84,11 +84,11 @@ class UvVirtualEnv:
         Create a virtual environment at the specified path.
         """
 
-        command = [UV_BIN, "venv", str(self.path)]
+        command = [os.fspath(self.uv_bin), "venv", str(self.path), "--no-config"]
         if python is not None:
             command.append("--python")
             command.append(os.fspath(python))
-        logger.debug("Creating virtual environment at path '%s' using UV (%s)", self.path, UV_BIN)
+        logger.debug("Creating virtual environment at path '%s' using UV (%s)", self.path, self.uv_bin)
         subprocess.check_call(command)
 
     def install(
@@ -103,7 +103,7 @@ class UvVirtualEnv:
         """
 
         command = [
-            UV_BIN,
+            os.fspath(self.uv_bin),
             "pip",
             "install",
             "--python",
@@ -127,7 +127,7 @@ class UvVirtualEnv:
         """
 
         command = [
-            UV_BIN,
+            os.fspath(self.uv_bin),
             "pip",
             "freeze",
             "--no-config",

@@ -48,3 +48,9 @@ id = "ebf85acd-413b-4c10-a083-73c6eae8cf37"
 type = "deprecation"
 description = "Add deprecation warning to `kraken query env` command"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d6c6b43d-8501-4883-880d-802c273dc687"
+type = "improvement"
+description = "Improve readability of log format (vertical alignment, colors and only show module and line number if verbosity >= 3)"
+author = "@NiklasRosenstein"

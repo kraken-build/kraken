@@ -44,9 +44,9 @@ class LoggingOptions:
 
     def init_logging(self, force_color: bool = False) -> None:
         verbosity = self.verbosity - self.quietness
-        if verbosity > 1:
+        if verbosity >= 2:
             level = "DEBUG"
-        elif verbosity > 0:
+        elif verbosity >= 1:
             level = "INFO"
         elif verbosity == 0:
             level = "WARNING"
@@ -75,8 +75,16 @@ class LoggingOptions:
 
         logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
+        if verbosity >= 3:
+            log_format = "<dim>[{time:HH:mm:ss} <lvl>{level:>8}</lvl> <cyan>{name}</cyan>:<cyan>{line}</cyan>]</dim> <lvl>{message}</lvl>"
+        else:
+            log_format = "<dim>[{time:HH:mm:ss} <lvl>{level:>8}</lvl>]</dim> <lvl>{message}</lvl>"
+
+            # Disable some noisy loggers by default.
+            logging.getLogger("keyring").setLevel(logging.WARNING)
+
         logger.remove()
-        logger.add(sys.stderr, level=level)
+        logger.add(sys.stderr, level=level, format=log_format)
 
 
 @dataclass
