@@ -19,7 +19,7 @@ dependencies = [
   "deprecated>=1.2.18",
   "kraken-build==0.44.1",
   "loguru>=0.7.2,<0.8.0",
-  "packaging>=23.1,<24.0",
+  "packaging>=25,<25.1",
   "uv>=0.7.0,<0.8.0",
 ]
 
