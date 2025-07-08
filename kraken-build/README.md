@@ -1,18 +1,14 @@
----
-title: Home
----
-
-# kraken-build
-
-[![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml) |
-[![PyPI version](https://badge.fury.io/py/kraken-build.svg)](https://badge.fury.io/py/kraken-build) |
-[Documentation](https://kraken-build.github.io/kraken/)
+# The Kraken build system
 
 ![kraken-logo](https://i.imgur.com/Lqjy2zi.png)
 
-Kraken is (not) a build system. It's focus is on the orchestration of high-level tasks, such as organization of your
-repository configuration, code generation, invoking other build systems, etc. It is not a replacement for tools like
-Poetry, Cargo or CMake.
+[![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml)
+[![PyPI version](https://badge.fury.io/py/kraken-build.svg)](https://badge.fury.io/py/kraken-build)
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=flat&logo=gitbook&logoColor=white)](https://kraken-build.github.io/kraken/)
+
+Kraken is a build system, but not in the traditional sense. It's focus is on the orchestration of high-level tasks,
+such as organization of your repository configuration, code generation, invoking other build systems, etc. It is not a
+replacement for tools like Poetry, Cargo or CMake.
 
 __Requirements__
 
@@ -55,7 +51,8 @@ add the `--incremental` flag or set `KRAKENW_INCREMENTAL=1`.
 
   [Slap]: https://github.com/NiklasRosenstein/slap
 
-This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to install Kraken for development:
+This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to
+install Kraken for development.
 
 ```
 $ slap venv -c --python python3.10
@@ -63,6 +60,11 @@ $ slap install --link
 # If you have the Slap shell magic installed, it will activate the Venv in your shell.
 $ slap venv -a
 ```
+
+You may want to use a released version of `krakenw` to interact in the repository however:
+
+    $ krakenw run python.install
+    $ krakenw run fmt lint test
 
 ### Releases
 

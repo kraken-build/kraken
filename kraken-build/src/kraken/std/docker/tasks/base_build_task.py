@@ -7,7 +7,7 @@ from kraken.std.util.render_file_task import RenderFileTask, render_file
 
 class BaseBuildTask(Task):
     """Base class for tasks that build Docker images. Subclasses implement converting the task properties into
-    the invokation for a Docker build backend."""
+    the invocation for a Docker build backend."""
 
     build_context: Property[Path]
     dockerfile: Property[Path] = Property.default(Path("Dockerfile"))

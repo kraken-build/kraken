@@ -118,6 +118,8 @@ class PythonSettings:
                 upload_url = "https://test.pypi.org/legacy"
             elif index_url.endswith("/simple"):
                 upload_url = index_url[: -len("/simple")]
+            elif index_url.endswith("/simple/"):
+                upload_url = index_url[: -len("/simple/")]
             else:
                 raise ValueError(f"cannot derive upload URL for alias {alias!r} and index URL {index_url!r}")
 
@@ -132,6 +134,15 @@ class PythonSettings:
             verify_ssl=True,
         )
         return self
+
+    def get_primary_index(self) -> _PackageIndex | None:
+        default: PythonSettings._PackageIndex | None = None
+        for idx in self.package_indexes.values():
+            if idx.priority == PackageIndex.Priority.primary:
+                return idx
+            if idx.priority == PackageIndex.Priority.default:
+                default = idx
+        return default
 
 
 def python_settings(

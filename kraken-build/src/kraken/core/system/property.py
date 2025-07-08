@@ -21,7 +21,6 @@ from operator import concat
 from pathlib import Path
 from typing import Any, ClassVar, TypeVar, cast
 
-import deprecated
 from typeapi import (
     AnnotatedTypeHint,
     ClassTypeHint,
@@ -45,7 +44,7 @@ class PropertyConfig:
     .. code:: Example
 
         from kraken.core.system.property import Object, Property, output
-        from typing_extensions import Annotated
+        from typing import Annotated
 
         class MyObj(Object):
             a: Annotated[Property[int], PropertyConfig(output=True)]
@@ -142,27 +141,6 @@ class Property(Supplier[T]):
         """Assign the result of this function as a default value to a property to declare it's default factory."""
 
         return PropertyConfig(default_factory=func, help=help)
-
-    @staticmethod
-    @deprecated.deprecated(reason="use Property.required(), .default() or .default_factory() instead")
-    def config(
-        output: bool = False,
-        default: Any | NotSet = NotSet.Value,
-        default_factory: Callable[[], Any] | NotSet = NotSet.Value,
-    ) -> Any:
-        """Assign the result of this function as a default value to a property on the class level of an :class:`Object`
-        subclass to configure it's default value or whether it is an output property. This is an alternative to using
-        a :class:`typing.Annotated` type hint.
-
-        .. code:: Example
-
-            from kraken.core.system.property import Object, Property, config
-
-            class MyObj(Object):
-                a: Property[int] = config(default=42)
-        """
-
-        return PropertyConfig(output, default, default_factory)
 
     def __init__(
         self,
@@ -332,11 +310,11 @@ class Property(Supplier[T]):
         Note that this does not work with generic parametrized types."""
 
         value = self.get()
-        if type_ != object and isinstance(value, type_):
+        if type_ is not object and isinstance(value, type_):
             return [value]
         if isinstance(value, Sequence):
             return [x for x in value if isinstance(x, type_)]
-        if type_ == object:
+        if type_ is object:
             return [cast(U, value)]
         return []
 

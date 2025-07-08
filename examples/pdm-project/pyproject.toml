@@ -8,12 +8,6 @@ authors = [
 dependencies = [
     "pytest",
     "pytest-cov",
-    "pytest-timeout",
-    "black",
-    "flake8",
-    "isort",
-    "mypy <1",
-    "codespell",
 ]
 requires-python = ">=3.9"
 readme = "README.md"

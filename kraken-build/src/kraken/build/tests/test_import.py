@@ -1,10 +1,12 @@
-import pytest
-from kraken.core import Context, Project
 from pathlib import Path
+
+import pytest
+
+from kraken.core import Context, Project
 
 
 def test_import_current_context_and_project_from_kraken_build() -> None:
-    """ Test that you can import the current Kraken build context and project from `kraken.build`. """
+    """Test that you can import the current Kraken build context and project from `kraken.build`."""
 
     with pytest.raises(RuntimeError):
         from kraken.build import context

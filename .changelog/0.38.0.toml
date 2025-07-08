@@ -1,0 +1,42 @@
+release-date = "2024-08-06"
+
+[[entries]]
+id = "b6fb5e00-0bed-4e07-8cf3-c16c394d40fe"
+type = "improvement"
+description = "Replace `rich` logger with `loguru` which produces nicer log formatting and requires less setup"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5f259115-ab4d-43d1-b23f-6b2436f26bb2"
+type = "feature"
+description = "Add `buildscript(interpreter_constraint)` argument"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "9a319506-3900-402f-a40b-ad9052acfbbf"
+type = "fix"
+description = "Detect Pyenv shims in interpreter constraint matching and ignore them by default; and if not ignore, then do not commit their version to the cache as the Python version they represent might change."
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "91681271-376e-45b5-b8c3-7bf718053586"
+type = "feature"
+description = "Propagate `SSL_CERT_FILE` or `REQUESTS_CA_BUNDLE` environment variable to PDM repository configuration on non-Linux systems (due to https://github.com/pdm-project/pdm/issues/3076)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "7b0576b8-d990-44c1-ab5b-395f06ab1e5f"
+type = "improvement"
+description = "Permit PyPI index URLs with trailing slash (e.g. `.../simple/`) in `PythonSettings.add_package_index()`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "a403dc03-77d0-4ff5-af16-70d6c8fce366"
+type = "fix"
+description = "Relative local dependencies in `buildscript(requirements)` are now resolved relative to the project root where `buildscript()` is called."
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/263",
+]

@@ -9,7 +9,7 @@ from kraken.common.supplier import OfSupplier, VoidSupplier
 from kraken.core.system.property import Property, PropertyContainer
 
 
-def test__Property_value_adapter_order_is_semantically_revelant() -> None:
+def test__Property_value_adapter_order_is_semantically_relevant() -> None:
     """Tests that a `str | Path` and `Path | str` property behave differently."""
 
     prop1: Property[str | Path] = Property(PropertyContainer(), "prop1", Union[str, Path])

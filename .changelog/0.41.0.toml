@@ -1,0 +1,67 @@
+release-date = "2025-01-29"
+
+[[entries]]
+id = "5edb6a12-7001-4c4a-8fca-cf95cfd88b7b"
+type = "improvement"
+description = "Run CI with Python 3.13"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "a0af4cfe-6ac0-4c38-a500-fc34b112fa3e"
+type = "hygiene"
+description = "Configure ruff to sort imports"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "4d8a687f-14ae-4644-904a-80b1aef3421b"
+type = "improvement"
+description = "Support management of package indexes for uv"
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "06add927-62e1-4503-b82f-88000bd29da1"
+type = "improvement"
+description = "Remove `uv` as a direct dependency in kraken-build"
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "3faaa1ff-aafc-4fee-bbd6-dd91a258d483"
+type = "fix"
+description = "Fixes build of Maturin projects that use UV to properly build wheels using Maturin"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "00ded573-ed92-4aab-b480-e21589718bbd"
+type = "fix"
+description = "Remove use of deprecated flag to be removed in pip 25.1"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "c34f7131-4e5d-482f-b654-bd08976c59fc"
+type = "fix"
+description = "Remove --log-cli-level INFO when calling pytest. This option can be added back by the users via their configuration files."
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "dddb0086-94f2-4b18-b73d-9816b2fc296f"
+type = "improvement"
+description = "[uv] Inject index environment variables to subprocesses"
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "4d8e2872-d32f-4747-b2d6-aa5c1cb4ec75"
+type = "fix"
+description = "Rename deprecated tool.poetry.dev-dependencies section"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "e3edc5a7-39ec-4e05-89c8-d06bf8cb0ee8"
+type = "feature"
+description = "Enabling `UvPyprojectHandler` to properly bump versions for path dependencies"
+author = "alexandre.ghelfi@helsing.ai"
+
+[[entries]]
+id = "19bd61b5-7cda-499e-9e8a-a4b913141392"
+type = "fix"
+description = "Avoid reading pyproject.toml when installing Kraken venv to avoid conflicts between indexes"
+author = "thomas.pellissier-tanon@helsing.ai"

@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import logging
 import os
 
 from kraken.common import EnvironmentType
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -13,9 +16,7 @@ class EnvOptions:
     upgrade: bool
     reinstall: bool
     uninstall: bool
-    use: EnvironmentType | None
     incremental: bool
-    show_install_logs: bool
     no_keyring: bool
 
     @staticmethod
@@ -25,10 +26,7 @@ class EnvOptions:
             "--use",
             choices=[v.name for v in EnvironmentType if v.is_wrapped()],
             default=os.getenv("KRAKENW_USE"),
-            help="use the specified environment type. If the environment type changes it will trigger a reinstall.\n"
-            "Defaults to the value of the KRAKENW_USE environment variable. If that variable is unset, and\nif a build "
-            "environment already exists, that environment's type will be used. The default\nenvironment type that is "
-            "used for new environments is VENV. [env: KRAKENW_USE=...]",
+            help="deprecated since v0.45.0.",
         )
         group.add_argument(
             "--status",
@@ -61,9 +59,8 @@ class EnvOptions:
         group.add_argument(
             "--show-install-logs",
             action="store_true",
-            default=os.getenv("KARKENW_SHOW_INSTALL_LOGS") == "1",
-            help="show Pip install logs instead of piping them to the build/.venv.log/ directory.\n"
-            "[env: KARKENW_SHOW_INSTALL_LOGS=1]",
+            default=os.getenv("KRAKENW_SHOW_INSTALL_LOGS") == "1",
+            help="deprecated since v0.45.0. has no effect [env: KRAKENW_SHOW_INSTALL_LOGS=1]",
         )
 
         group = parser.add_argument_group("authentication")
@@ -77,19 +74,28 @@ class EnvOptions:
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> EnvOptions:
+        if args.use:
+            logger.warning(
+                "deprecated option KRAKENW_USE/--use was specified. the option is deprecated since krakenw v0.45.0"
+            )
+
+        if args.show_install_logs:
+            logger.warning(
+                "deprecated option KRAKENW_SHOW_INSTALL_LOGS/--show-install-logs was specified. the option is "
+                "deprecated since krakenw v0.45.0"
+            )
+
         return cls(
             status=args.status,
             upgrade=args.upgrade,
             reinstall=args.reinstall,
             uninstall=args.uninstall,
-            use=EnvironmentType[args.use] if args.use else None,
             incremental=args.incremental,
-            show_install_logs=args.show_install_logs,
             no_keyring=args.no_keyring,
         )
 
     def any(self) -> bool:
-        return bool(self.status or self.upgrade or self.reinstall or self.uninstall or self.use)
+        return bool(self.status or self.upgrade or self.reinstall or self.uninstall)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -146,7 +152,7 @@ class AuthOptions:
             "--verbose",
             action="store_true",
             default=False,
-            help="show curl queries to use when authenicating hosts",
+            help="show curl queries to use when authenticating hosts",
         )
 
     @classmethod

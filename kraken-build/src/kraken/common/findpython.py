@@ -10,12 +10,9 @@ import subprocess
 import sys
 from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar, TypedDict
 
-from typing_extensions import NotRequired, TypedDict
-
-if TYPE_CHECKING:
-    import rich.table
+from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
 DEFAULT_CACHE_PATH = Path("~/.cache/krakenw/python-interpreters.json")
@@ -25,6 +22,7 @@ class InterpreterCandidate(TypedDict):
     path: str
     min_version: NotRequired[str | None]
     exact_version: NotRequired[str | None]
+    shim: NotRequired[bool]
 
 
 class Interpreter(TypedDict):
@@ -97,6 +95,17 @@ def get_candidates(
     installed via pyenv are also included in the results.
     """
 
+    for candidate in _get_candidates():
+        if ".pyenv/shims" in candidate["path"].replace("\\", "/"):
+            candidate["shim"] = True
+        yield candidate
+
+
+def _get_candidates(
+    path_list: Sequence[str | Path] | None = None, check_pyenv: bool = True
+) -> Iterator[InterpreterCandidate]:
+    """Internal. Implementation of `get_candidates()` without Pyenv shim detection."""
+
     if path_list is None:
         path_list = os.environ["PATH"].split(os.pathsep)
 
@@ -141,12 +150,25 @@ def get_candidates(
         if match:
             yield {"path": str(command), "exact_version": match.group(1)}
 
-    # pyenv
-    pyenv_versions = Path("~/.pyenv/versions").expanduser()
-    if check_pyenv and pyenv_versions.is_dir():
+    # pyenv (+Windows)
+    if check_pyenv:
+        pyenv_versions = Path("~/.pyenv/versions").expanduser()
+        if not pyenv_versions.is_dir():
+            pyenv = os.getenv("PYENV")
+            if pyenv:
+                pyenv_versions = Path(pyenv).expanduser().joinpath("versions")
+            elif os.name == "nt":
+                pyenv_versions = Path("~/.pyenv/pyenv-win/versions").expanduser()
+    else:
+        pyenv_versions = None
+
+    if pyenv_versions and pyenv_versions.is_dir():
         for item in pyenv_versions.iterdir():
             if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
-                yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
+                if os.name == "nt":
+                    yield {"path": str(item / "python.exe"), "exact_version": item.name}
+                else:
+                    yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
 
     yield {"path": sys.executable, "exact_version": ".".join(map(str, sys.version_info[:3]))}
 
@@ -168,7 +190,9 @@ def get_python_interpreter_version(python_bin: str) -> str:
 
 
 def evaluate_candidates(
-    candidates: Iterable[InterpreterCandidate], cache: InterpreterVersionCache | None = None
+    candidates: Iterable[InterpreterCandidate],
+    cache: InterpreterVersionCache | None = None,
+    ignore_shims: bool = True,
 ) -> list[Interpreter]:
     """
     Evaluates Python interpreter candidates and returns the deduplicated list of interpreters that were found.
@@ -178,6 +202,9 @@ def evaluate_candidates(
     visited: set[Path] = set()
 
     for choice in candidates:
+        if ignore_shims and choice.get("shim"):
+            continue
+
         try:
             path = Path(choice["path"]).resolve()
         except FileNotFoundError:
@@ -188,14 +215,14 @@ def evaluate_candidates(
             continue
         visited.add(path)
 
-        version = cache.get_version(path) if cache else None
+        version = cache.get_version(path) if cache and not choice.get("shim") else None
         if version is None:
             try:
                 version = get_python_interpreter_version(str(path))
-            except (subprocess.CalledProcessError, RuntimeError):
+            except (subprocess.CalledProcessError, RuntimeError, FileNotFoundError):
                 logger.debug("Failed to get version for Python interpreter %s", path, exc_info=True)
                 continue
-            if cache:
+            if cache and not choice.get("shim"):
                 cache.set_version(path, version)
 
         interpreter: Interpreter = {"path": str(path), "version": version}
@@ -204,22 +231,21 @@ def evaluate_candidates(
     return interpreters
 
 
-def build_rich_table(interpreters: Iterable[Interpreter]) -> rich.table.Table:
+def print_interpreters(interpreters: Iterable[Interpreter]) -> None:
     """
-    Gets a table of all viable Python interpreters on the system.
-
-    Requires that the `rich` package is installed.
+    Prints the interpreter information to stdout, colored.
     """
 
-    import rich.table
+    from kraken.common import Color, colored
 
-    tb = rich.table.Table("Path", "Version")
     for interpreter in interpreters:
+        prefix = "  "
         version = interpreter["version"]
+        version_color: Color = "grey"
         if interpreter.get("selected"):
-            version += " *"
-        tb.add_row(interpreter["path"], version)
-    return tb
+            prefix = " *"
+            version_color = "cyan"
+        print(colored(prefix, "grey"), colored(interpreter["path"], "green"), f"({colored(version, version_color)})")
 
 
 def match_version_constraint(constraint: str, version: str) -> bool:
@@ -235,19 +261,6 @@ def match_version_constraint(constraint: str, version: str) -> bool:
 def main() -> None:
     import argparse
 
-    try:
-        import rich
-        import rich.table
-
-        def tabulate(interpreters: Iterable[Interpreter]) -> None:
-            rich.print(build_rich_table(interpreters))
-
-    except ImportError:
-
-        def tabulate(interpreters: Iterable[Interpreter]) -> None:
-            for interpreter in interpreters:
-                print(interpreter)
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--constraint", help="Find a Python interpreter with the given constraint.")
     args = parser.parse_args()
@@ -259,7 +272,7 @@ def main() -> None:
             if match_version_constraint(args.constraint, interpreter["version"]):
                 interpreter["selected"] = True
 
-    tabulate(interpreters)
+    print_interpreters(interpreters)
 
 
 if __name__ == "__main__":

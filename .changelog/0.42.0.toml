@@ -1,0 +1,43 @@
+release-date = "2025-02-06"
+
+[[entries]]
+id = "62408706-cb66-49ed-95cf-d44382829ed6"
+type = "hygiene"
+description = "Remove unused dependencies"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "18cfdd07-b11d-4d22-906f-bc4080cda316"
+type = "improvement"
+description = "Directly call `uv build` even when no `[build-system]` is specified in the `pyproject.toml`"
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "f4662450-3fb1-401a-815c-260b9eff6dbe"
+type = "fix"
+description = "Primary index is not treated as default by uv"
+author = "antoine.broyelle@helsing.ai"
+
+[[entries]]
+id = "1898e101-4ef2-44c0-9832-c1b2ca0c39b6"
+type = "fix"
+description = "Address tool.poetry.dev-dependencies deprecation warnings"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "faea65a7-ef87-457c-8c7b-523bab205e00"
+type = "improvement"
+description = "Use `uv tool` instead of `pex` to run Python tools"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "77dc091d-98c6-45bf-b373-ac5c87e2919b"
+type = "breaking change"
+description = "Remove cargo_sqlx* and cargo_generate_deb_package tasks (no longer used at our knowledge)"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "cd8e92ee-4a72-4720-869a-2977878d378a"
+type = "breaking change"
+description = "Remove buf_lint and buf_format tasks (no longer used at our knowledge)"
+author = "thomas.pellissier-tanon@helsing.ai"

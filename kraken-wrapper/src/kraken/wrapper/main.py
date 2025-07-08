@@ -11,6 +11,8 @@ from pathlib import Path
 from textwrap import indent
 from typing import NamedTuple, NoReturn
 
+from deprecated import deprecated
+
 from kraken.common import (
     AsciiTable,
     BuildscriptMetadata,
@@ -19,24 +21,22 @@ from kraken.common import (
     LoggingOptions,
     RequirementSpec,
     TomlConfigFile,
+    colored,
     datetime_to_iso8601,
     inline_text,
 )
 from kraken.common.exceptions import exit_on_known_exceptions
-from termcolor import colored
 
 from . import __version__
-from ._buildenv import BuildEnvError
-from ._buildenv_manager import BuildEnvManager
 from ._config import DEFAULT_CONFIG_PATH, AuthModel
-from ._lockfile import Lockfile, calculate_lockfile
 from ._option_sets import AuthOptions, EnvOptions
+from .venv_manager import Lockfile, VirtualEnvError, VirtualEnvManager
 
 BUILDENV_PATH = Path("build/.kraken/venv")
 BUILDSCRIPT_FILENAME = ".kraken.py"
 BUILD_SUPPORT_DIRECTORY = "build-support"
 LOCK_FILENAME = ".kraken.lock"
-_FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: 731
+_FormatterClass = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=60, width=120)  # noqa: E731
 logger = logging.getLogger(__name__)
 
 
@@ -90,7 +90,7 @@ def _get_lock_argument_parser(prog: str) -> argparse.ArgumentParser:
     return parser
 
 
-def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project) -> NoReturn:
+def lock(prog: str, argv: list[str], manager: VirtualEnvManager, project: Project) -> NoReturn:
     parser = _get_lock_argument_parser(prog)
     parser.parse_args(argv)
 
@@ -98,15 +98,7 @@ def lock(prog: str, argv: list[str], manager: BuildEnvManager, project: Project)
         logger.error("cannot lock without a build environment")
         sys.exit(1)
 
-    environment = manager.get_environment()
-    distributions = environment.get_installed_distributions()
-    lockfile, extra_distributions = calculate_lockfile(project.requirements, distributions)
-
-    if environment.get_type() == EnvironmentType.VENV:
-        extra_distributions.discard("pip")  # We'll always have that in a virtual env.
-
-    if extra_distributions:
-        logger.warning("Found extra distributions in your Kraken build enviroment: %s", ", ".join(extra_distributions))
+    lockfile = manager.get_lockfile(project.requirements)
 
     had_lockfile = project.lockfile_path.exists()
     lockfile.write_to(project.lockfile_path)
@@ -129,6 +121,26 @@ def _get_auth_argument_parser(prog: str) -> argparse.ArgumentParser:
     )
     AuthOptions.add_to_parser(parser)
     return parser
+
+
+@deprecated(reason="krakenw config command has been removed in v0.45.0")
+def config_main(prog: str, argv: list[str]) -> NoReturn:
+    """Deprecated. Do not use."""
+
+    parser = argparse.ArgumentParser(prog=prog, description="deprecated, do not use.")
+    parser.add_argument(
+        "--installer",
+        choices=[x.name for x in EnvironmentType if x.is_wrapped()],
+        help="deprecated, has no effect.",
+    )
+    args = parser.parse_args(argv)
+
+    if args.installer is not None:
+        logger.warning("The `krakenw config` command is deprecated and will be removed in a future version.")
+        sys.exit(0)
+
+    parser.print_usage()
+    sys.exit(1)
 
 
 def auth(prog: str, argv: list[str], use_keyring_if_available: bool) -> NoReturn:
@@ -205,7 +217,6 @@ def auth_check(auth: AuthModel, args: AuthOptions, host: str, username: str, pas
 
 
 def list_pythons(prog: str, argv: list[str]) -> NoReturn:
-    import rich
     from kraken.common import findpython
 
     if argv:
@@ -213,43 +224,43 @@ def list_pythons(prog: str, argv: list[str]) -> NoReturn:
         sys.exit(1)
 
     interpreters = findpython.evaluate_candidates(findpython.get_candidates(), findpython.InterpreterVersionCache())
-    table = findpython.build_rich_table(interpreters)
-    rich.print(table)
+    findpython.print_interpreters(interpreters)
     sys.exit(0)
 
 
-def _print_env_status(manager: BuildEnvManager, project: Project) -> None:
-    """Print the status of the environent as a nicely formatted table."""
+def _print_env_status(manager: VirtualEnvManager, project: Project) -> None:
+    """Print the status of the environment as a nicely formatted table."""
 
     hash_algorithm = manager.get_hash_algorithm()
 
     table = AsciiTable()
+
     table.headers = ["Key", "Source", "Value"]
-    table.rows.append(("Requirements", str(project.requirements_path), project.requirements.to_hash(hash_algorithm)))
+    rows: list[tuple[str, str, str]] = table.rows  # type: ignore[assignment]  # Upcast
+
+    rows.append(("Requirements", str(project.requirements_path), project.requirements.to_hash(hash_algorithm)))
     if project.lockfile:
-        table.rows.append(("Lockfile", str(project.lockfile_path), "-"))
-        table.rows.append(("  Requirements hash", "", project.lockfile.requirements.to_hash(hash_algorithm)))
-        table.rows.append(("  Pinned hash", "", project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm)))
+        rows.append(("Lockfile", str(project.lockfile_path), "-"))
+        rows.append(("  Requirements hash", "", project.lockfile.requirements.to_hash(hash_algorithm)))
+        rows.append(("  Pinned hash", "", project.lockfile.to_pinned_requirement_spec().to_hash(hash_algorithm)))
     else:
-        table.rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
+        rows.append(("Lockfile", str(project.lockfile_path), "n/a"))
     if manager.exists():
         metadata = manager.get_metadata()
-        environment = manager.get_environment()
-        table.rows.append(("Environment", str(environment.get_path()), environment.get_type().name))
-        table.rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
-        table.rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
-        table.rows.append(("    Requirements hash", "", metadata.requirements_hash))
+        rows.append(("Environment", str(manager._path), ""))
+        rows.append(("  Metadata", str(manager.get_metadata_file()), "-"))
+        rows.append(("    Created at", "", datetime_to_iso8601(metadata.created_at)))
+        rows.append(("    Requirements hash", "", metadata.requirements_hash))
     else:
-        table.rows.append(("Environment", str(manager.get_environment().get_path()), "n/a"))
+        rows.append(("Environment", str(manager._path), "n/a"))
     table.print()
 
 
 def _ensure_installed(
-    manager: BuildEnvManager,
+    manager: VirtualEnvManager,
     project: Project,
     reinstall: bool,
     upgrade: bool,
-    env_type: EnvironmentType | None = None,
 ) -> None:
     exists = manager.exists()
     install = reinstall or upgrade or not exists
@@ -258,7 +269,6 @@ def _ensure_installed(
     reason: str | None = None
 
     if not exists:
-        env_type = env_type or env_type or manager.get_environment().get_type()
         operation = "Initializing"
     elif upgrade:
         operation = "Upgrading"
@@ -266,17 +276,6 @@ def _ensure_installed(
         operation = "Reinstalling"
     else:
         operation = "Reusing"
-
-    current_type = manager.get_environment().get_type()
-    if env_type is not None:
-        type_changed = exists and env_type != current_type
-        if not install and type_changed:
-            install = True
-            manager.remove()
-            operation = "Re-initializing"
-            reason = f"type changed from {current_type.name}"
-        elif install and type_changed:
-            reason = f"type changed from {current_type.name}"
 
     if not install and exists:
         metadata = manager.get_metadata()
@@ -296,16 +295,13 @@ def _ensure_installed(
             source_name = "requirements"
             source = project.requirements
             source_file = project.requirements_path
-            transitive = True
         else:
             source_name = "lock file"
             source = project.lockfile.to_pinned_requirement_spec()
             source_file = project.lockfile_path
-            transitive = False
 
-        env_type = env_type or manager.get_environment().get_type()
         logger.info(
-            "%s build environment from %s (%s)%s",
+            "%s build environment from %s (%s)%s.",
             operation,
             source_name,
             os.path.relpath(source_file),
@@ -313,12 +309,12 @@ def _ensure_installed(
         )
 
         tstart = time.perf_counter()
-        manager.install(source, env_type, transitive)
+        manager.install(source, reinstall)
         duration = time.perf_counter() - tstart
         logger.info("Operation complete after %.3fs.", duration)
 
     else:
-        logger.info("%s build environment of type %s", operation, current_type.name)
+        logger.info("%s build environment", operation)
 
 
 class Project(NamedTuple):
@@ -334,6 +330,30 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     This method loads the details about the current Kraken project from the current working directory
     and returns it. The project information includes the requirements for the project as well as the
     parsed lockfile, if present.
+
+    We use the :class:`GitAwareProjectFinder` in its :func:`default <GitAwareProjectFinder.default>`
+    configuration to determine the root directory of the Kraken project. This is later used to add the
+    ``-p, --project-dir`` option when invoking the project's underlying Kraken installation, as well as
+    adding to relative task and project selectors.
+
+    For example, in the following project:
+
+    .. code-block::
+
+        /
+            .git/
+            .kraken.py
+            examples/           << cwd
+                .kraken.py
+            src/
+
+    Running ``krakenw run test-examples`` will translate into ``kraken run -p .. examples:test-examples``
+    due to the :class:`GitAwareProjectFinder` finding ``/`` as the Kraken project root.
+
+    Note that if the ``examples/`` wanted to be its own Kraken project, independent of the project at ``//``,
+    you can add a line spelling ``# ::krakenw-root`` to the ``.kraken.py`` file. In that case, the
+    :class:`GitAwareProjectFinder` will consider that directory the root Kraken project (assuming your CWD
+    is somewhere within it).
 
     :param directory: The directory for which to load the build project details for.
     :param outdated_check: If enabled, performs a check to see if the requirements that the lockfile was
@@ -382,10 +402,10 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
     return Project(script.parent, script, requirements, lockfile_path, lockfile)
 
 
-@exit_on_known_exceptions(BuildEnvError, exit_code=2)
-def main() -> NoReturn:
+@exit_on_known_exceptions(VirtualEnvError, exit_code=2)
+def main(krakenw_args: list[str] | None = None) -> NoReturn:
     parser = _get_argument_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args=krakenw_args)
     logging_options = LoggingOptions.collect(args)
     logging_options.init_logging()
     env_options = EnvOptions.collect(args)
@@ -403,21 +423,23 @@ def main() -> NoReturn:
     argv: list[str] = args.cmd[1:] + args.args
 
     if cmd in ("a", "auth"):
-        # The `auth` comand does not require any current project information, it can be used globally.
+        # The `auth` command does not require any current project information, it can be used globally.
         auth(f"{parser.prog} auth", argv, use_keyring_if_available=not env_options.no_keyring)
+
+    if cmd in ("config",):
+        config_main(f"{parser.prog} config", argv)
 
     if cmd in ("list-pythons",):
         list_pythons(f"{parser.prog} list-pythons", argv)
 
     # The project details and build environment manager are relevant for any command that we are delegating.
     # This includes the built-in `lock` command.
-    config = TomlConfigFile(DEFAULT_CONFIG_PATH)
+    config_file = TomlConfigFile(DEFAULT_CONFIG_PATH)
     project = load_project(Path.cwd(), outdated_check=not env_options.upgrade)
-    manager = BuildEnvManager(
+    manager = VirtualEnvManager(
+        project.directory,
         project.directory / BUILDENV_PATH,
-        AuthModel(config, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
-        incremental=env_options.incremental,
-        show_install_logs=env_options.show_install_logs,
+        AuthModel(config_file, DEFAULT_CONFIG_PATH, use_keyring_if_available=not env_options.no_keyring),
     )
 
     # Execute environment operations before delegating the command.
@@ -443,7 +465,6 @@ def main() -> NoReturn:
             project,
             env_options.reinstall,
             env_options.upgrade,
-            env_options.use,
         )
 
     if cmd is None:
@@ -458,8 +479,7 @@ def main() -> NoReturn:
             argv += ["-p", str(project.directory)]
         command = [cmd, *argv]
         logger.info("$ %s", " ".join(map(shlex.quote, ["kraken"] + command)))
-        environment = manager.get_environment()
-        environment.dispatch_to_kraken_cli(command)
+        manager.dispatch_to_kraken_cli(command)
 
 
 if __name__ == "__main__":

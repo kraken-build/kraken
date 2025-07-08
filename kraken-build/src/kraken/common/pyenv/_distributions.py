@@ -1,4 +1,4 @@
-""" Inspect a Python environment for all installed packages. """
+"""Inspect a Python environment for all installed packages."""
 
 import argparse
 import csv
@@ -9,7 +9,11 @@ import sys
 from collections.abc import Iterable
 from importlib.metadata import (
     Distribution as _Distribution,
+)
+from importlib.metadata import (
     distribution as _distribution,
+)
+from importlib.metadata import (
     distributions as _distributions,
 )
 from pathlib import Path

@@ -1,0 +1,7 @@
+release-date = "2025-02-27"
+
+[[entries]]
+id = "0b8cd5c3-3d50-4026-af73-d15fa9ad9609"
+type = "fix"
+description = "Fixes workspace publishing with cargo 1.83"
+author = "thomas.pellissier-tanon@helsing.ai"

@@ -1,6 +1,5 @@
-""" This module provides provides the :class:`Supplier` interface which is used to represent values that can be
-calculated lazily and track provenance of such computations. """
-
+"""This module provides provides the :class:`Supplier` interface which is used to represent values that can be
+calculated lazily and track provenance of such computations."""
 
 import abc
 from collections.abc import Callable, Iterable, Mapping, Sequence

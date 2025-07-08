@@ -3,8 +3,7 @@ from __future__ import annotations
 from difflib import Differ
 from pathlib import Path
 
-from termcolor import colored
-
+from kraken.common import colored
 from kraken.common.path import try_relative_to
 from kraken.common.strings import as_string
 from kraken.core import Property, Task, TaskStatus

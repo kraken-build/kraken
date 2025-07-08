@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from .parser import GitignoreFile
+from kraken.common.gitignore import GitignoreFile
 
 GENERATED_SECTION_START = "# GENERATED-CONTENT-START"
 GENERATED_SECTION_END = "# GENERATED-CONTENT-END"

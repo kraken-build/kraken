@@ -1,4 +1,4 @@
-""" Provides tasks for Rust projects that build using Cargo. """
+"""Provides tasks for Rust projects that build using Cargo."""
 
 from __future__ import annotations
 
@@ -13,17 +13,12 @@ from kraken.core import Project, Task
 from .config import CargoConfig, CargoProject, CargoRegistry
 from .tasks.cargo_auth_proxy_task import CargoAuthProxyTask
 from .tasks.cargo_build_task import CargoBuildTask
-from .tasks.cargo_bump_version_task import CargoBumpVersionTask
 from .tasks.cargo_check_toolchain_version import CargoCheckToolchainVersionTask
 from .tasks.cargo_clippy_task import CargoClippyTask
 from .tasks.cargo_deny_task import CargoDenyTask
 from .tasks.cargo_fmt_task import CargoFmtTask
-from .tasks.cargo_generate_deb import CargoGenerateDebPackage
+from .tasks.cargo_login import CargoLoginTask
 from .tasks.cargo_publish_task import CargoPublishTask
-from .tasks.cargo_sqlx_database_create import CargoSqlxDatabaseCreateTask
-from .tasks.cargo_sqlx_database_drop import CargoSqlxDatabaseDropTask
-from .tasks.cargo_sqlx_migrate import CargoSqlxMigrateTask
-from .tasks.cargo_sqlx_prepare import CargoSqlxPrepareTask
 from .tasks.cargo_sync_config_task import CargoSyncConfigTask
 from .tasks.cargo_test_task import CargoTestTask
 from .tasks.cargo_update_task import CargoUpdateTask
@@ -32,29 +27,21 @@ from .tasks.rustup_target_add_task import RustupTargetAddTask
 __all__ = [
     "cargo_auth_proxy",
     "cargo_build",
-    "cargo_bump_version",
     "cargo_clippy",
     "cargo_deny",
     "cargo_fmt",
-    "cargo_generate_deb_package",
+    "cargo_login",
     "cargo_publish",
     "cargo_registry",
-    "cargo_sqlx_migrate",
-    "cargo_sqlx_prepare",
     "cargo_sync_config",
     "cargo_update",
     "CargoAuthProxyTask",
     "CargoBuildTask",
-    "CargoBumpVersionTask",
     "CargoClippyTask",
     "CargoDenyTask",
     "CargoProject",
     "CargoPublishTask",
     "CargoRegistry",
-    "CargoSqlxDatabaseCreateTask",
-    "CargoSqlxDatabaseDropTask",
-    "CargoSqlxMigrateTask",
-    "CargoSqlxPrepareTask",
     "CargoSyncConfigTask",
     "CargoTestTask",
     "cargo_check_toolchain_version",
@@ -77,71 +64,6 @@ def cargo_config(*, project: Project | None = None, nightly: bool = False) -> Ca
     config = CargoConfig(nightly=nightly)
     project.metadata.append(config)
     return config
-
-
-def cargo_sqlx_database_create(
-    *,
-    name: str = "sqlxDatabaseCreate",
-    project: Project | None = None,
-    database_url: str | None = None,
-) -> CargoSqlxDatabaseCreateTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxDatabaseCreateTask)
-    task.database_url = database_url
-    return task
-
-
-def cargo_sqlx_database_drop(
-    *,
-    name: str = "sqlxDatabaseDrop",
-    project: Project | None = None,
-    database_url: str | None = None,
-) -> CargoSqlxDatabaseDropTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxDatabaseDropTask)
-    task.database_url = database_url
-    return task
-
-
-def cargo_sqlx_migrate(
-    *,
-    name: str = "sqlxMigrate",
-    project: Project | None = None,
-    base_directory: Path | None = None,
-    database_url: str | None = None,
-    migrations: Path | None = None,
-) -> CargoSqlxMigrateTask:
-    project = project or Project.current()
-    task = project.task(name, CargoSqlxMigrateTask)
-    task.base_directory = base_directory
-    task.database_url = database_url
-    task.migrations = migrations
-    return task
-
-
-def cargo_sqlx_prepare(
-    *,
-    name: str = "sqlxPrepare",
-    project: Project | None = None,
-    check: bool,
-    base_directory: Path | None = None,
-    database_url: str | None = None,
-    migrations: Path | None = None,
-) -> CargoSqlxPrepareTask:
-    project = project or Project.current()
-    name = f"{name}Check" if check else name
-    task = project.task(name, CargoSqlxPrepareTask, group="check" if check else None)
-    task.check = check
-    task.base_directory = base_directory
-    task.database_url = database_url
-    task.migrations = migrations
-
-    # Preparing or checking sqlx metadata calls `cargo metadata`, which can require the auth proxy
-    # Without the auth proxy, cargo sqlx commands would fail with a cryptic error
-    # See https://github.com/launchbadge/sqlx/pull/2222 for details
-    task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
-
-    return task
 
 
 def cargo_registry(
@@ -178,8 +100,11 @@ def cargo_auth_proxy(*, project: Project | None = None) -> CargoAuthProxyTask:
     project = project or Project.current()
     cargo = CargoProject.get_or_create(project)
 
+    mitmweb_cmd = Supplier.of(["uv", "tool", "run", "--from", "mitmproxy>=10.0.0,<11.0.0", "mitmweb"])
+
     task = project.task("cargoAuthProxy", CargoAuthProxyTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
     task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+    task.mitmweb_cmd = mitmweb_cmd
 
     # The auth proxy is required for both building and publishing cargo packages with private cargo project dependencies
     project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
@@ -207,6 +132,25 @@ def cargo_sync_config(
     task.replace = replace
     check_task = task.create_check()
     project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(check_task)
+    return task
+
+
+def cargo_login(
+    *,
+    project: Project | None = None,
+) -> CargoLoginTask:
+    """Creates a task that will be added to the build and publish support groups
+    to login in the Cargo registries"""
+
+    project = project or Project.current()
+    cargo = CargoProject.get_or_create(project)
+    task = project.task("cargoLogin", CargoLoginTask, group="apply")
+    task.registries = Supplier.of_callable(lambda: list(cargo.registries.values()))
+    project.group(CARGO_BUILD_SUPPORT_GROUP_NAME).add(task)
+    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
+
+    # We need to have the credentials providers set up by cargoSyncConfig
+    task.depends_on(":cargoSyncConfig")
     return task
 
 
@@ -251,13 +195,11 @@ def cargo_deny(
     """
 
     project = project or Project.current()
-    return project.do(
-        "cargoDeny",
-        CargoDenyTask,
-        checks=checks,
-        config_file=config_file,
-        error_message=error_message,
-    )
+    task = project.task("cargoDeny", CargoDenyTask)
+    task.checks = checks
+    task.config_file = config_file
+    task.error_message = error_message
+    return task
 
 
 @dataclasses.dataclass
@@ -287,42 +229,6 @@ def cargo_update(*, project: Project | None = None) -> CargoUpdateTask:
     return task
 
 
-def cargo_bump_version(
-    *,
-    version: str,
-    revert: bool = True,
-    name: str = "cargoBumpVersion",
-    registry: str | None = None,
-    project: Project | None = None,
-    cargo_toml_file: Path = Path("Cargo.toml"),
-) -> CargoBumpVersionTask:
-    """Get or create a task that bumps the version in `Cargo.toml`.
-
-    :param version: The version number to bump to.
-    :param revert: Revert the version number after all direct dependants have run.
-    :param name: The task name. Note that if another task with the same configuration but different name exists,
-        it will not change the name of the task and that task will still be reused.
-    :param group: The group to assign the task to (even if the task is reused)."""
-
-    # This task will write the "current" version (usually taken from git) into Cargo.toml
-    # That is useful at two places
-    #  * at build time (because apps may use env!("CARGO_PKG_VERSION"))
-    #  * at publish time (because the artifact file name is derived from the version)
-
-    project = project or Project.current()
-
-    task = project.task(name, CargoBumpVersionTask, group=CARGO_BUILD_SUPPORT_GROUP_NAME)
-    task.version = version
-    task.revert = revert
-    task.registry = registry
-    task.cargo_toml_file = cargo_toml_file
-
-    # project.do() only supports one group, but this task is needed in two groups
-    project.group(CARGO_PUBLISH_SUPPORT_GROUP_NAME).add(task)
-
-    return task
-
-
 def cargo_build(
     mode: Literal["debug", "release"],
     incremental: bool | None = None,
@@ -335,6 +241,7 @@ def cargo_build(
     project: Project | None = None,
     features: list[str] | None = None,
     depends_on: Sequence[Task] = (),
+    locked: bool | None = None,
 ) -> CargoBuildTask:
     """Creates a task that runs `cargo build`.
 
@@ -373,6 +280,7 @@ def cargo_build(
     task.incremental = incremental
     task.target = mode
     task.additional_args = additional_args
+    task.locked = locked
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
 
     task.depends_on(f":{CARGO_BUILD_SUPPORT_GROUP_NAME}?")
@@ -437,6 +345,9 @@ def cargo_publish(
     name: str = "cargoPublish",
     package_name: str | None = None,
     project: Project | None = None,
+    version: str | None = None,
+    cargo_toml_file: Path = Path("Cargo.toml"),
+    allow_overwrite: bool = False,
 ) -> CargoPublishTask:
     """Creates a task that publishes the create to the specified *registry*.
 
@@ -466,7 +377,10 @@ def cargo_publish(
     task.retry_attempts = retry_attempts
     task.package_name = package_name
     task.env = Supplier.of_callable(lambda: {**cargo.build_env, **(env or {})})
+    task.version = version
+    task.cargo_toml_file = cargo_toml_file
     task.depends_on(f":{CARGO_PUBLISH_SUPPORT_GROUP_NAME}?")
+    task.allow_overwrite = allow_overwrite
     return task
 
 
@@ -492,12 +406,3 @@ def rustup_target_add(target: str, *, group: str | None = None, project: Project
     task = project.task(f"rustupTargetAdd/{target}", RustupTargetAddTask, group=group)
     task.target = target
     return task
-
-
-def cargo_generate_deb_package(*, project: Project | None = None, package_name: str) -> CargoGenerateDebPackage:
-    project = project or Project.current()
-    return project.do(
-        "cargoGenerateDeb",
-        CargoGenerateDebPackage,
-        package_name=package_name,
-    )

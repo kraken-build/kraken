@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import subprocess
 from dataclasses import dataclass, fields
 from enum import Enum
@@ -12,7 +13,6 @@ from typing import Any
 
 import tomli
 import tomli_w
-from pydantic import ClassError
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class CargoMetadata:
     target_directory: Path
 
     @classmethod
-    def read(cls, project_dir: Path) -> CargoMetadata:
+    def read(cls, project_dir: Path, from_project_dir: bool = False, locked: bool | None = None) -> CargoMetadata:
         cmd = [
             "cargo",
             "metadata",
@@ -79,7 +79,28 @@ class CargoMetadata:
             "--manifest-path",
             str(project_dir / "Cargo.toml"),
         ]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+
+        # the .cargo/config.toml in user/foo/bar is not picked up when running this command from
+        # user/foo for example. This flag executes the subprocess from the project dir
+        if from_project_dir:
+            cwd = project_dir
+        else:
+            cwd = Path(os.getcwd())
+
+        if locked is None:
+            # Append `--locked` if a Cargo.lock file is found in the project directory or any of its parents.
+            project_dir = project_dir.absolute()
+            for parent in [project_dir, *project_dir.parents]:
+                if (parent / "Cargo.lock").exists():
+                    cmd.append("--locked")
+                    break
+        elif locked:
+            # If locked is True, we should *always* pass --locked. The expectation is that the command will
+            # fail w/o a Cargo.lock file.
+            cmd.append("--locked")
+
+        result = subprocess.run(cmd, stdout=subprocess.PIPE, cwd=cwd)
+
         if result.returncode != 0:
             logger.error("Stderr: %s", result.stderr)
             logger.error(f"Could not execute `{' '.join(cmd)}`, and thus can't read the cargo metadata.")
@@ -211,6 +232,7 @@ class CargoManifest:
     workspace: Workspace | None
     dependencies: Dependencies | None
     build_dependencies: Dependencies | None
+    dev_dependencies: Dependencies | None
     bin: list[Bin]
 
     @classmethod
@@ -218,19 +240,22 @@ class CargoManifest:
         with path.open("rb") as fp:
             ret = cls.of(path, tomli.load(fp))
             if ret.package is None and ret.workspace is None:
-                raise ClassError
+                raise ValueError("Cargo manifest must have either a package or a workspace section.")
             return ret
 
     @classmethod
     def of(cls, path: Path, data: dict[str, Any]) -> CargoManifest:
         return cls(
-            path,
-            data,
-            Package.from_json(data["package"]) if "package" in data else None,
-            Workspace.from_json(data["workspace"]) if "workspace" in data else None,
-            Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
-            Dependencies.from_json(data["build-dependencies"]) if "build-dependencies" in data else None,
-            [Bin.from_json(x) for x in data.get("bin", [])],
+            _path=path,
+            _data=data,
+            package=Package.from_json(data["package"]) if "package" in data else None,
+            workspace=Workspace.from_json(data["workspace"]) if "workspace" in data else None,
+            dependencies=Dependencies.from_json(data["dependencies"]) if "dependencies" in data else None,
+            build_dependencies=Dependencies.from_json(data["build-dependencies"])
+            if "build-dependencies" in data
+            else None,
+            dev_dependencies=Dependencies.from_json(data["dev-dependencies"]) if "dev-dependencies" in data else None,
+            bin=[Bin.from_json(x) for x in data.get("bin", [])],
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -247,6 +272,8 @@ class CargoManifest:
             result["dependencies"] = self.dependencies.to_json()
         if self.build_dependencies:
             result["build-dependencies"] = self.build_dependencies.to_json()
+        if self.dev_dependencies:
+            result["dev-dependencies"] = self.dev_dependencies.to_json()
         return result
 
     def to_toml_string(self) -> str:

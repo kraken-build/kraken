@@ -124,20 +124,20 @@ def test__resolve_address__does_not_fail_on_optional_element() -> None:
     tree = ExampleNodeTree()
     space = NodeAddressSpace(tree.root)
 
-    # We can sucessfully resolve :a:b? to :a:b.
+    # We can successfully resolve :a:b? to :a:b.
     assert list(resolve_address(space, tree.root, Address(":a:b?")).matches()) == [tree.ab]
 
-    # We can sucessfully resolve :a:dontexist? to nothing, as the address does not exist.
+    # We can successfully resolve :a:dontexist? to nothing, as the address does not exist.
     assert list(resolve_address(space, tree.root, Address(":a:dontexist?")).matches()) == []
 
     # Try to resolve :a:dontexist without an optional element fails.
     with raises(AddressResolutionError):
         list(resolve_address(space, tree.root, Address(":a:dontexist")).matches())
 
-    # We can sucessfully resolve :a:b?:a to :a:b:a.
+    # We can successfully resolve :a:b?:a to :a:b:a.
     assert list(resolve_address(space, tree.root, Address(":a:b?:a")).matches()) == [tree.aba]
 
-    # We can sucessfully resolve :a:b?:dontexist to nothing, as the element that does not exist is optional.
+    # We can successfully resolve :a:b?:dontexist to nothing, as the element that does not exist is optional.
     assert list(resolve_address(space, tree.root, Address(":a:b:dontexist?")).matches()) == []
 
     # It is also okay to resolve :a::missing1?:missing to nothing, because we won't try to look up the missing2

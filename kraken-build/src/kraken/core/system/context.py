@@ -6,11 +6,10 @@ import enum
 import logging
 from collections.abc import Callable, Iterable, Iterator, MutableMapping, Sequence
 from pathlib import Path
-from typing import Any, ClassVar, TypeAlias, TypeVar, overload
-
-from nr.stream import Stream
+from typing import Any, ClassVar, TypeAlias, TypeVar, cast, overload
 
 from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRunner
+from kraken.common.iter import bipartition
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
@@ -90,7 +89,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         observer: GraphExecutorObserver | None = None,
     ) -> None:
         """
-        :param build_directory: The directory in which all files generated durin the build should be stored.
+        :param build_directory: The directory in which all files generated during the build should be stored.
         :param project_finder: This project finder should only search within the directory it was given, not
             around or in parent folders. Defaults to :class:`CurrentDirectoryProjectFinder`.
         :param executor: The executor to use when the graph is executed.
@@ -204,7 +203,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert project is not None
 
         for element in address.elements:
-            project = project.subproject(element.value, "if-exists")
+            project = project.subproject(element.value, "or-none")
             if not project:
                 raise ProjectNotFoundError(address)
 
@@ -212,7 +211,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
     def resolve_tasks(
         self,
-        addresses: Sequence[Task | str | Address] | None,
+        addresses: Iterable[Task | str | Address] | None,
         relative_to: Project | Address | None = None,
         set_selected: bool = False,
     ) -> list[Task]:
@@ -303,11 +302,11 @@ class Context(MetadataContainer, Currentable["Context"]):
             address = relative_to.concat(address).normalize(keep_container=True)
 
         matches = list(resolve_address(space, self.root_project, address).matches())
-        tasks = Stream(matches).of_type(Task).collect()  # type: ignore[type-abstract]
+        tasks = [t for t in matches if isinstance(t, Task)]
         if set_selected:
             for task in tasks:
                 task.selected = True
-        projects = Stream(matches).of_type(Project).collect()
+        projects = [p for p in matches if isinstance(p, Project)]
         if projects:
             # Using the address of a project means we want to select its default tasks
             for proj in projects:
@@ -335,7 +334,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         self.trigger(ContextEvent.Type.on_context_finalized, self)
 
-    def get_build_graph(self, targets: Sequence[str | Task] | None) -> TaskGraph:
+    def get_build_graph(self, targets: Sequence[str | Address | Task] | None) -> TaskGraph:
         """Returns the :class:`TaskGraph` that contains either all default tasks or the tasks specified with
         the *targets* argument.
 
@@ -346,9 +345,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         if targets is None:
             tasks = self.resolve_tasks(None)
         else:
-            tasks = self.resolve_tasks([t for t in targets if isinstance(t, str)]) + [
-                t for t in targets if not isinstance(t, str)
-            ]
+            needs_resolving, resolved = bipartition(lambda t: isinstance(t, Task), targets)
+            tasks = cast(list[Task], list(resolved))
+            tasks.extend(self.resolve_tasks(needs_resolving))
 
         if not tasks:
             raise ValueError("no tasks selected")
@@ -358,7 +357,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert graph, "TaskGraph cannot be empty"
         return graph
 
-    def execute(self, tasks: list[str | Task] | TaskGraph | None = None) -> None:
+    def execute(self, tasks: list[str | Address | Task] | TaskGraph | None = None) -> TaskGraph:
         """Execute all default tasks or the tasks specified by *targets* using the default executor.
         If :meth:`finalize` was not called already it will be called by this function before the build
         graph is created, unless a build graph is passed in the first place.
@@ -379,22 +378,16 @@ class Context(MetadataContainer, Currentable["Context"]):
         self.executor.execute_graph(graph, self.observer)
 
         if not graph.is_complete():
-            failed_tasks = list(graph.tasks(failed=True))
-            if len(failed_tasks) == 1:
-                message = f'task "{failed_tasks[0].address}" failed'
-            else:
-                message = "tasks " + ", ".join(f'"{task.address}"' for task in failed_tasks) + " failed"
-            raise BuildError(message)
+            raise BuildError(list(graph.tasks(failed=True)))
+        return graph
 
     @overload
     def listen(
         self, event_type: str | ContextEvent.Type
-    ) -> Callable[[ContextEvent.T_Listener], ContextEvent.T_Listener]:
-        ...
+    ) -> Callable[[ContextEvent.T_Listener], ContextEvent.T_Listener]: ...
 
     @overload
-    def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener) -> None:
-        ...
+    def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener) -> None: ...
 
     def listen(self, event_type: str | ContextEvent.Type, listener: ContextEvent.Listener | None = None) -> Any:
         """Registers a listener to the context for the given event type."""

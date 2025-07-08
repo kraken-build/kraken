@@ -1,42 +1,27 @@
 from __future__ import annotations
 
-import enum
 import logging
-import os
 import subprocess as sp
 
-from kraken.common import CredentialsWithHost, atomic_file_swap
-from kraken.core import Project, Property, Task, TaskStatus
-
-from .manifest import BuffrsManifest
+from kraken.core import Property, Task, TaskStatus
 
 logger = logging.getLogger(__name__)
-
-
-class Language(enum.Enum):
-    PYTHON = "python"
 
 
 class BuffrsLoginTask(Task):
     """This task logs into artifactory with buffrs"""
 
     description = "Login to artifactory with buffrs."
-    artifactory_credentials: Property[CredentialsWithHost]
+    registry: Property[str] = Property.required(
+        help="The Artifactory URL to publish to (e.g. `https://<domain>/artifactory`)."
+    )
+    token: Property[str] = Property.required(help="The token for the registry.")
 
     def execute(self) -> TaskStatus:
-        credentials = self.artifactory_credentials.get()
-
-        command = ["buffrs", "login", "--registry", credentials.host]
-
+        command = ["buffrs", "login", "--registry", self.registry.get()]
         return TaskStatus.from_exit_code(
             command,
-            sp.run(
-                command,
-                cwd=self.project.directory,
-                env=os.environ.copy(),
-                input=credentials.password,
-                text=True,
-            ).returncode,
+            sp.run(command, cwd=self.project.directory, input=self.token.get(), text=True).returncode,
         )
 
 
@@ -47,80 +32,41 @@ class BuffrsInstallTask(Task):
 
     def execute(self) -> TaskStatus:
         command = ["buffrs", "install"]
-
         return TaskStatus.from_exit_code(
             command,
-            sp.call(
-                command,
-                cwd=self.project.directory,
-                env=os.environ.copy(),
-            ),
+            sp.call(command, cwd=self.project.directory),
         )
 
 
 class BuffrsPublishTask(Task):
-    """This task uses buffrs to publish a new release of the buffrs package."""
+    """This task uses buffrs to publish a new release of the buffrs package.
+
+    Requires at least Buffrs 0.8.0."""
 
     description = "Publish a buffrs package"
-    artifactory_repository: Property[str]
-    version: Property[str]
 
-    def _get_updated_proto_toml(self) -> str:
-        project = self.project or Project.current()
-
-        manifest = BuffrsManifest.read(project.directory / "Proto.toml")
-
-        if manifest.package is None:
-            return manifest.to_toml_string()
-
-        manifest.package.version = self.version.get().format()
-
-        return manifest.to_toml_string()
-
-    def execute(self) -> TaskStatus:
-        command = ["buffrs", "publish", "--repository", self.artifactory_repository.get(), "--allow-dirty"]
-        project = self.project
-        content = self._get_updated_proto_toml()
-
-        with atomic_file_swap(project.directory / "Proto.toml", "w", always_revert=True) as atomic_file:
-            atomic_file.write(content)
-            atomic_file.close()
-
-            version = self.version.get()
-            logger.info(f"temporarily bumped Proto.toml to {version.format()}")
-
-            return TaskStatus.from_exit_code(
-                command,
-                sp.call(
-                    command,
-                    cwd=self.project.directory,
-                    env=os.environ.copy(),
-                ),
-            )
-
-
-class BuffrsGenerateTask(Task):
-    """This task uses buffrs to generate code definitions for installed packages."""
-
-    description = "Generates code for installed package with buffrs"
-    language: Property[Language]
-    generated_output_dir: Property[str]
+    registry: Property[str] = Property.required(
+        help="The Artifactory URL to publish to (e.g. `https://<domain>/artifactory`)."
+    )
+    repository: Property[str] = Property.required(
+        help="The Artifactory repository to publish to (this should be a Generic repository)."
+    )
+    version: Property[str | None] = Property.default(None, help="Override the version from the manifest.")
 
     def execute(self) -> TaskStatus:
         command = [
             "buffrs",
-            "generate",
-            "--lang",
-            self.language.get().value,
-            "--out-dir",
-            self.generated_output_dir.get(),
+            "publish",
+            "--registry",
+            self.registry.get(),
+            "--repository",
+            self.repository.get(),
+            "--allow-dirty",
         ]
-
+        if (version := self.version.get()) is not None:
+            command += ["--set-version", version]
+        self.logger.info("Running %s", command)
         return TaskStatus.from_exit_code(
             command,
-            sp.call(
-                command,
-                cwd=self.project.directory,
-                env=os.environ.copy(),
-            ),
+            sp.call(command, cwd=self.project.directory),
         )

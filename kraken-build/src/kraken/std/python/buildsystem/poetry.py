@@ -1,4 +1,4 @@
-""" Implements Poetry as a build system for kraken-std. """
+"""Implements Poetry as a build system for kraken-std."""
 
 from __future__ import annotations
 
@@ -8,16 +8,15 @@ import shutil
 import subprocess as sp
 from collections.abc import Iterator, Sequence
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
 from kraken.common.pyenv import get_current_venv
+from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
-from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
-from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
+from kraken.std.python.pyproject import PackageIndex, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
@@ -30,19 +29,14 @@ class PoetryPyprojectHandler(PyprojectHandler):
     Pyproject configuration handler for Poetry projects.
     """
 
-    @dataclass(frozen=True)
-    class Package:
-        include: str
-        from_: str | None = None
-
-    def __init__(self, pyproj: Pyproject) -> None:
+    def __init__(self, pyproj: TomlFile) -> None:
         super().__init__(pyproj)
 
     @property
     def _poetry_section(self) -> dict[str, Any]:
         return self.raw.setdefault("tool", {}).setdefault("poetry", {})  # type: ignore[no-any-return]
 
-    def get_packages(self, fallback: bool = True) -> list[Package]:
+    def get_packages(self) -> list[PyprojectHandler.Package]:
         """
         Returns the packages included in the distribution of this project listed in `[tool.poetry.packages]`.
 
@@ -51,11 +45,11 @@ class PoetryPyprojectHandler(PyprojectHandler):
         """
 
         packages: list[dict[str, Any]] | None = self._poetry_section.get("packages")
-        if packages is None and fallback:
+        if packages is None:
             package_name = self._poetry_section["name"]
             return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
-        else:
-            return [self.Package(include=x["include"], from_=x.get("from")) for x in packages or ()]
+
+        return [self.Package(include=p["include"], from_=p.get("from")) for p in packages]
 
     # PyprojectHandler
 
@@ -128,7 +122,7 @@ class PoetryPyprojectHandler(PyprojectHandler):
                 yield "group.dev.dependencies", group_dev_dependencies
 
         for name, dependencies in _dependency_groups():
-            for key, value in dependencies.items():
+            for key, value in list(dependencies.items()):
                 if isinstance(value, dict) and "path" in value:
                     logger.debug("Replacing path dependency %s with version %s in %s", key, version, name)
                     dependencies[key] = version
@@ -142,7 +136,7 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
 
     # PythonBuildSystem
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> PoetryPyprojectHandler:
+    def get_pyproject_reader(self, pyproject: TomlFile) -> PoetryPyprojectHandler:
         return PoetryPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
@@ -151,8 +145,9 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
     def get_managed_environment(self) -> ManagedEnvironment:
         return PoetryManagedEnvironment(self.project_directory)
 
-    def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
+    def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         command = ["poetry", "update"]
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
 
@@ -164,31 +159,12 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             if index.is_package_source and index.credentials:
                 command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], index.credentials[1]]
                 safe_command = ["poetry", "config", "http-basic." + index.alias, index.credentials[0], "MASKED"]
-                logger.info("$ %s", safe_command)
+                logger.info("Run '%s'", " ".join(safe_command))
                 code = sp.call(command)
                 if code != 0:
                     raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        previous_version: str | None = None
-        revert_version_paths: list[Path] = []
-        if as_version is not None:
-            # Bump the in-source version number.
-            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
-            pyproject.set_path_dependencies_to_version(as_version)
-            previous_version = pyproject.get_version()
-            pyproject.set_version(as_version)
-            pyproject.raw.save()
-            for package in pyproject.get_packages(fallback=True):
-                package_dir = self.project_directory / (package.from_ or "") / package.include
-                n_replaced = update_python_version_str_in_source_files(as_version, package_dir)
-                if n_replaced > 0:
-                    revert_version_paths.append(package_dir)
-                    print(
-                        f"Bumped {n_replaced} version reference(s) in "
-                        f"{package_dir.relative_to(self.project_directory)} to {as_version}"
-                    )
-
+    def build(self, output_directory: Path) -> list[Path]:
         # Poetry does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
         dist_dir = self.project_directory / "dist"
@@ -196,23 +172,16 @@ class PoetryPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["poetry", "build"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
-        for src, dst in zip(src_files, dst_files):
+        for src, dst in zip(src_files, dst_files, strict=True):
             shutil.move(str(src), dst)
 
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):
             shutil.rmtree(dist_dir)
-
-        # Roll back the previously updated in-source version numbers.
-        if previous_version is not None:
-            pyproject.set_version(previous_version)
-            pyproject.raw.save()
-            for package_dir in revert_version_paths:
-                update_python_version_str_in_source_files(previous_version, package_dir)
 
         return dst_files
 
@@ -237,14 +206,15 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             venv.deactivate(environ)
 
         command = ["poetry", "env", "info", "-p"]
+        logger.info("Run '%s'", " ".join(command))
         try:
             response = sp.check_output(command, cwd=self.project_directory, env=environ).decode().strip()
         except sp.CalledProcessError as exc:
             if exc.returncode != 1:
                 raise
             return None
-        else:
-            return Path(response)
+
+        return Path(response)
 
     def _get_all_poetry_known_environment_paths(self) -> list[Path]:
         """Uses `poetry env list --full-path` to get the path to all relevant virtual environments that are known
@@ -257,8 +227,8 @@ class PoetryManagedEnvironment(ManagedEnvironment):
             if exc.returncode != 1:
                 raise
             return []
-        else:
-            return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
+
+        return [Path(line.replace(" (Activated)", "").strip()) for line in response if line]
 
     def _get_poetry_environment_path(self) -> Path | None:
         # Run the two Poetry commands we need to run in parallel to improve load times.
@@ -281,8 +251,7 @@ class PoetryManagedEnvironment(ManagedEnvironment):
 
     def exists(self) -> bool:
         try:
-            self.get_path()
-            return True
+            return self.get_path().is_dir()
         except RuntimeError:
             return False
 
@@ -290,10 +259,10 @@ class PoetryManagedEnvironment(ManagedEnvironment):
         if self._env_path is NotSet.Value:
             self._env_path = self._get_poetry_environment_path()
         if self._env_path is None:
-            raise RuntimeError("managed environment does not exist")
+            raise RuntimeError("Managed environment does not exist")
         return self._env_path
 
     def install(self, settings: PythonSettings) -> None:
         command = ["poetry", "install", "--no-interaction"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)

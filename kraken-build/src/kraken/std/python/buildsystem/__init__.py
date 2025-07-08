@@ -1,15 +1,18 @@
-""" Abstraction of Python build systems such as Poetry and Slap. """
-
+"""Abstraction of Python build systems such as Poetry and Slap."""
 
 from __future__ import annotations
 
 import abc
+import contextlib
 import logging
+from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
 
+from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
-from kraken.std.python.pyproject import Pyproject, PyprojectHandler
+from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
+from kraken.std.python.pyproject import PyprojectHandler
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
@@ -21,6 +24,7 @@ class PythonBuildSystem(abc.ABC):
     """Abstraction of a Python build system."""
 
     name: ClassVar[str]
+    project_directory: Path
 
     @abc.abstractmethod
     def supports_managed_environments(self) -> bool:
@@ -33,7 +37,7 @@ class PythonBuildSystem(abc.ABC):
         :raise NotImplementedError: If :meth:`supports_managed_environment` returns `False`.
         """
 
-    def update_pyproject(self, settings: PythonSettings, pyproject: Pyproject) -> None:
+    def update_pyproject(self, settings: PythonSettings, pyproject: TomlFile) -> None:
         """A chance to permanently update the Pyproject configuration."""
 
         handler = self.get_pyproject_reader(pyproject)
@@ -45,9 +49,9 @@ class PythonBuildSystem(abc.ABC):
                 logger.debug("build system %r does not support managing package indexes", self.name)
 
     @abc.abstractmethod
-    def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
+    def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         """Resolve all dependencies of the project and write the exact versions into
-        the correspondig lock file. In the case of Poetry it is poetry.lock."""
+        the corresponding lock file. In the case of Poetry it is poetry.lock."""
 
     @abc.abstractmethod
     def requires_login(self) -> bool:
@@ -59,16 +63,66 @@ class PythonBuildSystem(abc.ABC):
 
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
+    @contextlib.contextmanager
+    def bump_version(self, version: str) -> Iterator[None]:
+        """Set the version of the project temporarily.
+
+        The default implementation bumps the version number in the `pyproject.toml` using `get_pyproject_reader()`
+        as well as in the source files in the packages provided by the `PyprojectHandler.get_packages()`.
+        """
+
+        # Save the previous version of the pyproject.toml.
+        pyproject_toml = self.project_directory / "pyproject.toml"
+
+        revert_files: dict[Path, str] = {}
+        revert_files[pyproject_toml] = pyproject_toml.read_text()
+
+        # Bump the in-source version number.
+        pyproject = self.get_pyproject_reader(TomlFile.read(pyproject_toml))
+        try:
+            pyproject.set_path_dependencies_to_version(version)
+        except NotImplementedError:
+            pass
+        pyproject.set_version(version)
+        pyproject.raw.save()
+
+        for package in pyproject.get_packages():
+            package_dir = self.project_directory / (package.from_ or "") / package.include
+
+            sum_replaced = 0
+            for path, n_replaced in update_python_version_str_in_source_files(version, package_dir):
+                sum_replaced += n_replaced
+                revert_files[path] = path.read_text()
+
+            if sum_replaced > 0:
+                print(
+                    f"Bumped {sum_replaced} version reference(s) in {len(revert_files)} files(s) in directory",
+                    f"{package_dir.relative_to(self.project_directory)} to {version}",
+                )
+
+        print("Modified files:")
+        for path in sorted(revert_files):
+            print("  -", path)
+
+        try:
+            yield
+        finally:
+            for path, content in revert_files.items():
+                path.write_text(content)
+
+    def build(self, output_directory: Path) -> list[Path]:
         """Build one or more distributions of the project managed by this build system.
 
         :param output_directory: The directory where the distributions should be placed.
-        :param as_version: A version number for the built distributions.
         """
 
+        raise NotImplementedError
+
+    def build_v2(self, settings: PythonSettings, output_directory: Path) -> list[Path]:
+        return self.build(output_directory)
+
     @abc.abstractmethod
-    def get_pyproject_reader(self, pyproject: Pyproject) -> PyprojectHandler:
+    def get_pyproject_reader(self, pyproject: TomlFile) -> PyprojectHandler:
         """Return an object able to read the pyproject file depending on the build system."""
 
     @abc.abstractmethod
@@ -120,18 +174,35 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
         return PoetryPythonBuildSystem(project_directory)
 
     if "maturin" in pyproject_content:
-        if "[tool.poetry]" in pyproject_content:
+        if "[tool.poetry" in pyproject_content:
             from .maturin import MaturinPoetryPythonBuildSystem
 
             return MaturinPoetryPythonBuildSystem(project_directory)
-        else:
+        elif "[tool.pdm" in pyproject_content:
             from .maturin import MaturinPdmPythonBuildSystem
 
             return MaturinPdmPythonBuildSystem(project_directory)
+        else:
+            from .maturin import MaturinUvPythonBuildSystem
+
+            if "[tool.uv" not in pyproject_content:
+                logger.warning(
+                    "Got no hint as to the Python dependency system used in the project '%s', falling back to UV (experimental)",
+                    project_directory,
+                )
+            return MaturinUvPythonBuildSystem(project_directory)
 
     if "pdm" in pyproject_content:
         from .pdm import PDMPythonBuildSystem
 
         return PDMPythonBuildSystem(project_directory)
 
-    return None
+    if "[tool.uv" not in pyproject_content:
+        logger.warning(
+            "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
+            project_directory,
+        )
+
+    from kraken.std.python.buildsystem.uv import UvPythonBuildSystem
+
+    return UvPythonBuildSystem(project_directory)

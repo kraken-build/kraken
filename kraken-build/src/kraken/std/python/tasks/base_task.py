@@ -4,9 +4,8 @@ import logging
 import os
 import shutil
 import subprocess as sp
+import sys
 from collections.abc import Iterable, MutableMapping
-
-from deprecated import deprecated
 
 from kraken.common.pyenv import VirtualEnvInfo, get_current_venv
 from kraken.core import Project, Task, TaskRelationship, TaskStatus
@@ -37,10 +36,6 @@ class EnvironmentAwareDispatchTask(Task):
 
         yield from super().get_relationships()
 
-    @deprecated(reason="Implement get_execute_command_v2() instead")
-    def get_execute_command(self) -> list[str] | TaskStatus:
-        raise NotImplementedError()
-
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         raise NotImplementedError()
 
@@ -61,10 +56,7 @@ class EnvironmentAwareDispatchTask(Task):
 
     def execute(self) -> TaskStatus:
         env = os.environ.copy()
-        try:
-            command = self.get_execute_command_v2(env)
-        except NotImplementedError:
-            command = self.get_execute_command()
+        command = self.get_execute_command_v2(env)
         if isinstance(command, TaskStatus):
             return command
         if self.settings.build_system and self.settings.build_system.supports_managed_environments():
@@ -72,10 +64,11 @@ class EnvironmentAwareDispatchTask(Task):
         if self.python_dependencies and shutil.which(command[0], path=env.get("PATH")) is None:
             logger.warning("Some Python dependencies of %s are not installed.", self.name)
             logger.warning("To run this task successfully you should add to the `pyproject.toml` file:")
-            logger.warning("[tool.poetry.dev-dependencies]")
+            logger.warning("[tool.poetry.group.dev.dependencies]")
             for dep in self.python_dependencies:
                 logger.warning('%s = "*"', dep)
             return TaskStatus.failed("The %s dependencies are missing" % self.python_dependencies)
         logger.info("%s", command)
-        result = sp.call(command, cwd=self.project.directory, env=env)
+        shell = sys.platform.startswith("win32")  # Windows requires shell to find executable in path
+        result = sp.call(command, cwd=self.project.directory, env=env, shell=shell)
         return self.handle_exit_code(result)

@@ -1,4 +1,4 @@
-""" This module provides the :class:`Task` class which represents a unit of work that is configurable through
+"""This module provides the :class:`Task` class which represents a unit of work that is configurable through
 :class:`Properties <Property>` that represent input/output parameters and are used to construct a dependency
 graph."""
 
@@ -10,19 +10,20 @@ import dataclasses
 import enum
 import logging
 import shlex
-from collections.abc import Collection, Iterable, Iterator, Sequence
+from collections.abc import Collection, Iterable, Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ForwardRef, Generic, Literal, TypeVar, cast, overload
 
-from deprecated import deprecated
+from loguru import logger
 
-from kraken.common import NotSet, Supplier
+from kraken.common import Supplier
 from kraken.core.address import Address
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
 
 if TYPE_CHECKING:
+    from kraken.core.system.context import Context
     from kraken.core.system.project import Project
 else:
     # Type hint evaluation in typeapi tries to fully resolve forward references to a type. In order to allow the
@@ -33,7 +34,6 @@ else:
 
 T = TypeVar("T")
 T_Task = TypeVar("T_Task", bound="Task")
-logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -182,7 +182,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
     """
     A Kraken Task is a unit of work that can be executed.
 
-    Tasks goe through a number of stages during its lifetime:
+    Tasks go through a number of stages during its lifetime:
 
     * Creation and configuration
     * Finalization (:meth:`finalize`) -- Mutations to properties of the task are locked after this.
@@ -235,57 +235,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         assert isinstance(self._parent, Project), "Task.parent must be a Project"
         return self._parent
 
-    ###
-    # Begin: Deprecated APIs
-    ###
-
     @property
-    @deprecated(reason="Task.path is deprecated, use str(Task.address) instead.")
-    def path(self) -> str:
-        return str(self.address)
-
-    @property
-    @deprecated(reason="Task.outputs is deprecated.")
+    # @deprecated(reason="Task.outputs is deprecated.")
     def outputs(self) -> list[Any]:
         return self._outputs
-
-    @deprecated(reason="Task.add_relationship() is deprecated, use Task.depends_on() or Task.required_by() instead.")
-    def add_relationship(
-        self,
-        task_or_selector: Task | Sequence[Task | Address] | Address | str,
-        strict: bool = True,
-        inverse: bool = False,
-    ) -> None:
-        """Add a relationship to this task that will be returned by :meth:`get_relationships`.
-
-        :param task_or_selector: A task, list of tasks or a task selector (wich may expand to multiple tasks)
-            to add as a relationship to this task. If a task selector string is specified, it will be evaluated
-            lazily when :meth:`get_relationships` is called.
-        :param strict: Whether the relationship is strict, i.e. informs a strong dependency in one or the other
-            direction. If a relationship is not strict, it informs only order of execution and parallel
-            exclusivity.
-        :param inverse: Whether to invert the relationship.
-        """
-
-        if isinstance(task_or_selector, (Task, str)):
-            if isinstance(task_or_selector, str):
-                task_or_selector = Address(task_or_selector)
-            self.__relationships.append(_Relationship(task_or_selector, strict, inverse))
-        elif isinstance(task_or_selector, Sequence):
-            for idx, task in enumerate(task_or_selector):
-                if not isinstance(task, Task):
-                    raise TypeError(
-                        f"task_or_selector[{idx}] must be Task | Sequence[Task] | str, got "
-                        f"{type(task_or_selector).__name__}"
-                    )
-            for task in task_or_selector:
-                if isinstance(task, str):
-                    task = Address(task)
-                self.__relationships.append(_Relationship(task, strict, inverse))
-        else:
-            raise TypeError(
-                f"task_or_selector argument must be Task | Sequence[Task] | str, got {type(task_or_selector).__name__}"
-            )
 
     def add_tag(self, name: str, *, reason: str, origin: str | None = None) -> None:
         """
@@ -295,7 +248,7 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         if name not in self.__tags:
             self.__tags[name] = set()
 
-        logger.debug("Adding tag %r (reason: %r, origin: %r) to %s", name, reason, origin, self.address)
+        logger.debug("Adding tag {!r} (reason: {!r}, origin: {!r}) to {}", name, reason, origin, self.address)
         self.__tags[name].add(TaskTag(name, reason, origin))
 
     def remove_tag(self, tag: TaskTag) -> None:
@@ -306,10 +259,10 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         try:
             self.__tags[tag.name].discard(tag)
         except KeyError:
-            logger.debug("Attempted to remove tag %r from %s, but it does not exist", tag, self.address)
+            logger.debug("Attempted to remove tag {!r} from {}, but it does not exist", tag, self.address)
             pass
         else:
-            logger.debug("Removed tag %r from %s", tag, self.address)
+            logger.debug("Removed tag {!r} from {}", tag, self.address)
 
     def get_tags(self, name: str) -> Collection[TaskTag]:
         """
@@ -510,7 +463,7 @@ class GroupTask(Task):
         self.tasks = []
         self.default = False
 
-    def add(self, tasks: str | Task | Iterable[str | Task]) -> None:
+    def add(self, tasks: str | Address | Task | Iterable[str | Address | Task]) -> None:
         """Add one or more tasks by name or task object to this group.
 
         This is different from adding a task via :meth:`add_relationship` because the task is instead stored in the
@@ -521,11 +474,11 @@ class GroupTask(Task):
         to add a task to the group by a selector string requires that the task already exists.
         """
 
-        if isinstance(tasks, (str, Task)):
+        if isinstance(tasks, (str, Address, Task)):
             tasks = [tasks]
 
         for task in tasks:
-            if isinstance(task, str):
+            if isinstance(task, (str, Address)):
                 self.tasks += [
                     t for t in self.project.context.resolve_tasks([task], self.project) if t not in self.tasks
                 ]
@@ -587,7 +540,7 @@ class BackgroundTask(Task):
             pass
         else:
             logger.warning(
-                'BackgroundTask.teardown() did not get called on task "%s". This may cause some issues, such '
+                'BackgroundTask.teardown() did not get called on task "{}". This may cause some issues, such '
                 "as an error during serialization or zombie processes.",
                 self.address,
             )
@@ -612,46 +565,45 @@ class BackgroundTask(Task):
         del self.__exit_stack
 
 
-class InlineTask(Task):
-    """
-    This class is what is instantiated when calling #Project.task() with only a name and a BuildDSL closure.
-    It simplifies the implementation of one-off tasks in a BuildDSK Kraken build script, allowing to dynamically
-    define properties.
-    """
-
-    _properties: dict[str, Property[Any]]
-
-    def __init__(self, name: str, project: Project) -> None:
-        super().__init__(name, project)
-        self._properties = {}
-
-    @overload
-    def property(self, name: str) -> Property[Any]:
-        """Retrieve a property by name."""
-
-    @overload
-    def property(self, name: str, value: Any) -> Property[Any]:
-        """Define a property on this task with the given *name* and *value*."""
-
-    def property(self, name: str, value: Any | NotSet = NotSet.Value) -> Property[Any]:
-        if value is NotSet.Value:
-            return self._properties[name]
-        prop = self._properties[name] = Property(self, name, Any)
-        prop.set(value)
-        return prop
-
-    # Task
-
-    def get_properties(self) -> Iterable[Property[Any]]:
-        yield from self._properties.values()
-        yield from super().get_properties()
-
-    def execute(self) -> TaskStatus | None:
-        return None
-
-
 class TaskSet(Collection[Task]):
     """Represents a collection of tasks."""
+
+    @staticmethod
+    def build(
+        context: Context | Project,
+        selector: str | Address | Task | Iterable[str | Address | Task],
+        project: Project | None = None,
+    ) -> TaskSet:
+        """
+        For each item in *selector*, resolve tasks using [`Context.resolve_tasks()`]. If a selector is a string,
+        assign the resolved tasks to a partition by that selector value.
+
+        Args:
+            context: A Kraken context or project to resolve the *selector* in. If it is a project, string selectors
+                are treated relative to the project.
+            selector: A single selector string or task, or a sequence thereof. Note that selectors of type [`Address`]
+                are converted to string partitions.
+        """
+
+        from kraken.core.system.project import Project
+
+        if isinstance(context, Project):
+            project = context
+            context = context.context
+        else:
+            project = None
+
+        if isinstance(selector, (str, Address, Task)):
+            selector = [selector]
+
+        result = TaskSet()
+        for item in selector:
+            if isinstance(item, (str, Address)):
+                result.add(context.resolve_tasks([item], project), partition=str(item))
+            else:
+                result.add([item])
+
+        return result
 
     def __init__(self, tasks: Iterable[Task] = ()) -> None:
         self._tasks = set(tasks)
@@ -665,7 +617,7 @@ class TaskSet(Collection[Task]):
         return len(self._tasks)
 
     def __repr__(self) -> str:
-        return f"TaskSet(length={len(self._tasks)})"
+        return f"TaskSet(length={len(self._tasks)}, pttm={self._partition_to_task_map}, ttpm={self._task_to_partition_map})"
 
     def __contains__(self, __x: object) -> bool:
         return __x in self._tasks
@@ -742,15 +694,18 @@ class TaskSetPartitions:
         return iter(self._ptt)
 
     @overload
-    def __getitem__(self, partition: str) -> Collection[Task]:
-        ...
+    def __getitem__(self, partition: str) -> Collection[Task]: ...
 
     @overload
-    def __getitem__(self, partition: Task) -> Collection[str]:
-        ...
+    def __getitem__(self, partition: Address) -> Collection[Task]: ...
 
-    def __getitem__(self, partition: str | Task) -> Collection[str] | Collection[Task]:
+    @overload
+    def __getitem__(self, partition: Task) -> Collection[str]: ...
+
+    def __getitem__(self, partition: str | Address | Task) -> Collection[str] | Collection[Task]:
         if isinstance(partition, str):
             return self._ptt.get(partition) or ()
+        elif isinstance(partition, Address):
+            return self._ptt.get(str(partition)) or ()
         else:
             return self._ttp.get(partition) or ()

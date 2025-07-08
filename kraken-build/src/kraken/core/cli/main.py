@@ -14,20 +14,21 @@ from functools import partial
 from pathlib import Path
 from typing import Any, NoReturn
 
-from nr.io.graphviz.render import render_to_browser
-from nr.io.graphviz.writer import GraphvizWriter
-from termcolor import colored
+from deprecated import deprecated
 
 from kraken.common import (
     BuildscriptMetadata,
+    ColorOptions,
     CurrentDirectoryProjectFinder,
     LoggingOptions,
     RequirementSpec,
     appending_to_sys_path,
+    colored,
     get_terminal_width,
     not_none,
     propagate_argparse_formatter_to_subparser,
 )
+from kraken.common.graphviz import GraphvizWriter, render_to_browser
 from kraken.common.pyenv import get_distributions
 from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize
@@ -64,6 +65,7 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
             """
         ),
     )
+    ColorOptions.add_to_parser(parser)
     subparsers = parser.add_subparsers(dest="cmd")
 
     run = subparsers.add_parser(
@@ -140,7 +142,7 @@ def _load_build_state(
         )
 
     # For consistency, we always act as if Kraken was run from the project root directory.
-    # Using the `subproject_directory`, we later fitler down which tasks are selected / how relative
+    # Using the `subproject_directory`, we later filter down which tasks are selected / how relative
     # task references on the CLI are resolved.
     os.chdir(root_directory)
 
@@ -409,7 +411,7 @@ def tree(graph: TaskGraph, exclude_options: ExcludeOptions) -> None:
 
         parent = address.parent.set_container(True) if address and not address.is_root() else None
         if parent:
-            result = colored(str(parent), "grey")
+            result = colored(str(parent), "light_grey")
         else:
             result = ""
         result = result + colored(":" if address.is_root() else address.name, attrs=["bold"])
@@ -563,14 +565,23 @@ def visualize(graph: TaskGraph, viz_options: VizOptions) -> None:
         render_to_browser(buffer.getvalue())
 
 
+@deprecated(
+    reason="kraken-wrapper uses `uv pip freeze` since v0.45.0. `kraken query env` will be removed in "
+    "an upcoming version."
+)
 def env() -> None:
+    logger.warning(
+        "The `kraken query env` command is deprecated. This probably means you are using an older version "
+        "of kraken-wrapper (unless you directly called this command). You should upgrade kraken-wrapper."
+    )
+
     dists = sorted(get_distributions().values(), key=lambda dist: dist.name)
     print(json.dumps([dist.to_json() for dist in dists], sort_keys=True))
 
 
 def on_exception(exc: BaseException) -> int:
     """
-    Called when an exception occurrs in #main_internal() to handle common errors and provide better error messages.
+    Called when an exception occurs in #main_internal() to handle common errors and provide better error messages.
     """
 
     issues_url = "https://github.com/kraken-build/kraken-build/issues"
@@ -620,8 +631,11 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
         parser.print_usage()
         sys.exit(0)
 
+    color_opts = ColorOptions.collect(args)
+    color_opts.init_color()
+
     if LoggingOptions.available(args):
-        LoggingOptions.collect(args).init_logging()
+        LoggingOptions.collect(args).init_logging(force_color=not color_opts.no_color)
 
     if pdb_enabled:
         logger.info("note: KRAKEN_PDB=1 is set, an interactive debugging session will be started on exit.")

@@ -1,4 +1,4 @@
-""" Build and publish Helm charts with Kraken. """
+"""Build and publish Helm charts with Kraken."""
 
 from __future__ import annotations
 

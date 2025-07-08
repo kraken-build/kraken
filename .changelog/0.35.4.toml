@@ -1,0 +1,32 @@
+release-date = "2024-03-14"
+
+[[entries]]
+id = "a2bf2942-29a7-406f-a771-ebdca0051148"
+type = "improvement"
+description = "Use `tomlkit` instead of `tomli`/`tomli-w` packages to read/write Pyproject; this preserves comments in the `pyproject.toml`"
+author = "@NiklasRosenstein"
+component = "kraken-build"
+
+[[entries]]
+id = "adc17a2c-58fc-48e5-a476-2bcfccb26a21"
+type = "fix"
+description = "Do not fail when building the same PEX file twice"
+author = "@Tpt"
+
+[[entries]]
+id = "654174ac-b3d2-476a-b761-e65c8f4dd8a5"
+type = "fix"
+description = "Fixed an issue where when the DaemonController fails to start the daemon process, the fork of the Kraken process continues, resulting in two copies of the process trying to run to completion, e.g. executing tasks from this point on."
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "7d1ec411-3b1a-4b54-a858-137ff10033f1"
+type = "improvement"
+description = "Add `PythonBuildSystem.bump_version()` function with a single implementation for Poetry/Maturin/Pdm which correctly reverts to the original file contents. Note that reverting is still not supported for Slap"
+author = "niklas.rosenstein@helsing.ai"
+
+[[entries]]
+id = "38ef4850-c7b2-435e-8801-f4fe50070be8"
+type = "improvement"
+description = "Remove mitmweb dependency, install it with PEX instead. Print mitmweb proxy and UI URLs in the CargoAuthProxy task"
+author = "niklas.rosenstein@helsing.ai"

@@ -1,28 +1,9 @@
-"""This test is an end-to-end test to publish and consume crates from Artifactory/Cloudsmith. It performs the
-following steps:
-
-* Create a temporary Cargo repository in Artifactory/Cloudsmith
-* Publish the `data/hello-world-lib` using the :func:`cargo_publish()` task
-* Consume the just published library in `data/hello-world-app` using the :func:`cargo_build()` task
-
-Without injecting the HTTP basic authentication credentials into the Cargo publish and build steps, we
-expect the publish and/or build step to fail.
-
-The test runs in a new temporary `CARGO_HOME` directory to ensure that Cargo has to freshly fetch the
-Artifactory/Cloudsmith repository Git index every time.
-
-!!! note
-
-    This integration tests requires live remote repository credentials with enough permissions to create and delete
-    repositories and to create a new user with access to the repository. If we get setting up an actual Artifactory
-    or Cloudsmith instance within the tests, it would be very nice, but until then we need to inject these credentials
-    in CI via an environment variable. Unless the environment variable is present, the test will be skipped.
-"""
+"""This test is an end-to-end test to publish and consume crates from a private Cargo registry."""
 
 from __future__ import annotations
 
 import dataclasses
-import json
+import fcntl
 import logging
 import os
 import random
@@ -30,21 +11,25 @@ import shutil
 import subprocess as sp
 import time
 import unittest.mock
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 
 import pytest
+from requests_mock import Mocker
 
 from kraken.core import BuildError
 from kraken.core.testing import kraken_ctx, kraken_project
 from kraken.std.cargo import (
     cargo_auth_proxy,
     cargo_build,
-    cargo_bump_version,
     cargo_check_toolchain_version,
     cargo_publish,
     cargo_registry,
     cargo_sync_config,
 )
+
+from tests.kraken_std.util.docker import DockerServiceManager
 from tests.resources import example_dir
 
 logger = logging.getLogger(__name__)
@@ -54,53 +39,83 @@ logger = logging.getLogger(__name__)
 class CargoRepositoryWithAuth:
     name: str
     index_url: str
-    user: str
-    password: str
-    token: str
+    creds: tuple[str, str] | None
+    token: str | None
 
 
-def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdir: Path) -> None:
+def skip_publish_lib(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
+    lib_dir = tempdir.joinpath("cargo-hello-world-lib")
+    shutil.copytree(example_dir("cargo-hello-world-lib"), lib_dir)
+    cargo_registry_id = "private-repo"
+
+    with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
+        # Build the library and publish it to the registry.
+        logger.info(
+            "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
+            repository.name,
+            repository.index_url,
+        )
+
+        with kraken_ctx() as ctx, kraken_project(ctx) as project1:
+            project1.directory = lib_dir
+            cargo_registry(
+                cargo_registry_id,
+                repository.index_url,
+                read_credentials=repository.creds,
+                publish_token=repository.token,
+            )
+            cargo_auth_proxy()
+            task = cargo_sync_config()
+            task.git_fetch_with_cli.set(True)
+            cargo_check_toolchain_version(minimal_version="1.60")
+            publish_task = cargo_publish(
+                cargo_registry_id,
+                version="0.1.0",
+                cargo_toml_file=project1.directory.joinpath("Cargo.toml"),
+            )
+            graph = project1.context.execute(["publish"])
+            status = graph.get_status(publish_task)
+            assert status is not None and status.is_skipped()
+
+
+def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
     # Copy the Cargo project files to a temporary directory.
     for item in ["cargo-hello-world-lib", "cargo-hello-world-app"]:
         shutil.copytree(example_dir(item), tempdir / item)
+
+    app_dir = tempdir.joinpath("cargo-hello-world-app")
+    lib_dir = tempdir.joinpath("cargo-hello-world-lib")
 
     cargo_registry_id = "private-repo"
     publish_version = ".".join(str(random.randint(0, 999)) for _ in range(3))
     logger.info("==== Publish version is %s", publish_version)
 
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
-        # Build the library and publish it to Artifactory.
-        if repository:
-            logger.info(
-                "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
-                repository.name,
-                repository.index_url,
-            )
-        else:
-            logger.info("Building data/hello-world-lib")
+        # Build the library and publish it to the registry.
+        logger.info(
+            "Publishing cargo-hello-world-lib to Cargo repository %r (%r)",
+            repository.name,
+            repository.index_url,
+        )
 
         with kraken_ctx() as ctx, kraken_project(ctx) as project1:
-            project1.directory = example_dir("cargo-hello-world-lib")
-            if repository:
-                cargo_registry(
-                    cargo_registry_id,
-                    repository.index_url,
-                    read_credentials=(repository.user, repository.password),
-                    publish_token=repository.token,
-                )
+            project1.directory = lib_dir
+            cargo_registry(
+                cargo_registry_id,
+                repository.index_url,
+                read_credentials=repository.creds,
+                publish_token=repository.token,
+            )
             cargo_auth_proxy()
             task = cargo_sync_config()
             task.git_fetch_with_cli.set(True)
             cargo_check_toolchain_version(minimal_version="1.60")
-            cargo_bump_version(version=publish_version)
-            cargo_publish(cargo_registry_id)
-            if repository:
-                project1.context.execute(["fmt", "lint", "publish"])
-            else:
-                project1.context.execute(["fmt", "lint", "build"])
-
-        if not repository:
-            return
+            cargo_publish(
+                cargo_registry_id,
+                version=publish_version,
+                cargo_toml_file=project1.directory.joinpath("Cargo.toml"),
+            )
+            project1.context.execute(["fmt", "lint", "publish"])
 
         num_tries = 3
         for idx in range(num_tries):
@@ -112,24 +127,25 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                     repository.index_url,
                 )
                 with kraken_ctx() as ctx, kraken_project(ctx) as project2:
-                    project2.directory = example_dir("cargo-hello-world-app")
+                    project2.directory = app_dir
                     cargo_toml = project2.directory / "Cargo.toml"
                     cargo_toml.write_text(cargo_toml.read_text().replace("$VERSION", publish_version))
                     cargo_registry(
                         cargo_registry_id,
                         repository.index_url,
-                        read_credentials=(repository.user, repository.password),
+                        read_credentials=repository.creds,
                     )
                     cargo_auth_proxy()
-                    cargo_sync_config()
-                    cargo_build("debug")
+                    sync_task = cargo_sync_config()
+                    sync_task.git_fetch_with_cli.set(True)
+                    build_task = cargo_build("debug")
+                    build_task.from_project_dir = True
                     project2.context.execute(["fmt", "build"])
 
                 # Running the application should give "Hello from hello-world-lib!".
-                output = sp.check_output(
-                    [example_dir("cargo-hello-world-app") / "target" / "debug" / "hello-world-app"]
-                ).decode()
+                output = sp.check_output([app_dir / "target" / "debug" / "hello-world-app"]).decode()
                 assert output.strip() == "Hello from hello-world-lib!"
+                break
             except BuildError as exc:
                 logger.error(
                     "Encountered a build error (%s); most likely that is because the Cargo repository "
@@ -142,40 +158,115 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth | None, tempdi
                 time.sleep(10)
 
 
-ARTIFACTORY_VAR = "ARTIFACTORY_INTEGRATION_TEST_CREDENTIALS"
-CLOUDSMITH_VAR = "CLOUDSMITH_INTEGRATION_TEST_CREDENTIALS"
+def publish_workspace(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
+    # Copy the Cargo project files to a temporary directory.
+    workspace_dir = tempdir.joinpath("cargo-hello-world-workspace")
+    shutil.copytree(example_dir("cargo-hello-world-workspace"), workspace_dir)
+
+    cargo_registry_id = "private-repo"
+    publish_version = ".".join(str(random.randint(0, 999)) for _ in range(3))
+    logger.info("==== Publish version is %s", publish_version)
+
+    with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
+        # Build the library and publish it to the registry.
+        logger.info(
+            "Publishing cargo-hello-world-workspace to Cargo repository %r (%r)",
+            repository.name,
+            repository.index_url,
+        )
+
+        with kraken_ctx() as ctx, kraken_project(ctx) as project:
+            project.directory = workspace_dir
+            cargo_registry(
+                cargo_registry_id,
+                repository.index_url,
+                read_credentials=repository.creds,
+                publish_token=repository.token,
+            )
+            cargo_auth_proxy()
+            task = cargo_sync_config()
+            task.git_fetch_with_cli.set(True)
+            cargo_publish(
+                cargo_registry_id,
+                package_name="hello-world-parent",
+                version=publish_version,
+                cargo_toml_file=project.directory / "parent" / "Cargo.toml",
+            )
+            cargo_publish(
+                cargo_registry_id,
+                package_name="hello-world-child",
+                version=publish_version,
+                cargo_toml_file=project.directory / "child" / "Cargo.toml",
+            )
+            project.context.execute(["fmt", "lint", "publish"])
 
 
-@pytest.mark.skipif(ARTIFACTORY_VAR not in os.environ, reason=f"{ARTIFACTORY_VAR} is not set")
-@pytest.mark.xfail(reason="currently failing, see test artifactory is no longer active, see #32")
-def test__artifactory_cargo_publish_and_consume(tempdir: Path) -> None:
-    credentials = json.loads(os.environ[ARTIFACTORY_VAR])
+# NOTE(@niklas): It would be better if we could just create a new Cargo registry for each test instead of scoping
+#       it to the session, however somehow `cargo publish` chooses the server's internal port for the
+#       `/api/v1/crates/new` request even if we configure the host port instead.
+#
+#       Logs from mitmweb on `cargo publish --registry private-repo --token xxxxx`
+#
+#           - GET http://localhost:49321/git/info/refs?service=git-upload-pack HTTP/1.1
+#           - GET http://localhost:49321/git/HEAD HTTP/1.1
+#           - PUT http://0.0.0.0:35504/api/v1/crates/new HTTP/1.1
+#
+#       I suppose it's caused by the repository config served via the Git repository that directs Cargo to a separate
+#       API endpoint. Until we can find a way to change this behavior, we need the container port and the host port
+#       to be the same, which prevents us from running multiple test-scoped fixtures in parallel.
+@pytest.fixture(scope="session")
+def private_registry(docker_service_manager: DockerServiceManager) -> Iterator[str]:
+    with file_lock(
+        Path("/tmp/kraken_cargo_private_registry_lock")
+    ):  # We hardcode a port, only a single instance must exist at the same time
+        container = docker_service_manager.run(
+            "ghcr.io/d-e-s-o/cargo-http-registry:sha-2edffd8",  # TODO(Tpt): hardcoded because latest docker images are broken
+            [
+                "/tmp/test-registry",
+                "--addr",
+                "0.0.0.0:35504",
+            ],
+            ports=["35504:35504"],
+            detach=True,
+        )
+
+        index_url = "http://0.0.0.0:35504/git"
+        logger.info("Started local cargo registry at %s", index_url)
+        time.sleep(5)
+        yield index_url
+        container.stop()
+
+
+def test__private_cargo_registry_publish_and_consume(tempdir: Path, private_registry: str) -> None:
     repository = CargoRepositoryWithAuth(
-        "kraken-std-cargo-integration-test",
-        credentials["url"] + f"/git/{os.environ['ARTIFACTORY_CARGO_REPOSITORY']}.git",
-        credentials["user"],
-        credentials["token"],
-        "Bearer " + credentials["token"],
+        "kraken-std-cargo-integration-test", private_registry, None, "xxxxxxxxxxxxxxxxxxxxxx"
     )
     publish_lib_and_build_app(repository, tempdir)
 
 
-@pytest.mark.skipif(CLOUDSMITH_VAR not in os.environ, reason=f"{CLOUDSMITH_VAR} is not set")
-@pytest.mark.xfail(reason="currently failing, see #14")
-def test__cloudsmith_cargo_publish_and_consume(tempdir: Path) -> None:
-    credentials = json.loads(os.environ[CLOUDSMITH_VAR])
+def test__private_cargo_registry_publish_workspace(tempdir: Path, private_registry: str) -> None:
     repository = CargoRepositoryWithAuth(
-        "kraken-std-cargo-integration-test",
-        (
-            f"https://dl.cloudsmith.io/basic/{credentials['owner']}/"
-            f"{os.environ['CLOUDSMITH_CARGO_REPOSITORY']}/cargo/index.git"
-        ),
-        credentials["user"],
-        credentials["api_key"],
-        credentials["api_key"],
+        "kraken-std-cargo-integration-test", private_registry, None, "xxxxxxxxxxxxxxxxxxxxxx"
     )
-    publish_lib_and_build_app(repository, tempdir)
+    publish_workspace(repository, tempdir)
 
 
-def test_cargo_build(tempdir: Path) -> None:
-    publish_lib_and_build_app(None, tempdir)
+def test__mock_cargo_registry_skips_publish_if_exists(tempdir: Path, requests_mock: Mocker) -> None:
+    registry_url = "http://0.0.0.0:35510"
+    index_url = f"sparse+{registry_url}/"
+
+    requests_mock.get(f"{registry_url}/config.json", text="{}")
+    requests_mock.get(f"{registry_url}/he/ll/hello-world-lib", text='{"vers": "0.1.0"}')
+
+    repository = CargoRepositoryWithAuth("kraken-std-cargo-integration-test", index_url, None, "xxxxxxxxxxxxxxxxxxxxxx")
+    skip_publish_lib(repository, tempdir)
+
+
+@contextmanager
+def file_lock(path: Path) -> Iterator[None]:
+    with path.open("w") as fp:
+        fcntl.lockf(fp, fcntl.LOCK_EX)
+        try:
+            yield None
+        finally:
+            fcntl.lockf(fp, fcntl.LOCK_UN)

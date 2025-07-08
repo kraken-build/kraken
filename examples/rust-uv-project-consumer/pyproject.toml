@@ -1,0 +1,11 @@
+[project]
+name = "rust-uv-project-consumer"
+version = "0.1.0"
+dependencies = [
+    "rust-uv-project"
+]
+requires-python = "~=3.9"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

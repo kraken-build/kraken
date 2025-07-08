@@ -1,19 +1,19 @@
-__version__ = "0.33.2"
+__version__ = "0.44.1"
 
 from . import path
 from ._argparse import propagate_argparse_formatter_to_subparser
 from ._asciitable import AsciiTable
 from ._auth import CredentialsWithHost
 from ._buildscript import BuildscriptMetadata, BuildscriptMetadataException, buildscript
+from ._colored import Attribute, Color, Highlight, colored
 from ._date import datetime_to_iso8601, iso8601_to_datetime
 from ._environment import EnvironmentType
 from ._fs import atomic_file_swap, safe_rmpath
 from ._generic import NotSet, flatten, not_none
 from ._importlib import appending_to_sys_path, import_class
-from ._option_sets import LoggingOptions
+from ._option_sets import ColorOptions, LoggingOptions
 from ._requirements import LocalRequirement, PipRequirement, Requirement, RequirementSpec, parse_requirement
 from ._runner import (
-    BuildDslScriptRunner,
     CurrentDirectoryProjectFinder,
     GitAwareProjectFinder,
     ProjectFinder,
@@ -32,6 +32,11 @@ __all__ = [
     "propagate_argparse_formatter_to_subparser",
     # _asciitable
     "AsciiTable",
+    # _colored
+    "colored",
+    "Color",
+    "Highlight",
+    "Attribute",
     # _date
     "datetime_to_iso8601",
     "iso8601_to_datetime",
@@ -52,6 +57,7 @@ __all__ = [
     "BuildscriptMetadata",
     "BuildscriptMetadataException",
     # _option_sets
+    "ColorOptions",
     "LoggingOptions",
     # _requirements
     "parse_requirement",
@@ -60,7 +66,6 @@ __all__ = [
     "PipRequirement",
     "RequirementSpec",
     # _runner
-    "BuildDslScriptRunner",
     "CurrentDirectoryProjectFinder",
     "GitAwareProjectFinder",
     "ProjectFinder",

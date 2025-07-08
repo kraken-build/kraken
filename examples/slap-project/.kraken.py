@@ -8,9 +8,7 @@ python.python_settings(always_use_managed_env=True).add_package_index(
     credentials=(os.environ["LOCAL_USER"], os.environ["LOCAL_PASSWORD"]),
 )
 python.install()
-python.mypy()
-python.flake8()
-python.black()
-python.isort()
+python.mypy(version_spec="==1.10.0")
+python.ruff(version_spec="==0.9.4")
 python.pytest()
 python.publish(package_index="local", distributions=python.build(as_version="0.1.0").output_files)

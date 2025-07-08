@@ -7,23 +7,26 @@ import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
 
 logger = logging.getLogger(__name__)
 DEFAULT_BUILD_SUPPORT_FOLDER = "build-support"
-DEFAULT_INTERPRETER_CONSTRAINT = ">=3.10,<3.11"  # Kraken-core requires 3.10 exactly
+DEFAULT_INTERPRETER_CONSTRAINT = ">=3.10"
 
 
-def parse_requirement(value: str) -> "PipRequirement | LocalRequirement":
+def parse_requirement(value: str) -> "PipRequirement | LocalRequirement | UrlRequirement":
     """
     Parse a string as a requirement. Return a :class:`PipRequirement` or :class:`LocalRequirement`.
     """
 
-    match = re.match(r"(.+?)@(.+)", value)
-    if match:
-        return LocalRequirement(match.group(1).strip(), Path(match.group(2).strip()))
+    if match := re.match(r"(.+?)@(.+)", value):
+        name, value = match.group(1).strip(), match.group(2).strip()
+        if match := re.match(r"(git\+)?(ssh|https?)://.+", value):
+            return UrlRequirement(name, value)
+        return LocalRequirement(name, Path(value))
 
     match = re.match(r"([\w\d\-\_]+)(.*)", value)
     if match:
@@ -44,10 +47,14 @@ class Requirement(abc.ABC):
 
 @dataclasses.dataclass(frozen=True)
 class PipRequirement(Requirement):
-    """Represents a Pip requriement."""
+    """Represents a Pip requirement."""
 
     name: str
-    spec: "str | None"
+    spec: str | None
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid URL requirement: {self}")
 
     def __str__(self) -> str:
         return f"{self.name}{self.spec or ''}"
@@ -65,11 +72,36 @@ class LocalRequirement(Requirement):
     name: str
     path: Path
 
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid requirement: {self}")
+
     def __str__(self) -> str:
-        return f"{self.name}@{self.path}"
+        return f"{self.name} @ {self.path}"
 
     def to_args(self, base_dir: Path) -> list[str]:
         return [str((base_dir / self.path if base_dir else self.path).absolute())]
+
+
+@dataclasses.dataclass(frozen=True)
+class UrlRequirement(Requirement):
+    """Represents a requirement that is installed from a URL."""
+
+    name: str
+    url: str
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise ValueError(f"invalid requirement: {self}")
+        print(self.url)
+        if not urlparse(self.url).scheme:
+            raise ValueError(f"invalid URL requirement: {self}")
+
+    def __str__(self) -> str:
+        return f"{self.name} @ {self.url}"
+
+    def to_args(self, base_dir: Path) -> list[str]:
+        return [str(self)]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -204,7 +236,7 @@ class RequirementSpec:
             requirements=tuple(map(parse_requirement, metadata.requirements)),
             index_url=metadata.index_url,
             extra_index_urls=tuple(metadata.extra_index_urls),
-            interpreter_constraint=DEFAULT_INTERPRETER_CONSTRAINT,
+            interpreter_constraint=metadata.interpreter_constraint or DEFAULT_INTERPRETER_CONSTRAINT,
             pythonpath=tuple(metadata.additional_sys_paths) + (DEFAULT_BUILD_SUPPORT_FOLDER,),
         )
 
@@ -214,4 +246,5 @@ class RequirementSpec:
             extra_index_urls=list(self.extra_index_urls),
             requirements=[str(x) for x in self.requirements],
             additional_sys_paths=[x for x in self.pythonpath if x != DEFAULT_BUILD_SUPPORT_FOLDER],
+            interpreter_constraint=DEFAULT_INTERPRETER_CONSTRAINT,
         )

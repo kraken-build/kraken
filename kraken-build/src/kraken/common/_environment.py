@@ -1,9 +1,14 @@
 import enum
 from collections.abc import Mapping, MutableMapping
 
+from deprecated import deprecated
+
 KRAKEN_ENVIRONMENT_TYPE_VARIABLE = "_KRAKEN_COMMONS_ENVIRONMENT_TYPE"
 
 
+@deprecated(
+    reason="Starting with kraken-wrapper v0.45.0, the environment type can no longer be selected and only Uv is supported."
+)
 class EnvironmentType(enum.Enum):
     """
     This enumeration describes the type of environment that is being used to run Kraken in.
@@ -15,13 +20,11 @@ class EnvironmentType(enum.Enum):
     #: Wrapper, using a virtual environment.
     VENV = 1
 
-    def is_native(self) -> bool:
-        return self == EnvironmentType.NATIVE
-
-    def is_venv(self) -> bool:
-        return self == EnvironmentType.VENV
+    #: Use the new shiny `uv` package manager.
+    UV = 2
 
     def is_wrapped(self) -> bool:
+        """Whether the environment is managed by Kraken-wrapper."""
         return self != EnvironmentType.NATIVE
 
     @staticmethod

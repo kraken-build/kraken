@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import logging
-from abc import ABC
-from collections.abc import Mapping, Sequence
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Any, ClassVar, TypeAlias
 
-import tomli
-import tomli_w
+from kraken.common.toml import TomlFile
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +20,16 @@ class _PackageIndexPriority(str, Enum):
     https://python-poetry.org/docs/repositories/#project-configuration
     """
 
+    # in decreasing order of priority
     default = "default"
     primary = "primary"
     secondary = "secondary"  # Do not use
     supplemental = "supplemental"
+    explicit = "explicit"
+
+    @property
+    def level(self) -> int:
+        return list(_PackageIndexPriority).index(self)
 
 
 @dataclass
@@ -52,46 +56,14 @@ class PackageIndex:
     verify_ssl: bool
 
 
-@dataclass
-class Pyproject(dict[str, Any]):
-    """
-    Represents a raw `pyproject.toml` file in deserialized form.
-    """
-
-    path: Path | None
-
-    def __init__(self, path: Path | None, data: Mapping[str, Any]) -> None:
-        super().__init__(data)
-        self.path = path
-
-    @classmethod
-    def read_string(cls, text: str) -> Pyproject:
-        return cls(None, tomli.loads(text))
-
-    @classmethod
-    def read(cls, path: Path) -> Pyproject:
-        with path.open("rb") as fp:
-            return cls(path, tomli.load(fp))
-
-    def save(self, path: Path | None = None) -> None:
-        path = path or self.path
-        if not path:
-            raise RuntimeError("No path to save to")
-        with path.open("wb") as fp:
-            tomli_w.dump(self, fp)
-
-    def to_toml_string(self) -> str:
-        return tomli_w.dumps(self)
-
-
 class PyprojectHandler(ABC):
     """
-    A wrapper for a raw Pyproject to implement common read and mutation operations.
+    A wrapper for a raw TomlConfig to implement common read and mutation operations.
     """
 
-    raw: Pyproject
+    raw: TomlFile
 
-    def __init__(self, raw: Pyproject) -> None:
+    def __init__(self, raw: TomlFile) -> None:
         self.raw = raw
 
     def get_name(self) -> str | None:
@@ -162,3 +134,19 @@ class PyprojectHandler(ABC):
         """
 
         raise NotImplementedError("%s.set_path_dependencies_to_version()" % type(self).__name__)
+
+    @dataclass(frozen=True)
+    class Package:
+        include: str
+        # Why do we need the extra `from_` if it's only used by PythonBuildSystem.bump_version to concatenate it
+        # to `include`: package_dir = self.project_directory / (package.from_ or "") / package.include
+        # Then if the dataclass only has one field its existence is no longer needed.
+        from_: str | None = None
+
+    @abstractmethod
+    def get_packages(self) -> list[Package]:
+        pass
+
+
+# Define Pyproject type for back compatibility
+Pyproject = TomlFile

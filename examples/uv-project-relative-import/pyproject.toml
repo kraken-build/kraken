@@ -1,0 +1,26 @@
+[project]
+name = "uv-project-relative-import"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.10"
+dependencies = [
+    "tqdm>=4.66.5",
+    "uv-project",
+]
+
+[dependency-groups]
+dev = [
+    "uv-project",
+]
+
+[project.optional-dependencies]
+opt = [
+    "uv-project",
+]
+
+[tool.uv.sources]
+uv-project = { path = "../uv-project", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -1,4 +1,4 @@
-""" Implements PDM as a build system for kraken-std. """
+"""Implements PDM as a build system for kraken-std."""
 
 from __future__ import annotations
 
@@ -6,28 +6,32 @@ import logging
 import os
 import shutil
 import subprocess as sp
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 from kraken.common import NotSet
 from kraken.common.path import is_relative_to
+from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
-from kraken.std.python.pyproject import PackageIndex, Pyproject, PyprojectHandler
+from kraken.std.python.pyproject import PackageIndex, PyprojectHandler
 from kraken.std.python.settings import PythonSettings
 
 from . import ManagedEnvironment, PythonBuildSystem
 
 logger = logging.getLogger(__name__)
 
+# NOTE: We can't inline this expression where we need it because Mypy understands the expression and will permanently
+#       turn off a code path on the corresponding system, which can lead to type errors downstream (typically
+#       unreachable code).
+_is_linux = sys.platform == "linux"
+
 
 class PdmPyprojectHandler(PyprojectHandler):
     """
     Implements the PyprojectHandler interface for PDM projects.
     """
-
-    def __init__(self, pyproj: Pyproject) -> None:
-        super().__init__(pyproj)
 
     # PyprojectHandler
 
@@ -105,6 +109,11 @@ class PdmPyprojectHandler(PyprojectHandler):
                 source["verify_ssl"] = False
             sources_conf.append(source)
 
+    def get_packages(self) -> list[PyprojectHandler.Package]:
+        # TODO: Detect packages in the PDM project. Until we do, the __version__ in source files of PDM
+        #       projects are not bumped on publish.
+        return []
+
 
 class PDMPythonBuildSystem(PythonBuildSystem):
     name = "PDM"
@@ -112,7 +121,7 @@ class PDMPythonBuildSystem(PythonBuildSystem):
     def __init__(self, project_directory: Path) -> None:
         self.project_directory = project_directory
 
-    def get_pyproject_reader(self, pyproject: Pyproject) -> PdmPyprojectHandler:
+    def get_pyproject_reader(self, pyproject: TomlFile) -> PdmPyprojectHandler:
         return PdmPyprojectHandler(pyproject)
 
     def supports_managed_environments(self) -> bool:
@@ -121,8 +130,9 @@ class PDMPythonBuildSystem(PythonBuildSystem):
     def get_managed_environment(self) -> ManagedEnvironment:
         return PDMManagedEnvironment(self.project_directory)
 
-    def update_lockfile(self, settings: PythonSettings, pyproject: Pyproject) -> TaskStatus:
+    def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
         command = ["pdm", "update"]
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
         return TaskStatus.succeeded()
 
@@ -130,42 +140,56 @@ class PDMPythonBuildSystem(PythonBuildSystem):
         return True
 
     def login(self, settings: PythonSettings) -> None:
+        # PDM does not support SSL_CERT_FILE or REQUESTS_CA_BUNDLE directly on non-Linux because it uses the
+        # `truststore` package (see https://github.com/pdm-project/pdm/issues/3076 for more information).
+        # On these systems, if these variables are set, we configure the certificates in the PDM configuration
+        # instead.
+        if not _is_linux:
+            ca_certs = next(filter(None, (os.environ.get(k) for k in ["SSL_CERT_FILE", "REQUESTS_CA_BUNDLE"])), None)
+        else:
+            ca_certs = None
+
         for index in settings.package_indexes.values():
-            if index.is_package_source and index.credentials:
+            if index.is_package_source and (index.credentials or ca_certs):
                 commands = [
                     ["pdm", "config", f"pypi.{index.alias}.url", index.index_url],
-                    [
-                        "pdm",
-                        "config",
-                        f"pypi.{index.alias}.username",
-                        index.credentials[0],
-                    ],
-                    [
-                        "pdm",
-                        "config",
-                        f"pypi.{index.alias}.password",
-                        index.credentials[1],
-                    ],
                 ]
+                if index.credentials:
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.username",
+                            index.credentials[0],
+                        ]
+                    )
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.password",
+                            index.credentials[1],
+                        ]
+                    )
+                if ca_certs is not None:
+                    # See https://pdm-project.org/latest/usage/config/#configure-https-certificates
+                    commands.append(
+                        [
+                            "pdm",
+                            "config",
+                            f"pypi.{index.alias}.ca_certs",
+                            os.path.abspath(ca_certs),
+                        ]
+                    )
                 for command in commands:
                     safe_command = command[:-1] + ["MASKED"]
-                    logger.info("$ %s", safe_command)
+                    logger.info("Run '%s'", " ".join(safe_command))
 
                     code = sp.call(command)
                     if code != 0:
                         raise RuntimeError(f"command {safe_command!r} failed with exit code {code}")
 
-    def build(self, output_directory: Path, as_version: str | None = None) -> list[Path]:
-        previous_version: str | None = None
-
-        if as_version is not None:
-            # Bump the in-source version number.
-            pyproject = self.get_pyproject_reader(Pyproject.read(self.project_directory / "pyproject.toml"))
-            previous_version = pyproject.get_version()
-            # pyproject.set_path_dependencies_to_version(as_version)
-            pyproject.set_version(as_version)
-            pyproject.raw.save()
-
+    def build(self, output_directory: Path) -> list[Path]:
         # PDM does not allow configuring the output folder, so it's always going to be "dist/".
         # We remove the contents of that folder to make sure we know what was produced.
         dist_dir = self.project_directory / "dist"
@@ -173,23 +197,18 @@ class PDMPythonBuildSystem(PythonBuildSystem):
             shutil.rmtree(dist_dir)
 
         command = ["pdm", "build"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)
 
         src_files = list(dist_dir.iterdir())
         dst_files = [output_directory / path.name for path in src_files]
         os.makedirs(output_directory, exist_ok=True)
-        for src, dst in zip(src_files, dst_files):
+        for src, dst in zip(src_files, dst_files, strict=True):
             shutil.move(str(src), dst)
 
         # Unless the output directory is a subdirectory of the dist_dir, we remove the dist dir again.
         if not is_relative_to(output_directory, dist_dir):
             shutil.rmtree(dist_dir)
-
-        # Roll back the previously updated in-source version numbers.
-        if previous_version is not None:
-            pyproject.set_version(previous_version)
-            pyproject.raw.save()
 
         return dst_files
 
@@ -206,7 +225,7 @@ class PDMManagedEnvironment(ManagedEnvironment):
         """Uses `pdm venv --path in-project`. TODO(simone.zandara) Add support for more environments."""
 
         get_command = ["pdm", "venv", "--path", "in-project"]
-        logger.debug("$ %s", get_command)
+        logger.info("Run '%s'", " ".join(get_command))
         try:
             return Path(sp.check_output(get_command, cwd=self.project_directory, stderr=sp.PIPE).decode().strip())
         except sp.CalledProcessError as exc:
@@ -215,12 +234,12 @@ class PDMManagedEnvironment(ManagedEnvironment):
                 return None
 
         create_command = ["pdm", "venv", "create"]
-        logger.info("$ %s", create_command)
+        logger.info("Run '%s'", " ".join(create_command))
         sp.check_call(create_command, cwd=self.project_directory)
 
         # Make sure we use the in-project environment.
         use_command = ["pdm", "use", "--venv", "in-project"]
-        logger.info("$ %s", use_command)
+        logger.info("Run '%s'", " ".join(use_command))
         sp.check_call(use_command, cwd=self.project_directory)
 
         path = self._get_pdm_environment_path(create=False)
@@ -249,5 +268,5 @@ class PDMManagedEnvironment(ManagedEnvironment):
         self._get_pdm_environment_path(create=True)
 
         command = ["pdm", "install"]
-        logger.info("%s", command)
+        logger.info("Run '%s'", " ".join(command))
         sp.check_call(command, cwd=self.project_directory)

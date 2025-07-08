@@ -1,27 +1,26 @@
 from kraken.common import buildscript
 
-buildscript(requirements=["kraken-build>=0.33.2"])
+buildscript(requirements=["kraken-build>=0.44.0"])
 
 import os
 
+from kraken.build import project
 from kraken.std import python
-from kraken.std.git import git_describe
+from kraken.std.git import git_describe, gitignore
 
 
 def configure_project() -> None:
     from kraken.build import project
 
-    python.pyupgrade(python_version="3.10", version_spec="==3.15.0")
-    python.pycln(version_spec="==2.4.0")
-
-    python.black(additional_args=["--config", "pyproject.toml"], version_spec="==23.12.1")
-    python.flake8(version_spec="==6.1.0")
-    python.isort(version_spec="==5.13.2")
-    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.8.0")
+    python.ruff(additional_args=["--exclude", "tests/iss-263/example_project"])
+    python.mypy(additional_args=["--exclude", "src/tests/integration/.*/data/.*"], version_spec="==1.16.1")
 
     if project.directory.joinpath("tests").is_dir():
         # Explicit list of test directories, Pytest skips the build directory if not specified explicitly.
-        python.pytest(ignore_dirs=["src/tests/integration"], include_dirs=["src/kraken/build"])
+        if project.directory.name == "kraken-build":
+            python.pytest(ignore_dirs=["src/tests/integration"], include_dirs=["src/kraken/build"])
+        elif project.directory.name == "kraken-wrapper":
+            python.pytest(doctest_modules=False)
 
     if project.directory.joinpath("tests/integration").is_dir():
         python.pytest(
@@ -45,6 +44,7 @@ def configure_project() -> None:
             credentials=(os.environ["TESTPYPI_USER"], os.environ["TESTPYPI_PASSWORD"])
             if "TESTPYPI_USER" in os.environ
             else None,
+            is_package_source=False,
         )
     )
 
@@ -90,13 +90,8 @@ def configure_project() -> None:
             )
 
 
-from kraken.build import project
-
-try:
-    project.subproject("docs")
-except ImportError:
-    pass
-
+gitignore()
+project.subproject("docs")
 for subproject in [project.subproject("kraken-build"), project.subproject("kraken-wrapper")]:
     with subproject.as_current():
         configure_project()

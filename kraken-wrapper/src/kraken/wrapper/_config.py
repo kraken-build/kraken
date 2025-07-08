@@ -8,6 +8,7 @@ from typing import Any, NamedTuple
 import keyring
 import keyring.backends.fail
 import keyring.backends.null
+
 from kraken.common import http
 from kraken.common.http import ReadTimeout
 
@@ -112,7 +113,7 @@ class AuthModel:
         return result
 
     def check_credential(self, host: str, username: str, password: str) -> CredentialCheck | None:
-        if ".jfrog.io" in host:
+        if "jfrog" in host:
             # Allow the user to override the url that will be used by setting
             # the `auth_check_url_suffix` in their krakenw/config.toml file PER HOST
             url_suffix = (
@@ -145,8 +146,8 @@ class AuthModel:
                     hints.append("Credential check resulted in unknown 401 unauthorised error")
             elif result.status_code in (404, 302):
                 hints.append(
-                    f"""Authentication URL incorrect (HTTP response {result.status_code}).
-Please check host.auth_check_url_suffix value in {self._path}"""
+                    f"Authentication URL incorrect (HTTP response {result.status_code}). "
+                    f"Please check host.auth_check_url_suffix value in {self._path}"
                 )
 
             return self.CredentialCheck(curl_command, result.status_code == 200, result.text, " ".join(hints))

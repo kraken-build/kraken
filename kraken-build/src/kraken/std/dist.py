@@ -13,9 +13,10 @@ from pathlib import Path
 from typing import Any, Literal, Union, cast
 
 import databind.json
-from termcolor import colored
 
+from kraken.common import colored
 from kraken.core import Project, Property, Task, TaskSet
+from kraken.core.address import Address
 
 from .descriptors.resource import BinaryArtifact, LibraryArtifact, Resource
 
@@ -174,7 +175,7 @@ class ArchiveWriter(abc.ABC):
 
 class TarArchiveWriter(ArchiveWriter):
     def __init__(self, path: Path, type_: Literal["", "gz", "bz2", "xz"]) -> None:
-        self._archive = tarfile.open(path, mode="w:" + type_)
+        self._archive = tarfile.open(path, mode="w:" + type_)  # type: ignore[call-overload]
 
     def close(self) -> None:
         self._archive.close()
@@ -197,7 +198,7 @@ class ZipArchiveWriter(ArchiveWriter):
 def dist(
     *,
     name: str,
-    dependencies: Sequence[str | Task] | Mapping[str, Mapping[str, Any] | IndividualDistOptions],
+    dependencies: Sequence[str | Address | Task] | Mapping[str | Address, Mapping[str, Any] | IndividualDistOptions],
     output_file: str | Path,
     archive_type: str | None = None,
     prefix: str | None = None,
@@ -225,13 +226,13 @@ def dist(
 
     if isinstance(dependencies, Sequence):
         dependencies = cast(
-            Mapping[str, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
+            Mapping[str | Address, Union[Mapping[str, Any], IndividualDistOptions]], {d: {} for d in dependencies}
         )
     dependencies_map = {
         k: databind.json.load(v, IndividualDistOptions) if not isinstance(v, IndividualDistOptions) else v
         for k, v in dependencies.items()
     }
-    dependencies_set = project.resolve_tasks(dependencies_map)
+    dependencies_set = TaskSet.build(project, dependencies_map)
 
     # This associates the IndividualDistOptions specified in *dependencies* to the Resource(s)
     # provided by the task(s).
@@ -241,7 +242,7 @@ def dist(
         .map(
             lambda resources: get_configured_resources(
                 resources,
-                dependencies_map,
+                {str(k): v for k, v in dependencies_map.items()},
                 dependencies_set,
             )
         )
