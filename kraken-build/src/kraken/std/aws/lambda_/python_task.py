@@ -16,8 +16,6 @@ class BuildPythonLambdaZipTask(Task):
     platform: Property[PythonPlatform | None]
     quiet: Property[bool]
 
-    # TODO: implement prepare() to check if we need to rebuild from scratch?
-
     def execute(self) -> TaskStatus | None:
         inputs = BuildPythonLambdaZip(
             project_directory=self.project_directory.get_or(None),
