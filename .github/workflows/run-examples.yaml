@@ -9,7 +9,7 @@ env:
 
 jobs:
   run-example:
-    uses: ./.github/workflow_templates/run-example.yaml
+    uses: ./.github/workflows/run-example.yaml
     strategy:
       matrix:
         example-name:
