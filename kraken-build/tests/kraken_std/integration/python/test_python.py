@@ -88,7 +88,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
         "uv-project",
         "rust-poetry-project",
         "rust-pdm-project",
-        "rust-uv-project",
+        # "rust-uv-project",  # See https://github.com/kraken-build/kraken/issues/356
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
