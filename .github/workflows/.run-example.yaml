@@ -1,0 +1,35 @@
+name: Run example
+
+on:
+  workflow_call:
+    inputs:
+      example-name:
+        description: 'The name of the example to run.'
+        required: true
+        type: string
+      targets:
+        description: 'The targets to run.'
+        required: true
+        type: string
+      python-version:
+        description: 'The version of Python to use.'
+        required: false
+        type: string
+        default: '3.13'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.3"
+          python-version: ${{ inputs.python-version }}
+      - name: Install Kraken
+        run: uv tool install -e ./kraken-build
+      - name: Run Example
+        working-directory: examples/${{ inputs.example-name }}
+        run: kraken run ${{ inputs.targets }} -vv

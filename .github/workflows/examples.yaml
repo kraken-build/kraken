@@ -1,0 +1,23 @@
+name: Examples
+
+on:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
+
+env:
+  COLUMNS: 200
+
+jobs:
+  run-example:
+    uses: ./.github/workflows/.run-example.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        example-name:
+          - aws-lambda
+          - docker
+          - docker-manual
+    name: ${{ matrix.example-name }}
+    with:
+      example-name: ${{ matrix.example-name }}
+      targets: :**
