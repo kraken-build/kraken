@@ -109,6 +109,7 @@ def build_python_lambda_zip(
                 "install",
                 "--no-config",
                 "--exact",
+                *(["--managed-python"] if managed_python else []),
                 *(["-q"] if quiet else []),
                 "--target",
                 os.fspath(build_directory),
@@ -117,7 +118,6 @@ def build_python_lambda_zip(
                 "--",
                 *packages,
                 *([os.fspath(project_directory.absolute())] if project_directory else []),
-                *(["--managed-python"] if managed_python else []),
             ]
             if not quiet:
                 if platform:
