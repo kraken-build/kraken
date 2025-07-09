@@ -69,3 +69,9 @@ author = "@NiklasRosenstein"
 issues = [
     "https://github.com/kraken-build/kraken/issues/230",
 ]
+
+[[entries]]
+id = "4c239971-2079-4d0f-b77c-3445563ede5e"
+type = "deprecation"
+description = "Deprecate `--no-save`, `--resume` and `--restart` options"
+author = "@NiklasRosenstein"
