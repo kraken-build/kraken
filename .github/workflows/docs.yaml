@@ -1,4 +1,4 @@
-name: Build docs
+name: Documentation
 
 on:
   push: { branches: [ "develop" ], tags: [ "*" ] }
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build documentation
+    name: Build and publish
     permissions:
       contents: read
       pages: write
