@@ -104,7 +104,7 @@ class Supplier(Generic[T], abc.ABC):
     def of(value: "T | Supplier[T]", derived_from: Sequence["Supplier[Any]"] = ()) -> "Supplier[T]":
         """
         Coercion for ``T | Supplier[T] -> Supplier[T]``. This is useful when accepting parameters for task factories
-        that could either be "hard" value or derived from properties of other tasks.
+        that could either be a "hard" value or derived from properties of other tasks.
 
         .. code-block:: python
 
@@ -118,8 +118,8 @@ class Supplier(Generic[T], abc.ABC):
                 )
                 return task
 
-        Note that Mypy's (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
-        need to explicitly define ``T``.
+        Note that Mypy (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
+        need to explicitly define ``T`` (as also shown in the example above).
 
         .. code-block:: python
 
