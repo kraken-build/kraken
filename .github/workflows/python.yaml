@@ -17,13 +17,13 @@ jobs:
     - run: typos
 
   check:
-    name: Check code
+    name: Check
     uses: ./.github/workflows/.run-krakenw.yaml
     with:
       targets: check
 
   lint:
-    name: Lint code
+    name: Lint
     uses: ./.github/workflows/.run-krakenw.yaml
     with:
       targets: lint
