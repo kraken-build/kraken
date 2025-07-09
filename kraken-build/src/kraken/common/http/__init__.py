@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import ssl
-from typing import Any, ContextManager
+from typing import TYPE_CHECKING, Any, ContextManager
 
 import httpx
 from httpx import ReadTimeout
@@ -29,37 +29,33 @@ def _get_system_ca_list() -> ssl.SSLContext:
     return _CACHED_SYSTEM_CA_LIST
 
 
-def request(method: str, url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.request(method, url, verify=_get_system_ca_list(), **kwargs)
+if TYPE_CHECKING:
+    from httpx import delete, get, head, options, patch, post, put, request, stream
+else:
 
+    def request(method: str, url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.request(method, url, verify=_get_system_ca_list(), **kwargs)
 
-def get(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.get(url, verify=_get_system_ca_list(), **kwargs)
+    def stream(method, url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
+        return httpx.stream(method, url, verify=_get_system_ca_list(), **kwargs)
 
+    def get(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.get(url, verify=_get_system_ca_list(), **kwargs)
 
-def options(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.options(url, verify=_get_system_ca_list(), **kwargs)
+    def options(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.options(url, verify=_get_system_ca_list(), **kwargs)
 
+    def head(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.head(url, verify=_get_system_ca_list(), **kwargs)
 
-def head(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.head(url, verify=_get_system_ca_list(), **kwargs)
+    def post(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.post(url, verify=_get_system_ca_list(), **kwargs)
 
+    def put(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.put(url, verify=_get_system_ca_list(), **kwargs)
 
-def post(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.post(url, verify=_get_system_ca_list(), **kwargs)
+    def patch(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.patch(url, verify=_get_system_ca_list(), **kwargs)
 
-
-def put(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.put(url, verify=_get_system_ca_list(), **kwargs)
-
-
-def patch(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.patch(url, verify=_get_system_ca_list(), **kwargs)
-
-
-def delete(url: str, **kwargs: Any) -> httpx.Response:
-    return httpx.delete(url, verify=_get_system_ca_list(), **kwargs)
-
-
-def stream(url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
-    return httpx.stream(url, verify=_get_system_ca_list(), **kwargs)
+    def delete(url: str, **kwargs: Any) -> httpx.Response:
+        return httpx.delete(url, verify=_get_system_ca_list(), **kwargs)

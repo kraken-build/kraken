@@ -9,7 +9,7 @@ from posixpath import basename
 from shutil import copyfileobj
 from tarfile import open as TarFile
 
-from requests import get
+from httpx import stream
 
 from kraken.common import not_none
 from kraken.core import Property, Task, TaskStatus
@@ -56,8 +56,10 @@ class ShellcheckTask(Task):
                 self.logger.info("Downloading %s ...", url)
                 try:
                     with archive_path.open("wb") as fp:
-                        for chunk in get(url, stream=True).iter_content():
-                            fp.write(chunk)
+                        with stream("GET", url, follow_redirects=True) as stream_response:
+                            stream_response.raise_for_status()
+                            for chunk in stream_response.iter_bytes():
+                                fp.write(chunk)
                 except Exception:
                     archive_path.unlink()
                     raise
