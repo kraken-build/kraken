@@ -171,7 +171,7 @@ class CargoPublishTask(CargoBuildTask):
                     "Unable to verify package existence - registry requires authentication, but no credentials set"
                 )
             config_response = http.get(f"{index}/config.json", auth=registry.read_credentials)
-            if config_response.status_code % 200 != 0:
+            if config_response.status_code // 100 != 2:
                 logger.warn(config_response.text)
                 return TaskStatus.pending(
                     "Unable to verify package existence - failed to download config.json file from registry"
