@@ -162,6 +162,7 @@ def main() -> None:
     parser.add_argument(
         "-b",
         "--build-directory",
+        type=Path,
         help="Build directory. If not specified, a temporary directory will be used and deleted after.",
     )
     parser.add_argument(
