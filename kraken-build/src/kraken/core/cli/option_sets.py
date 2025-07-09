@@ -115,7 +115,9 @@ class GraphOptions:
         )
 
         if saveable:
-            group.add_argument("--save", action="store_true", help="deprecated since v0.45.0. the default is to not save.")
+            group.add_argument(
+                "--save", action="store_true", help="deprecated since v0.45.0. the default is to not save."
+            )
             group.add_argument("--no-save", action="store_true", help="deprecated since v0.45.0.")
 
     @classmethod
