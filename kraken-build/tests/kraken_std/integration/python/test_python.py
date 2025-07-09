@@ -104,6 +104,14 @@ def test__python_project_install_lint_and_publish(
     shutil.copytree(example_dir(project_dir), tempdir / project_dir)
     shutil.copytree(example_dir(consumer_dir), tempdir / consumer_dir)
 
+    # Remove the .venv if it exists in the project directory to ensure a clean environment.
+    venv_path = tempdir / project_dir / ".venv"
+    if venv_path.exists():
+        shutil.rmtree(venv_path)
+    venv_path = tempdir / consumer_dir / ".venv"
+    if venv_path.exists():
+        shutil.rmtree(venv_path)
+
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
     # TODO: mock the `os.environ` dict instead of mutating the global one
     os.environ["LOCAL_PACKAGE_INDEX"] = pypiserver
