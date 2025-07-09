@@ -1,7 +1,7 @@
 # This file has examples of constructs that should be disallowed by some of our custom linters
 
 import httpx
-import requests
+import requests  # type: ignore[import-untyped]
 
 from kraken.common import http
 

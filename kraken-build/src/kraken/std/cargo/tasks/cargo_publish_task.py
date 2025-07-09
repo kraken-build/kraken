@@ -4,10 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-import requests
-import requests.auth
-
-from kraken.common import atomic_file_swap, not_none
+from kraken.common import atomic_file_swap, http, not_none
 from kraken.core import Project, Property, TaskStatus
 from kraken.std.cargo import CargoProject
 from kraken.std.cargo.manifest import CargoManifest
@@ -167,15 +164,13 @@ class CargoPublishTask(CargoBuildTask):
         index = index.removesuffix("/")
 
         # >> Index authentication
-        session = requests.sessions.Session()
-        config_response = session.get(f"{index}/config.json")
+        config_response = http.get(f"{index}/config.json")
         if config_response.status_code == 401:
             if registry.read_credentials is None:
                 return TaskStatus.pending(
                     "Unable to verify package existence - registry requires authentication, but no credentials set"
                 )
-            session.auth = registry.read_credentials
-            config_response = session.get(f"{index}/config.json")
+            config_response = http.get(f"{index}/config.json", auth=registry.read_credentials)
             if config_response.status_code % 200 != 0:
                 logger.warn(config_response.text)
                 return TaskStatus.pending(
@@ -197,7 +192,7 @@ class CargoPublishTask(CargoBuildTask):
 
         # >> Download the index file
         index_path = "/".join(path + [package_name])
-        index_response = session.get(f"{index}/{index_path}")
+        index_response = http.get(f"{index}/{index_path}", auth=registry.read_credentials)
 
         if index_response.status_code in [404, 410, 451]:
             return TaskStatus.pending(f"Package {package_name} does not already exists in {registry.alias}")
