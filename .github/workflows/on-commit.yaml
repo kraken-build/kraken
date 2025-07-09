@@ -61,42 +61,21 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        tasks: ["check lint", "test"]
     steps:
     - uses: actions/checkout@v4
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
+    - run: krakenw run check lint test -X pytest-e2e -vv
 
-    # We have Rust code in the examples/ which will be built as part of our tests.
-    - run: rustup update
-
-    - name: Restore Kraken build cache
-      uses: actions/cache/restore@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-    - name: Restore Venv
-      uses: actions/cache/restore@v4
-      with:
-        path: .venv/
-        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-    # Explicitly mention python.install to ensure that Pip install is rerun.
-    - run: krakenw run python.install ${{ matrix.tasks }} -vv
-
-    - name: Save Venv
-      uses: actions/cache/save@v4
-      with:
-        path: .venvs/
-        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-    - name: Save Kraken build cache
-      uses: actions/cache/save@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
+  test-e2e:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - uses: actions/setup-python@v5
+      with: { python-version: "3.13" }
+    - run: krakenw run pytest-e2e -vv
 
   # == Try running Kraken as defined in the kraken.yaml file ==
 
