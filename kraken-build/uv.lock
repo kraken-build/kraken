@@ -658,7 +658,7 @@ requires-dist = [
     { name = "networkx", specifier = ">=3.1,<4.0" },
     { name = "packaging", specifier = ">=25,<25.1" },
     { name = "stablehash", specifier = ">=0.2.2" },
-    { name = "termcolor", specifier = ">=2.3.0,<3.0" },
+    { name = "termcolor", specifier = ">=3.1,<3.2" },
     { name = "tomli", specifier = ">=2.0.1,<3.0.0" },
     { name = "tomli-w", specifier = ">=1.0.0,<2.0.0" },
     { name = "tomlkit", specifier = ">=0.13.0,<0.14.0" },
@@ -1522,18 +1522,18 @@ wheels = [
 name = "stablehash"
 version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/85/70/a389e88d4c45c8f07a35096f5076451d1aac54ef949edcf93a6bb53d8802/stablehash-0.2.2.tar.gz", hash = "sha256:7789e5f41c22b04a00f02f59ef3e1915fbee1e64aca23c782d7d4b07fb54193b", size = 15382, upload-time = "2025-07-09T15:47:09.544Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/85/70/a389e88d4c45c8f07a35096f5076451d1aac54ef949edcf93a6bb53d8802/stablehash-0.2.2.tar.gz", hash = "sha256:7789e5f41c22b04a00f02f59ef3e1915fbee1e64aca23c782d7d4b07fb54193b", size = 15382 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9e/a8/44b37356ed70f83f8c6337be18fc9fb40495581ce3e7f55c8111948a57eb/stablehash-0.2.2-py3-none-any.whl", hash = "sha256:4dea2fb05a2f3191925d7a9053a5b36b6e4d78a3909548ace1ecf8b85fbbdbbe", size = 6042, upload-time = "2025-07-09T15:47:08.346Z" },
+    { url = "https://files.pythonhosted.org/packages/9e/a8/44b37356ed70f83f8c6337be18fc9fb40495581ce3e7f55c8111948a57eb/stablehash-0.2.2-py3-none-any.whl", hash = "sha256:4dea2fb05a2f3191925d7a9053a5b36b6e4d78a3909548ace1ecf8b85fbbdbbe", size = 6042 },
 ]
 
 [[package]]
 name = "termcolor"
-version = "2.5.0"
+version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/37/72/88311445fd44c455c7d553e61f95412cf89054308a1aa2434ab835075fc5/termcolor-2.5.0.tar.gz", hash = "sha256:998d8d27da6d48442e8e1f016119076b690d962507531df4890fcd2db2ef8a6f", size = 13057 }
+sdist = { url = "https://files.pythonhosted.org/packages/ca/6c/3d75c196ac07ac8749600b60b03f4f6094d54e132c4d94ebac6ee0e0add0/termcolor-3.1.0.tar.gz", hash = "sha256:6a6dd7fbee581909eeec6a756cff1d7f7c376063b14e4a298dc4980309e55970", size = 14324 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7f/be/df630c387a0a054815d60be6a97eb4e8f17385d5d6fe660e1c02750062b4/termcolor-2.5.0-py3-none-any.whl", hash = "sha256:37b17b5fc1e604945c2642c872a3764b5d547a48009871aea3edd3afa180afb8", size = 7755 },
+    { url = "https://files.pythonhosted.org/packages/4f/bd/de8d508070629b6d84a30d01d57e4a65c69aa7f5abe7560b8fad3b50ea59/termcolor-3.1.0-py3-none-any.whl", hash = "sha256:591dd26b5c2ce03b9e43f391264626557873ce1d379019786f99b0c2bee140aa", size = 7684 },
 ]
 
 [[package]]
