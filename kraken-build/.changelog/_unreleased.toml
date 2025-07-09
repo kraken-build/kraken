@@ -1,5 +1,0 @@
-[[entries]]
-id = "33436462-eb4e-4178-a962-de40bbd75418"
-type = "hygiene"
-description = "Remove import of `requests` package from Cargo task, we use `httpx` in Kraken;"
-author = "@NiklasRosenstein"

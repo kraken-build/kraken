@@ -1,3 +1,5 @@
+release-date = "2025-07-09"
+
 [[entries]]
 id = "e64939c7-c061-46c3-a148-a81a2b0a4e97"
 type = "deprecation"
@@ -86,4 +88,16 @@ author = "@NiklasRosenstein"
 id = "4c239971-2079-4d0f-b77c-3445563ede5e"
 type = "deprecation"
 description = "Deprecate `--no-save`, `--resume` and `--restart` options"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "33436462-eb4e-4178-a962-de40bbd75418"
+type = "hygiene"
+description = "Remove import of `requests` package from Cargo task, we use `httpx` in Kraken;"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1d451852-d94f-4e00-adca-89b778017e6b"
+type = "hygiene"
+description = "Remove abstraction over build environments, there is only one `BuildEnv` implementation now and that is Uv"
 author = "@NiklasRosenstein"

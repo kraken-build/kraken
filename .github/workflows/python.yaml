@@ -64,9 +64,9 @@ jobs:
       - uses: jdx/mise-action@v2
 
       - name: Build dist
-        run:
-          uv build kraken-build
-          uv build kraken-wrapper
+        run: |
+          uv build -o dist/ kraken-build
+          uv build -o dist/ kraken-wrapper
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
