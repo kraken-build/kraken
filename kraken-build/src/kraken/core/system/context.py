@@ -321,18 +321,19 @@ class Context(MetadataContainer, Currentable["Context"]):
         if self._finalized:
             logger.warning("Context.finalize() called more than once", stack_info=True)
             return
-
         self._finalized = True
-        self.trigger(ContextEvent.Type.on_context_begin_finalize, self)
 
-        # Delegate to finalize calls in all tasks of all projects.
-        for project in self.iter_projects():
-            self.trigger(ContextEvent.Type.on_project_begin_finalize, project)
-            for task in project.tasks().values():
-                task.finalize()
-            self.trigger(ContextEvent.Type.on_project_finalized, project)
+        with self.as_current():
+            self.trigger(ContextEvent.Type.on_context_begin_finalize, self)
 
-        self.trigger(ContextEvent.Type.on_context_finalized, self)
+            # Delegate to finalize calls in all tasks of all projects.
+            for project in self.iter_projects():
+                self.trigger(ContextEvent.Type.on_project_begin_finalize, project)
+                for task in project.tasks().values():
+                    task.finalize()
+                self.trigger(ContextEvent.Type.on_project_finalized, project)
+
+            self.trigger(ContextEvent.Type.on_context_finalized, self)
 
     def get_build_graph(self, targets: Sequence[str | Address | Task] | None) -> TaskGraph:
         """Returns the :class:`TaskGraph` that contains either all default tasks or the tasks specified with
