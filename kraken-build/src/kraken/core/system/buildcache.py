@@ -133,7 +133,6 @@ class BuildCache:
                 if child.is_file():
                     if is_excluded(child):
                         continue
-                    print(child)
                     with child.open("rb") as f:
                         self.input_hasher.update(fspath(child).encode("utf-8"))
                         self.input_hasher.update(f.read())
