@@ -5,11 +5,54 @@ import subprocess
 from contextlib import ExitStack
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Sequence
+from typing import Literal, Sequence
 
 from uv import find_uv_bin
 
+PythonPlatform = Literal[
+    "windows",
+    "linux",
+    "macos",
+    "x86_64-pc-windows-msvc",
+    "i686-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "aarch64-unknown-linux-gnu",
+    "aarch64-unknown-linux-musl",
+    "x86_64-unknown-linux-musl",
+    "x86_64-manylinux2014",
+    "x86_64-manylinux_2_17",
+    "x86_64-manylinux_2_28",
+    "x86_64-manylinux_2_31",
+    "x86_64-manylinux_2_32",
+    "x86_64-manylinux_2_33",
+    "x86_64-manylinux_2_34",
+    "x86_64-manylinux_2_35",
+    "x86_64-manylinux_2_36",
+    "x86_64-manylinux_2_37",
+    "x86_64-manylinux_2_38",
+    "x86_64-manylinux_2_39",
+    "x86_64-manylinux_2_40",
+    "aarch64-manylinux2014",
+    "aarch64-manylinux_2_17",
+    "aarch64-manylinux_2_28",
+    "aarch64-manylinux_2_31",
+    "aarch64-manylinux_2_32",
+    "aarch64-manylinux_2_33",
+    "aarch64-manylinux_2_34",
+    "aarch64-manylinux_2_35",
+    "aarch64-manylinux_2_36",
+    "aarch64-manylinux_2_37",
+    "aarch64-manylinux_2_38",
+    "aarch64-manylinux_2_39",
+    "aarch64-manylinux_2_40",
+    "wasm32-pyodide2024",
+]
+
+
 UV_BIN = os.fsdecode(os.getenv("KRAKEN_UV_BIN", find_uv_bin()))
+PYTHON_PLATFORMS: set[str] = set(PythonPlatform.__args__)  # type: ignore[attr-defined]
 
 
 def build_python_lambda_zip(
@@ -18,6 +61,7 @@ def build_python_lambda_zip(
     include: Sequence[Path] = (),
     packages: Sequence[str] = (),
     requirements: Path | None = None,
+    platform: PythonPlatform | None = None,
     build_directory: Path | None = None,
     uv_bin: Path | None = None,
     quiet: bool = False,
@@ -40,13 +84,17 @@ def build_python_lambda_zip(
                 *(["-q"] if quiet else []),
                 "--target",
                 os.fspath(build_directory),
+                *(["--python-platform", platform] if platform else []),
                 *(["-r", os.fspath(requirements)] if requirements else []),
                 "--",
                 *packages,
                 *([os.fspath(project_directory.absolute())] if project_directory else []),
             ]
             if not quiet:
-                print(f"uv pip install → {build_directory}/")
+                if platform:
+                    print(f"uv pip install (for platform '{platform}') → {build_directory}/")
+                else:
+                    print(f"uv pip install → {build_directory}/")
             subprocess.check_call(command)
 
         for path in include:

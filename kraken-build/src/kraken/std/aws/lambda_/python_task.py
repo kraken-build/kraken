@@ -4,6 +4,7 @@ from typing import Literal, Sequence
 from kraken.core import Property, Task
 from kraken.core.system.task import TaskStatus
 
+from .python import PYTHON_PLATFORMS, PythonPlatform
 from .python import build_python_lambda_zip as _build_python_lambda_zip
 
 
@@ -13,6 +14,7 @@ class BuildPythonLambdaZipTask(Task):
     include: Property[Sequence[Path]]
     packages: Property[Sequence[str]]
     requirements: Property[Path | None]
+    platform: Property[PythonPlatform | None]
     quiet: Property[bool]
 
     # TODO: implement prepare() to check if we need to rebuild from scratch?
@@ -24,6 +26,7 @@ class BuildPythonLambdaZipTask(Task):
             include=self.include.get_or([]),
             packages=self.packages.get_or([]),
             requirements=self.requirements.get_or(None),
+            platform=self.platform.get_or(None),
             quiet=self.quiet.get_or(False),
         )
 
@@ -37,6 +40,7 @@ def python_lambda_zip(
     include: Sequence[str | Path] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
+    platform: PythonPlatform | None = None,
     quiet: bool = False,
 ) -> BuildPythonLambdaZipTask:
     from kraken.build import project
@@ -51,12 +55,16 @@ def python_lambda_zip(
         ):
             project_directory = project.directory
 
+    if platform and platform not in PYTHON_PLATFORMS:
+        raise ValueError(f"invalid `platform`, got {platform!r}, expected one of {PYTHON_PLATFORMS}")
+
     task = project.task(name, BuildPythonLambdaZipTask)
     task.outfile = project.directory / outfile if outfile else project.build_directory / f"{name}.zip"
     task.project_directory = project_directory
     task.include = [project.directory / x for x in include]
     task.packages = list(packages)
     task.requirements = project.directory / requirements if requirements else None
+    task.platform = platform
     task.quiet = quiet
 
     return task
