@@ -170,9 +170,9 @@ jobs:
     - uses: actions/checkout@v4
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
-      with: { python-version: "3.12" }
+      with: { python-version: "3.13" }
     - name: Build the lambda ZIP
-      run: uv run --project .. kraken run lambda
+      run: uv run --project .. kraken run lambda -vv
       working-directory: examples/aws-lambda
     - name: Check the ZIP file
       working-directory: examples/aws-lambda
