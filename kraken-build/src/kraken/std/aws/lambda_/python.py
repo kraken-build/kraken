@@ -92,6 +92,7 @@ def build_python_lambda_zip(
     platform: PythonPlatform | None = None,
     build_directory: Path | None = None,
     quiet: bool = False,
+    managed_python: bool = True,
 ) -> None:
     uv_bin = uv_bin or Path(UV_BIN)
 
@@ -116,6 +117,7 @@ def build_python_lambda_zip(
                 "--",
                 *packages,
                 *([os.fspath(project_directory.absolute())] if project_directory else []),
+                *(["--managed-python"] if managed_python else []),
             ]
             if not quiet:
                 if platform:
