@@ -17,7 +17,6 @@ jobs:
           - aws-lambda
           - docker
           - docker-manual
-          - rust-uv-project
     name: ${{ matrix.example-name }}
     with:
       example-name: ${{ matrix.example-name }}
