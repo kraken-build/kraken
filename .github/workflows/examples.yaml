@@ -1,4 +1,4 @@
-name: Run examples
+name: Examples
 
 on:
   push: { branches: [ "develop" ], tags: [ "*" ] }
@@ -9,7 +9,7 @@ env:
 
 jobs:
   run-example:
-    uses: ./.github/workflows/run-example.yaml
+    uses: ./.github/workflows/.run-example.yaml
     strategy:
       fail-fast: false
       matrix:

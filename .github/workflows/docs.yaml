@@ -1,10 +1,12 @@
 name: Build docs
 
 on:
-  workflow_call:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
 
 jobs:
-  run-tests:
+  build:
+    name: Build documentation
     permissions:
       contents: read
       pages: write
