@@ -1,11 +1,13 @@
 [project]
-name = "examples"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
 dependencies = [
-    "kraken-wrapper"
+  "kraken-wrapper",
+  "kraken-build",
 ]
+description = "Add your description here"
+name = "examples"
+readme = "README.md"
+version = "0.1.0"
 
 [tool.uv.sources]
-kraken-wrapper = { path = "../kraken-wrapper" }
+kraken-build = {path = "../kraken-build", editable = true}
+kraken-wrapper = {path = "../kraken-wrapper", editable = true}
