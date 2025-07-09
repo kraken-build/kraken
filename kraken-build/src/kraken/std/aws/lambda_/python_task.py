@@ -1,15 +1,14 @@
 from pathlib import Path
 from typing import Literal, Sequence
 
-from kraken.core import Property, Task
+from kraken.core import BuildCache, Property, Task
 from kraken.core.system.task import TaskStatus
 
-from .python import PYTHON_PLATFORMS, PythonPlatform
-from .python import build_python_lambda_zip as _build_python_lambda_zip
+from .python import PYTHON_PLATFORMS, BuildPythonLambdaZip, PythonPlatform
 
 
 class BuildPythonLambdaZipTask(Task):
-    outfile: Property[Path]
+    outfile: Property[Path] = Property.output()
     project_directory: Property[Path | None]
     include: Property[Sequence[Path]]
     packages: Property[Sequence[str]]
@@ -20,8 +19,7 @@ class BuildPythonLambdaZipTask(Task):
     # TODO: implement prepare() to check if we need to rebuild from scratch?
 
     def execute(self) -> TaskStatus | None:
-        _build_python_lambda_zip(
-            outfile=self.outfile.get(),
+        inputs = BuildPythonLambdaZip(
             project_directory=self.project_directory.get_or(None),
             include=self.include.get_or([]),
             packages=self.packages.get_or([]),
@@ -30,7 +28,24 @@ class BuildPythonLambdaZipTask(Task):
             quiet=self.quiet.get_or(False),
         )
 
-        return TaskStatus.succeeded(f"built {self.outfile.get()}")
+        with BuildCache.for_(self) as cache:
+            cache.consumes(inputs)
+            if inputs.project_directory:
+                cache.consumes_path(inputs.project_directory)
+            for path in inputs.include:
+                cache.consumes_path(path)
+            cache.finalize()
+
+            outfile = "lambda.zip"
+            cache.link_result(outfile, self.outfile.get())
+
+            if cache.exists():
+                return TaskStatus.skipped(f"retained {self.outfile.get()}")
+            else:
+                build_directory = cache.staging_path() / "build"
+                inputs.build(cache.staging_path() / outfile, build_directory)
+                cache.commit()
+                return TaskStatus.succeeded(f"built {self.outfile.get()}")
 
 
 def python_lambda_zip(

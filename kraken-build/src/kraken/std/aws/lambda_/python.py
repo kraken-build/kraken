@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 from contextlib import ExitStack
+from dataclasses import dataclass
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Literal, Sequence
@@ -55,7 +56,34 @@ UV_BIN = os.fsdecode(os.getenv("KRAKEN_UV_BIN", find_uv_bin()))
 PYTHON_PLATFORMS: set[str] = set(PythonPlatform.__args__)  # type: ignore[attr-defined]
 
 
+@dataclass(frozen=True)
+class BuildPythonLambdaZip:
+    project_directory: Path | None = None
+    include: Sequence[Path] = ()
+    packages: Sequence[str] = ()
+    requirements: Path | None = None
+    platform: PythonPlatform | None = None
+    uv_bin: Path = Path(UV_BIN)
+    quiet: bool = False
+
+    def build(self, outfile: Path, build_directory: Path | None = None) -> None:
+        """Shorthand to calling :func:`build_python_lambda_zip` with the inputs from this dataclass."""
+
+        build_python_lambda_zip(
+            uv_bin=self.uv_bin,
+            outfile=outfile,
+            project_directory=self.project_directory,
+            include=self.include,
+            packages=self.packages,
+            requirements=self.requirements,
+            platform=self.platform,
+            build_directory=build_directory,
+            quiet=self.quiet,
+        )
+
+
 def build_python_lambda_zip(
+    uv_bin: Path,
     outfile: Path,
     project_directory: Path | None = None,
     include: Sequence[Path] = (),
@@ -63,7 +91,6 @@ def build_python_lambda_zip(
     requirements: Path | None = None,
     platform: PythonPlatform | None = None,
     build_directory: Path | None = None,
-    uv_bin: Path | None = None,
     quiet: bool = False,
 ) -> None:
     uv_bin = uv_bin or Path(UV_BIN)
@@ -164,6 +191,7 @@ def main() -> None:
         requirements=args.requirements,
         build_directory=args.build_directory,
         quiet=args.quiet,
+        uv_bin=Path(UV_BIN),
     )
 
 
