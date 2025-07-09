@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import shutil
 import subprocess
@@ -9,6 +10,8 @@ from tempfile import TemporaryDirectory
 from typing import Literal, Sequence
 
 from uv import find_uv_bin
+
+logger = logging.getLogger(__name__)
 
 PythonPlatform = Literal[
     "windows",
@@ -124,6 +127,7 @@ def build_python_lambda_zip(
                     print(f"uv pip install (for platform '{platform}') → {build_directory}/")
                 else:
                     print(f"uv pip install → {build_directory}/")
+            logger.debug(f"Running command: {' '.join(command)}")
             subprocess.check_call(command)
 
         for path in include:
