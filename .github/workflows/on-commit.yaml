@@ -164,6 +164,20 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
+  run-example-docker-manual:
+    name: Example (docker-manual)
+    uses: ./.github/workflows/run-example.yml
+    with:
+      example-name: aws-lambda
+      targets: lambda
+
+  run-example-aws-lambda:
+    name: Example (aws-lambda)
+    uses: ./.github/workflows/run-example.yml
+    with:
+      example-name: aws-lambda
+      targets: lambda
+
   publish:
     runs-on: ubuntu-latest
     needs: test
