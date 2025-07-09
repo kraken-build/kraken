@@ -1,4 +1,4 @@
-name: Run Example
+name: Run example
 
 on:
   workflow_call:

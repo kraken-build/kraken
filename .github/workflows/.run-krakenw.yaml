@@ -1,0 +1,27 @@
+name: Run krakenw
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        description: 'The targets to run.'
+        required: true
+        type: string
+      python-version:
+        description: 'The version of Python to use.'
+        required: false
+        type: string
+        default: '3.13'
+
+env:
+  PYTEST_FLAGS: --numprocesses 4
+
+jobs:
+  run-kraken-local:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - uses: actions/setup-python@v5
+      with: { python-version: "${{ inputs.python-version }}" }
+    - run: krakenw run ${{ matrix.tasks }} -vv

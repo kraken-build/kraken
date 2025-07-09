@@ -6,47 +6,11 @@ on:
 
 env:
   COLUMNS: 200
-  PYTEST_FLAGS: --numprocesses 4
 
 jobs:
 
-  # == Documentation ==
-
   documentation:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    steps:
-    - uses: actions/checkout@v4
-    - uses: jdx/mise-action@v2
-
-    - name: Restore Kraken build cache
-      uses: actions/cache/restore@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-    - run: mise run build-docs
-
-    - name: Save Kraken build cache
-      uses: actions/cache/save@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: build/docs/mkdocs/_site
-
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/develop'
-      id: deployment
-      uses: actions/deploy-pages@v4
-
-  # == Unit tests, linting, and type checking ==
+    uses: ./.github/workflows/build-docs.yaml
 
   typos:
     runs-on: ubuntu-latest
@@ -55,114 +19,26 @@ jobs:
     - uses: jdx/mise-action@v2
     - run: typos
 
+  check:
+    uses: ./.github/workflows/run-krakenw.yaml
+    with:
+      targets: check
+
+  lint:
+    uses: ./.github/workflows/run-krakenw.yaml
+    with:
+      targets: lint
+
   test:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/run-krakenw.yaml
+    name: Test Python v${{ matrix.python-version }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        tasks: ["check lint", "test"]
-    steps:
-    - uses: actions/checkout@v4
-    - uses: jdx/mise-action@v2
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-
-    # We have Rust code in the examples/ which will be built as part of our tests.
-    - run: rustup update
-
-    - name: Restore Kraken build cache
-      uses: actions/cache/restore@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-    - name: Restore Venv
-      uses: actions/cache/restore@v4
-      with:
-        path: .venv/
-        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-    # Explicitly mention python.install to ensure that Pip install is rerun.
-    - run: krakenw run python.install ${{ matrix.tasks }} -vv
-
-    - name: Save Venv
-      uses: actions/cache/save@v4
-      with:
-        path: .venvs/
-        key: build-cache:${{ runner.os }}:venv:${{ matrix.python-version }}
-
-    - name: Save Kraken build cache
-      uses: actions/cache/save@v4
-      with:
-        path: build
-        key: build-cache:${{ runner.os }}:${{ hashFiles('.kraken.lock') }}
-
-  # == Try running Kraken as defined in the kraken.yaml file ==
-
-  # selftest:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ["3.10", "3.11", "3.12", "3.x"]
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: NiklasRosenstein/slap@gha/install/v1
-  #   - uses: actions/setup-python@v5
-  #     with: { python-version: "${{ matrix.python-version }}" }
-  #   - run: pip install pipx && pipx install poetry && pipx install pdm
-  #   - run: rustup update
-
-  #   - name: Restore cache
-  #     uses: actions/cache/restore@v4
-  #     with:
-  #       path: |
-  #         build
-  #         .venvs
-  #       key: build-cache:${{ runner.os }}:selftest
-
-  #   # - run: slap config --venv-type=uv && slap install --link --no-venv-check ${{ matrix.only }}
-  #   - run: slap install --link --no-venv-check ${{ matrix.only }}
-
-  #   - run: kraken run python.install fmt lint test -vv
-  #   - run: kraken q ls
-  #   - run: kraken q tree
-  #   - run: kraken q viz
-  #   - run: kraken q d python.mypy
-
-  #   - run: krakenw run python.install fmt lint test -vv
-
-  #   - name: Save cache
-  #     uses: actions/cache/save@v4
-  #     with:
-  #       path: |
-  #         build
-  #         .venvs
-  #       key: build-cache:${{ runner.os }}:selftest
-
-  # uv-installer:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #   - uses: NiklasRosenstein/slap@gha/install/v1
-  #   - run: slap config --venv-type=uv && slap install --link --no-venv-check
-  #   - run: krakenw --reinstall --use=UV
-  #   - run: krakenw run fmt lint
-
-  examples-docker-manual:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        call-target: ["krakenw", "kraken"]
-    steps:
-    - uses: actions/checkout@v4
-    - uses: jdx/mise-action@v2
-    - uses: actions/setup-python@v5
-      with: { python-version: "${{ matrix.python-version }}" }
-    - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
+    with:
+      targets: test
+      python-version: ${{ matrix.python-version }}
 
   publish:
     runs-on: ubuntu-latest
