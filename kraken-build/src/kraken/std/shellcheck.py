@@ -56,7 +56,8 @@ class ShellcheckTask(Task):
                 self.logger.info("Downloading %s ...", url)
                 try:
                     with archive_path.open("wb") as fp:
-                        with stream("GET", url) as stream_response:
+                        with stream("GET", url, follow_redirects=True) as stream_response:
+                            stream_response.raise_for_status()
                             for chunk in stream_response.iter_bytes():
                                 fp.write(chunk)
                 except Exception:
