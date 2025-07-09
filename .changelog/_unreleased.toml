@@ -75,3 +75,15 @@ id = "833a09a8-236d-4633-aef9-d9d6fc2e6799"
 type = "feature"
 description = "Add `kraken.std.aws.lambda_` module with `python_lambda_zip` function"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ec0ede68-bfcf-4d95-a633-780fb732c065"
+type = "feature"
+description = "Add `kraken.core.system.buildcache.BuildCache` class to manage Nix-store inspired build caches"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "4c239971-2079-4d0f-b77c-3445563ede5e"
+type = "deprecation"
+description = "Deprecate `--no-save`, `--resume` and `--restart` options"
+author = "@NiklasRosenstein"

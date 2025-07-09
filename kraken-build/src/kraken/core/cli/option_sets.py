@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import logging
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -8,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import argparse
 
+logger = logging.getLogger(__name__)
 DEFAULT_BUILD_DIR = Path("build")
 BUILD_STATE_DIR = ".kraken/buildenv"
 
@@ -91,7 +93,7 @@ class GraphOptions:
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True) -> None:
         group = parser.add_argument_group("graph options")
-        group.add_argument("--resume", action="store_true", help="load previous build state")
+        group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
         group.add_argument(
             "--restart",
             choices=("all",),
@@ -113,15 +115,25 @@ class GraphOptions:
         )
 
         if saveable:
-            group.add_argument("--no-save", action="store_true", help="do not save the new build state")
+            group.add_argument(
+                "--save", action="store_true", help="deprecated since v0.45.0. the default is to not save."
+            )
+            group.add_argument("--no-save", action="store_true", help="deprecated since v0.45.0.")
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> GraphOptions:
+        if args.save:
+            logger.warning("the --save/--no-save options are deprecated since kraken v0.45.0")
+        if args.resume:
+            logger.warning("the --resume option is deprecated since kraken v0.45.0")
+        if args.restart:
+            logger.warning("the --restart option is deprecated since kraken v0.45.0")
+
         return cls(
             tasks=args.tasks or None,
             resume=args.resume,
             restart=args.restart,
-            no_save=getattr(args, "no_save", True),
+            no_save=not args.save,
             all=getattr(args, "all", False),
         )
 
