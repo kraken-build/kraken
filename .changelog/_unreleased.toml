@@ -69,3 +69,9 @@ author = "@NiklasRosenstein"
 issues = [
     "https://github.com/kraken-build/kraken/issues/230",
 ]
+
+[[entries]]
+id = "833a09a8-236d-4633-aef9-d9d6fc2e6799"
+type = "feature"
+description = "Add `kraken.std.aws.lambda_` module with `python_lambda_zip` function"
+author = "@NiklasRosenstein"
