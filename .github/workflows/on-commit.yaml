@@ -166,14 +166,14 @@ jobs:
 
   run-example-docker-manual:
     name: Example (docker-manual)
-    uses: ./.github/workflows/run-example.yml
+    uses: ./.github/workflows/run-example.yaml
     with:
       example-name: aws-lambda
       targets: lambda
 
   run-example-aws-lambda:
     name: Example (aws-lambda)
-    uses: ./.github/workflows/run-example.yml
+    uses: ./.github/workflows/run-example.yaml
     with:
       example-name: aws-lambda
       targets: lambda
