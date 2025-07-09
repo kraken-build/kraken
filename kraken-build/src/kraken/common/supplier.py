@@ -106,15 +106,27 @@ class Supplier(Generic[T], abc.ABC):
         Coercion for ``T | Supplier[T] -> Supplier[T]``. This is useful when accepting parameters for task factories
         that could either be "hard" value or derived from properties of other tasks.
 
+        .. code-block:: python
+
+            def my_task(name: str, files: Sequence[str | Path] | Property[Sequence[Path]]) -> MyTask:
+                from kraken.build import project
+                task = project.task(name, MyTask)
+                task.files = (
+                    Supplier[Sequence[str | Path]]
+                    .of(files)
+                    .map(lambda files: [project.directory / f for f in files])
+                )
+                return task
+
         Note that Mypy's (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
         need to explicitly define ``T``.
 
-        Example:
+        .. code-block:: python
 
-        >>> from typing_extensions import assert_type
-        >>> assert_type( Supplier.of("foo"),                            Supplier[str]       )  # OK (simple)
-        >>> assert_type( Supplier.of(cast(str | int, "foo"),            Supplier[object]    )  # types unrefined
-        >>> assert_type( Supplier[str | int].of(cast(str | int, "foo"), Supplier[int | str] )  # OK
+            >>> from typing_extensions import assert_type
+            >>> assert_type( Supplier.of("foo"),                            Supplier[str]       )  # OK (simple)
+            >>> assert_type( Supplier.of(cast(str | int, "foo"),            Supplier[object]    )  # types unrefined
+            >>> assert_type( Supplier[str | int].of(cast(str | int, "foo"), Supplier[int | str] )  # OK
         """
 
         if isinstance(value, Supplier):
