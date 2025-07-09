@@ -1,0 +1,28 @@
+name: Documentation
+
+on:
+  push: { branches: [ "develop" ], tags: [ "*" ] }
+  pull_request: { branches: [ "*" ] }
+
+jobs:
+  build:
+    name: Build and publish
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: jdx/mise-action@v2
+    - run: mise run build-docs
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build/docs/mkdocs/_site
+
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/develop'
+      id: deployment
+      uses: actions/deploy-pages@v4
