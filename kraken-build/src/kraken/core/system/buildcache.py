@@ -264,7 +264,7 @@ class BuildCache:
     def __enter__(self) -> "BuildCache":
         """
         Enter the context manager, which allows the cache to be used in a `with` statement. This is useful to ensure
-        that the cache is deleted if any exception occurrs during inside the `with` block.
+        that the cache is deleted if any exception occurs during inside the `with` block.
         """
 
         return self
