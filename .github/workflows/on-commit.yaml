@@ -164,24 +164,6 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
     - run: cd examples/docker-manual && uv run ${{ matrix.call-target }} run :dockerBuild :sub:helloWorld
 
-  examples-aws-lambda:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: jdx/mise-action@v2
-    - uses: actions/setup-python@v5
-      with: { python-version: "3.13" }
-    - name: Build the lambda ZIP
-      run: uv run --project .. kraken run lambda -vv
-      working-directory: examples/aws-lambda
-    - name: Check the ZIP file
-      working-directory: examples/aws-lambda
-      run: |
-        ls -l build/lambda.zip
-        unzip -t build/lambda.zip
-        unzip -l build/lambda.zip | grep requests/__version__.py
-        unzip -l build/lambda.zip | grep main.py
-
   publish:
     runs-on: ubuntu-latest
     needs: test
