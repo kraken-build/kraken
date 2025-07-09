@@ -36,6 +36,9 @@ else:
     def request(method: str, url: str, **kwargs: Any) -> httpx.Response:
         return httpx.request(method, url, verify=_get_system_ca_list(), **kwargs)
 
+    def stream(method, url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
+        return httpx.stream(method, url, verify=_get_system_ca_list(), **kwargs)
+
     def get(url: str, **kwargs: Any) -> httpx.Response:
         return httpx.get(url, verify=_get_system_ca_list(), **kwargs)
 
@@ -56,6 +59,3 @@ else:
 
     def delete(url: str, **kwargs: Any) -> httpx.Response:
         return httpx.delete(url, verify=_get_system_ca_list(), **kwargs)
-
-    def stream(url: str, **kwargs: Any) -> ContextManager[httpx.Response]:
-        return httpx.stream(url, verify=_get_system_ca_list(), **kwargs)
