@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Iterator
 
 import pytest
-from requests_mock import Mocker
+from pytest_httpx import HTTPXMock
 
 from kraken.core import BuildError
 from kraken.core.testing import kraken_ctx, kraken_project
@@ -251,12 +251,13 @@ def test__private_cargo_registry_publish_workspace(tempdir: Path, private_regist
     publish_workspace(repository, tempdir)
 
 
-def test__mock_cargo_registry_skips_publish_if_exists(tempdir: Path, requests_mock: Mocker) -> None:
+@pytest.mark.httpx_mock(should_mock=lambda request: request.url.netloc.decode() == "0.0.0.0:35510")
+def test__mock_cargo_registry_skips_publish_if_exists(tempdir: Path, httpx_mock: HTTPXMock) -> None:
     registry_url = "http://0.0.0.0:35510"
     index_url = f"sparse+{registry_url}/"
 
-    requests_mock.get(f"{registry_url}/config.json", text="{}")
-    requests_mock.get(f"{registry_url}/he/ll/hello-world-lib", text='{"vers": "0.1.0"}')
+    httpx_mock.add_response(url=f"{registry_url}/config.json", text="{}")
+    httpx_mock.add_response(url=f"{registry_url}/he/ll/hello-world-lib", text='{"vers": "0.1.0"}')
 
     repository = CargoRepositoryWithAuth("kraken-std-cargo-integration-test", index_url, None, "xxxxxxxxxxxxxxxxxxxxxx")
     skip_publish_lib(repository, tempdir)
