@@ -3,7 +3,7 @@ calculated lazily and track provenance of such computations."""
 
 import abc
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, overload
 
 from ._generic import NotSet
 
@@ -37,7 +37,13 @@ class Supplier(Generic[T], abc.ABC):
     def get(self) -> T:
         """Return the value of the supplier. Depending on the implemenmtation, this may defer to other suppliers."""
 
-    def get_or(self, fallback: U) -> "T | U":
+    @overload
+    def get_or(self, fallback: None) -> "T | None": ...
+
+    @overload
+    def get_or(self, fallback: U) -> "T | U": ...
+
+    def get_or(self, fallback: U | None) -> "T | U | None":
         """Return the value of the supplier, or the *fallback* value if the supplier is empty."""
         try:
             return self.get()
@@ -96,6 +102,21 @@ class Supplier(Generic[T], abc.ABC):
 
     @staticmethod
     def of(value: "T | Supplier[T]", derived_from: Sequence["Supplier[Any]"] = ()) -> "Supplier[T]":
+        """
+        Coercion for ``T | Supplier[T] -> Supplier[T]``. This is useful when accepting parameters for task factories
+        that could either be "hard" value or derived from properties of other tasks.
+
+        Note that Mypy's (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
+        need to explicitly define ``T``.
+
+        Example:
+
+        >>> from typing_extensions import assert_type
+        >>> assert_type( Supplier.of("foo"),                            Supplier[str]       )  # OK (simple)
+        >>> assert_type( Supplier.of(cast(str | int, "foo"),            Supplier[object]    )  # types unrefined
+        >>> assert_type( Supplier[str | int].of(cast(str | int, "foo"), Supplier[int | str] )  # OK
+        """
+
         if isinstance(value, Supplier):
             return value
         return OfSupplier(value, derived_from)
