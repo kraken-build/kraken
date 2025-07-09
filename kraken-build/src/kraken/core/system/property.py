@@ -19,7 +19,7 @@ import weakref
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from operator import concat
 from pathlib import Path
-from typing import Any, ClassVar, TypeVar, cast
+from typing import Any, ClassVar, TypeVar, cast, overload
 
 from typeapi import (
     AnnotatedTypeHint,
@@ -345,6 +345,12 @@ class Property(Supplier[T]):
         return super().is_empty()
 
     # Python Descriptor
+
+    @overload
+    def __set__(self, instance: PropertyContainer, value: Supplier[T]) -> None: ...
+
+    @overload
+    def __set__(self, instance: PropertyContainer, value: T | None) -> None: ...
 
     def __set__(self, instance: PropertyContainer, value: T | Supplier[T] | None) -> None:
         instance_prop = vars(instance)[self.name]

@@ -54,3 +54,18 @@ id = "d6c6b43d-8501-4883-880d-802c273dc687"
 type = "improvement"
 description = "Improve readability of log format (vertical alignment, colors and only show module and line number if verbosity >= 3)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6cb96921-71d8-4a07-8f66-d8731eec1108"
+type = "improvement"
+description = "Improve typing of `Supplier.get_or()` and `Property.__set__()`, update docs of `Supplier.of()` to cover some special cases and (how to) deal with them"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ca3d9693-e472-4be0-91bb-bd59811d879f"
+type = "fix"
+description = "`Ensure `Context.current()` returns the current context during `finalize()`"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/230",
+]
