@@ -66,7 +66,7 @@ jobs:
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ matrix.python-version }}" }
-    - run: krakenw run check lint test -vv
+    - run: krakenw run check lint test -X pytest-e2e -vv
 
   test-e2e:
     runs-on: ubuntu-latest
