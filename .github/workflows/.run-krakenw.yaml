@@ -24,4 +24,4 @@ jobs:
     - uses: jdx/mise-action@v2
     - uses: actions/setup-python@v5
       with: { python-version: "${{ inputs.python-version }}" }
-    - run: krakenw run ${{ inputs.tasks }} -vv
+    - run: krakenw run ${{ inputs.targets }} -vv
