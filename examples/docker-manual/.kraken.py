@@ -1,9 +1,10 @@
-## ::krakenw-root
+# ::krakenw-root
 
 from kraken.common import buildscript
 
 buildscript(
-    requirements=["kraken-build @ ../../kraken-wrapper"], additional_sys_paths=["."]
+    additional_sys_paths=["."],
+    requirements=["kraken-build>=0.45.1"],
 )
 
 from kraken.build import project  # noqa: E402
