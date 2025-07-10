@@ -99,14 +99,7 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
     @property
     def name(self) -> str:
         if self.address.is_root():
-            warnings.warn(
-                "Accessing Project.name on the root project is deprecated since kraken-core v0.12.0. "
-                "In future versions, this will result ValueError being raised. The project name is now "
-                "determined by the Address.name, which is undefined on the root address (`:`). "
-                "The fallback behaviour for this version is that we return the Project.directory.name.",
-                DeprecationWarning,
-            )
-            return self.directory.name
+            return ":"
         return self.address.name
 
     @property
