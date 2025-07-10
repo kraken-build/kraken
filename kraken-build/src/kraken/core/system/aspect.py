@@ -195,4 +195,35 @@ def parse_options(
     return result
 
 
-ASPECTS: dict[str, type[Aspect]] = {}
+@dataclass(kw_only=True)
+class LintAspectOptions(AspectOptions):
+    """
+    Perform linting on the code in a project.
+
+    Linting concerns the process of checking the code for semantic, stylistic and specific formatting issues that could
+    lead to bugs or make the code harder to read and maintain. This aspect provides a common interface for tasks that
+    implement such checks.
+
+    Parameters
+    ----------
+    fix:
+        Automatically fix issues where possible.
+    unsafe_fix:
+        Automatically fix issues where possible, even if it may lead to unsafe changes. This is a more aggressive
+        option and should be used with caution.
+    """
+
+    fix: bool = False
+    unsafe_fix: bool = False
+
+
+@dataclass
+class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions):
+    """
+    An example aspect that represents a superset of tasks that perform linting on the code in a project.
+    """
+
+
+ASPECTS: dict[str, type[Aspect]] = {
+    "lint": LintAspect,
+}

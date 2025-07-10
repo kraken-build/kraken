@@ -2,7 +2,7 @@ __version__ = "0.45.3"
 
 from kraken.common.supplier import Supplier
 from kraken.core.address import Address
-from kraken.core.system.aspect import Aspect, AspectBase, AspectOptions
+from kraken.core.system.aspect import Aspect, AspectBase, AspectOptions, LintAspect, LintAspectOptions
 from kraken.core.system.buildcache import BuildCache
 from kraken.core.system.context import Context, ContextEvent
 from kraken.core.system.errors import BuildError, ProjectLoaderError
@@ -33,6 +33,8 @@ __all__ = [
     "ContextEvent",
     "Graph",
     "GroupTask",
+    "LintAspect",
+    "LintAspectOptions",
     "Project",
     "ProjectLoaderError",
     "Property",
