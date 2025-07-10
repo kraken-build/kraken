@@ -1,0 +1,5 @@
+[[entries]]
+id = "246aadb7-b409-43ba-8c22-c9bf32b41458"
+type = "feature"
+description = "Add `kraken.core.aspect` module which is used to implement purpose-specific `kraken` CLI subcommands (e.g. `kraken lint`)"
+author = "@NiklasRosenstein"
