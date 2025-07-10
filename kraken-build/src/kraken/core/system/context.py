@@ -12,6 +12,7 @@ from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRu
 from kraken.common.iter import bipartition
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
+from kraken.core.system.artifact import Artifact
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
 from kraken.core.system.executor import GraphExecutor, GraphExecutorObserver
 from kraken.core.system.executor.default import (
@@ -105,6 +106,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
+
+        # A mapping from artifact to the task that produces it.
+        self._artifact_producer: dict[Artifact, Task] = {}
 
     @property
     def root_project(self) -> Project:
@@ -350,7 +354,12 @@ class Context(MetadataContainer, Currentable["Context"]):
         return tasks
 
     def finalize(self) -> None:
-        """Call :meth:`Task.finalize()` on all tasks. This should be called before a graph is created."""
+        """
+        Call :meth:`Task.finalize()` on all tasks. This should be called before a graph is created.
+
+        During this step, all tasks declare their input and output artifacts, helping in building a more complete
+        dependency graph between tasks.
+        """
 
         if self._finalized:
             logger.warning("Context.finalize() called more than once", stack_info=True)
@@ -358,14 +367,42 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._finalized = True
 
         with self.as_current():
-            self.trigger(ContextEvent.Type.on_context_begin_finalize, self)
-
             # Delegate to finalize calls in all tasks of all projects.
             for project in self.iter_projects():
                 self.trigger(ContextEvent.Type.on_project_begin_finalize, project)
                 for task in project.tasks().values():
                     task.finalize()
+                    for artifact in task.produces():
+                        # The artifact cannot be produced by two tasks at the same time.
+                        if artifact in self._artifact_producer:
+                            other_task = self._artifact_producer[artifact]
+                            raise ValueError(
+                                f"{artifact!r} is produced by more than task:\n\n\t(1) {other_task}\n\n\t(2) {task}"
+                            )
+
+                        self._artifact_producer[artifact] = task
+
                 self.trigger(ContextEvent.Type.on_project_finalized, project)
+
+            # Add implied dependencies by the declared consumed artifacts.
+            for project in self.iter_projects():
+                for task in project.tasks().values():
+                    for artifact in task.consumes():
+                        produced_by = self._artifact_producer.get(artifact)
+                        if not produced_by and not artifact.exists():
+                            # TODO: Better error?
+                            raise ValueError(
+                                f"{artifact!r} is required but does not exist and is not produced by a task."
+                                f"\n\n\trequired by: {task}"
+                            )
+                        if produced_by:
+                            logger.debug(
+                                "implied dependency %s ← %s through %r",
+                                task.address,
+                                produced_by.address,
+                                artifact,
+                            )
+                            task.depends_on(produced_by)
 
             self.trigger(ContextEvent.Type.on_context_finalized, self)
 

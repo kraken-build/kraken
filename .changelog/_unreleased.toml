@@ -27,3 +27,9 @@ id = "1f5ce1f3-35fa-44e4-ad45-095e23ff565a"
 type = "feature"
 description = "Add `python_lambda_zip(python_version=None, symlink_result=True)` arguments"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "665e1499-b48e-419f-b0a4-8a49bd7446c4"
+type = "feature"
+description = "Add `Task.consumes()` and `Task.produces()` API"
+author = "@NiklasRosenstein"
