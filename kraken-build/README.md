@@ -49,7 +49,7 @@ want to use a released version of `krakenw` instead of the live version in `krak
 repository. You can use [Mise] to install all the tools you need.
 
     $ mise install
-    $ eval $(mise activate)
+    $ eval "$(mise activate)"
     $ krakenw run fmt lint test
 
 ## Release process
