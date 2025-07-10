@@ -16,6 +16,7 @@ import tomli
 
 from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
+from kraken.core.system.errors import BuildError
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
@@ -121,13 +122,13 @@ def test__python_project_install_lint_and_publish(
     # Make sure Poetry installs the environment locally so it gets cleaned up
     os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "1"
 
-    kraken_ctx.load_project(directory=tempdir / project_dir)
+    kraken_ctx.load_project(tempdir / project_dir)
     kraken_ctx.execute([":lint", ":publish"])
 
     # Try to run the "consumer" project.
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
-    kraken_ctx.load_project(directory=tempdir / consumer_dir)
+    kraken_ctx.load_project(tempdir / consumer_dir)
 
     # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
@@ -290,26 +291,28 @@ def test__python_project_coverage(
 def test__python_project_can_lint_lint_enforced_directories(
     kraken_ctx: Context,
     kraken_project: Project,
+    capfd: pytest.CaptureFixture[str],
 ) -> None:
-    tempdir = kraken_project.directory
-    original_dir = data_path("lint-enforced-directories-project")
-
-    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
-    logger.info("Loading and executing Kraken project (%s)", tempdir)
-
-    python.settings.python_settings(
-        project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
+    shutil.copytree(
+        data_path("lint-enforced-directories-project"),
+        kraken_project.directory,
+        dirs_exist_ok=True,
     )
-    python.install(project=kraken_project)
+    kraken_ctx.load_project(kraken_project)
 
-    for linter, version in {
-        "black": "23.12.1",
-        "flake8": "6.1.0",
-        "isort": "5.13.2",
-        "mypy": "1.8.0",
-        "pycln": "2.4.0",
-        "pylint": "3.0.3",
-    }.items():
-        getattr(python, linter)(project=kraken_project, version_spec=f"=={version}")
+    with pytest.raises(BuildError) as excinfo:
+        kraken_ctx.execute([":lint"])
+    assert str(excinfo.value) == 'tasks ":python.mypy", ":python.ruff.check" failed'
 
-    kraken_ctx.execute([":lint"])
+    output = capfd.readouterr().out
+    print(output)
+
+    # Check for Ruff errors
+    assert "src/mypackage/__init__.py:3:8: F401 `os` imported but unused" in output
+    assert "bin/main.py:3:8: F401 `os` imported but unused" in output
+    assert "examples/example.py:3:8: F401 `os` imported but unused" in output
+
+    # Check for Mypy errors
+    assert "src/mypackage/__init__.py:6: error: Missing return statement  [return]" in output
+    assert "bin/main.py:6: error: Missing return statement  [return]" in output
+    assert "examples/example.py:6: error: Missing return statement  [return]" in output
