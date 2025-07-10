@@ -5,9 +5,8 @@ from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
 
-from kraken.common import Supplier
-from kraken.core import Project, Property
-from kraken.core.system.task import TaskStatus
+from kraken.core import Aspect, Project, Property, Supplier, TaskStatus
+from kraken.core.system.aspect import LintAspect, LintAspectOptions
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -23,10 +22,18 @@ class RuffTask(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
+    _lint_aspect: LintAspectOptions | None = None
+
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
+        ruff_task = list(self.ruff_task.get())
+        if self._lint_aspect and self._lint_aspect.fix and "--fix" not in ruff_task:
+            ruff_task += ["--fix"]
+        if self._lint_aspect and self._lint_aspect.unsafe_fix and "--unsafe-fix" not in ruff_task:
+            ruff_task += ["--unsafe-fix"]
+
         command = [
             *self.ruff_cmd.get(),
-            *self.ruff_task.get(),
+            *ruff_task,
             str(self.settings.source_directory),
             *self.settings.get_tests_directory_as_args(),
         ]
@@ -35,6 +42,14 @@ class RuffTask(EnvironmentAwareDispatchTask):
             command += ["--config", str(self.config_file.get().absolute())]
         command += self.additional_args.get()
         return command
+
+    def implements_aspect(self, aspect: Aspect) -> bool:
+        match aspect:
+            case LintAspect(options):
+                self._lint_aspect = options
+                return True
+            case _:
+                return False
 
 
 @dataclass

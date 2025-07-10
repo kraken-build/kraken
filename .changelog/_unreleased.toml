@@ -15,3 +15,9 @@ id = "da6bd5e0-2aa3-4d64-a83b-e717f6490f55"
 type = "feature"
 description = "Add `kraken lint` aspect with `LintAspect` class"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "0390aa18-568c-4292-aac5-b96798881df8"
+type = "feature"
+description = "implement `LintAspect` in `RuffTask`"
+author = "@NiklasRosenstein"
