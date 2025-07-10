@@ -9,3 +9,9 @@ id = "c9db8fde-734f-45df-b484-4394c6491c03"
 type = "fix"
 description = "`python_settings(lint_enforced_directories)` is now checked correctly relative to the project directory before choosing to ignore them"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bf38cca3-b823-488a-8dd6-22ccba4d4f38"
+type = "breaking change"
+description = "Remove `python.(black|flake8|isort|pycln|pylint|pyupgrade)` as all of the functionality is covered by Ruff"
+author = "@NiklasRosenstein"
