@@ -259,7 +259,7 @@ class BuildCache:
             source = self.store_path() / source
             if not source.exists():
                 raise FileNotFoundError(f"Source file '{source}' does not exist.")
-            if target.exists(follow_symlinks=False):
+            if target.exists() or target.is_symlink():  # follow_symlink argument in exists() added in 3.12
                 logger.debug("Removing existing result '%s'", target)
                 safe_rmpath(target)
             logger.debug("Linking '%s' to '%s'", source, target)
@@ -280,7 +280,7 @@ class BuildCache:
             source = self.store_path() / source
             if not source.exists():
                 raise FileNotFoundError(f"Source file '{source}' does not exist.")
-            if target.exists(follow_symlinks=False):
+            if target.exists() or target.is_symlink():  # follow_symlink argument in exists() added in 3.12
                 logger.debug("Removing existing result '%s'", target)
                 safe_rmpath(target)
             logger.debug("Copying '%s' to '%s'", source, target)
