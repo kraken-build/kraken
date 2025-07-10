@@ -1,0 +1,103 @@
+release-date = "2025-07-09"
+
+[[entries]]
+id = "e64939c7-c061-46c3-a148-a81a2b0a4e97"
+type = "deprecation"
+description = "Deprecate Maturin + PDM project support"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "39a47d11-7858-44c9-ab41-4f4c128e86e5"
+type = "fix"
+description = "Fix error when calling `uv pip install` when no requirements are specified in `buildscript()` call. (It will error later when it cannot call Kraken, but that is a better error)"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "dbb56b0e-6634-4c45-ae99-3936c397b12a"
+type = "improvement"
+description = "Run `typos` in CI and fix typos in codebase"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "50a658a1-1bd2-4088-b7c7-c2670371f69e"
+type = "improvement"
+description = "Use Uv instead of Poetry in `pyproject.toml`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "fe2b3657-efb3-41e2-a336-95574ed1645b"
+type = "deprecation"
+description = "Remove support for `VENV` build manager in a backwards-compatible way (will use Uv anyway)"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "e9b71e05-1606-422d-9f83-7fede0992905"
+type = "hygiene"
+description = "Remove conditional import of kraken main procedure that has not changed since v0.9.0"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "bb486cf0-c42a-48c2-b6c2-2c6fe9167861"
+type = "refactor"
+description = "Refactor virtual environment managed in kraken-wrapper to make use of `uv pip freeze` instead of the homegrown `kraken query env` command, which is slower and more brittle."
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
+id = "ebf85acd-413b-4c10-a083-73c6eae8cf37"
+type = "deprecation"
+description = "Add deprecation warning to `kraken query env` command"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "d6c6b43d-8501-4883-880d-802c273dc687"
+type = "improvement"
+description = "Improve readability of log format (vertical alignment, colors and only show module and line number if verbosity >= 3)"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "6cb96921-71d8-4a07-8f66-d8731eec1108"
+type = "improvement"
+description = "Improve typing of `Supplier.get_or()` and `Property.__set__()`, update docs of `Supplier.of()` to cover some special cases and (how to) deal with them"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ca3d9693-e472-4be0-91bb-bd59811d879f"
+type = "fix"
+description = "`Ensure `Context.current()` returns the current context during `finalize()`"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/230",
+]
+
+[[entries]]
+id = "833a09a8-236d-4633-aef9-d9d6fc2e6799"
+type = "feature"
+description = "Add `kraken.std.aws.lambda_` module with `python_lambda_zip` function"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ec0ede68-bfcf-4d95-a633-780fb732c065"
+type = "feature"
+description = "Add `kraken.core.system.buildcache.BuildCache` class to manage Nix-store inspired build caches"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "4c239971-2079-4d0f-b77c-3445563ede5e"
+type = "deprecation"
+description = "Deprecate `--no-save`, `--resume` and `--restart` options"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "33436462-eb4e-4178-a962-de40bbd75418"
+type = "hygiene"
+description = "Remove import of `requests` package from Cargo task, we use `httpx` in Kraken;"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1d451852-d94f-4e00-adca-89b778017e6b"
+type = "hygiene"
+description = "Remove abstraction over build environments, there is only one `BuildEnv` implementation now and that is Uv"
+author = "@NiklasRosenstein"

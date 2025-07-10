@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from collections.abc import Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, overload
@@ -98,16 +97,14 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
     @property
     def name(self) -> str:
+        """
+        Returns the name of the project. This is usually the same as the name of the directory that the project
+        belongs to.
+        """
+
         if self.address.is_root():
-            warnings.warn(
-                "Accessing Project.name on the root project is deprecated since kraken-core v0.12.0. "
-                "In future versions, this will result ValueError being raised. The project name is now "
-                "determined by the Address.name, which is undefined on the root address (`:`). "
-                "The fallback behaviour for this version is that we return the Project.directory.name.",
-                DeprecationWarning,
-            )
             return self.directory.name
-        return self.address.name
+        return self.address.name  # Usually the same as the directory name.
 
     @property
     def build_directory(self) -> Path:

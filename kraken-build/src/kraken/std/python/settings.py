@@ -195,13 +195,13 @@ def python_settings(
     if lint_enforced_directories is not None:
         dirs = []
         for directory in lint_enforced_directories:
-            directory_path = Path(directory)
-            if not directory_path.exists():
-                logger.debug(f"skipping specified lint enforced directory {directory_path} as it does not exist")
-            elif not directory_path.is_dir():
-                logger.warning(f"skipping specified lint enforced directory {directory_path} as it is not a directory")
+            full_path = project.directory / directory
+            if not full_path.exists():
+                logger.debug(f"skipping specified lint enforced directory {full_path} as it does not exist")
+            elif not full_path.is_dir():
+                logger.warning(f"skipping specified lint enforced directory {full_path} as it is not a directory")
             else:
-                dirs.append(directory_path)
+                dirs.append(Path(directory))
         settings.lint_enforced_directories = dirs
 
     if always_use_managed_env is not None:

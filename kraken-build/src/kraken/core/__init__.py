@@ -1,7 +1,8 @@
-__version__ = "0.44.1"
+__version__ = "0.45.1"
 
 from kraken.core.address import Address
 from kraken.core.system.artifact import Artifact, PathArtifact
+from kraken.core.system.buildcache import BuildCache
 from kraken.core.system.context import Context, ContextEvent
 from kraken.core.system.errors import BuildError, ProjectLoaderError
 from kraken.core.system.executor import Graph
@@ -24,6 +25,7 @@ __all__ = [
     "Artifact",
     "BackgroundTask",
     "BuildError",
+    "BuildCache",
     "Context",
     "ContextEvent",
     "Graph",

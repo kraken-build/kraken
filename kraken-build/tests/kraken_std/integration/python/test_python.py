@@ -16,6 +16,7 @@ import tomli
 
 from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
+from kraken.core.system.errors import BuildError
 from kraken.std import python
 from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
 from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
@@ -24,7 +25,7 @@ from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 
 from tests.kraken_std.util.docker import DockerServiceManager
-from tests.resources import example_dir
+from tests.resources import data_path
 
 logger = logging.getLogger(__name__)
 USER_NAME = "integration-test-user"
@@ -87,8 +88,9 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
         "pdm-project",
         "uv-project",
         "rust-poetry-project",
-        "rust-pdm-project",
-        "rust-uv-project",
+        # See https://github.com/kraken-build/kraken/issues/356
+        # "rust-pdm-project",
+        # "rust-uv-project",
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
@@ -101,8 +103,16 @@ def test__python_project_install_lint_and_publish(
     consumer_dir = project_dir + "-consumer"
 
     # Copy the projects to the temporary directory.
-    shutil.copytree(example_dir(project_dir), tempdir / project_dir)
-    shutil.copytree(example_dir(consumer_dir), tempdir / consumer_dir)
+    shutil.copytree(data_path(project_dir), tempdir / project_dir)
+    shutil.copytree(data_path(consumer_dir), tempdir / consumer_dir)
+
+    # Remove the .venv if it exists in the project directory to ensure a clean environment.
+    venv_path = tempdir / project_dir / ".venv"
+    if venv_path.exists():
+        shutil.rmtree(venv_path)
+    venv_path = tempdir / consumer_dir / ".venv"
+    if venv_path.exists():
+        shutil.rmtree(venv_path)
 
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
     # TODO: mock the `os.environ` dict instead of mutating the global one
@@ -112,13 +122,13 @@ def test__python_project_install_lint_and_publish(
     # Make sure Poetry installs the environment locally so it gets cleaned up
     os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "1"
 
-    kraken_ctx.load_project(directory=tempdir / project_dir)
+    kraken_ctx.load_project(tempdir / project_dir)
     kraken_ctx.execute([":lint", ":publish"])
 
     # Try to run the "consumer" project.
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
-    kraken_ctx.load_project(directory=tempdir / consumer_dir)
+    kraken_ctx.load_project(tempdir / consumer_dir)
 
     # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
@@ -148,7 +158,7 @@ def test__python_project_upgrade_python_version_string(
 
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
-    original_dir = example_dir("version-project")
+    original_dir = data_path("version-project")
     project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
@@ -191,7 +201,7 @@ def test__python_project__upgrade_relative_import_version(
 
     build_as_version = "0.1.1"
     project_name = "uv-project-relative-import"
-    original_dir = example_dir(project_name)
+    original_dir = data_path(project_name)
     project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
@@ -234,7 +244,7 @@ def test__python_pyproject_reads_correct_data(
 ) -> None:
     # Copy the projects to the temporary directory.
     new_dir = kraken_project.directory / project_dir
-    shutil.copytree(example_dir(project_dir), new_dir)
+    shutil.copytree(data_path(project_dir), new_dir)
 
     pyproject = TomlFile.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
@@ -257,7 +267,7 @@ def test__python_project_coverage(
     os.environ["PYTEST_FLAGS"] = ""
 
     tempdir = kraken_project.directory
-    original_dir = example_dir("slap-project")
+    original_dir = data_path("slap-project")
 
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
@@ -281,26 +291,32 @@ def test__python_project_coverage(
 def test__python_project_can_lint_lint_enforced_directories(
     kraken_ctx: Context,
     kraken_project: Project,
+    capfd: pytest.CaptureFixture[str],
 ) -> None:
-    tempdir = kraken_project.directory
-    original_dir = example_dir("lint-enforced-directories-project")
-
-    shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
-    logger.info("Loading and executing Kraken project (%s)", tempdir)
-
-    python.settings.python_settings(
-        project=kraken_project, lint_enforced_directories=[tempdir / "examples", tempdir / "bin"]
+    shutil.copytree(
+        data_path("lint-enforced-directories-project"),
+        kraken_project.directory,
+        dirs_exist_ok=True,
     )
-    python.install(project=kraken_project)
+    kraken_ctx.load_project(kraken_project)
 
-    for linter, version in {
-        "black": "23.12.1",
-        "flake8": "6.1.0",
-        "isort": "5.13.2",
-        "mypy": "1.8.0",
-        "pycln": "2.4.0",
-        "pylint": "3.0.3",
-    }.items():
-        getattr(python, linter)(project=kraken_project, version_spec=f"=={version}")
+    with pytest.raises(BuildError) as excinfo:
+        kraken_ctx.execute([":lint"])
 
-    kraken_ctx.execute([":lint"])
+    output = capfd.readouterr().out
+    print(output)
+
+    assert str(excinfo.value) == 'tasks ":python.mypy", ":python.ruff.check", ":python.ruff.fmt.check" failed'
+
+    # Check for Ruff errors
+    assert "src/mypackage/__init__.py:3:8: F401 `os` imported but unused" in output
+    assert "bin/main.py:3:8: F401 [*] `os` imported but unused" in output
+    assert "examples/example.py:3:8: F401 [*] `os` imported but unused" in output
+
+    # Check for Ruff formatting errors
+    assert "Would reformat: bin/main.py" in output
+
+    # Check for Mypy errors
+    assert "src/mypackage/__init__.py:6: error: Missing return statement  [return]" in output
+    assert "bin/main.py:7: error: Missing return statement  [return]" in output
+    assert "examples/example.py:6: error: Missing return statement  [return]" in output

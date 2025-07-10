@@ -1,58 +1,31 @@
 [[entries]]
-id = "e64939c7-c061-46c3-a148-a81a2b0a4e97"
-type = "deprecation"
-description = "Deprecate Maturin + PDM project support"
-author = "thomas.pellissier-tanon@helsing.ai"
+id = "3fd0a55f-f220-4ad2-9c20-175b481f96ff"
+type = "improvement"
+description = "`Context.load_project()` can now accept a `Project` as first argument instead of a `Path`, useful for tests. Note that this breaks the interface slightly because the `directory` argument can no longer be passed as a keyword argument, but the method is very much internal."
+author = "@NiklasRosenstein"
 
 [[entries]]
-id = "39a47d11-7858-44c9-ab41-4f4c128e86e5"
+id = "c9db8fde-734f-45df-b484-4394c6491c03"
 type = "fix"
-description = "Fix error when calling `uv pip install` when no requirements are specified in `buildscript()` call. (It will error later when it cannot call Kraken, but that is a better error)"
-author = "@NiklasRosenstein"
-component = "kraken-wrapper"
-
-[[entries]]
-id = "dbb56b0e-6634-4c45-ae99-3936c397b12a"
-type = "improvement"
-description = "Run `typos` in CI and fix typos in codebase"
+description = "`python_settings(lint_enforced_directories)` is now checked correctly relative to the project directory before choosing to ignore them"
 author = "@NiklasRosenstein"
 
 [[entries]]
-id = "50a658a1-1bd2-4088-b7c7-c2670371f69e"
-type = "improvement"
-description = "Use Uv instead of Poetry in `pyproject.toml`"
+id = "bf38cca3-b823-488a-8dd6-22ccba4d4f38"
+type = "breaking change"
+description = "Remove `python.(black|flake8|isort|pycln|pylint|pyupgrade)` as all of the functionality is covered by Ruff"
 author = "@NiklasRosenstein"
 
 [[entries]]
-id = "fe2b3657-efb3-41e2-a336-95574ed1645b"
-type = "deprecation"
-description = "Remove support for `VENV` build manager in a backwards-compatible way (will use Uv anyway)"
-author = "@NiklasRosenstein"
-component = "kraken-wrapper"
-
-[[entries]]
-id = "e9b71e05-1606-422d-9f83-7fede0992905"
-type = "hygiene"
-description = "Remove conditional import of kraken main procedure that has not changed since v0.9.0"
+id = "9cc068b8-5934-4735-b36d-a69bfeca878a"
+type = "feature"
+description = "Add `BuildCache.copy_result()`"
 author = "@NiklasRosenstein"
 
 [[entries]]
-id = "bb486cf0-c42a-48c2-b6c2-2c6fe9167861"
-type = "refactor"
-description = "Refactor virtual environment managed in kraken-wrapper to make use of `uv pip freeze` instead of the homegrown `kraken query env` command, which is slower and more brittle."
-author = "@NiklasRosenstein"
-component = "kraken-wrapper"
-
-[[entries]]
-id = "ebf85acd-413b-4c10-a083-73c6eae8cf37"
-type = "deprecation"
-description = "Add deprecation warning to `kraken query env` command"
-author = "@NiklasRosenstein"
-
-[[entries]]
-id = "d6c6b43d-8501-4883-880d-802c273dc687"
-type = "improvement"
-description = "Improve readability of log format (vertical alignment, colors and only show module and line number if verbosity >= 3)"
+id = "1f5ce1f3-35fa-44e4-ad45-095e23ff565a"
+type = "feature"
+description = "Add `python_lambda_zip(python_version=None, symlink_result=True)` arguments"
 author = "@NiklasRosenstein"
 
 [[entries]]

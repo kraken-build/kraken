@@ -120,9 +120,11 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert self._root_project is None, "Context.root_project is already set"
         self._root_project = project
 
+    @overload
     def load_project(
         self,
         directory: Path,
+        /,
         parent: Project | None = None,
         require_buildscript: bool = True,
         runner: ScriptRunner | None = None,
@@ -142,6 +144,39 @@ class Context(MetadataContainer, Currentable["Context"]):
             specified without a *runner*.
         """
 
+    @overload
+    def load_project(
+        self,
+        into: Project,
+        /,
+        parent: Project | None = None,
+        require_buildscript: bool = True,
+        runner: ScriptRunner | None = None,
+        script: Path | None = None,
+    ) -> Project:
+        """
+        Loads a project into an existing project instance. This is usually only used during tests where the project is
+        passed as a pytest fixture but it is uninitialized.
+
+        Note that the *parent* argument is ignored in this case, as the project will already have been created with
+        a parent parameter.
+        """
+
+    def load_project(
+        self,
+        directory: Path | Project,
+        /,
+        parent: Project | None = None,
+        require_buildscript: bool = True,
+        runner: ScriptRunner | None = None,
+        script: Path | None = None,
+    ) -> Project:
+        if isinstance(directory, Project):
+            project = directory
+            directory = project.directory
+        else:
+            project = Project(directory.name, directory, parent, self)
+
         if not runner:
             if script is not None:
                 raise ValueError("cannot specify `script` parameter without a `runner` parameter")
@@ -152,7 +187,6 @@ class Context(MetadataContainer, Currentable["Context"]):
             script = runner.find_script(directory)
 
         has_root_project = self._root_project is not None
-        project = Project(directory.name, directory, parent, self)
         try:
             if parent:
                 parent.add_child(project)
@@ -330,48 +364,47 @@ class Context(MetadataContainer, Currentable["Context"]):
         if self._finalized:
             logger.warning("Context.finalize() called more than once", stack_info=True)
             return
-
         self._finalized = True
-        self.trigger(ContextEvent.Type.on_context_begin_finalize, self)
 
-        # Delegate to finalize calls in all tasks of all projects.
-        for project in self.iter_projects():
-            self.trigger(ContextEvent.Type.on_project_begin_finalize, project)
-            for task in project.tasks().values():
-                task.finalize()
-                for artifact in task.produces():
-                    # The artifact cannot be produced by two tasks at the same time.
-                    if artifact in self._artifact_producer:
-                        other_task = self._artifact_producer[artifact]
-                        raise ValueError(
-                            f"{artifact!r} is produced by more than task:\n\n\t(1) {other_task}\n\n\t(2) {task}"
-                        )
+        with self.as_current():
+            # Delegate to finalize calls in all tasks of all projects.
+            for project in self.iter_projects():
+                self.trigger(ContextEvent.Type.on_project_begin_finalize, project)
+                for task in project.tasks().values():
+                    task.finalize()
+                    for artifact in task.produces():
+                        # The artifact cannot be produced by two tasks at the same time.
+                        if artifact in self._artifact_producer:
+                            other_task = self._artifact_producer[artifact]
+                            raise ValueError(
+                                f"{artifact!r} is produced by more than task:\n\n\t(1) {other_task}\n\n\t(2) {task}"
+                            )
 
-                    self._artifact_producer[artifact] = task
+                        self._artifact_producer[artifact] = task
 
-            self.trigger(ContextEvent.Type.on_project_finalized, project)
+                self.trigger(ContextEvent.Type.on_project_finalized, project)
 
-        # Add implied dependencies by the declared consumed artifacts.
-        for project in self.iter_projects():
-            for task in project.tasks().values():
-                for artifact in task.consumes():
-                    produced_by = self._artifact_producer.get(artifact)
-                    if not produced_by and not artifact.exists():
-                        # TODO: Better error?
-                        raise ValueError(
-                            f"{artifact!r} is required but does not exist and is not produced by a task."
-                            f"\n\n\trequired by: {task}"
-                        )
-                    if produced_by:
-                        logger.debug(
-                            "implied dependency %s ← %s through %r",
-                            task.address,
-                            produced_by.address,
-                            artifact,
-                        )
-                        task.depends_on(produced_by)
+            # Add implied dependencies by the declared consumed artifacts.
+            for project in self.iter_projects():
+                for task in project.tasks().values():
+                    for artifact in task.consumes():
+                        produced_by = self._artifact_producer.get(artifact)
+                        if not produced_by and not artifact.exists():
+                            # TODO: Better error?
+                            raise ValueError(
+                                f"{artifact!r} is required but does not exist and is not produced by a task."
+                                f"\n\n\trequired by: {task}"
+                            )
+                        if produced_by:
+                            logger.debug(
+                                "implied dependency %s ← %s through %r",
+                                task.address,
+                                produced_by.address,
+                                artifact,
+                            )
+                            task.depends_on(produced_by)
 
-        self.trigger(ContextEvent.Type.on_context_finalized, self)
+            self.trigger(ContextEvent.Type.on_context_finalized, self)
 
     def get_build_graph(self, targets: Sequence[str | Address | Task] | None) -> TaskGraph:
         """Returns the :class:`TaskGraph` that contains either all default tasks or the tasks specified with
