@@ -17,7 +17,7 @@ authors = [
 ]
 dependencies = [
   "deprecated>=1.2.18",
-  "kraken-build>=0.45.0,<0.46.0",
+  "kraken-build==0.45.2",
   "loguru>=0.7.2,<0.8.0",
   "packaging>=25,<25.1",
   "uv>=0.7.0,<0.8.0",

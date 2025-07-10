@@ -23,6 +23,7 @@ patterns = [
     ("kraken-wrapper/src/kraken/wrapper/__init__.py", r'^__version__ = "(.*?)"$'),
     ("kraken-build/pyproject.toml", r'^version = "(.*?)"$'),
     ("kraken-wrapper/pyproject.toml", r'^version = "(.*?)"$'),
+    ("kraken-wrapper/pyproject.toml", r'^\s*"kraken-build==(.*?)",$'),
 ]
 
 post_bump_hooks = [
