@@ -283,9 +283,12 @@ class BuildCache:
             if target.exists():
                 logger.debug("Removing existing result '%s'", target)
                 safe_rmpath(target)
-            logger.debug("Linking '%s' to '%s'", source, target)
-            copytree(source, target, symlinks=symlinks, dirs_exist_ok=True)
-            target.symlink_to(source.resolve(), source.is_dir())
+            logger.debug("Copying '%s' to '%s'", source, target)
+            if source.is_dir():
+                copytree(source, target, symlinks=symlinks, dirs_exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)  # Ensure target directory exists
+                shutil.copy2(source, target)
 
     def __enter__(self) -> "BuildCache":
         """
