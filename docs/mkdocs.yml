@@ -55,6 +55,7 @@ nav:
     - api/kraken.build.md
     - api/kraken.common.md
     - api/kraken.core.md
+    - api/kraken.std.aws.md
     - api/kraken.std.buffrs.md
     - api/kraken.std.cargo.md
     - api/kraken.std.descriptors.resource.md

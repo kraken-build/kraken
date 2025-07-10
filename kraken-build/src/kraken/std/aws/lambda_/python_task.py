@@ -77,39 +77,37 @@ def python_lambda_zip(
     """
     Create a task to build a Python AWS Lambda deployment package.
 
-    This function creates a task that packages a Python project and its dependencies
-    into a ZIP file suitable for deployment to AWS Lambda. The task can include
-    additional files, install packages from requirements files, and specify the
-    Python version and platform.
+    Args:
+        name: The name of the task.
+        outfile: The output file path for the ZIP archive. If not specified,
+                 the archive will be placed in the build directory with the name
+                 "{name}.zip".
+        project_directory: The path to the Python project directory. If set to
+                           "ignore", the project directory will not be included.
+                           If None and a project configuration file is found in
+                           the current directory, that directory will be used.
+        include: A sequence of files or directories to include in the ZIP archive.
+                Each item can be a string in the format "source:dest" or just
+                "source" (which will use the basename as the destination).
+        data_files: A sequence of data files to include in the ZIP archive.
+                   Each item can be an Include object or a string in the format
+                   "source:dest".
+        packages: A sequence of Python packages to install in the Lambda
+                  environment.
+        requirements: A path to a requirements file containing Python packages
+                     to install.
+        python_version: The Python version to use for the Lambda function.
+        platform: The target platform for the Lambda function.
+        quiet: If True, suppress output from the build process.
+        symlink_result: If True, symlink the resulting ZIP archive to the
+                       specified outfile. If False, copy the file instead.
 
-    :param name: The name of the task.
-    :param outfile: The output file path for the ZIP archive. If not specified,
-                   the archive will be placed in the build directory with the name
-                   "{name}.zip".
-    :param project_directory: The path to the Python project directory. If set to
-                             "ignore", the project directory will not be included.
-                             If None and a project configuration file is found in
-                             the current directory, that directory will be used.
-    :param include: A sequence of files or directories to include in the ZIP archive.
-                   Each item must be a Python source file to include in the archive.
-    :param data_files: A sequence of data files to include in the ZIP archive.
-                      Each item can be an Include object or a string in the format
-                      "source:dest" or just "source".
-    :param packages: A sequence of Python packages to install in the Lambda
-                    environment.
-    :param requirements: A path to a requirements file containing Python packages
-                        to install.
-    :param python_version: The Python version to use for the Lambda function.
-    :param platform: The target platform for the Lambda function.
-    :param quiet: If True, suppress output from the build process.
-    :param symlink_result: If True, symlink the resulting ZIP archive to the
-                          specified outfile. If False, copy the file instead.
-    :return: A task that, when executed, builds the Python Lambda deployment package.
-    :rtype: BuildPythonLambdaZipTask
+    Returns:
+        A task that, when executed, builds the Python Lambda deployment package.
 
-    :raises ValueError: If an invalid platform is specified.
+    Raises:
+        ValueError: If an invalid platform is specified.
     """
-
     from kraken.build import project
 
     if project_directory == "ignore":
