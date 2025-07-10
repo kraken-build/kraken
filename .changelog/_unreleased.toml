@@ -11,6 +11,12 @@ description = "`python_settings(lint_enforced_directories)` is now checked corre
 author = "@NiklasRosenstein"
 
 [[entries]]
+id = "bf38cca3-b823-488a-8dd6-22ccba4d4f38"
+type = "breaking change"
+description = "Remove `python.(black|flake8|isort|pycln|pylint|pyupgrade)` as all of the functionality is covered by Ruff"
+author = "@NiklasRosenstein"
+
+[[entries]]
 id = "9cc068b8-5934-4735-b36d-a69bfeca878a"
 type = "feature"
 description = "Add `BuildCache.copy_result()`"
