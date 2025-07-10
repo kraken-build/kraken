@@ -1,0 +1,5 @@
+[[entries]]
+id = "50abd80c-f160-4793-b4d8-133da2ab3b36"
+type = "fix"
+description = "Fix dependency of `kraken-wrapper` on `kraken-build`"
+author = "@NiklasRosenstein"
