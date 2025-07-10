@@ -315,7 +315,7 @@ wheels = [
 
 [[package]]
 name = "kraken-build"
-version = "0.45.0"
+version = "0.45.1"
 source = { editable = "../kraken-build" }
 dependencies = [
     { name = "databind" },
@@ -370,7 +370,7 @@ dev = [
 
 [[package]]
 name = "kraken-wrapper"
-version = "0.45.0"
+version = "0.45.1"
 source = { editable = "." }
 dependencies = [
     { name = "deprecated" },

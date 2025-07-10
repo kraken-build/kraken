@@ -7,7 +7,7 @@ packages = ["src/kraken"]
 
 [project]
 name = "kraken-wrapper"
-version = "0.45.0"
+version = "0.45.1"
 description = "krakenw ensures a consistent and reproducible environment for your project's build orchestrated by Kraken."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
