@@ -4,13 +4,14 @@ from typing import Literal, Sequence
 from kraken.core import BuildCache, Property, Task
 from kraken.core.system.task import TaskStatus
 
-from .python import PYTHON_PLATFORMS, BuildPythonLambdaZip, PythonPlatform
+from .python import PYTHON_PLATFORMS, BuildPythonLambdaZip, Include, PythonPlatform
 
 
 class BuildPythonLambdaZipTask(Task):
     outfile: Property[Path] = Property.output()
     project_directory: Property[Path | None]
     include: Property[Sequence[Path]]
+    data_files: Property[Sequence[Include]]
     packages: Property[Sequence[str]]
     requirements: Property[Path | None]
     python_version: Property[str]
@@ -22,9 +23,14 @@ class BuildPythonLambdaZipTask(Task):
     )
 
     def execute(self) -> TaskStatus | None:
+        include = [
+            *map(Include.coerce, self.include.get_or([])),
+            *self.data_files.get_or([]),
+        ]
+
         inputs = BuildPythonLambdaZip(
             project_directory=self.project_directory.get_or(None),
-            include=self.include.get_or([]),
+            include=include,
             packages=self.packages.get_or([]),
             requirements=self.requirements.get_or(None),
             python_version=self.python_version.get_or(None),
@@ -36,8 +42,8 @@ class BuildPythonLambdaZipTask(Task):
             cache.consumes(inputs)
             if inputs.project_directory:
                 cache.consumes_path(inputs.project_directory)
-            for path in inputs.include:
-                cache.consumes_path(path)
+            for item in inputs.include:
+                cache.consumes_path(item.source)
             cache.finalize()
 
             outfile = "lambda.zip"
@@ -60,6 +66,7 @@ def python_lambda_zip(
     outfile: str | Path | None = None,
     project_directory: Path | None | Literal["ignore"] = None,
     include: Sequence[str | Path] = (),
+    data_files: Sequence[str | Include] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
     python_version: str | None = None,
@@ -67,6 +74,42 @@ def python_lambda_zip(
     quiet: bool = False,
     symlink_result: bool = True,
 ) -> BuildPythonLambdaZipTask:
+    """
+    Create a task to build a Python AWS Lambda deployment package.
+
+    This function creates a task that packages a Python project and its dependencies
+    into a ZIP file suitable for deployment to AWS Lambda. The task can include
+    additional files, install packages from requirements files, and specify the
+    Python version and platform.
+
+    :param name: The name of the task.
+    :param outfile: The output file path for the ZIP archive. If not specified,
+                   the archive will be placed in the build directory with the name
+                   "{name}.zip".
+    :param project_directory: The path to the Python project directory. If set to
+                             "ignore", the project directory will not be included.
+                             If None and a project configuration file is found in
+                             the current directory, that directory will be used.
+    :param include: A sequence of files or directories to include in the ZIP archive.
+                   Each item must be a Python source file to include in the archive.
+    :param data_files: A sequence of data files to include in the ZIP archive.
+                      Each item can be an Include object or a string in the format
+                      "source:dest" or just "source".
+    :param packages: A sequence of Python packages to install in the Lambda
+                    environment.
+    :param requirements: A path to a requirements file containing Python packages
+                        to install.
+    :param python_version: The Python version to use for the Lambda function.
+    :param platform: The target platform for the Lambda function.
+    :param quiet: If True, suppress output from the build process.
+    :param symlink_result: If True, symlink the resulting ZIP archive to the
+                          specified outfile. If False, copy the file instead.
+    :return: A task that, when executed, builds the Python Lambda deployment package.
+    :rtype: BuildPythonLambdaZipTask
+
+    :raises ValueError: If an invalid platform is specified.
+    """
+
     from kraken.build import project
 
     if project_directory == "ignore":
@@ -86,6 +129,7 @@ def python_lambda_zip(
     task.outfile = project.directory / outfile if outfile else project.build_directory / f"{name}.zip"
     task.project_directory = project_directory
     task.include = [project.directory / x for x in include]
+    task.data_files = [Include(project.directory / i.source, i.dest) for i in map(Include.coerce, data_files)]
     task.packages = list(packages)
     task.requirements = project.directory / requirements if requirements else None
     task.python_version = python_version
