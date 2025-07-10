@@ -60,9 +60,28 @@ PYTHON_PLATFORMS: set[str] = set(PythonPlatform.__args__)  # type: ignore[attr-d
 
 
 @dataclass(frozen=True)
+class Include:
+    """
+    Represents a path to be included in the ZIP archive.
+    """
+
+    source: Path
+    dest: Path
+
+    @staticmethod
+    def coerce(x: "Include | str | Path") -> "Include":
+        if isinstance(x, str):
+            source, dest = x.partition(":")[::2]
+            return Include(Path(source), Path(dest or source))
+        elif isinstance(x, os.PathLike):
+            return Include(x, Path(x.name))
+        return x
+
+
+@dataclass(frozen=True)
 class BuildPythonLambdaZip:
     project_directory: Path | None = None
-    include: Sequence[Path] = ()
+    include: Sequence[Include] = ()
     packages: Sequence[str] = ()
     requirements: Path | None = None
     python_version: str | None = None
@@ -91,7 +110,7 @@ def build_python_lambda_zip(
     uv_bin: Path,
     outfile: Path,
     project_directory: Path | None = None,
-    include: Sequence[Path] = (),
+    include: Sequence[Include] = (),
     packages: Sequence[str] = (),
     requirements: Path | None = None,
     python_version: str | None = None,
@@ -134,10 +153,16 @@ def build_python_lambda_zip(
             logger.debug(f"Running command: {' '.join(command)}")
             subprocess.check_call(command)
 
-        for path in include:
+        for item in include:
+            dest = build_directory / item.dest
             if not quiet:
-                print(f"copy {path} → {build_directory}/")
-            shutil.copy(path, build_directory)
+                print(f"copy {item.source} → {dest}")
+            if item.source.is_dir():
+                shutil.copytree(item.source, dest, symlinks=False, dirs_exist_ok=True)
+            elif item.source.is_file():
+                shutil.copy2(item.source, build_directory)
+            else:
+                raise FileNotFoundError(item.source)
 
         if not quiet:
             print(f"zip {build_directory}/ → {outfile}")

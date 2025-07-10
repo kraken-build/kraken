@@ -1,0 +1,11 @@
+[[entries]]
+id = "2d4ee3ee-f0ab-4b0c-a90d-0aa76eef5995"
+type = "feature"
+description = "Add `python_lambda_zip(include_data)` argument"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "5ef588f3-55bd-4a30-a0dd-49a504be9135"
+type = "fix"
+description = "`BuildCache.link_result()` and `BuildCache.copy_result()` now correctly check whether the target exists even when it is a broken symlink"
+author = "@NiklasRosenstein"
