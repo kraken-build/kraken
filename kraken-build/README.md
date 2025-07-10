@@ -10,66 +10,55 @@ Kraken is a build system, but not in the traditional sense. It's focus is on the
 such as organization of your repository configuration, code generation, invoking other build systems, etc. It is not a
 replacement for tools like Poetry, Cargo or CMake.
 
-__Requirements__
+**Requirements**
 
-* CPython 3.10+
+- CPython 3.10+
 
 ## Getting started
 
-  [Pipx]: https://pypa.github.io/pipx/
+[Pipx]: https://pypa.github.io/pipx/
 
 Currently, Kraken's OSS components are not very well documented and do not provide a convenient way to get started.
 However, if you really want to try it, you can use the following steps:
 
-1. Install `kraken-wrapper` (e.g. with [Pipx][]) to get access to the `krakenw` command-line tool.
+1. Install `kraken-wrapper` (e.g. with [Uv]) to get access to the `krakenw` command-line tool.
 2. Create a `.kraken.py` script in your project's root directory.
 
-    ```py
-    from kraken.common import buildscript
-    buildscript(requirements=["kraken-build==0.32.3"])
-    
-    from kraken.std.python import mypy, black, isort
-    mypy()
-    black()
-    isort()
-    ```
+   ```py
+   from kraken.common import buildscript
+   buildscript(requirements=["kraken-build==0.45.2"])
+
+   from kraken.std import python
+   python.mypy()
+   python.ruff()
+   ```
+
 3. Run `krakenw lock` to install `kraken-build` for your project in `build/.kraken/venv` and generate a `kraken.lock` file.
 4. Run `krakenw run lint` to run the linters.
 
 > Note that you can also use the `kraken` CLI (instead of `krakenw`), however this will disregard the `buildscript()`
 > function, will not use the lock file and will use the version of Kraken that was installed globally.
 
-## How-to's
-
-### Upgrade a project's lock file
-
-To upgrade a project's lock file, run `krakenw lock --upgrade`. This will upgrade all dependencies to the latest
-available version. If you want to upgrade based on updated constraints in `.kraken.py` without installing from scratch,
-add the `--incremental` flag or set `KRAKENW_INCREMENTAL=1`.
-
 ## Development
 
-  [Slap]: https://github.com/NiklasRosenstein/slap
+[Uv]: https://docs.astral.sh/uv/
+[Mise]: https://mise.jdx.dev/
 
-This repository uses [Slap][] to manage the Python project. After installing Slap with Pipx, run the following to
-install Kraken for development.
+This repository uses [Uv], but not currently a Uv-workspace because Kraken does not support that, yet. You may
+want to use a released version of `krakenw` instead of the live version in `kraken-wrapper/` to interact with this
+repository. You can use [Mise] to install all the tools you need.
 
-```
-$ slap venv -c --python python3.10
-$ slap install --link
-# If you have the Slap shell magic installed, it will activate the Venv in your shell.
-$ slap venv -a
-```
-
-You may want to use a released version of `krakenw` to interact in the repository however:
-
-    $ krakenw run python.install
+    $ mise install
+    $ eval $(mise activate)
     $ krakenw run fmt lint test
 
-### Releases
+## Release process
 
-A release must be created by a maintainer that has write access to the `develop` branch. The release process
-is automated using Slap.
+A release must be created by a maintainer that has write access to the `develop` branch.
 
-    $ slap release -tp <patch|minor|major|x.y.z>
-    $ slap publish
+    $ ./scripts/bump.py X.Y.Z
+    $ git commit -m 'release X.Y.Z'
+    $ git tag X.Y.Z
+    $ git push origin develop X.Y.Z
+
+The packages are published to PyPI from CI.
