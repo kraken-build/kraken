@@ -9,3 +9,9 @@ id = "c9db8fde-734f-45df-b484-4394c6491c03"
 type = "fix"
 description = "`python_settings(lint_enforced_directories)` is now checked correctly relative to the project directory before choosing to ignore them"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "9cc068b8-5934-4735-b36d-a69bfeca878a"
+type = "feature"
+description = "Add `BuildCache.copy_result()`"
+author = "@NiklasRosenstein"

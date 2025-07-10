@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from fnmatch import fnmatch
 from os import fspath
 from pathlib import Path
+from shutil import copytree
 from typing import Any, Protocol
 
 from stablehash import stablehash
@@ -68,6 +69,7 @@ class BuildCache:
     finalized: bool = False
     committed: bool = False
     staged_links: list[tuple[str | Path, Path]] = field(default_factory=list)
+    staged_copies: list[tuple[str | Path, Path]] = field(default_factory=list)
     exclude_paths: list[str] = field(default_factory=list)
 
     @staticmethod
@@ -195,6 +197,9 @@ class BuildCache:
         for source, target in self.staged_links:
             self.link_result(source, target)
         self.staged_links.clear()
+        for source, target in self.staged_copies:
+            self.copy_result(source, target)
+        self.staged_copies.clear()
 
     def abort(self) -> None:
         """
@@ -258,6 +263,28 @@ class BuildCache:
                 logger.debug("Removing existing result '%s'", target)
                 safe_rmpath(target)
             logger.debug("Linking '%s' to '%s'", source, target)
+            target.symlink_to(source.resolve(), source.is_dir())
+
+    def copy_result(self, source: str | Path, target: Path, symlinks: bool = True) -> None:
+        """
+        Like :meth:`link_result`, but copies the source instead of symlinking it. Symlinking is preferred for
+        efficiency, but there may be reasons you need to copy the result instead.
+
+        If *symlinks* is enabled (default), it will existing symlinks in the *source* and only the source itself
+        will be copied (which, if it is a symlink already, will also be retained).
+        """
+
+        if not self.committed:
+            self.staged_copies.append((source, target))
+        else:
+            source = self.store_path() / source
+            if not source.exists():
+                raise FileNotFoundError(f"Source file '{source}' does not exist.")
+            if target.exists():
+                logger.debug("Removing existing result '%s'", target)
+                safe_rmpath(target)
+            logger.debug("Linking '%s' to '%s'", source, target)
+            copytree(source, target, symlinks=symlinks, dirs_exist_ok=True)
             target.symlink_to(source.resolve(), source.is_dir())
 
     def __enter__(self) -> "BuildCache":
