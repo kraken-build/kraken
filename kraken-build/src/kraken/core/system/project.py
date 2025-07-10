@@ -97,9 +97,14 @@ class Project(KrakenObject, MetadataContainer, Currentable["Project"]):
 
     @property
     def name(self) -> str:
+        """
+        Returns the name of the project. This is usually the same as the name of the directory that the project
+        belongs to.
+        """
+
         if self.address.is_root():
-            return ":"
-        return self.address.name
+            return self.directory.name
+        return self.address.name  # Usually the same as the directory name.
 
     @property
     def build_directory(self) -> Path:
