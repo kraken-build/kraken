@@ -15,3 +15,9 @@ id = "9cc068b8-5934-4735-b36d-a69bfeca878a"
 type = "feature"
 description = "Add `BuildCache.copy_result()`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "1f5ce1f3-35fa-44e4-ad45-095e23ff565a"
+type = "feature"
+description = "Add `python_lambda_zip(symlink_result=True)` argument"
+author = "@NiklasRosenstein"

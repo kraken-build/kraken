@@ -15,6 +15,10 @@ class BuildPythonLambdaZipTask(Task):
     requirements: Property[Path | None]
     platform: Property[PythonPlatform | None]
     quiet: Property[bool]
+    symlink_result: Property[bool] = Property.default(
+        True,
+        help="Whether to symlink the resulting ZIP archive to `outfile`. If disabled, the file will be copied instead.",
+    )
 
     def execute(self) -> TaskStatus | None:
         inputs = BuildPythonLambdaZip(
@@ -35,7 +39,10 @@ class BuildPythonLambdaZipTask(Task):
             cache.finalize()
 
             outfile = "lambda.zip"
-            cache.link_result(outfile, self.outfile.get())
+            if self.symlink_result.get():
+                cache.link_result(outfile, self.outfile.get())
+            else:
+                cache.copy_result(outfile, self.outfile.get())
 
             if cache.exists():
                 return TaskStatus.skipped(f"retained {self.outfile.get()}")
@@ -55,6 +62,7 @@ def python_lambda_zip(
     requirements: str | Path | None = None,
     platform: PythonPlatform | None = None,
     quiet: bool = False,
+    symlink_result: bool = True,
 ) -> BuildPythonLambdaZipTask:
     from kraken.build import project
 
@@ -79,5 +87,6 @@ def python_lambda_zip(
     task.requirements = project.directory / requirements if requirements else None
     task.platform = platform
     task.quiet = quiet
+    task.symlink_result = symlink_result
 
     return task
