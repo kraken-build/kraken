@@ -9,10 +9,6 @@ Deprecated in v0.45.0:
         * `--resume`
         * `--restart`
 
-Deprecated in v0.44.1:
-
-    * `python.(black|flake8|isort|pycln|pylint|pypgrade)` functions in favor of `python_ruff()`
-
 Deprecated in v0.37.1:
 
     * `gitignore(gitignore_io_tokens, gitignore_io_allow_http_request_backfill)` parameters
