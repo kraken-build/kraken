@@ -1,6 +1,8 @@
 __version__ = "0.45.3"
 
+from kraken.common.supplier import Supplier
 from kraken.core.address import Address
+from kraken.core.system.aspect import Aspect, AspectBase, AspectOptions
 from kraken.core.system.buildcache import BuildCache
 from kraken.core.system.context import Context, ContextEvent
 from kraken.core.system.errors import BuildError, ProjectLoaderError
@@ -21,9 +23,12 @@ from kraken.core.system.task import (
 
 __all__ = [
     "Address",
+    "Aspect",
+    "AspectBase",
+    "AspectOptions",
     "BackgroundTask",
-    "BuildError",
     "BuildCache",
+    "BuildError",
     "Context",
     "ContextEvent",
     "Graph",
@@ -31,6 +36,7 @@ __all__ = [
     "Project",
     "ProjectLoaderError",
     "Property",
+    "Supplier",
     "Task",
     "TaskGraph",
     "TaskRelationship",

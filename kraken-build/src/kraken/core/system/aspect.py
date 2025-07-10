@@ -1,7 +1,7 @@
 import inspect
 import os
 from dataclasses import MISSING, dataclass, fields
-from typing import Any, ClassVar, Generic, Mapping, TypeVar, cast
+from typing import Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
 
 import cyclopts
 
@@ -13,7 +13,8 @@ class AspectOptions:
     pass
 
 
-class Aspect(Generic[T_Options]):
+@dataclass
+class AspectBase(Generic[T_Options]):
     """
     Aspects provide a common interface for tasks that share a common goal.
 
@@ -50,11 +51,37 @@ class Aspect(Generic[T_Options]):
 
     Options: ClassVar[type[AspectOptions]]
 
+    options: T_Options
+
     def __init_subclass__(cls, options_class: type[T_Options] | None = None, **kwargs: Any) -> None:
         cls.Options = cast(
             type[AspectOptions], options_class or getattr(cls, "Options", cast(type[T_Options], AspectOptions))
         )
         super().__init_subclass__(**kwargs)
+
+    @overload
+    @classmethod
+    def parse_options(
+        cls,
+        args: list[str],
+        name: str | None = None,
+        help: str | None = None,
+        exit_on_error: Literal[True] = True,
+        print_error: bool = True,
+        env: Mapping[str, str] | None = None,
+    ) -> T_Options: ...
+
+    @overload
+    @classmethod
+    def parse_options(
+        cls,
+        args: list[str],
+        name: str | None = None,
+        help: str | None = None,
+        exit_on_error: bool = True,
+        print_error: bool = True,
+        env: Mapping[str, str] | None = None,
+    ) -> T_Options | None: ...
 
     @classmethod
     def parse_options(
@@ -78,6 +105,33 @@ class Aspect(Generic[T_Options]):
                 env=env,
             ),
         )
+
+
+Aspect = AspectBase[Any]
+
+
+@overload
+def parse_options(
+    args: list[str],
+    options_class: type[T_Options],
+    name: str | None = None,
+    help: str | None = None,
+    exit_on_error: Literal[True] = True,
+    print_error: bool = True,
+    env: Mapping[str, str] | None = None,
+) -> T_Options: ...
+
+
+@overload
+def parse_options(
+    args: list[str],
+    options_class: type[T_Options],
+    name: str | None = None,
+    help: str | None = None,
+    exit_on_error: bool = True,
+    print_error: bool = True,
+    env: Mapping[str, str] | None = None,
+) -> T_Options | None: ...
 
 
 def parse_options(
@@ -139,3 +193,6 @@ def parse_options(
             os.environ.update(env_copy)
 
     return result
+
+
+ASPECTS: dict[str, type[Aspect]] = {}

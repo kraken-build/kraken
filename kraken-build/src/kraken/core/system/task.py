@@ -18,6 +18,7 @@ from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
+from kraken.core.system.aspect import Aspect
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
@@ -449,6 +450,17 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         return None
+
+    def implements_aspect(self, aspect: Aspect) -> bool:
+        """
+        When the build system is running an aspect, this method is called to pass the aspect configuration to the task
+        and to check if the task implements it. The task may alter its own configuration based on the aspect's options.
+        If the task returns `true`, it will be executed as part of the aspect run.
+
+        Note that tasks should not assume that the
+        """
+
+        return False
 
 
 class GroupTask(Task):

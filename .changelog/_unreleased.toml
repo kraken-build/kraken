@@ -3,3 +3,9 @@ id = "246aadb7-b409-43ba-8c22-c9bf32b41458"
 type = "feature"
 description = "Add `kraken.core.aspect` module which is used to implement purpose-specific `kraken` CLI subcommands (e.g. `kraken lint`)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ea7c9e91-260f-4f93-a5f4-52de128f250d"
+type = "feature"
+description = "Add CLI for `kraken <aspect>` and `Task.implements_aspects()` method"
+author = "@NiklasRosenstein"

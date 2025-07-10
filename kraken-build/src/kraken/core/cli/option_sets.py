@@ -91,14 +91,15 @@ class GraphOptions:
     all: bool
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True, include_deprecated: bool = True) -> None:
         group = parser.add_argument_group("graph options")
-        group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
-        group.add_argument(
-            "--restart",
-            choices=("all",),
-            help="load previous build state, but discard existing results (requires --resume)",
-        )
+        if include_deprecated:
+            group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
+            group.add_argument(
+                "--restart",
+                choices=("all",),
+                help="load previous build state, but discard existing results (requires --resume)",
+            )
 
         group.add_argument("--all", action="store_true", help="include all tasks in the build graph")
 
@@ -114,7 +115,7 @@ class GraphOptions:
             default=[],
         )
 
-        if saveable:
+        if saveable and include_deprecated:
             group.add_argument(
                 "--save", action="store_true", help="deprecated since v0.45.0. the default is to not save."
             )
@@ -122,18 +123,22 @@ class GraphOptions:
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> GraphOptions:
-        if args.save:
+        save = getattr(args, "save", False)
+        resume = getattr(args, "resume", False)
+        restart = getattr(args, "restart", False)
+
+        if save:
             logger.warning("the --save/--no-save options are deprecated since kraken v0.45.0")
-        if args.resume:
+        if resume:
             logger.warning("the --resume option is deprecated since kraken v0.45.0")
-        if args.restart:
+        if restart:
             logger.warning("the --restart option is deprecated since kraken v0.45.0")
 
         return cls(
             tasks=args.tasks or None,
-            resume=args.resume,
-            restart=args.restart,
-            no_save=not args.save,
+            resume=resume,
+            restart=restart,
+            no_save=not save,
             all=getattr(args, "all", False),
         )
 
