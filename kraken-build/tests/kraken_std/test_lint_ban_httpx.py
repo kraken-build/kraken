@@ -1,9 +1,8 @@
 import ast
-from pathlib import Path
 
 from kraken.common.http.lint_ban_bare_requests import BanBareHttpxCalls, BanBareRequestsCalls
 
-DATA_PATH = Path(__file__).parent / "data"
+from tests.resources import data_path
 
 
 def test_lint() -> None:
@@ -12,7 +11,7 @@ def test_lint() -> None:
 
 
 def lint_file(filename: str) -> tuple[int, int]:
-    filepath = (DATA_PATH / filename).absolute()
+    filepath = data_path(filename)
     with open(filepath) as f:
         tree = ast.parse(f.read())
 

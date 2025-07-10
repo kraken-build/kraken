@@ -4,6 +4,8 @@ import pytest
 
 from kraken.std.cargo.manifest import CargoManifest
 
+from tests.resources import data_path
+
 
 def test_cargo_manifest_handles_unknown_fields_correctly() -> None:
     manifest = CargoManifest.of(
@@ -56,7 +58,7 @@ def test_cargo_manifest_complex_file() -> None:
     it correctly handles all of the unknown fields, and maintains their type (generally).
     """
 
-    cargo_file = Path(__file__).parent / "data" / "complex_manifest.toml"
+    cargo_file = data_path("complex_manifest.toml")
     manifest = CargoManifest.read(cargo_file)
 
     assert manifest is not None
@@ -76,7 +78,7 @@ def test_cargo_manifest_workspace_file() -> None:
     section it correctly passes.
     """
 
-    cargo_file = Path(__file__).parent / "data" / "workspace_manifest.toml"
+    cargo_file = data_path("workspace_manifest.toml")
     manifest = CargoManifest.read(cargo_file)
 
     assert manifest.package is None
@@ -91,6 +93,6 @@ def test_cargo_manifest_throws_when_no_workspace_or_package() -> None:
     throws a ValueError.
     """
 
-    cargo_file = Path(__file__).parent / "data" / "invalid_manifest.toml"
+    cargo_file = data_path("invalid_manifest.toml")
     with pytest.raises(ValueError):
         CargoManifest.read(cargo_file)

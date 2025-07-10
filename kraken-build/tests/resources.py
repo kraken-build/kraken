@@ -5,13 +5,7 @@ Helper functions to access test resources.
 from pathlib import Path
 
 
-def repository_root() -> Path:
-    """Returns the path to the root of the repository."""
-    path = Path(__file__).parent.parent
-    assert path.name == "kraken-build"
-    return path.parent
+def data_path(name: str) -> Path:
+    """Returns the path to a file or directory in the tests data directory."""
 
-
-def example_dir(name: str) -> Path:
-    """Returns the path to the example directory."""
-    return repository_root() / "examples" / name
+    return (Path(__file__).parent / "data" / name).resolve()

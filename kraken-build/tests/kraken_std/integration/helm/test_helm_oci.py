@@ -11,6 +11,7 @@ from kraken.core import Project
 from kraken.std.helm import HelmPackageTask, HelmPushTask, helm_settings
 
 from tests.kraken_std.util.docker import DockerServiceManager
+from tests.resources import data_path
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ def test__helm_push_to_oci_registry(kraken_project: Project, oci_registry: str) 
 
     helm_settings(kraken_project).add_auth(oci_registry, USER_NAME, USER_PASS, insecure=True)
     package = kraken_project.task("helmPackage", HelmPackageTask)
-    package.chart_directory = Path(__file__).parent / "data" / "example-chart"
+    package.chart_directory = data_path("example-chart")
 
     push = kraken_project.task("helmPush", HelmPushTask)
     push.chart_tarball = package.chart_tarball
