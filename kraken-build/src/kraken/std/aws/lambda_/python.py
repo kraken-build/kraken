@@ -71,7 +71,7 @@ class Include:
     @staticmethod
     def coerce(x: "Include | str | Path") -> "Include":
         if isinstance(x, str):
-            source, dest = x.rpartition(":")[::2]
+            source, dest = x.partition(":")[::2]
             return Include(Path(source), Path(dest or source))
         elif isinstance(x, os.PathLike):
             return Include(x, Path(x.name))
