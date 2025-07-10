@@ -302,17 +302,21 @@ def test__python_project_can_lint_lint_enforced_directories(
 
     with pytest.raises(BuildError) as excinfo:
         kraken_ctx.execute([":lint"])
-    assert str(excinfo.value) == 'tasks ":python.mypy", ":python.ruff.check" failed'
 
     output = capfd.readouterr().out
     print(output)
 
+    assert str(excinfo.value) == 'tasks ":python.mypy", ":python.ruff.check", ":python.ruff.fmt.check" failed'
+
     # Check for Ruff errors
     assert "src/mypackage/__init__.py:3:8: F401 `os` imported but unused" in output
-    assert "bin/main.py:3:8: F401 `os` imported but unused" in output
-    assert "examples/example.py:3:8: F401 `os` imported but unused" in output
+    assert "bin/main.py:3:8: F401 [*] `os` imported but unused" in output
+    assert "examples/example.py:3:8: F401 [*] `os` imported but unused" in output
+
+    # Check for Ruff formatting errors
+    assert "Would reformat: bin/main.py" in output
 
     # Check for Mypy errors
     assert "src/mypackage/__init__.py:6: error: Missing return statement  [return]" in output
-    assert "bin/main.py:6: error: Missing return statement  [return]" in output
+    assert "bin/main.py:7: error: Missing return statement  [return]" in output
     assert "examples/example.py:6: error: Missing return statement  [return]" in output
