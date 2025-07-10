@@ -11,7 +11,7 @@ class BuildPythonLambdaZipTask(Task):
     outfile: Property[Path] = Property.output()
     project_directory: Property[Path | None]
     include: Property[Sequence[Path]]
-    data_files: Property[Sequence[Include]]
+    include_data: Property[Sequence[Include]]
     packages: Property[Sequence[str]]
     requirements: Property[Path | None]
     python_version: Property[str]
@@ -25,7 +25,7 @@ class BuildPythonLambdaZipTask(Task):
     def execute(self) -> TaskStatus | None:
         include = [
             *map(Include.coerce, self.include.get_or([])),
-            *self.data_files.get_or([]),
+            *self.include_data.get_or([]),
         ]
 
         inputs = BuildPythonLambdaZip(
@@ -66,7 +66,7 @@ def python_lambda_zip(
     outfile: str | Path | None = None,
     project_directory: Path | None | Literal["ignore"] = None,
     include: Sequence[str | Path] = (),
-    data_files: Sequence[str | Include] = (),
+    include_data: Sequence[str | Include] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
     python_version: str | None = None,
@@ -89,9 +89,9 @@ def python_lambda_zip(
         include: A sequence of files or directories to include in the ZIP archive.
                 Each item can be a string in the format "source:dest" or just
                 "source" (which will use the basename as the destination).
-        data_files: A sequence of data files to include in the ZIP archive.
-                   Each item can be an Include object or a string in the format
-                   "source:dest".
+        include_data: A sequence of paths with an optional rename to include in
+                      the ZIP archive. Each item can be an Include object or a
+                      string in the format "source:dest".
         packages: A sequence of Python packages to install in the Lambda
                   environment.
         requirements: A path to a requirements file containing Python packages
@@ -127,7 +127,7 @@ def python_lambda_zip(
     task.outfile = project.directory / outfile if outfile else project.build_directory / f"{name}.zip"
     task.project_directory = project_directory
     task.include = [project.directory / x for x in include]
-    task.data_files = [Include(project.directory / i.source, i.dest) for i in map(Include.coerce, data_files)]
+    task.include_data = [Include(project.directory / i.source, i.dest) for i in map(Include.coerce, include_data)]
     task.packages = list(packages)
     task.requirements = project.directory / requirements if requirements else None
     task.python_version = python_version

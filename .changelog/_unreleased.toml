@@ -1,5 +1,5 @@
 [[entries]]
 id = "2d4ee3ee-f0ab-4b0c-a90d-0aa76eef5995"
 type = "feature"
-description = "Add `python_lambda_zip(data_files)` argument"
+description = "Add `python_lambda_zip(include_data)` argument"
 author = "@NiklasRosenstein"
