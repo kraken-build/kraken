@@ -17,5 +17,3 @@ Deprecated in v0.37.1:
 Deprecated in v0.26.0:
 
     * `Task.outputs`
-    * `Task.path`
-    * `Task.add_relationship`
