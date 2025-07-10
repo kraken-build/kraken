@@ -65,6 +65,7 @@ class BuildPythonLambdaZip:
     include: Sequence[Path] = ()
     packages: Sequence[str] = ()
     requirements: Path | None = None
+    python_version: str | None = None
     platform: PythonPlatform | None = None
     uv_bin: Path = Path(UV_BIN)
     quiet: bool = False
@@ -79,6 +80,7 @@ class BuildPythonLambdaZip:
             include=self.include,
             packages=self.packages,
             requirements=self.requirements,
+            python_version=self.python_version,
             platform=self.platform,
             build_directory=build_directory,
             quiet=self.quiet,
@@ -92,6 +94,7 @@ def build_python_lambda_zip(
     include: Sequence[Path] = (),
     packages: Sequence[str] = (),
     requirements: Path | None = None,
+    python_version: str | None = None,
     platform: PythonPlatform | None = None,
     build_directory: Path | None = None,
     quiet: bool = False,
@@ -116,6 +119,7 @@ def build_python_lambda_zip(
                 *(["-q"] if quiet else []),
                 "--target",
                 os.fspath(build_directory),
+                *(["--python", python_version] if python_version else []),
                 *(["--python-platform", platform] if platform else []),
                 *(["-r", os.fspath(requirements)] if requirements else []),
                 "--",

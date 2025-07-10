@@ -13,8 +13,13 @@ class BuildPythonLambdaZipTask(Task):
     include: Property[Sequence[Path]]
     packages: Property[Sequence[str]]
     requirements: Property[Path | None]
+    python_version: Property[str]
     platform: Property[PythonPlatform | None]
     quiet: Property[bool]
+    symlink_result: Property[bool] = Property.default(
+        True,
+        help="Whether to symlink the resulting ZIP archive to `outfile`. If disabled, the file will be copied instead.",
+    )
 
     def execute(self) -> TaskStatus | None:
         inputs = BuildPythonLambdaZip(
@@ -22,6 +27,7 @@ class BuildPythonLambdaZipTask(Task):
             include=self.include.get_or([]),
             packages=self.packages.get_or([]),
             requirements=self.requirements.get_or(None),
+            python_version=self.python_version.get_or(None),
             platform=self.platform.get_or(None),
             quiet=self.quiet.get_or(False),
         )
@@ -35,7 +41,10 @@ class BuildPythonLambdaZipTask(Task):
             cache.finalize()
 
             outfile = "lambda.zip"
-            cache.link_result(outfile, self.outfile.get())
+            if self.symlink_result.get():
+                cache.link_result(outfile, self.outfile.get())
+            else:
+                cache.copy_result(outfile, self.outfile.get())
 
             if cache.exists():
                 return TaskStatus.skipped(f"retained {self.outfile.get()}")
@@ -53,8 +62,10 @@ def python_lambda_zip(
     include: Sequence[str | Path] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
+    python_version: str | None = None,
     platform: PythonPlatform | None = None,
     quiet: bool = False,
+    symlink_result: bool = True,
 ) -> BuildPythonLambdaZipTask:
     from kraken.build import project
 
@@ -77,7 +88,9 @@ def python_lambda_zip(
     task.include = [project.directory / x for x in include]
     task.packages = list(packages)
     task.requirements = project.directory / requirements if requirements else None
+    task.python_version = python_version
     task.platform = platform
     task.quiet = quiet
+    task.symlink_result = symlink_result
 
     return task
