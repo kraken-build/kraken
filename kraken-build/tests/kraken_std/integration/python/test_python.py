@@ -24,7 +24,7 @@ from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 
 from tests.kraken_std.util.docker import DockerServiceManager
-from tests.resources import example_dir
+from tests.resources import data_path
 
 logger = logging.getLogger(__name__)
 USER_NAME = "integration-test-user"
@@ -101,8 +101,8 @@ def test__python_project_install_lint_and_publish(
     consumer_dir = project_dir + "-consumer"
 
     # Copy the projects to the temporary directory.
-    shutil.copytree(example_dir(project_dir), tempdir / project_dir)
-    shutil.copytree(example_dir(consumer_dir), tempdir / consumer_dir)
+    shutil.copytree(data_path(project_dir), tempdir / project_dir)
+    shutil.copytree(data_path(consumer_dir), tempdir / consumer_dir)
 
     # Remove the .venv if it exists in the project directory to ensure a clean environment.
     venv_path = tempdir / project_dir / ".venv"
@@ -156,7 +156,7 @@ def test__python_project_upgrade_python_version_string(
 
     build_as_version = "9.9.9a1"
     init_file = "src/version_project/__init__.py"
-    original_dir = example_dir("version-project")
+    original_dir = data_path("version-project")
     project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
@@ -199,7 +199,7 @@ def test__python_project__upgrade_relative_import_version(
 
     build_as_version = "0.1.1"
     project_name = "uv-project-relative-import"
-    original_dir = example_dir(project_name)
+    original_dir = data_path(project_name)
     project_dist = kraken_project.build_directory / "python-dist"
 
     # Copy the projects to the temporary directory.
@@ -242,7 +242,7 @@ def test__python_pyproject_reads_correct_data(
 ) -> None:
     # Copy the projects to the temporary directory.
     new_dir = kraken_project.directory / project_dir
-    shutil.copytree(example_dir(project_dir), new_dir)
+    shutil.copytree(data_path(project_dir), new_dir)
 
     pyproject = TomlFile.read(new_dir / "pyproject.toml")
     local_build_system = python.buildsystem.detect_build_system(new_dir)
@@ -265,7 +265,7 @@ def test__python_project_coverage(
     os.environ["PYTEST_FLAGS"] = ""
 
     tempdir = kraken_project.directory
-    original_dir = example_dir("slap-project")
+    original_dir = data_path("slap-project")
 
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
@@ -291,7 +291,7 @@ def test__python_project_can_lint_lint_enforced_directories(
     kraken_project: Project,
 ) -> None:
     tempdir = kraken_project.directory
-    original_dir = example_dir("lint-enforced-directories-project")
+    original_dir = data_path("lint-enforced-directories-project")
 
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
     logger.info("Loading and executing Kraken project (%s)", tempdir)

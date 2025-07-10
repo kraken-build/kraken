@@ -30,7 +30,7 @@ from kraken.std.cargo import (
 )
 
 from tests.kraken_std.util.docker import DockerServiceManager
-from tests.resources import example_dir
+from tests.resources import data_path
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class CargoRepositoryWithAuth:
 
 def skip_publish_lib(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
     lib_dir = tempdir.joinpath("cargo-hello-world-lib")
-    shutil.copytree(example_dir("cargo-hello-world-lib"), lib_dir)
+    shutil.copytree(data_path("cargo-hello-world-lib"), lib_dir)
     cargo_registry_id = "private-repo"
 
     with unittest.mock.patch.dict(os.environ, {"CARGO_HOME": str(tempdir)}):
@@ -81,7 +81,7 @@ def skip_publish_lib(repository: CargoRepositoryWithAuth, tempdir: Path) -> None
 def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
     # Copy the Cargo project files to a temporary directory.
     for item in ["cargo-hello-world-lib", "cargo-hello-world-app"]:
-        shutil.copytree(example_dir(item), tempdir / item)
+        shutil.copytree(data_path(item), tempdir / item)
 
     app_dir = tempdir.joinpath("cargo-hello-world-app")
     lib_dir = tempdir.joinpath("cargo-hello-world-lib")
@@ -161,7 +161,7 @@ def publish_lib_and_build_app(repository: CargoRepositoryWithAuth, tempdir: Path
 def publish_workspace(repository: CargoRepositoryWithAuth, tempdir: Path) -> None:
     # Copy the Cargo project files to a temporary directory.
     workspace_dir = tempdir.joinpath("cargo-hello-world-workspace")
-    shutil.copytree(example_dir("cargo-hello-world-workspace"), workspace_dir)
+    shutil.copytree(data_path("cargo-hello-world-workspace"), workspace_dir)
 
     cargo_registry_id = "private-repo"
     publish_version = ".".join(str(random.randint(0, 999)) for _ in range(3))
