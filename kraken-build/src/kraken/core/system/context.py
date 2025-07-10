@@ -116,9 +116,11 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert self._root_project is None, "Context.root_project is already set"
         self._root_project = project
 
+    @overload
     def load_project(
         self,
         directory: Path,
+        /,
         parent: Project | None = None,
         require_buildscript: bool = True,
         runner: ScriptRunner | None = None,
@@ -138,6 +140,39 @@ class Context(MetadataContainer, Currentable["Context"]):
             specified without a *runner*.
         """
 
+    @overload
+    def load_project(
+        self,
+        into: Project,
+        /,
+        parent: Project | None = None,
+        require_buildscript: bool = True,
+        runner: ScriptRunner | None = None,
+        script: Path | None = None,
+    ) -> Project:
+        """
+        Loads a project into an existing project instance. This is usually only used during tests where the project is
+        passed as a pytest fixture but it is uninitialized.
+
+        Note that the *parent* argument is ignored in this case, as the project will already have been created with
+        a parent parameter.
+        """
+
+    def load_project(
+        self,
+        directory: Path | Project,
+        /,
+        parent: Project | None = None,
+        require_buildscript: bool = True,
+        runner: ScriptRunner | None = None,
+        script: Path | None = None,
+    ) -> Project:
+        if isinstance(directory, Project):
+            project = directory
+            directory = project.directory
+        else:
+            project = Project(directory.name, directory, parent, self)
+
         if not runner:
             if script is not None:
                 raise ValueError("cannot specify `script` parameter without a `runner` parameter")
@@ -148,7 +183,6 @@ class Context(MetadataContainer, Currentable["Context"]):
             script = runner.find_script(directory)
 
         has_root_project = self._root_project is not None
-        project = Project(directory.name, directory, parent, self)
         try:
             if parent:
                 parent.add_child(project)

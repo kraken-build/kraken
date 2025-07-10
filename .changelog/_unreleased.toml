@@ -1,0 +1,11 @@
+[[entries]]
+id = "3fd0a55f-f220-4ad2-9c20-175b481f96ff"
+type = "improvement"
+description = "`Context.load_project()` can now accept a `Project` as first argument instead of a `Path`, useful for tests. Note that this breaks the interface slightly because the `directory` argument can no longer be passed as a keyword argument, but the method is very much internal."
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "c9db8fde-734f-45df-b484-4394c6491c03"
+type = "fix"
+description = "`python_settings(lint_enforced_directories)` is now checked correctly relative to the project directory before choosing to ignore them"
+author = "@NiklasRosenstein"
