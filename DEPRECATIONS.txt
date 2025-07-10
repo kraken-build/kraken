@@ -14,10 +14,6 @@ Deprecated in v0.37.1:
     * `gitignore(gitignore_io_tokens, gitignore_io_allow_http_request_backfill)` parameters
     * The `kraken.std.gitignore_io` module
 
-Deprecated in v0.28.0.dev0:
-
-    * `Property.config()`
-
 Deprecated in v0.27.0:
 
     * `Project.do()` in favor of `Project.task()`
