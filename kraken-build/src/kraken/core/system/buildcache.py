@@ -1,10 +1,10 @@
 import hashlib
 import logging
+import shutil
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 from os import fspath
 from pathlib import Path
-from shutil import copytree
 from typing import Any, Protocol
 
 from stablehash import stablehash
@@ -285,7 +285,7 @@ class BuildCache:
                 safe_rmpath(target)
             logger.debug("Copying '%s' to '%s'", source, target)
             if source.is_dir():
-                copytree(source, target, symlinks=symlinks, dirs_exist_ok=True)
+                shutil.copytree(source, target, symlinks=symlinks, dirs_exist_ok=True)
             else:
                 target.parent.mkdir(parents=True, exist_ok=True)  # Ensure target directory exists
                 shutil.copy2(source, target)
