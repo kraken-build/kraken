@@ -712,8 +712,6 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
                 aspect=aspect,
             )
 
-            # Find tasks matching the aspect.
-
     else:
         parser.print_usage()
 

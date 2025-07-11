@@ -28,17 +28,21 @@ class ProjectLoaderError(Exception):
 
 
 class BuildError(Exception):
-    def __init__(self, failed_tasks: Iterable[Task]) -> None:
+    def __init__(self, failed_tasks: Iterable[Task], reason: str | None = None) -> None:
         assert not isinstance(failed_tasks, str), type(failed_tasks)  # type: ignore[unreachable]
         assert isinstance(failed_tasks, Iterable), type(failed_tasks)
         self.failed_tasks = set(failed_tasks)
+        self.reason = reason
 
     def __str__(self) -> str:
         if len(self.failed_tasks) == 1:
-            return f'task "{next(iter(self.failed_tasks)).address}" failed'
+            result = f'task "{next(iter(self.failed_tasks)).address}" failed'
         else:
-            return (
+            result = (
                 "tasks "
                 + ", ".join(f'"{task}"' for task in sorted(str(x.address) for x in self.failed_tasks))
                 + " failed"
             )
+        if self.reason:
+            result = f"{result}\n\nreason: {self.reason}"
+        return result

@@ -136,6 +136,7 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         self.format_header = format_header or str
         self.format_duration = format_duration or str
         self._lock = threading.Lock()
+        self._graph: Graph
         self._status: dict[Address, TaskStatus] = {}
         self._started: dict[Address, float] = {}
         self._duration: dict[Address, float] = {}
@@ -144,6 +145,7 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         return not (isinstance(task, (GroupTask, VoidTask)) and status.is_skipped())
 
     def before_execute_graph(self, graph: Graph) -> None:
+        self._graph = graph
         print(flush=True)
         print(self.format_header("Start build"), flush=True)
         print(flush=True)
@@ -153,13 +155,15 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         print(self.format_header("Build summary"), flush=True)
         print(flush=True)
 
-        for task_addr, status in self._status.items():
-            task = graph.get_task(task_addr)
-            if self._ask_report_task_status(task, status):
+        for task in self._graph.tasks():
+            status = self._graph.get_status(task)
+            if status and self._ask_report_task_status(task, status):
                 print(
-                    " " * (len(self.execute_prefix) + 1) + str(task_addr),
+                    " " * (len(self.execute_prefix) + 1) + str(task.address),
                     self.status_to_text(status),
-                    self.format_duration(f"[{self._duration[task_addr]:.3f}s]") if task_addr in self._duration else "",
+                    self.format_duration(f"[{self._duration[task.address]:.3f}s]")
+                    if task.address in self._duration
+                    else "",
                 )
 
         not_executed_tasks = [t for t in graph.tasks(not_executed=True) if not isinstance(t, GroupTask)]
@@ -190,7 +194,6 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
         if self._ask_report_task_status(task, status):
             print(self.execute_prefix, task.address, self.status_to_text(status), flush=True)
         with self._lock:
-            self._status[task.address] = status
             if task.address in self._started:
                 self._duration[task.address] = time.perf_counter() - self._started[task.address]
 
@@ -199,5 +202,3 @@ class DefaultPrintingExecutorObserver(GraphExecutorObserver):
 
     def after_teardown_task(self, task: Task, status: TaskStatus) -> None:
         print(self.teardown_prefix, task.address, self.status_to_text(status), flush=True)
-        with self._lock:
-            self._status[task.address] = status

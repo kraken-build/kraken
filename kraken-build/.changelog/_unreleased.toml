@@ -1,0 +1,5 @@
+[[entries]]
+id = "799ecb3d-0755-4004-9ac5-de6b8b4e1dae"
+type = "feature"
+description = "Add `Graph.task(ok)` argument and `Graph.get_status()`"
+author = "@NiklasRosenstein"

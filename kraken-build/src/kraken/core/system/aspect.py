@@ -1,4 +1,5 @@
 import inspect
+import logging
 import os
 import sys
 from collections.abc import Iterable
@@ -8,11 +9,14 @@ from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, Mapping, Type
 import cyclopts
 from typing_extensions import Self
 
+from kraken.core.system.errors import BuildError
+
 if TYPE_CHECKING:
     from kraken.core.system.context import Context
     from kraken.core.system.graph import TaskGraph
     from kraken.core.system.task import Task
 
+logger = logging.getLogger(__name__)
 T_Options = TypeVar("T_Options", bound="AspectOptions")
 
 
@@ -146,6 +150,9 @@ class AspectBase(Generic[T_Options]):
         for task in graph.root.tasks():
             if isinstance(task, self.Implements) and task.aspect_applies(self):
                 yield task
+
+    def after_execute_graph(self, context: "Context", graph: "TaskGraph") -> None:
+        pass
 
 
 Aspect = AspectBase[Any]
@@ -336,8 +343,76 @@ class CheckAspect(AspectBase["CheckAspect.Options"]):
         """
 
 
+@dataclass
+class TestAspect(AspectBase["TestAspect.Options"]):
+    """
+    An aspect that represents a superset of tasks that execute tests on code.
+    """
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Execute tests in your code base.
+
+        Parameters
+        ----------
+        paths:
+            Narrow the set test sources down to these paths. If not specified, it's equivalent of passing "."
+        filter:
+            One or more tokens to filter by. Tests that include either one of these tokens will be run.
+        """
+
+        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+        filter: list[str] = field(default_factory=lambda: [])
+
+    class Implements:
+        """
+        Tasks should additionally inherit from this class to denote that they implement the test aspect.
+        """
+
+        TestAspect_failure_reason: Literal["NoTests"] | None = None
+        """
+        This field must be set by tasks tht implement the test aspect after execution to indicate whty the task has
+        failed.
+
+        Many individual test tasks would usually error if they can not find a single test to run as it might prompt
+        a misconfiguration. However, when filters are applied, it's possble that from a set of many test tasks, only
+        some are going to have tests that match the filter, leaving others to not run any tests and usually error.
+
+        When the [TestAspect] is active and a filter is provided, test tasks should permit when no tasks where run
+        instead of returning [TaskStatus.FAILED][kraken.core.system.task.TaskStatus.FAILED]. The [TestAspect] will
+        then check across all tasks that were run whether at least one task has run at least one test.
+        """
+
+    def after_execute_graph(self, context: "Context", graph: "TaskGraph") -> None:
+        from kraken.core.system.task import TaskStatus
+
+        # If we're using filters, test tasks might fail when they found no matching tests. This is ok if at least
+        # one test task did not fail.
+        if self.options.filter:
+            ok_tasks = [task for task in graph.tasks(ok=True) if isinstance(task, TestAspect.Implements)]
+            failed_tasks = [task for task in graph.tasks(failed=True) if isinstance(task, TestAspect.Implements)]
+            for task in failed_tasks:
+                if task.TestAspect_failure_reason == "NoTests":
+                    new_status = TaskStatus.warning("no tests selected")
+                    logger.debug(
+                        "Altering status of task %s from %s to %s",
+                        task.address,
+                        graph.get_status(task),
+                        new_status,
+                    )
+                    graph.set_status(task, new_status, force=True)
+
+            if not ok_tasks:
+                reason = None
+                if all(t.TestAspect_failure_reason == "NoTests" for t in failed_tasks):
+                    reason = "specified --filter matched no tests"
+                raise BuildError(failed_tasks, reason=reason)
+
+
 ASPECTS: dict[str, type[Aspect]] = {
     "fmt": FmtAspect,
     "lint": LintAspect,
     "check": CheckAspect,
+    "test": TestAspect,
 }

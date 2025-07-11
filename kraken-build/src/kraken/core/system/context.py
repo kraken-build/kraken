@@ -14,7 +14,7 @@ from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
 from kraken.core.system.aspect import Aspect
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
-from kraken.core.system.executor import GraphExecutor, GraphExecutorObserver
+from kraken.core.system.executor import DelegatingGraphExecutorObserver, Graph, GraphExecutor, GraphExecutorObserver
 from kraken.core.system.executor.default import (
     DefaultGraphExecutor,
     DefaultPrintingExecutorObserver,
@@ -413,8 +413,30 @@ class Context(MetadataContainer, Currentable["Context"]):
                 self.finalize()
             graph = self.get_build_graph(tasks)
 
+        build_error: BuildError | None = None
+        if self.aspects:
+            # The aspect needs a hook right after the graph execution ends, but before the other observer
+            # gets a chance to process the results. The aspects may raise their own build error if they deem
+            # the build unsuccessful for their own reasons.
+            class AspectDelegator(GraphExecutorObserver):
+                def after_execute_graph(_self, graph: Graph) -> None:
+                    assert isinstance(graph, TaskGraph)
+                    try:
+                        for aspect in self.aspects:
+                            aspect.after_execute_graph(self, graph)
+                    except BuildError as exc:
+                        nonlocal build_error
+                        build_error = exc
+
+            observer: GraphExecutorObserver = DelegatingGraphExecutorObserver(AspectDelegator(), self.observer)
+        else:
+            observer = self.observer
+
         with self.as_current():
-            self.executor.execute_graph(graph, self.observer)
+            self.executor.execute_graph(graph, observer)
+
+        if build_error:
+            raise build_error
 
         if not graph.is_complete():
             raise BuildError(list(graph.tasks(failed=True)))
