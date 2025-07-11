@@ -187,13 +187,18 @@ def parse_options(
 
     parameters: list[inspect.Parameter] = []
 
-    for field in fields(options_class):
+    for field_ in fields(options_class):
+        positional = field_.metadata.get("positional", False)
         parameters.append(
             inspect.Parameter(
-                name=field.name,
-                kind=inspect.Parameter.KEYWORD_ONLY,
-                default=field.default if field.default is not MISSING else inspect.Parameter.empty,
-                annotation=field.type,
+                name=field_.name,
+                kind=inspect.Parameter.POSITIONAL_ONLY if positional else inspect.Parameter.KEYWORD_ONLY,
+                default=field_.default
+                if field_.default is not MISSING
+                else field_.default_factory()
+                if field_.default_factory is not None
+                else inspect.Parameter.empty,
+                annotation=field_.type,
             )
         )
 
@@ -205,7 +210,6 @@ def parse_options(
         """
 
         nonlocal result
-        assert not args, "Options parser should not receive positional arguments"
         result = options_class(*args, **kwargs)
 
     options_parser.__signature__ = inspect.Signature(parameters)  # type: ignore[attr-defined]
@@ -231,7 +235,7 @@ def parse_options(
     return result
 
 
-@dataclass(kw_only=True)
+@dataclass
 class LintAspectOptions(AspectOptions):
     """
     Perform linting on the code in a project.
@@ -242,6 +246,8 @@ class LintAspectOptions(AspectOptions):
 
     Parameters
     ----------
+    paths:
+        Narrow the set of files to lint down to these paths. If not specified, it's equivalent of passing "."
     fix:
         Automatically fix issues where possible.
     unsafe_fix:
@@ -249,6 +255,7 @@ class LintAspectOptions(AspectOptions):
         option and should be used with caution.
     """
 
+    paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
     fix: bool = False
     unsafe_fix: bool = False
 
