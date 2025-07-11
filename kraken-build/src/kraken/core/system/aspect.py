@@ -282,7 +282,7 @@ class LintAspect(AspectBase["LintAspect.Options"]):
 
 
 @dataclass
-class FmtAspect(AspectBase["CheckAspect.Options"]):
+class FmtAspect(AspectBase["FmtAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform formatting on files.
     """
@@ -296,9 +296,12 @@ class FmtAspect(AspectBase["CheckAspect.Options"]):
         ----------
         paths:
             Narrow the set of files to format down to these paths. If not specified, it's equivalent of passing "."
+        check:
+            Instead of formatting files, only whether the files _would_ be formatted, and error if there are any.
         """
 
         paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+        check: bool = False
 
     class Implements:
         """

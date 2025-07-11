@@ -36,6 +36,9 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
                 ruff_task += ["--fix"]
             if lint.unsafe_fix and "--unsafe-fix" not in ruff_task:
                 ruff_task += ["--unsafe-fix"]
+        if ruff_task[0] == "format" and (fmt := FmtAspect.current_options()):
+            if fmt.check and "--check" not in ruff_task:
+                ruff_task += ["--check"]
 
         command = [
             *self.ruff_cmd.get(),
