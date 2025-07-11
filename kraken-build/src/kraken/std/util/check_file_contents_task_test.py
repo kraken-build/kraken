@@ -17,6 +17,7 @@ def test__CheckFileContentsTask__shows_diff(kraken_project: Project, capsys: Cap
     task.file = path
     task.encoding = "utf8"
     task.content = "Hello, world!\nGoodbye, world!\n"
+    task.no_color = True
     status = task.execute()
     assert status == TaskStatus.failed(f'file "{path}" is not up to date')
 

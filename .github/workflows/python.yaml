@@ -49,6 +49,7 @@ jobs:
     with:
       targets: pytest-e2e
       python-version: "3.13"
+      pytest-flags: --numprocesses 4
 
   publish:
     name: Publish to PyPI
