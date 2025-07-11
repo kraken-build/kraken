@@ -50,6 +50,18 @@ class Supplier(Generic[T], abc.ABC):
         except Supplier.Empty:
             return fallback
 
+    @overload
+    def get_or_else(self, fallback: Callable[[], None]) -> "T | None": ...
+
+    @overload
+    def get_or_else(self, fallback: Callable[[], U]) -> "T | U": ...
+
+    def get_or_else(self, fallback: Callable[[], U | None]) -> "T | U | None":
+        try:
+            return self.get()
+        except Supplier.Empty:
+            return fallback()
+
     def get_or_raise(self, get_exception: Callable[[], Exception]) -> T:
         """Return the value of the supplier, or raise the exception provided by *get_exception* if empty."""
         try:
