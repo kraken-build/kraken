@@ -8,7 +8,7 @@ from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import flatten
-from kraken.core import Project, Property, TaskStatus
+from kraken.core import Project, Property, TaskStatus, TestAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -27,7 +27,7 @@ class CoverageFormat(enum.Enum):
         return self.value[1]
 
 
-class PytestTask(EnvironmentAwareDispatchTask):
+class PytestTask(EnvironmentAwareDispatchTask, TestAspect.Implements):
     description = "Run unit tests using Pytest."
     python_dependencies = ["pytest"]
 
@@ -95,9 +95,17 @@ class PytestTask(EnvironmentAwareDispatchTask):
         if self.doctest_modules.get():
             command += ["--doctest-modules"]
         command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
+
+        if opt := TestAspect.current_options():
+            # TODO: handle opt.paths
+            if opt.filter:
+                command += ["-k", " or ".join(opt.filter)]
+
         return command
 
     def handle_exit_code(self, code: int) -> TaskStatus:
+        if code == 5:
+            self.TestAspect_failure_reason = "NoTests"
         if code == 5 and self.allow_no_tests.get():
             # Pytest returns exit code 5 if no tests were run.
             return TaskStatus.succeeded()
