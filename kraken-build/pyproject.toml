@@ -12,9 +12,7 @@ description = "Kraken is an extensible build orchestration system."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 license = "MIT"
-authors = [
-  {name = "Niklas Rosenstein", email = "rosensteinniklas@gmail.com"},
-]
+authors = [{ name = "Niklas Rosenstein", email = "rosensteinniklas@gmail.com" }]
 dependencies = [
   "cyclopts>=3.22.2",
   "databind>=4.5.0,<5.0.0",
@@ -85,6 +83,7 @@ forced-separate = ["tests"]
 known-first-party = ["kraken"]
 
 [tool.pytest.ini_options]
-markers = [
-  "integration",
-]
+# The default includes "build" in the list, meaning it will ignore src/kraken/build, and adding passing that path
+# to the pytest args instead makes it kind of ignore --doctest-modules (???).
+norecursedirs = [".*", "dist", "CVS", "_darcs", "{arch}", "*.egg"]
+markers = ["integration"]

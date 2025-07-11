@@ -22,6 +22,7 @@ class CheckFileContentsTask(Task):
     render_prepare: Property[TaskStatus]
     update_task_name: Property[str | None] = Property.default(None)
     show_diff: Property[bool] = Property.default(True)
+    no_color: Property[bool] = Property.default(False)
 
     def _show_diff(self, a: str, b: str) -> None:
         differ = Differ()
@@ -35,10 +36,10 @@ class CheckFileContentsTask(Task):
 
     def execute(self) -> TaskStatus | None:
         file = try_relative_to(self.project.directory / self.file.get())
-        file_fmt = colored(str(file), "yellow", attrs=["bold"])
+        file_fmt = colored(str(file), "yellow", attrs=["bold"], no_color=self.no_color.get())
 
         if update_task_name := self.update_task_name.get():
-            uptask = colored(update_task_name, "blue", attrs=["bold"])
+            uptask = colored(update_task_name, "blue", attrs=["bold"], no_color=self.no_color.get())
             message_suffix = f", run {uptask} to generate it"
         else:
             message_suffix = ""

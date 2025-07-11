@@ -12,9 +12,11 @@ on:
         required: false
         type: string
         default: '3.13'
-
-env:
-  PYTEST_FLAGS: --numprocesses 4
+      pytest-flags:
+        description: 'Number of parallel tests to run.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   run-krakenw:
@@ -25,3 +27,5 @@ jobs:
     - uses: actions/setup-python@v5
       with: { python-version: "${{ inputs.python-version }}" }
     - run: krakenw run ${{ inputs.targets }} -vv
+      env:
+        PYTEST_FLAGS: --color=yes ${{ inputs.pytest-flags }}
