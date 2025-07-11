@@ -1,5 +1,6 @@
 import inspect
 import os
+import sys
 from collections.abc import Iterable
 from dataclasses import MISSING, dataclass, field, fields
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
@@ -77,6 +78,7 @@ class AspectBase(Generic[T_Options]):
         name: str | None = None,
         help: str | None = None,
         exit_on_error: Literal[True] = True,
+        exit_on_help: bool = True,
         print_error: bool = True,
         env: Mapping[str, str] | None = None,
     ) -> T_Options: ...
@@ -89,6 +91,7 @@ class AspectBase(Generic[T_Options]):
         name: str | None = None,
         help: str | None = None,
         exit_on_error: bool = True,
+        exit_on_help: bool = True,
         print_error: bool = True,
         env: Mapping[str, str] | None = None,
     ) -> T_Options | None: ...
@@ -100,6 +103,7 @@ class AspectBase(Generic[T_Options]):
         name: str | None = None,
         help: str | None = None,
         exit_on_error: bool = True,
+        exit_on_help: bool = True,
         print_error: bool = True,
         env: Mapping[str, str] | None = None,
     ) -> T_Options | None:
@@ -111,6 +115,7 @@ class AspectBase(Generic[T_Options]):
                 name=name or cls.__class__.__name__,
                 help=help or cls.Options.__doc__,
                 exit_on_error=exit_on_error,
+                exit_on_help=exit_on_help,
                 print_error=print_error,
                 env=env,
             ),
@@ -153,6 +158,7 @@ def parse_options(
     name: str | None = None,
     help: str | None = None,
     exit_on_error: Literal[True] = True,
+    exit_on_help: bool = True,
     print_error: bool = True,
     env: Mapping[str, str] | None = None,
 ) -> T_Options: ...
@@ -165,6 +171,7 @@ def parse_options(
     name: str | None = None,
     help: str | None = None,
     exit_on_error: bool = True,
+    exit_on_help: bool = True,
     print_error: bool = True,
     env: Mapping[str, str] | None = None,
 ) -> T_Options | None: ...
@@ -176,6 +183,7 @@ def parse_options(
     name: str | None = None,
     help: str | None = None,
     exit_on_error: bool = True,
+    exit_on_help: bool = True,
     print_error: bool = True,
     env: Mapping[str, str] | None = None,
 ) -> T_Options | None:
@@ -196,7 +204,7 @@ def parse_options(
                 default=field_.default
                 if field_.default is not MISSING
                 else field_.default_factory()
-                if field_.default_factory is not None
+                if field_.default_factory is not MISSING
                 else inspect.Parameter.empty,
                 annotation=field_.type,
             )
@@ -232,6 +240,8 @@ def parse_options(
             os.environ.clear()
             os.environ.update(env_copy)
 
+    if exit_on_help and result is None:
+        sys.exit(0)
     return result
 
 
