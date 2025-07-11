@@ -4,10 +4,11 @@ import os
 import sys
 from collections.abc import Iterable
 from dataclasses import MISSING, dataclass, field, fields
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
 
+import attrs
 import cyclopts
-from typeapi import ClassTypeHint, TypeHint
+from typeapi import AnnotatedTypeHint, ClassTypeHint, TypeHint
 from typing_extensions import Self
 
 from kraken.core.system.errors import BuildError
@@ -224,6 +225,7 @@ def parse_options(
         result = options_class(**kwargs)
 
     options_parser.__signature__ = signature  # type: ignore[attr-defined]
+    options_parser.__annotations__ = {}  # We need to unset these, other cyclopts will consider them and it breaks.
     options_parser.__doc__ = help or options_class.__doc__
 
     # HACK: Maybe there is a better way to pass environment variables to cyclopts?
@@ -255,19 +257,37 @@ def build_signature_from_dataclass(data_class: Any) -> tuple[inspect.Signature, 
     positional_map: dict[str, int | slice] = {}
 
     for field_ in fields(data_class):
-        positional = field_.metadata.get("positional", False)
-        if positional:
-            hint = TypeHint(field_.type)
+        hint = TypeHint(field_.type)
+
+        # Unwrap the Annotated type hint, if any.
+        annotations: tuple[Any, ...] = ()
+        if isinstance(hint, AnnotatedTypeHint):
+            annotations = hint.metadata
+            hint = TypeHint(hint.type)
+
+        # If already annotated with a Cyclopts parameter, use it.
+        param_cfg = next((x for x in annotations if isinstance(x, cyclopts.Parameter)), None)
+        annotations = tuple(x for x in annotations if x is not param_cfg)
+
+        # Determine the parameter kind.
+        if field_.metadata.get("positional", False):
             if isinstance(hint, ClassTypeHint) and hint.type is list and field_.default_factory is MISSING:
                 # Positional argument typed as a list with no default arguments takes varargs.
                 kind: inspect._ParameterKind = inspect.Parameter.VAR_POSITIONAL
                 positional_map[field_.name] = slice(positional_index, None)
+                param_cfg = (
+                    attrs.evolve(param_cfg, allow_leading_hyphen=True)
+                    if param_cfg
+                    else cyclopts.Parameter(allow_leading_hyphen=True)
+                )
+                hint = TypeHint(hint.args[0])  # Use item type
             else:
-                kind = inspect.Parameter.POSITIONAL_ONLY
+                kind = inspect.Parameter.POSITIONAL_OR_KEYWORD
                 positional_map[field_.name] = positional_index
                 positional_index += 1
         else:
             kind = inspect.Parameter.KEYWORD_ONLY
+
         default = (
             field_.default
             if field_.default is not MISSING
@@ -275,7 +295,21 @@ def build_signature_from_dataclass(data_class: Any) -> tuple[inspect.Signature, 
             if field_.default_factory is not MISSING
             else inspect.Parameter.empty
         )
-        parameters.append(inspect.Parameter(name=field_.name, kind=kind, default=default, annotation=field_.type))
+
+        # Rebuild the Annotated type hint if needed.
+        if param_cfg:
+            annotations = (param_cfg, *annotations)
+        if annotations:
+            hint = TypeHint(Annotated[(hint.hint, *annotations)])
+
+        parameters.append(
+            inspect.Parameter(
+                name=field_.name,
+                kind=kind,
+                default=default,
+                annotation=hint.hint,
+            )
+        )
 
     return inspect.Signature(parameters), positional_map
 

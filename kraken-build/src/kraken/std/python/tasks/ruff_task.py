@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import MutableMapping, Sequence
 from dataclasses import dataclass
 from itertools import chain
+from os import fspath
 from pathlib import Path
 
 from kraken.core import Aspect, FmtAspect, LintAspect, Project, Property, Supplier, TaskStatus
@@ -29,23 +30,20 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
     """
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
-        ruff_task = list(self.ruff_task.get())
+        ruff_args = list(self.ruff_task.get())
+        ruff_paths: list[str] = [fspath(self.settings.source_directory), *self.settings.get_tests_directory_as_args()]
 
-        if ruff_task[0] == "check" and (lint := LintAspect.current_options()):
-            if lint.fix and "--fix" not in ruff_task:
-                ruff_task += ["--fix"]
-            if lint.unsafe_fix and "--unsafe-fix" not in ruff_task:
-                ruff_task += ["--unsafe-fix"]
-        if ruff_task[0] == "format" and (fmt := FmtAspect.current_options()):
-            if fmt.check and "--check" not in ruff_task:
-                ruff_task += ["--check"]
+        if ruff_args[0] == "check" and (lint := LintAspect.current_options()):
+            if lint.fix and "--fix" not in ruff_args:
+                ruff_args += ["--fix"]
+            if lint.unsafe_fix and "--unsafe-fix" not in ruff_args:
+                ruff_args += ["--unsafe-fix"]
 
-        command = [
-            *self.ruff_cmd.get(),
-            *ruff_task,
-            str(self.settings.source_directory),
-            *self.settings.get_tests_directory_as_args(),
-        ]
+        if ruff_args[0] == "format" and (fmt := FmtAspect.current_options()):
+            if fmt.check and "--check" not in ruff_args:
+                ruff_args += ["--check"]
+
+        command = [*self.ruff_cmd.get(), *ruff_args, *ruff_paths]
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get().absolute())]

@@ -8,9 +8,10 @@ from pathlib import Path
 
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
+from kraken.core.system.aspect import RunAspect
 
 
-class MkDocsTask(Task):
+class MkDocsTask(Task, RunAspect.Implements):
     """Build docs with MkDocs."""
 
     mkdocs_cmd: Property[Sequence[str]] = Property.default(["mkdocs"])
@@ -23,6 +24,8 @@ class MkDocsTask(Task):
             cwd = self.project.directory / mkdocs_root
         else:
             cwd = self.project.directory
+        if (run := RunAspect.current_options()):
+            command += run.args
         self.logger.info("$ %s", command)
         return TaskStatus.from_exit_code(command, subprocess.call(command, cwd=cwd))
 
