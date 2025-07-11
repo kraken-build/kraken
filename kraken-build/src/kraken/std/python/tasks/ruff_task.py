@@ -21,6 +21,13 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
+    _ignore_aspects: bool = False
+    """
+    The [ruff] function creates separate fix/check tasks, which we don't need when invoking Ruff via aspects
+    since the `--fix` and `--check` options can be passed via the aspect options. We enable `ignore_aspects` for
+    these tasks do they don't get also invoked with the aspect.
+    """
+
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         ruff_task = list(self.ruff_task.get())
 
@@ -43,6 +50,8 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
         return command
 
     def aspect_applies(self, aspect: Aspect) -> bool:
+        if self._ignore_aspects:
+            return False
         task = self.ruff_task.get()[0]
         match (task, aspect):
             case ("format", FmtAspect()) | ("check", LintAspect()):
@@ -106,6 +115,7 @@ def ruff(
     fix_task.ruff_task = ["check", "--fix"]
     fix_task.config_file = config_file
     fix_task.additional_args = additional_args
+    fix_task._ignore_aspects = True
 
     format_task = project.task(f"{name}.fmt", RuffTask, group="fmt")
     format_task.ruff_cmd = ruff_cmd
@@ -118,5 +128,6 @@ def ruff(
     format_check_task.ruff_task = ["format", "--check"]
     format_check_task.config_file = config_file
     format_check_task.additional_args = additional_args
+    format_check_task._ignore_aspects = True
 
     return RuffTasks(check_task, fix_task, format_task, format_check_task)
