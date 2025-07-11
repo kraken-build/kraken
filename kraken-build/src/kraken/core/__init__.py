@@ -36,7 +36,6 @@ __all__ = [
     "Graph",
     "GroupTask",
     "LintAspect",
-    "LintAspectOptions",
     "Project",
     "ProjectLoaderError",
     "Property",
