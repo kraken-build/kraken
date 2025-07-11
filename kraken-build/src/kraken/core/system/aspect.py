@@ -64,7 +64,7 @@ class AspectBase(Generic[T_Options]):
     Implements: ClassVar[type[Any] | None] = None
     """
     Subclasses can define their own `Implements` class. If set, the default implementation of [select_tasks()] will
-    flter tasks to those that inherit from this `Implements` class.
+    filter tasks to those that inherit from this `Implements` class.
     """
 
     options: T_Options
@@ -372,11 +372,11 @@ class TestAspect(AspectBase["TestAspect.Options"]):
 
         TestAspect_failure_reason: Literal["NoTests"] | None = None
         """
-        This field must be set by tasks tht implement the test aspect after execution to indicate whty the task has
+        This field must be set by tasks that implement the test aspect after execution to indicate whty the task has
         failed.
 
         Many individual test tasks would usually error if they can not find a single test to run as it might prompt
-        a misconfiguration. However, when filters are applied, it's possble that from a set of many test tasks, only
+        a misconfiguration. However, when filters are applied, it's possible that from a set of many test tasks, only
         some are going to have tests that match the filter, leaving others to not run any tests and usually error.
 
         When the [TestAspect] is active and a filter is provided, test tasks should permit when no tasks where run
