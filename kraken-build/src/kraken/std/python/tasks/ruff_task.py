@@ -5,8 +5,7 @@ from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
 
-from kraken.core import Project, Property, Supplier, TaskStatus
-from kraken.core.system.aspect import LintAspect
+from kraken.core import Project, Property, Supplier, TaskStatus, LintAspect, CheckAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 

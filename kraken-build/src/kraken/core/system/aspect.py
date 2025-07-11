@@ -45,12 +45,13 @@ class AspectBase(Generic[T_Options]):
     ```python
     from kraken.core.aspect import Aspect, AspectOptions
 
-    @dataclass
-    class MyAspectOptions(AspectOptions):
-        my_option: str = "default_value"
+    class MyAspect(Aspect["MyAspect.Options"]):
 
-    class MyAspect(Aspect, options_class=MyAspectOptions):
-        pass
+        @dataclass
+        class Options(AspectOptions):
+            my_option: str = "default_value"
+
+        class Implements: ...
     ```
     """
 
@@ -65,9 +66,8 @@ class AspectBase(Generic[T_Options]):
     options: T_Options
 
     def __init_subclass__(cls, options_class: type[T_Options] | None = None, **kwargs: Any) -> None:
-        cls.Options = cast(
-            type[AspectOptions], options_class or getattr(cls, "Options", cast(type[T_Options], AspectOptions))
-        )
+        if options_class is not None:
+            cls.Options = cast(type[AspectOptions], options_class)
         super().__init_subclass__(**kwargs)
 
     @overload
@@ -246,35 +246,34 @@ def parse_options(
 
 
 @dataclass
-class LintAspectOptions(AspectOptions):
-    """
-    Perform linting on the code in a project.
-
-    Linting concerns the process of checking the code for semantic, stylistic and specific formatting issues that could
-    lead to bugs or make the code harder to read and maintain. This aspect provides a common interface for tasks that
-    implement such checks.
-
-    Parameters
-    ----------
-    paths:
-        Narrow the set of files to lint down to these paths. If not specified, it's equivalent of passing "."
-    fix:
-        Automatically fix issues where possible.
-    unsafe_fix:
-        Automatically fix issues where possible, even if it may lead to unsafe changes. This is a more aggressive
-        option and should be used with caution.
-    """
-
-    paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
-    fix: bool = False
-    unsafe_fix: bool = False
-
-
-@dataclass
-class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions):
+class LintAspect(AspectBase["LintAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform linting on the code in a project.
     """
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Perform linting on the code in a project.
+
+        Linting concerns the process of checking the code for semantic, stylistic and specific formatting issues that could
+        lead to bugs or make the code harder to read and maintain. This aspect provides a common interface for tasks that
+        implement such checks.
+
+        Parameters
+        ----------
+        paths:
+            Narrow the set of files to lint down to these paths. If not specified, it's equivalent of passing "."
+        fix:
+            Automatically fix issues where possible.
+        unsafe_fix:
+            Automatically fix issues where possible, even if it may lead to unsafe changes. This is a more aggressive
+            option and should be used with caution.
+        """
+
+        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+        fix: bool = False
+        unsafe_fix: bool = False
 
     class Implements:
         """
@@ -283,26 +282,25 @@ class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions)
 
 
 @dataclass
-class CheckAspectOptions(AspectOptions):
-    """
-    Perform type checking on the code in a project.
-
-    Type checking concerns itself only with the correctness of code with respect to its type definitions.
-
-    Parameters
-    ----------
-    paths:
-        Narrow the set of files to check down to these paths. If not specified, it's equivalent of passing "."
-    """
-
-    paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
-
-
-@dataclass
-class CheckAspect(AspectBase[CheckAspectOptions], options_class=CheckAspectOptions):
+class CheckAspect(AspectBase["CheckAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform type checking on code.
     """
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Perform type checking on the code in a project.
+
+        Type checking concerns itself only with the correctness of code with respect to its type definitions.
+
+        Parameters
+        ----------
+        paths:
+            Narrow the set of files to check down to these paths. If not specified, it's equivalent of passing "."
+        """
+
+        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
 
     class Implements:
         """
