@@ -476,7 +476,8 @@ class TestAspect(AspectBase["TestAspect.Options"]):
 class RunAspect(AspectBase["RunAspect.Options"]):
     """
     An aspect that can be used to run a single task, optionally appending arguments to the command the task wraps.
-    This aspect is usually implemented for build artifacts, allowing you to invoke them.
+    This aspect is usually implemented for build artifacts, allowing you to invoke them. Some tasks may also parse
+    the arguments themselves and mutate their behavior accordingly.
     """
 
     class Implements:
@@ -485,7 +486,7 @@ class RunAspect(AspectBase["RunAspect.Options"]):
     @dataclass
     class Options(AspectOptions):
         """
-        Invoke a task that represents something runnable.
+        Invoke a task that represents something runnable and which optionally accepts additional arguments.
 
         Parameters
         ----------
