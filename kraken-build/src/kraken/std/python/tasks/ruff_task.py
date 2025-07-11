@@ -6,7 +6,6 @@ from itertools import chain
 from pathlib import Path
 
 from kraken.core import Aspect, FmtAspect, LintAspect, Project, Property, Supplier, TaskStatus
-from kraken.core.system.aspect import CheckAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -46,7 +45,7 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
     def aspect_applies(self, aspect: Aspect) -> bool:
         task = self.ruff_task.get()[0]
         match (task, aspect):
-            case ("format", FmtAspect()) | ("check", CheckAspect()):
+            case ("format", FmtAspect()) | ("check", LintAspect()):
                 return True
         return False
 
