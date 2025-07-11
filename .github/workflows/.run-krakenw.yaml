@@ -28,4 +28,4 @@ jobs:
       with: { python-version: "${{ inputs.python-version }}" }
     - run: krakenw run ${{ inputs.targets }} -vv
       env:
-        PYTEST_FLAGS: ${{ inputs.pytest-flags }}
+        PYTEST_FLAGS: --color=yes ${{ inputs.pytest-flags }}
