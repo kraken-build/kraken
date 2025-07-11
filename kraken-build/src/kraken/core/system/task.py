@@ -53,14 +53,22 @@ RelationshipMode = Literal["strict", "order-only"]
 class TaskStatusType(enum.Enum):
     """Represents the possible statuses that a task can return from its execution."""
 
-    PENDING = enum.auto()  #: The task is pending execution (only to be returned from :meth:`Task.prepare`).
-    FAILED = enum.auto()  #: The task failed it's preparation or execution.
-    INTERRUPTED = enum.auto()  #: The task was interrupted by the user.
-    SUCCEEDED = enum.auto()  #: The task succeeded it's execution (only to be returned from :meth:`Task.execute`).
-    STARTED = enum.auto()  #: The task started a background task that needs to be torn down later.
-    SKIPPED = enum.auto()  #: The task was skipped (i.e. it is not applicable).
-    UP_TO_DATE = enum.auto()  #: The task is up to date and did not run (or not run it's usual logic).
-    WARNING = enum.auto()  #: The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`).
+    PENDING = enum.auto()
+    """The task is pending execution (only to be returned from :meth:`Task.prepare`)."""
+    FAILED = enum.auto()
+    """The task failed it's preparation or execution."""
+    INTERRUPTED = enum.auto()
+    """The task was interrupted by the user."""
+    SUCCEEDED = enum.auto()
+    """The task succeeded it's execution (only to be returned from :meth:`Task.execute`)."""
+    STARTED = enum.auto()
+    """The task started a background task that needs to be torn down later."""
+    SKIPPED = enum.auto()
+    """The task was skipped (i.e. it is not applicable)."""
+    UP_TO_DATE = enum.auto()
+    """The task is up to date and did not run (or not run it's usual logic)."""
+    WARNING = enum.auto()
+    """The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`)."""
 
     def is_ok(self) -> bool:
         return not self.is_not_ok()

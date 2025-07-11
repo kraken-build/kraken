@@ -27,6 +27,8 @@ T_Options = TypeVar("T_Options", bound="AspectOptions")
 
 @dataclass
 class AspectOptions:
+    """Base class for aspect options."""
+
     pass
 
 
@@ -42,14 +44,14 @@ class AspectBase(Generic[T_Options]):
     configurability through command-line arguments that can otherwise only be achieved if the intended tasks
     support special environment variables.
 
-    Take the [`LintAspect`][LintAspect] for example, which represents a superset of tasks that perform linting
-    on the code in a project. The aspect allows you to run `kraken lint` and configure it with the options that
-    are defined by the aspect.
+    Take the [`LintAspect`][kraken.core.system.aspect.LintAspect] for example, which represents a superset of tasks
+    that perform linting on the code in a project. The aspect allows you to run `kraken lint` and configure it with
+    the options that are defined by the aspect.
 
     An aspect's command-line interface is defnied by a dataclass on the class level named `Options`. This dataclass
     is converted to a command-line interface using the `cyclopts` module. It is required that an override of the
-    `Options` dataclass is a subclass of [`AspectOptions`][AspectOptions]. The `Options` dataclass is defined by
-    passing the `options_class` meta argument on class creation, like so:
+    `Options` dataclass is a subclass of [`AspectOptions`][kraken.core.AspectOptions]. The `Options` dataclass is
+    defined by passing the `options_class` meta argument on class creation, like so:
 
     ```python
     from kraken.core.aspect import Aspect, AspectOptions
@@ -446,9 +448,10 @@ class TestAspect(AspectBase["TestAspect.Options"]):
         a misconfiguration. However, when filters are applied, it's possible that from a set of many test tasks, only
         some are going to have tests that match the filter, leaving others to not run any tests and usually error.
 
-        When the [TestAspect] is active and a filter is provided, test tasks should permit when no tasks where run
-        instead of returning [TaskStatus.FAILED][kraken.core.system.task.TaskStatus.FAILED]. The [TestAspect] will
-        then check across all tasks that were run whether at least one task has run at least one test.
+        When the [`TestAspect`][kraken.core.TestAspect] is active and a filter is provided, test tasks should permit
+        when no tasks where run instead of returning [TaskStatus.FAILED][kraken.core.TaskStatusType.FAILED]. The
+        [`TestAspect`][kraken.core.TestAspect] will then check across all tasks that were run whether at least one task
+        has run at least one test.
         """
 
     def after_execute_graph(self, context: "Context", graph: "TaskGraph") -> None:
