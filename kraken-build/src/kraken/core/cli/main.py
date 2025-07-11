@@ -702,6 +702,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
     elif args.cmd in ASPECTS:
         aspect_class = ASPECTS[args.cmd]
         aspect = aspect_class(aspect_class.parse_options(args.args + remainder))
+        logger.debug("Arguments for %s = %s", aspect_class.__name__, aspect.options)
 
         with contextlib.ExitStack() as exit_stack:
             run(

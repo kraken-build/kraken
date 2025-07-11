@@ -135,7 +135,7 @@ class GraphOptions:
             logger.warning("the --restart option is deprecated since kraken v0.45.0")
 
         return cls(
-            tasks=args.tasks or None,
+            tasks=getattr(args, "tasks", []) or None,
             resume=resume,
             restart=restart,
             no_save=not save,
