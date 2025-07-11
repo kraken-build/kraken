@@ -273,7 +273,7 @@ class LintAspectOptions(AspectOptions):
 @dataclass
 class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions):
     """
-    An example aspect that represents a superset of tasks that perform linting on the code in a project.
+    An aspect that represents a superset of tasks that perform linting on the code in a project.
     """
 
     class Implements:
@@ -282,6 +282,35 @@ class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions)
         """
 
 
+@dataclass
+class CheckAspectOptions(AspectOptions):
+    """
+    Perform type checking on the code in a project.
+
+    Type checking concerns itself only with the correctness of code with respect to its type definitions.
+
+    Parameters
+    ----------
+    paths:
+        Narrow the set of files to check down to these paths. If not specified, it's equivalent of passing "."
+    """
+
+    paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+
+
+@dataclass
+class CheckAspect(AspectBase[CheckAspectOptions], options_class=CheckAspectOptions):
+    """
+    An aspect that represents a superset of tasks that perform type checking on code.
+    """
+
+    class Implements:
+        """
+        Tasks should additionally inherit from this class to denote that they implement the check aspect.
+        """
+
+
 ASPECTS: dict[str, type[Aspect]] = {
+    "check": CheckAspect,
     "lint": LintAspect,
 }
