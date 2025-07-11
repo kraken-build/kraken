@@ -29,12 +29,15 @@ class MkDocsRunOptions:
         Build the site without any effects of `mkdocs serve` - pure `mkdocs build`, then serve.
     livereload:
         Use live reloading of the development server.
+    strict:
+        Use strict mode. Overrides what's defined on the task-level.
     """
 
     serve: bool = False
     address: Annotated[str, Parameter(env_var="MKDOCS_PORT")] = "localhost:8000"
     clean: bool = False
     livereload: bool = True
+    strict: bool | None = None
 
 
 class MkDocsTask(Task, RunAspect.Implements):
@@ -83,10 +86,13 @@ class MkDocsTask(Task, RunAspect.Implements):
             if opts.serve:
                 mode = "serve"
                 args += ["-a", opts.address]
-                if opts.clean:
-                    args += ["--clean"]
                 if not opts.livereload:
                     args += ["--no-livereload"]
+
+            if opts.clean:
+                args += ["--clean"]
+            if opts.strict is not None:
+                strict = opts.strict
 
         # Build up the Mkdocs command to invoke.
 
@@ -118,10 +124,12 @@ def mkdocs(
     project = project or Project.current()
 
     mkdocs_cmd = Supplier.of(["uv", "tool", "run", *chain.from_iterable(("--with", r) for r in requirements), "mkdocs"])
+    final_watch_files = [(project.directory / x).absolute() for x in watch_files]
 
     build_task = project.task(f"{task_prefix}", MkDocsTask)
     build_task.mkdocs_root = project.directory / (mkdocs_root or "")
     build_task.mkdocs_cmd = mkdocs_cmd
+    build_task.watch_files = final_watch_files
 
     # The .build and .serve variants are deprecated and here only for backwards compatibility. Use
     # `krakenw invoke :{task_prefix} [--serve]` instead.
@@ -135,6 +143,6 @@ def mkdocs(
     serve_task.mkdocs_cmd = mkdocs_cmd
     serve_task._do_not_use_mode = "serve"
     serve_task._do_not_use_other_task_name = str(build_task.address)
-    serve_task.watch_files = [(project.directory / x).absolute() for x in watch_files]
+    serve_task.watch_files = final_watch_files
 
     return build_task, serve_task
