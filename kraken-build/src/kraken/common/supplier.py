@@ -123,10 +123,14 @@ class Supplier(Generic[T], abc.ABC):
 
         .. code-block:: python
 
+            >>> from typing import cast
             >>> from typing_extensions import assert_type
-            >>> assert_type( Supplier.of("foo"),                            Supplier[str]       )  # OK (simple)
-            >>> assert_type( Supplier.of(cast(str | int, "foo"),            Supplier[object]    )  # types unrefined
-            >>> assert_type( Supplier[str | int].of(cast(str | int, "foo"), Supplier[int | str] )  # OK
+            >>> assert_type( Supplier.of("foo"),                             Supplier[str]       )  # OK (simple)
+            Supplier.of('foo')
+            >>> assert_type( Supplier.of(cast(str | int, "foo")),            Supplier[object]    )  # types unrefined
+            Supplier.of('foo')
+            >>> assert_type( Supplier[str | int].of(cast(str | int, "foo")), Supplier[int | str] )  # OK
+            Supplier.of('foo')
         """
 
         if isinstance(value, Supplier):
@@ -266,7 +270,7 @@ class OfSupplier(Supplier[T]):
         return self._value
 
     def __repr__(self) -> str:
-        return f"Supplier.of({self._value})"
+        return f"Supplier.of({self._value!r})"
 
     def __eq__(self, other: object) -> bool:
         if type(other) is not type(self):
