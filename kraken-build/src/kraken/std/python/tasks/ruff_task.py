@@ -5,12 +5,13 @@ from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
 
-from kraken.core import Project, Property, Supplier, TaskStatus, LintAspect, CheckAspect
+from kraken.core import Aspect, FmtAspect, LintAspect, Project, Property, Supplier, TaskStatus
+from kraken.core.system.aspect import CheckAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 
 
-class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements):
+class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Implements):
     """A task to run `ruff` in either format, fix, or check mode."""
 
     description = "Lint Python source files with Ruff."
@@ -41,6 +42,13 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements):
             command += ["--config", str(self.config_file.get().absolute())]
         command += self.additional_args.get()
         return command
+
+    def aspect_applies(self, aspect: Aspect) -> bool:
+        task = self.ruff_task.get()[0]
+        match (task, aspect):
+            case ("format", FmtAspect()) | ("check", CheckAspect()):
+                return True
+        return False
 
 
 @dataclass

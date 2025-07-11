@@ -144,7 +144,7 @@ class AspectBase(Generic[T_Options]):
         if self.Implements is None:
             return
         for task in graph.root.tasks():
-            if isinstance(task, self.Implements):
+            if isinstance(task, self.Implements) and task.aspect_applies(self):
                 yield task
 
 
@@ -282,6 +282,31 @@ class LintAspect(AspectBase["LintAspect.Options"]):
 
 
 @dataclass
+class FmtAspect(AspectBase["CheckAspect.Options"]):
+    """
+    An aspect that represents a superset of tasks that perform formatting on files.
+    """
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Perform formatting on code in the project.
+
+        Parameters
+        ----------
+        paths:
+            Narrow the set of files to format down to these paths. If not specified, it's equivalent of passing "."
+        """
+
+        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+
+    class Implements:
+        """
+        Tasks should additionally inherit from this class to denote that they implement the `fmt` aspect.
+        """
+
+
+@dataclass
 class CheckAspect(AspectBase["CheckAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform type checking on code.
@@ -309,6 +334,7 @@ class CheckAspect(AspectBase["CheckAspect.Options"]):
 
 
 ASPECTS: dict[str, type[Aspect]] = {
-    "check": CheckAspect,
+    "fmt": FmtAspect,
     "lint": LintAspect,
+    "check": CheckAspect,
 }

@@ -18,6 +18,7 @@ from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
+from kraken.core.system.aspect import Aspect
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
@@ -449,6 +450,18 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         return None
+
+    def aspect_applies(self, aspect: Aspect) -> bool:
+        """
+        Called on a `Task` to check if the aspect actually applies in its current configuration.
+
+        Note that this is only called on tasks that also subclass the corresponding [Aspect.Implements] class.
+
+        Also keep in mind that this is called at the very beginning of the build process, so you cannot rely
+        on your task's properties that depend on other tasks to have fully materialized.
+        """
+
+        return True
 
 
 class GroupTask(Task):
