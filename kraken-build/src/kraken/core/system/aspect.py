@@ -14,11 +14,14 @@ from typing_extensions import Self
 from kraken.core.system.errors import BuildError
 
 if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
+
     from kraken.core.system.context import Context
     from kraken.core.system.graph import TaskGraph
     from kraken.core.system.task import Task
 
 logger = logging.getLogger(__name__)
+T_Dataclass = TypeVar("T_Dataclass", bound="DataclassInstance")
 T_Options = TypeVar("T_Options", bound="AspectOptions")
 
 
@@ -163,14 +166,14 @@ Aspect = AspectBase[Any]
 @overload
 def parse_options(
     args: list[str],
-    options_class: type[T_Options],
+    options_class: type[T_Dataclass],
     name: str | None = None,
     help: str | None = None,
     exit_on_error: Literal[True] = True,
     exit_on_help: bool = True,
     print_error: bool = True,
     env: Mapping[str, str] | None = None,
-) -> T_Options: ...
+) -> T_Dataclass: ...
 
 
 @overload
@@ -188,21 +191,21 @@ def parse_options(
 
 def parse_options(
     args: list[str],
-    options_class: type[T_Options],
+    options_class: type[T_Dataclass],
     name: str | None = None,
     help: str | None = None,
     exit_on_error: bool = True,
     exit_on_help: bool = True,
     print_error: bool = True,
     env: Mapping[str, str] | None = None,
-) -> T_Options | None:
+) -> T_Dataclass | None:
     """
     Create a command-line options parser for the given options class.
 
     Returns `None` if the `--help` option is passed.
     """
 
-    result: T_Options | None = None
+    result: T_Dataclass | None = None
     signature, positional_map = build_signature_from_dataclass(options_class)
 
     def options_parser(*args: Any, **kwargs: Any) -> None:
@@ -250,7 +253,9 @@ def parse_options(
     return result
 
 
-def build_signature_from_dataclass(data_class: Any) -> tuple[inspect.Signature, dict[str, int | slice]]:
+def build_signature_from_dataclass(
+    data_class: "type[DataclassInstance]",
+) -> tuple[inspect.Signature, dict[str, int | slice]]:
     parameters: list[inspect.Parameter] = []
 
     positional_index = 0
