@@ -646,7 +646,10 @@ def on_exception(exc: BaseException) -> int:
 
 def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoReturn:
     parser = _get_argument_parser(prog)
-    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    args, remainder = parser.parse_known_args(sys.argv[1:] if argv is None else argv)
+
+    if args.cmd not in ASPECTS and remainder:
+        parser.error(f"unknown arguments: {' '.join(remainder)}")
 
     if not args.cmd:
         parser.print_usage()
@@ -698,7 +701,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
 
     elif args.cmd in ASPECTS:
         aspect_class = ASPECTS[args.cmd]
-        aspect = aspect_class(aspect_class.parse_options(args.args))
+        aspect = aspect_class(aspect_class.parse_options(args.args + remainder))
 
         with contextlib.ExitStack() as exit_stack:
             run(
