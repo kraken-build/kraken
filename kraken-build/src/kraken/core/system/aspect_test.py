@@ -61,7 +61,8 @@ def test_parse_options_varargs_with_hyphen() -> None:
                 kind=inspect.Parameter.VAR_POSITIONAL,
                 annotation=Annotated[str, cyclopts.Parameter(allow_leading_hyphen=True)],
             ),
-        ]
+        ],
+        return_annotation=None,
     )
     assert positional_map == {"task": 0, "args": slice(1, None)}
 

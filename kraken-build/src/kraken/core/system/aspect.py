@@ -316,7 +316,7 @@ def build_signature_from_dataclass(
             )
         )
 
-    return inspect.Signature(parameters), positional_map
+    return inspect.Signature(parameters, return_annotation=None), positional_map
 
 
 @dataclass
