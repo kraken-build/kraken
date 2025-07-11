@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Annotated
 
 from cyclopts import MissingArgumentError, Parameter
@@ -28,3 +28,13 @@ def test_parse_options() -> None:
         env={"WITH_HELP": "yes"},
     )
     assert options == MyAspectOptions(without_default="foo", with_default="default_value", with_help="yes")
+
+
+def test_parse_options_varargs() -> None:
+    @dataclass
+    class MyAspectOptions(AspectOptions):
+        task: str = field(metadata={"positional": True})
+        args: list[str] = field(metadata={"positional": True})
+
+    options = parse_options([":task", "arg1", "arg2"], MyAspectOptions, exit_on_error=False, print_error=False)
+    assert options == MyAspectOptions(":task", ["arg1", "arg2"])

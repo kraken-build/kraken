@@ -7,6 +7,7 @@ from dataclasses import MISSING, dataclass, field, fields
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
 
 import cyclopts
+from typeapi import ClassTypeHint, TypeHint
 from typing_extensions import Self
 
 from kraken.core.system.errors import BuildError
@@ -200,34 +201,29 @@ def parse_options(
     Returns `None` if the `--help` option is passed.
     """
 
-    parameters: list[inspect.Parameter] = []
-
-    for field_ in fields(options_class):
-        positional = field_.metadata.get("positional", False)
-        parameters.append(
-            inspect.Parameter(
-                name=field_.name,
-                kind=inspect.Parameter.POSITIONAL_ONLY if positional else inspect.Parameter.KEYWORD_ONLY,
-                default=field_.default
-                if field_.default is not MISSING
-                else field_.default_factory()
-                if field_.default_factory is not MISSING
-                else inspect.Parameter.empty,
-                annotation=field_.type,
-            )
-        )
-
     result: T_Options | None = None
+    signature, positional_map = build_signature_from_dataclass(options_class)
 
     def options_parser(*args: Any, **kwargs: Any) -> None:
         """
         Create an instance of the options class with the given arguments.
         """
 
-        nonlocal result
-        result = options_class(*args, **kwargs)
+        for field_name, index in positional_map.items():
+            if isinstance(index, int) and index >= len(args):
+                # Optional positional argument.
+                continue
 
-    options_parser.__signature__ = inspect.Signature(parameters)  # type: ignore[attr-defined]
+            kwargs[field_name] = args[index]
+
+            # Varargs are only supported for fields annotated as list, but args is a tuple.
+            if isinstance(index, slice):
+                kwargs[field_name] = list(kwargs[field_name])
+
+        nonlocal result
+        result = options_class(**kwargs)
+
+    options_parser.__signature__ = signature  # type: ignore[attr-defined]
     options_parser.__doc__ = help or options_class.__doc__
 
     # HACK: Maybe there is a better way to pass environment variables to cyclopts?
@@ -250,6 +246,38 @@ def parse_options(
     if exit_on_help and result is None:
         sys.exit(0)
     return result
+
+
+def build_signature_from_dataclass(data_class: Any) -> tuple[inspect.Signature, dict[str, int | slice]]:
+    parameters: list[inspect.Parameter] = []
+
+    positional_index = 0
+    positional_map: dict[str, int | slice] = {}
+
+    for field_ in fields(data_class):
+        positional = field_.metadata.get("positional", False)
+        if positional:
+            hint = TypeHint(field_.type)
+            if isinstance(hint, ClassTypeHint) and hint.type is list and field_.default_factory is MISSING:
+                # Positional argument typed as a list with no default arguments takes varargs.
+                kind: inspect._ParameterKind = inspect.Parameter.VAR_POSITIONAL
+                positional_map[field_.name] = slice(positional_index, None)
+            else:
+                kind = inspect.Parameter.POSITIONAL_ONLY
+                positional_map[field_.name] = positional_index
+                positional_index += 1
+        else:
+            kind = inspect.Parameter.KEYWORD_ONLY
+        default = (
+            field_.default
+            if field_.default is not MISSING
+            else field_.default_factory()
+            if field_.default_factory is not MISSING
+            else inspect.Parameter.empty
+        )
+        parameters.append(inspect.Parameter(name=field_.name, kind=kind, default=default, annotation=field_.type))
+
+    return inspect.Signature(parameters), positional_map
 
 
 @dataclass
