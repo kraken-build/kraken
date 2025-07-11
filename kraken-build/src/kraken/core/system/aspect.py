@@ -438,9 +438,48 @@ class TestAspect(AspectBase["TestAspect.Options"]):
                 raise BuildError(failed_tasks, reason=reason)
 
 
+@dataclass
+class RunAspect(AspectBase["RunAspect.Options"]):
+    """
+    An aspect that can be used to run a single task, optionally appending arguments to the command the task wraps.
+    This aspect is usually implemented for build artifacts, allowing you to invoke them.
+    """
+
+    class Implements:
+        pass
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Invoke a task that represents something runnable.
+
+        Parameters
+        ----------
+        task:
+            The name of the task to invoke.
+        args:
+            Additional arguments to pass to the runnable.
+        """
+
+        task: str = field(metadata={"positional": True})
+        args: list[str] = field(metadata={"positional": True})
+
+    def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:
+        # TODO: We mgiht need to do something in the context to only reveal the aspect to tasks that
+        #       are returned by this method. If the targeted task depends on another that also implements
+        #       the "run" aspect, that other task should not be using the aspect.
+        tasks = context.resolve_tasks([self.options.task])
+        if not tasks:
+            return []  # Caller will handle the error
+        if len(tasks) > 1:
+            raise BuildError(tasks, reason="not more than one task can be selected with the run aspect")
+        return tasks
+
+
 ASPECTS: dict[str, type[Aspect]] = {
     "fmt": FmtAspect,
     "lint": LintAspect,
     "check": CheckAspect,
     "test": TestAspect,
+    "invoke": RunAspect,  # "run" is currently shadowed by the original "kraken run" command
 }
