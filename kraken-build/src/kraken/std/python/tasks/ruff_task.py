@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
 
-from kraken.core import Aspect, Project, Property, Supplier, TaskStatus
-from kraken.core.system.aspect import LintAspect, LintAspectOptions
+from kraken.core import Project, Property, Supplier, TaskStatus
+from kraken.core.system.aspect import LintAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 
 
-class RuffTask(EnvironmentAwareDispatchTask):
+class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements):
     """A task to run `ruff` in either format, fix, or check mode."""
 
     description = "Lint Python source files with Ruff."
@@ -22,14 +22,14 @@ class RuffTask(EnvironmentAwareDispatchTask):
     config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
 
-    _lint_aspect: LintAspectOptions | None = None
-
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         ruff_task = list(self.ruff_task.get())
-        if self._lint_aspect and self._lint_aspect.fix and "--fix" not in ruff_task:
-            ruff_task += ["--fix"]
-        if self._lint_aspect and self._lint_aspect.unsafe_fix and "--unsafe-fix" not in ruff_task:
-            ruff_task += ["--unsafe-fix"]
+
+        if ruff_task[0] == "check" and (lint := LintAspect.current_options()):
+            if lint.fix and "--fix" not in ruff_task:
+                ruff_task += ["--fix"]
+            if lint.unsafe_fix and "--unsafe-fix" not in ruff_task:
+                ruff_task += ["--unsafe-fix"]
 
         command = [
             *self.ruff_cmd.get(),
@@ -42,14 +42,6 @@ class RuffTask(EnvironmentAwareDispatchTask):
             command += ["--config", str(self.config_file.get().absolute())]
         command += self.additional_args.get()
         return command
-
-    def implements_aspect(self, aspect: Aspect) -> bool:
-        match aspect:
-            case LintAspect(options):
-                self._lint_aspect = options
-                return True
-            case _:
-                return False
 
 
 @dataclass

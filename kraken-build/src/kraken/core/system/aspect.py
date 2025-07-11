@@ -1,9 +1,16 @@
 import inspect
 import os
-from dataclasses import MISSING, dataclass, fields
-from typing import Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
+from collections.abc import Iterable
+from dataclasses import MISSING, dataclass, field, fields
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
 
 import cyclopts
+from typing_extensions import Self
+
+if TYPE_CHECKING:
+    from kraken.core.system.context import Context
+    from kraken.core.system.graph import TaskGraph
+    from kraken.core.system.task import Task
 
 T_Options = TypeVar("T_Options", bound="AspectOptions")
 
@@ -37,19 +44,22 @@ class AspectBase(Generic[T_Options]):
     ```python
     from kraken.core.aspect import Aspect, AspectOptions
 
-    @dataclass(kw_only=True)
+    @dataclass
     class MyAspectOptions(AspectOptions):
         my_option: str = "default_value"
 
     class MyAspect(Aspect, options_class=MyAspectOptions):
         pass
     ```
-
-    It is _strongly_ recommended to set `kw_only=True` to avoid breakage when parameters are added to the
-    [`AspectOptions`][AspectOptions] base class with default values in the future.
     """
 
     Options: ClassVar[type[AspectOptions]]
+
+    Implements: ClassVar[type[Any] | None] = None
+    """
+    Subclasses can define their own `Implements` class. If set, the default implementation of [select_tasks()] will
+    flter tasks to those that inherit from this `Implements` class.
+    """
 
     options: T_Options
 
@@ -105,6 +115,32 @@ class AspectBase(Generic[T_Options]):
                 env=env,
             ),
         )
+
+    @classmethod
+    def current(cls) -> Self | None:
+        """
+        Returns the current aspect as configured in the current context, if any.
+        """
+
+        from kraken.core.system.context import Context
+
+        return Context.current().aspect(cls)
+
+    @classmethod
+    def current_options(cls) -> T_Options | None:
+        """
+        Just like [current], but returns the aspect's options directly.
+        """
+
+        aspect = cls.current()
+        return aspect.options if aspect else None
+
+    def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:
+        if self.Implements is None:
+            return
+        for task in graph.root.tasks():
+            if isinstance(task, self.Implements):
+                yield task
 
 
 Aspect = AspectBase[Any]
@@ -222,6 +258,11 @@ class LintAspect(AspectBase[LintAspectOptions], options_class=LintAspectOptions)
     """
     An example aspect that represents a superset of tasks that perform linting on the code in a project.
     """
+
+    class Implements:
+        """
+        Tasks should additionally inherit from this class to denote that they implement the lint aspect.
+        """
 
 
 ASPECTS: dict[str, type[Aspect]] = {

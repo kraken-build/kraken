@@ -12,6 +12,7 @@ from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRu
 from kraken.common.iter import bipartition
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
+from kraken.core.system.aspect import Aspect
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
 from kraken.core.system.executor import GraphExecutor, GraphExecutorObserver
 from kraken.core.system.executor.default import (
@@ -25,6 +26,7 @@ from kraken.core.system.task import Task
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
+T_Aspect = TypeVar("T_Aspect", bound=Aspect)
 
 
 class KrakenAddressSpace(AddressSpace["Project | Task"]):
@@ -105,6 +107,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
+        self.aspects: list[Aspect] = []
 
     @property
     def root_project(self) -> Project:
@@ -410,7 +413,8 @@ class Context(MetadataContainer, Currentable["Context"]):
                 self.finalize()
             graph = self.get_build_graph(tasks)
 
-        self.executor.execute_graph(graph, self.observer)
+        with self.as_current():
+            self.executor.execute_graph(graph, self.observer)
 
         if not graph.is_complete():
             raise BuildError(list(graph.tasks(failed=True)))
@@ -447,3 +451,13 @@ class Context(MetadataContainer, Currentable["Context"]):
         for listener in listeners:
             # TODO(NiklasRosenstein): Should we catch errors in listeners of letting them propagate?
             listener(ContextEvent(event_type, data))
+
+    def aspect(self, aspect_class: type[T_Aspect]) -> T_Aspect | None:
+        """
+        If an aspect of the given type is set in the context, it is returned, otherwise `None`.
+        """
+
+        for aspect in self.aspects:
+            if isinstance(aspect, aspect_class):
+                return aspect
+        return None

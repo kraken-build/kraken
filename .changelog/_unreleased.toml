@@ -7,7 +7,13 @@ author = "@NiklasRosenstein"
 [[entries]]
 id = "ea7c9e91-260f-4f93-a5f4-52de128f250d"
 type = "feature"
-description = "Add CLI for `kraken <aspect>` and `Task.implements_aspects()` method"
+description = "Add CLI for `kraken <aspect>`"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "ea7c9e91-260f-4f93-a5f4-52de128f250d"
+type = "feature"
+description = "Add `Context.aspect()` method and `Context.aspects` attribute"
 author = "@NiklasRosenstein"
 
 [[entries]]

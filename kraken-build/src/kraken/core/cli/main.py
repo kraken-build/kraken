@@ -255,11 +255,12 @@ def _load_build_state(
         targets = context.resolve_tasks(None, relative_to=relative_address)
 
     # If an aspect was specified, we need to find the tasks that match the aspect.
+    context.aspects = []
     if aspect:
-        for task in graph.root.tasks():
-            if task.implements_aspect(aspect):
-                task.selected = True
-                targets.append(task)
+        context.aspects.append(aspect)
+        for task in aspect.select_tasks(context, graph):
+            task.selected = True
+            targets.append(task)
 
     # Trim the graph down to the selected or default tasks.
     if not graph_options.all:
