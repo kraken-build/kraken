@@ -535,6 +535,9 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
         build-mode:
             An arbitrary string that the selected task can interpret to modify its build behaviour. Example values
             are `release` and `debug`.
+
+        symlink:
+            Define whether symlinks should be created when writing the result paths of the task or not.
         """
 
         target: str = field(metadata={"positional": True})
@@ -544,6 +547,8 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
         release: bool = False
         debug: bool = False
         build_mode: str | None = None
+
+        symlink: bool | None = None
 
         def __post_init__(self) -> None:
             if self.build_mode and self.release:
