@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import Literal, Sequence
 
-from kraken.core import BuildCache, Property, Task
+from kraken.core import BuildAspect, BuildCache, Property, Task
 from kraken.core.system.task import TaskStatus
 
 from .python import PYTHON_PLATFORMS, BuildPythonLambdaZip, Include, PythonPlatform
 
 
-class BuildPythonLambdaZipTask(Task):
+class BuildPythonLambdaZipTask(Task, BuildAspect.Implements):
     outfile: Property[Path] = Property.output()
     project_directory: Property[Path | None]
     include: Property[Sequence[Path]]
@@ -21,6 +21,12 @@ class BuildPythonLambdaZipTask(Task):
         True,
         help="Whether to symlink the resulting ZIP archive to `outfile`. If disabled, the file will be copied instead.",
     )
+
+    def prepare(self) -> TaskStatus | None:
+        if opts := BuildAspect.current_options():
+            if opts.outfile:
+                self.outfile.set(opts.outfile)
+        return None
 
     def execute(self) -> TaskStatus | None:
         include = [

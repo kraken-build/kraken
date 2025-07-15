@@ -63,3 +63,9 @@ id = "b9576cc2-09f7-4b4b-9783-71545d0a49c5"
 type = "feature"
 description = "Add `kraken build` aspect with `BuildAspect` class"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "b731f2c2-f3a9-468c-88dc-a09937e3d33a"
+type = "feature"
+description = "Implement `BuildAspect` in `BuildPythonLambdaZipTask` with support for `--outfile` option"
+author = "@NiklasRosenstein"
