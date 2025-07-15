@@ -5,6 +5,7 @@ import shutil
 import tempfile
 from collections.abc import Iterator
 from pathlib import Path
+from posixpath import normpath
 from typing import IO, AnyStr, BinaryIO, ContextManager, Literal, Sequence, TextIO, overload
 
 
@@ -194,6 +195,14 @@ def intersect_paths(
         ...     right_relative_to=PosixPath("/project"),
         ... )
         [PosixPath('/project/src'), PosixPath('tests/core')]
+
+        >>> intersect_paths(
+        ...     left=[PosixPath("/project/src"), PosixPath("/project/src/tests/foo/..")],
+        ...     right=[PosixPath(".")],
+        ...     left_relative_to=PosixPath("/project"),
+        ...     right_relative_to=PosixPath("/project"),
+        ... )
+        [PosixPath('/project/src'), PosixPath('/project/src/tests')]
     """
 
     cwd = Path.cwd()
@@ -204,8 +213,10 @@ def intersect_paths(
 
     left_absolute = [p.is_absolute() for p in left]
     right_absolute = [p.is_absolute() for p in right]
-    left_paths = [(left_relative_to.joinpath(p) if left_relative_to else p).absolute() for p in left]
-    right_paths = [(right_relative_to.joinpath(p) if right_relative_to else p).absolute() for p in right]
+    left_paths = [Path(normpath((left_relative_to.joinpath(p) if left_relative_to else p).absolute())) for p in left]
+    right_paths = [
+        Path(normpath((right_relative_to.joinpath(p) if right_relative_to else p).absolute())) for p in right
+    ]
     result = []
 
     for left_abs, left_path in zip(left_absolute, left_paths):
