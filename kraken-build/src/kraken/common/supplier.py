@@ -50,6 +50,18 @@ class Supplier(Generic[T], abc.ABC):
         except Supplier.Empty:
             return fallback
 
+    @overload
+    def get_or_else(self, fallback: Callable[[], None]) -> "T | None": ...
+
+    @overload
+    def get_or_else(self, fallback: Callable[[], U]) -> "T | U": ...
+
+    def get_or_else(self, fallback: Callable[[], U | None]) -> "T | U | None":
+        try:
+            return self.get()
+        except Supplier.Empty:
+            return fallback()
+
     def get_or_raise(self, get_exception: Callable[[], Exception]) -> T:
         """Return the value of the supplier, or raise the exception provided by *get_exception* if empty."""
         try:
@@ -106,22 +118,21 @@ class Supplier(Generic[T], abc.ABC):
         Coercion for ``T | Supplier[T] -> Supplier[T]``. This is useful when accepting parameters for task factories
         that could either be a "hard" value or derived from properties of other tasks.
 
-        .. code-block:: python
 
-            def my_task(name: str, files: Sequence[str | Path] | Property[Sequence[Path]]) -> MyTask:
-                from kraken.build import project
-                task = project.task(name, MyTask)
-                task.files = (
-                    Supplier[Sequence[str | Path]]
-                    .of(files)
-                    .map(lambda files: [project.directory / f for f in files])
-                )
-                return task
+        ```py
+        def my_task(name: str, files: Sequence[str | Path] | Property[Sequence[Path]]) -> MyTask:
+            from kraken.build import project
+            task = project.task(name, MyTask)
+            task.files = (
+                Supplier[Sequence[str | Path]]
+                .of(files)
+                .map(lambda files: [project.directory / f for f in files])
+            )
+            return task
+        ```
 
         Note that Mypy (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
         need to explicitly define ``T`` (as also shown in the example above).
-
-        .. code-block:: python
 
             >>> from typing import cast
             >>> from typing_extensions import assert_type

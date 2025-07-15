@@ -1,5 +1,5 @@
 ---
-title: kraken.std.aws
+title: aws
 ---
 
 ::: kraken.std.aws.lambda_

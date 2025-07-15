@@ -29,38 +29,39 @@ class BuildCache:
     Using a `BuildCache` object must follow a strict sequence of method calls to ensure correctness and to avoid
     mistakes.
 
-    1. Populate the input hash by calling :meth:`consume` or :meth:`consume_path` with the data that influences the output.
-    2. Finalize the input hash by calling :meth:`finalize`. The :meth:`consume` and :meth:`consume_path` methods can no
-    longer be called after this.
-    3. Call :meth:`staging_key` or :meth:`staging_path` to get the staging directory for the task's results. The methods
-    cannot be called before the cache has been finalized.
-    4. Call :meth:`commit` to finalize the cache and move the staging directory to the final cache directory.
-    5. Call the :meth:`store_key` or :meth:`store_path` to get the final cache directory. These methods can only be
-    called after the cache has been committed. You can also use the :meth:`link_result` method to create a link to a
-    file or directory in the finalized cache.
+    1. Populate the input hash by calling [`consumes`][(c).consumes] or [`consumes_path`][(c).consumes_path] with the
+    data that influences the output.
+    2. Finalize the input hash by calling [`finalize`][(c).finalize]. The [`consumes`][(c).consumes] and
+    [`consumes_path`][(c).consumes_path] methods can no longer be called after this.
+    3. Call [`staging_key`][(c).staging_key] or [`staging_path`][(c).staging_path] to get the staging directory for the
+    task's results. The methods cannot be called before the cache has been finalized.
+    4. Call [`commit`][(c).commit] to finalize the cache and move the staging directory to the final cache directory.
+    5. Call the [`store_key`][(c).store_key] or [`store_path`][(c).store_path] to get the final cache directory. These
+    methods can only be called after the cache has been committed. You can also use the [`link_result`][(c).link_result]
+    method to create a link to a file or directory in the finalized cache.
 
     It is recommended to use the `BuildCache` class as a context manager, which ensures that the cache is cleaned up
-    using the :meth:`abort` method if an exception occurs during the execution of the task before :meth:`commit` is
-    called.
+    using the [`abort`][(c).abort] method if an exception occurs during the execution of the task before
+    [`commit`][(c).commit] is called.
 
     A typical usage pattern looks like this:
 
-    .. code-block:: python
+    ```py
+    with BuildCache.for_(task) as cache:
+        cache.consumes(data)
+        cache.consumes_path(path)
+        cache.finalize()
 
-        with BuildCache.for_(task) as cache:
-            cache.consumes(data)
-            cache.consumes_path(path)
-            cache.finalize()
-
-            if cache.exists():
-                cache.link_result("output.txt", task.output_file)
-                return TaskStatus.skipped("Cache hit")
-            else:
-                # Perform the task's work and write the output to the staging directory
-                cache.staging_path().mkdir(parents=True, exist_ok=True)
-                cache.commit()
-                cache.link_result("output.txt", task.output_file)
-                return TaskStatus.succeeded("Task completed successfully")
+        if cache.exists():
+            cache.link_result("output.txt", task.output_file)
+            return TaskStatus.skipped("Cache hit")
+        else:
+            # Perform the task's work and write the output to the staging directory
+            cache.staging_path().mkdir(parents=True, exist_ok=True)
+            cache.commit()
+            cache.link_result("output.txt", task.output_file)
+            return TaskStatus.succeeded("Task completed successfully")
+    ```
     """
 
     suffix: str
@@ -85,7 +86,10 @@ class BuildCache:
     def consumes(self, data: Any) -> None:
         """
         Include the given *data* in the hash calculation. The *data* can be any Python object that is hashable by the
-        :class:`stablehash` library, which includes most built-in types, including lists, dictionaries and data classes.
+        [`stablehash`][stablehash] library, which includes most built-in types, including lists, dictionaries and data
+        classes.
+
+        [stablehash]: https://pypi.org/project/stablehash/
         """
 
         if self.finalized:
@@ -165,7 +169,8 @@ class BuildCache:
 
     def staging_path(self) -> Path:
         """
-        Returns the full staging path for the cache, based on the store directory and the :meth:`staging_key` method.
+        Returns the full staging path for the cache, based on the store directory and the
+        [`staging_key`][(c).staging_key] method.
         """
 
         return self.store_directory / self.staging_key()
@@ -179,19 +184,20 @@ class BuildCache:
             raise RuntimeError("Cannot commit cache before it has been finalized.")
 
         final_path = self.store_path(_force=True)
-        final_path_exists = final_path.exists()
-
         staging_path = self.staging_path()
-        if not staging_path.exists():
-            if final_path_exists:
-                return
-            raise FileNotFoundError(f"Staging path '{staging_path}' does not exist.")
 
-        if final_path.exists():
-            raise FileExistsError(f"Cache already exists at '{final_path}'.")
+        if staging_path.exists():
+            if final_path.exists():
+                raise FileExistsError(f"Cache already exists at '{final_path}'.")
+            else:
+                logger.debug("Committing cache from '%s' to '%s'", staging_path, final_path)
+                staging_path.rename(final_path)
+        else:
+            if final_path.exists():
+                logger.debug("Reusing cache at '%s'", final_path)
+            else:
+                raise FileNotFoundError(f"Staging path '{staging_path}' does not exist.")
 
-        logger.debug("Committing cache from '%s' to '%s'", staging_path, final_path)
-        staging_path.rename(final_path)
         self.committed = True
 
         for source, target in self.staged_links:
@@ -224,8 +230,8 @@ class BuildCache:
     def store_path(self, *, _force: bool = False) -> Path:
         """
         Return the path to the cache directory in the store directory. The path is created based on the unique name
-        returned by :meth:`store_name`. Note that this method finalizes the cache, meaning that no further data can be
-        consumed to alter the hash.
+        returned by [`store_key`][(c).store_key]. Note that this method finalizes the cache, meaning that no further
+        data can be consumed to alter the hash.
         """
 
         return self.store_directory / self.store_key(_force=_force)
@@ -267,8 +273,8 @@ class BuildCache:
 
     def copy_result(self, source: str | Path, target: Path, symlinks: bool = True) -> None:
         """
-        Like :meth:`link_result`, but copies the source instead of symlinking it. Symlinking is preferred for
-        efficiency, but there may be reasons you need to copy the result instead.
+        Like [`link_result`][(c).link_result], but copies the source instead of symlinking it. Symlinking is preferred
+        for efficiency, but there may be reasons you need to copy the result instead.
 
         If *symlinks* is enabled (default), it will existing symlinks in the *source* and only the source itself
         will be copied (which, if it is a symlink already, will also be retained).

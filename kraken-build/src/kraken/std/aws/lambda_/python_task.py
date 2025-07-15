@@ -1,13 +1,13 @@
 from pathlib import Path
 from typing import Literal, Sequence
 
-from kraken.core import BuildCache, Property, Task
+from kraken.core import BuildAspect, BuildCache, Property, Task
 from kraken.core.system.task import TaskStatus
 
 from .python import PYTHON_PLATFORMS, BuildPythonLambdaZip, Include, PythonPlatform
 
 
-class BuildPythonLambdaZipTask(Task):
+class BuildPythonLambdaZipTask(Task, BuildAspect.Implements):
     outfile: Property[Path] = Property.output()
     project_directory: Property[Path | None]
     include: Property[Sequence[Path]]
@@ -21,6 +21,14 @@ class BuildPythonLambdaZipTask(Task):
         True,
         help="Whether to symlink the resulting ZIP archive to `outfile`. If disabled, the file will be copied instead.",
     )
+
+    def prepare(self) -> TaskStatus | None:
+        if opts := BuildAspect.current_options(self):
+            if opts.outfile:
+                self.outfile.set(opts.outfile)
+            if opts.symlink is not None:
+                self.symlink_result.set(opts.symlink, force=True)
+        return None
 
     def execute(self) -> TaskStatus | None:
         include = [
@@ -69,7 +77,7 @@ def python_lambda_zip(
     include_data: Sequence[str | Include] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
-    python_version: str | None = None,
+    python_version: str | None = "3.13",
     platform: PythonPlatform | None = None,
     quiet: bool = False,
     symlink_result: bool = True,
@@ -96,7 +104,10 @@ def python_lambda_zip(
                   environment.
         requirements: A path to a requirements file containing Python packages
                      to install.
-        python_version: The Python version to use for the Lambda function.
+        python_version: The Python version to use for the Lambda function. This should
+                        always be set, otherwise Uv might use the Python version that
+                        the Kraken build runs with, which might be incompatible. Defaults
+                        to Python 3.13.
         platform: The target platform for the Lambda function.
         quiet: If True, suppress output from the build process.
         symlink_result: If True, symlink the resulting ZIP archive to the

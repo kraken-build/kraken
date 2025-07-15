@@ -1,5 +1,5 @@
 ---
-title: kraken.std.util
+title: util
 ---
 
 ::: kraken.std.util

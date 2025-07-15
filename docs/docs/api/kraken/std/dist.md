@@ -1,5 +1,5 @@
 ---
-title: kraken.std.dist
+title: dist
 ---
 
 ::: kraken.std.dist

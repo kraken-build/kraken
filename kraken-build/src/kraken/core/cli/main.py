@@ -34,6 +34,7 @@ from kraken.core.address import Address, AddressResolutionError
 from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
 from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
+from kraken.core.system.aspect import ASPECTS, Aspect
 from kraken.core.system.context import Context
 from kraken.core.system.errors import BuildError, ProjectNotFoundError
 from kraken.core.system.graph import TaskGraph
@@ -114,6 +115,16 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     env = query_subparsers.add_parser("env", description="produce a JSON file of the Python environment distributions")
     LoggingOptions.add_to_parser(env)
 
+    for aspect_name, aspect_class in ASPECTS.items():
+        aspect_parser = subparsers.add_parser(
+            aspect_name,
+            description=f"The `{aspect_name}` aspect. Use `-- --help` to see aspect-specific options.",
+        )
+        LoggingOptions.add_to_parser(aspect_parser)
+        BuildOptions.add_to_parser(aspect_parser, include_deprecated=False)
+        RunOptions.add_to_parser(aspect_parser)
+        aspect_parser.add_argument("args", nargs="*", help="Arguments for the aspect")
+
     propagate_argparse_formatter_to_subparser(parser)
     return parser
 
@@ -122,6 +133,7 @@ def _load_build_state(
     exit_stack: contextlib.ExitStack,
     build_options: BuildOptions,
     graph_options: GraphOptions,
+    aspect: Aspect | None = None,
 ) -> tuple[Context, TaskGraph]:
     """
     This function loads the build state for the current working directory; which involves either executing the
@@ -144,6 +156,7 @@ def _load_build_state(
     # For consistency, we always act as if Kraken was run from the project root directory.
     # Using the `subproject_directory`, we later filter down which tasks are selected / how relative
     # task references on the CLI are resolved.
+    original_working_directory = Path.cwd()
     os.chdir(root_directory)
 
     project_info = CurrentDirectoryProjectFinder.default().find_project(Path.cwd())
@@ -212,6 +225,7 @@ def _load_build_state(
             graph = TaskGraph(context)
 
     assert graph is not None
+    context.original_working_directory = original_working_directory
 
     # Serialize the build graph, even on failure, at the end of the build.
     if not graph_options.no_save:
@@ -237,11 +251,18 @@ def _load_build_state(
 
     # Mark tasks that were explicitly selected on the command-line as such. Tasks may alter their behaviour
     # based on whether they were explicitly selected or not.
-    if graph_options.tasks:
-        selected = context.resolve_tasks(graph_options.tasks, relative_to=relative_address, set_selected=True)
-        targets = selected
+    if graph_options.tasks or aspect:
+        targets = context.resolve_tasks(graph_options.tasks, relative_to=relative_address, set_selected=True)
     else:
         targets = context.resolve_tasks(None, relative_to=relative_address)
+
+    # If an aspect was specified, we need to find the tasks that match the aspect.
+    if aspect:
+        aspect_tasks = list(aspect.select_tasks(context, graph))
+        targets += aspect_tasks
+        context.register_aspect(aspect, aspect_tasks)
+        for task in aspect_tasks:
+            task.selected = True
 
     # Trim the graph down to the selected or default tasks.
     if not graph_options.all:
@@ -255,11 +276,13 @@ def run(
     build_options: BuildOptions,
     graph_options: GraphOptions,
     run_options: RunOptions,
+    aspect: Aspect | None = None,
 ) -> None:
     context, graph = _load_build_state(
         exit_stack=exit_stack,
         build_options=build_options,
         graph_options=graph_options,
+        aspect=aspect,
     )
 
     context.observer = ColoredDefaultPrintingExecutorObserver()
@@ -625,7 +648,10 @@ def on_exception(exc: BaseException) -> int:
 
 def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoReturn:
     parser = _get_argument_parser(prog)
-    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    args, remainder = parser.parse_known_args(sys.argv[1:] if argv is None else argv)
+
+    if args.cmd not in ASPECTS and remainder:
+        parser.error(f"unknown arguments: {' '.join(remainder)}")
 
     if not args.cmd:
         parser.print_usage()
@@ -674,6 +700,26 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
                 tree(graph, ExcludeOptions.collect(args))
             else:
                 assert False, args.query_cmd
+
+    elif args.cmd in ASPECTS:
+        logger.warning(
+            "You're invoking an experimental Kraken aspect subcommand (`%s`). It might change in the future. "
+            "Use with care!",
+            args.cmd,
+        )
+
+        aspect_class = ASPECTS[args.cmd]
+        aspect = aspect_class(aspect_class.parse_options(args.args + remainder))
+        logger.debug("Arguments for %s = %s", aspect_class.__name__, aspect.options)
+
+        with contextlib.ExitStack() as exit_stack:
+            run(
+                exit_stack,
+                build_options=BuildOptions.collect(args),
+                graph_options=GraphOptions([], resume=False, restart=False, no_save=True, all=False),
+                run_options=RunOptions.collect(args),
+                aspect=aspect,
+            )
 
     else:
         parser.print_usage()

@@ -1,5 +1,5 @@
 ---
-title: kraken.std.docs
+title: docs
 ---
 
 ::: kraken.std.docs.tasks.mkdocs.mkdocs

@@ -335,7 +335,7 @@ class TaskGraph(Graph):
                 resolved_status = status_a or status_b
             if resolved_status is not None:
                 # NOTE: This will already take care of updating :attr:`_background_tasks`.
-                self.set_status(task, resolved_status, _force=True)
+                self.set_status(task, resolved_status, force=True)
 
     def resume(self) -> None:
         """Reset the result of all background tasks that are required by any pending tasks. This needs to be
@@ -370,6 +370,7 @@ class TaskGraph(Graph):
         goals: bool = False,
         pending: bool = False,
         failed: bool = False,
+        ok: bool = False,
         not_executed: bool = False,
     ) -> Iterator[Task]:
         """Returns the tasks in the graph in arbitrary order.
@@ -377,6 +378,7 @@ class TaskGraph(Graph):
         :param goals: Return only goal tasks (i.e. leaf nodes).
         :param pending: Return only pending tasks.
         :param failed: Return only failed tasks.
+        :param ok: Return only ok tasks.
         :param not_executed: Return only not executed tasks (i.e. downstream of failed tasks)"""
 
         tasks = (self.get_task(addr) for addr in self._digraph)
@@ -387,6 +389,8 @@ class TaskGraph(Graph):
             tasks = (t for t in tasks if t.address not in self._results)
         if failed:
             tasks = (t for t in tasks if t.address in self._results and self._results[t.address].is_failed())
+        if ok:
+            tasks = (t for t in tasks if t.address in self._results and self._results[t.address].is_ok())
         if not_executed:
             tasks = (
                 t
@@ -535,10 +539,10 @@ class TaskGraph(Graph):
             return not_none(self._get_task(addr), lambda: f"no task for {addr!r}")
         return self.root.get_task(addr)
 
-    def set_status(self, task: Task, status: TaskStatus, *, _force: bool = False) -> None:
+    def set_status(self, task: Task, status: TaskStatus, *, force: bool = False) -> None:
         """Sets the status of a task, marking it as executed."""
 
-        if not _force and (task.address in self._results and not self._results[task.address].is_started()):
+        if not force and (task.address in self._results and not self._results[task.address].is_started()):
             raise RuntimeError(f"already have a status for task `{task.address}`")
         self._results[task.address] = status
         if status.is_started():

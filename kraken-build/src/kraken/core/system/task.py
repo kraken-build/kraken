@@ -18,6 +18,7 @@ from loguru import logger
 
 from kraken.common import Supplier
 from kraken.core.address import Address
+from kraken.core.system.aspect import Aspect
 from kraken.core.system.kraken_object import KrakenObject
 from kraken.core.system.property import Property, PropertyContainer
 from kraken.core.system.task_supplier import TaskSupplier
@@ -52,14 +53,22 @@ RelationshipMode = Literal["strict", "order-only"]
 class TaskStatusType(enum.Enum):
     """Represents the possible statuses that a task can return from its execution."""
 
-    PENDING = enum.auto()  #: The task is pending execution (only to be returned from :meth:`Task.prepare`).
-    FAILED = enum.auto()  #: The task failed it's preparation or execution.
-    INTERRUPTED = enum.auto()  #: The task was interrupted by the user.
-    SUCCEEDED = enum.auto()  #: The task succeeded it's execution (only to be returned from :meth:`Task.execute`).
-    STARTED = enum.auto()  #: The task started a background task that needs to be torn down later.
-    SKIPPED = enum.auto()  #: The task was skipped (i.e. it is not applicable).
-    UP_TO_DATE = enum.auto()  #: The task is up to date and did not run (or not run it's usual logic).
-    WARNING = enum.auto()  #: The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`).
+    PENDING = enum.auto()
+    """The task is pending execution (only to be returned from :meth:`Task.prepare`)."""
+    FAILED = enum.auto()
+    """The task failed it's preparation or execution."""
+    INTERRUPTED = enum.auto()
+    """The task was interrupted by the user."""
+    SUCCEEDED = enum.auto()
+    """The task succeeded it's execution (only to be returned from :meth:`Task.execute`)."""
+    STARTED = enum.auto()
+    """The task started a background task that needs to be torn down later."""
+    SKIPPED = enum.auto()
+    """The task was skipped (i.e. it is not applicable)."""
+    UP_TO_DATE = enum.auto()
+    """The task is up to date and did not run (or not run it's usual logic)."""
+    WARNING = enum.auto()
+    """The task succeeded, but with warnings (only to be returned from :meth:`Task.execute`)."""
 
     def is_ok(self) -> bool:
         return not self.is_not_ok()
@@ -449,6 +458,18 @@ class Task(KrakenObject, PropertyContainer, abc.ABC):
         """
 
         return None
+
+    def aspect_applies(self, aspect: Aspect) -> bool:
+        """
+        Called on a `Task` to check if the aspect actually applies in its current configuration.
+
+        Note that this is only called on tasks that also subclass the corresponding [Aspect.Implements] class.
+
+        Also keep in mind that this is called at the very beginning of the build process, so you cannot rely
+        on your task's properties that depend on other tasks to have fully materialized.
+        """
+
+        return True
 
 
 class GroupTask(Task):

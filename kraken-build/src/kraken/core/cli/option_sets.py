@@ -24,7 +24,7 @@ class BuildOptions:
     state_name: str
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, include_deprecated: bool = True) -> None:
         group = parser.add_argument_group("build options")
         group.add_argument(
             "-b",
@@ -46,39 +46,49 @@ class BuildOptions:
             "represented by the current working directory. (note: this option is automatically passed when using "
             "kraken-wrapper as it finds the respective project automatically).",
         )
-        group.add_argument(
-            "--state-name",
-            metavar="NAME",
-            help="specify a name for the generated state file; if not specified, a short random ID is used",
-            default=str(uuid.uuid4())[:7],
-        )
-        group.add_argument(
-            "--state-dir",
-            metavar="PATH",
-            type=Path,
-            help=f"specify the main build state directory [default: ${{--build-dir}}/{BUILD_STATE_DIR}]",
-        )
-        group.add_argument(
-            "--additional-state-dir",
-            metavar="PATH",
-            type=Path,
-            help="specify an additional state directory to load build state from. can be specified multiple times",
-        )
-        group.add_argument(
-            "--no-load-project",
-            action="store_true",
-            help="do not load the root project. this is only useful when loading an existing build state",
-        )
+        if include_deprecated:
+            group.add_argument(
+                "--state-name",
+                metavar="NAME",
+                help="deprecated since 0.45.0. specify a name for the generated state file; if not specified, a short random ID is used",
+                default=str(uuid.uuid4())[:7],
+            )
+            group.add_argument(
+                "--state-dir",
+                metavar="PATH",
+                type=Path,
+                help=f"deprecated since 0.45.0. specify the main build state directory [default: ${{--build-dir}}/{BUILD_STATE_DIR}]",
+            )
+            group.add_argument(
+                "--additional-state-dir",
+                metavar="PATH",
+                type=Path,
+                help="deprecated since 0.45.0. specify an additional state directory to load build state from. can be specified multiple times",
+            )
+            group.add_argument(
+                "--no-load-project",
+                action="store_true",
+                help="deprecated since 0.45.0. do not load the root project. this is only useful when loading an existing build state",
+            )
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> BuildOptions:
+        if state_name := getattr(args, "state_name", None):
+            logger.warning("the --state-name options are deprecated since kraken v0.45.0")
+        if state_dir := getattr(args, "state_dir", None):
+            logger.warning("the --state-dir option is deprecated since kraken v0.45.0")
+        if additional_state_dir := getattr(args, "additional_state_dir", None):
+            logger.warning("the --additional-state-dir option is deprecated since kraken v0.45.0")
+        if no_load_project := getattr(args, "no_load_project", None):
+            logger.warning("the --no-load-project option is deprecated since kraken v0.45.0")
+
         return cls(
             build_dir=args.build_dir,
             project_dir=args.project_dir,
-            state_name=args.state_name,
-            state_dir=args.state_dir or args.build_dir / BUILD_STATE_DIR,
-            additional_state_dirs=args.additional_state_dir or [],
-            no_load_project=args.no_load_project,
+            state_name=state_name or str(uuid.uuid4())[:7],
+            state_dir=state_dir or args.build_dir / BUILD_STATE_DIR,
+            additional_state_dirs=additional_state_dir or [],
+            no_load_project=no_load_project or False,
         )
 
 
@@ -91,14 +101,15 @@ class GraphOptions:
     all: bool
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True, include_deprecated: bool = True) -> None:
         group = parser.add_argument_group("graph options")
-        group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
-        group.add_argument(
-            "--restart",
-            choices=("all",),
-            help="load previous build state, but discard existing results (requires --resume)",
-        )
+        if include_deprecated:
+            group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
+            group.add_argument(
+                "--restart",
+                choices=("all",),
+                help="load previous build state, but discard existing results (requires --resume)",
+            )
 
         group.add_argument("--all", action="store_true", help="include all tasks in the build graph")
 
@@ -114,7 +125,7 @@ class GraphOptions:
             default=[],
         )
 
-        if saveable:
+        if saveable and include_deprecated:
             group.add_argument(
                 "--save", action="store_true", help="deprecated since v0.45.0. the default is to not save."
             )
@@ -122,18 +133,22 @@ class GraphOptions:
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> GraphOptions:
-        if args.save:
+        save = getattr(args, "save", False)
+        resume = getattr(args, "resume", False)
+        restart = getattr(args, "restart", False)
+
+        if save:
             logger.warning("the --save/--no-save options are deprecated since kraken v0.45.0")
-        if args.resume:
+        if resume:
             logger.warning("the --resume option is deprecated since kraken v0.45.0")
-        if args.restart:
+        if restart:
             logger.warning("the --restart option is deprecated since kraken v0.45.0")
 
         return cls(
-            tasks=args.tasks or None,
-            resume=args.resume,
-            restart=args.restart,
-            no_save=not args.save,
+            tasks=getattr(args, "tasks", []) or None,
+            resume=resume,
+            restart=restart,
+            no_save=not save,
             all=getattr(args, "all", False),
         )
 

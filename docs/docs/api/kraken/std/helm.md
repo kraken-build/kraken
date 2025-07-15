@@ -1,5 +1,5 @@
 ---
-title: kraken.std.helm
+title: helm
 ---
 
 ::: kraken.std.helm

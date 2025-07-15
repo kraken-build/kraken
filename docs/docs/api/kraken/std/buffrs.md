@@ -1,5 +1,5 @@
 ---
-title: kraken.std.buffrs
+title: buffrs
 ---
 
 ::: kraken.std.buffrs

@@ -230,8 +230,8 @@ class Property(Supplier[T]):
         except Supplier.Empty:
             raise Supplier.Empty(self, self._error_message)
 
-    def set(self, value: T | Supplier[T], derived_from: Iterable[Supplier[Any]] = ()) -> None:
-        if self._finalized:
+    def set(self, value: T | Supplier[T], derived_from: Iterable[Supplier[Any]] = (), *, force: bool = False) -> None:
+        if self._finalized and not force:
             raise RuntimeError(f"{self} is finalized")
         derived_from = list(derived_from)
         if not isinstance(value, Supplier):

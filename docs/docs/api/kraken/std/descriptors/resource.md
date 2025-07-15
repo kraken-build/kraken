@@ -1,5 +1,5 @@
 ---
-title: kraken.std.descriptors.resource
+title: resource
 ---
 
 ::: kraken.std.descriptors.resource

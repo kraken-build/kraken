@@ -6,8 +6,8 @@ theme:
   palette:
     primary: blue
     accent: green
-  # features:
-  #   - navigation.tabs
+  features:
+    - navigation.tabs
 
 hooks:
   - mksync-hook.py
@@ -15,10 +15,14 @@ hooks:
 plugins:
   - search
   - mkdocstrings:
-      default_handler: python
+      default_handler: python_xref
       handlers:
-        python:
-          paths: [../kraken-build/src, ../kraken-wrapper/src]
+        python_xref:
+          paths:
+            - ../kraken-build/src
+            - ../kraken-wrapper/src
+          # inventories:
+          # - https://docs.python.org/3/objects.inv
           options:
             heading_level: 3
             show_root_heading: true
@@ -28,6 +32,9 @@ plugins:
             signature_crossrefs: true
             separate_signature: true
             show_signature_annotations: true
+            relative_crossrefs: true
+            scoped_crossrefs: true
+            docstring_section_style: list
 
 markdown_extensions:
   - admonition
@@ -52,23 +59,44 @@ nav:
     - lang/helm.md
     - lang/python.md
   - API Documentation:
-    - api/kraken.build.md
-    - api/kraken.common.md
-    - api/kraken.core.md
-    - api/kraken.std.aws.md
-    - api/kraken.std.buffrs.md
-    - api/kraken.std.cargo.md
-    - api/kraken.std.descriptors.resource.md
-    - api/kraken.std.dist.md
-    - api/kraken.std.docs.md
-    - api/kraken.std.git.md
-    - api/kraken.std.helm.md
-    - api/kraken.std.mitm.md
-    - api/kraken.std.python.md
-    - api/kraken.std.sccache.md
-    - api/kraken.std.shellcheck.md
-    - api/kraken.std.util.md
+    - kraken:
+      - api/kraken/build.md
+      - "common":
+        - api/kraken/common/index.md
+        - api/kraken/common/graphviz.md
+        - api/kraken/common/findpython.md
+        - api/kraken/common/supplier.md
+      - "core":
+          - api/kraken/core/index.md
+          - api/kraken/core/address.md
+          - "system":
+            - api/kraken/core/system/aspect.md
+            - api/kraken/core/system/buildcache.md
+            - api/kraken/core/system/context.md
+            - api/kraken/core/system/errors.md
+            - api/kraken/core/system/graph.md
+            - api/kraken/core/system/kraken_object.md
+            - api/kraken/core/system/project.md
+            - api/kraken/core/system/property.md
+            - api/kraken/core/system/task_supplier.md
+            - api/kraken/core/system/task.md
+      - "std":
+        - api/kraken/std/aws.md
+        - api/kraken/std/buffrs.md
+        - api/kraken/std/cargo.md
+        - api/kraken/std/dist.md
+        - api/kraken/std/docs.md
+        - api/kraken/std/git.md
+        - api/kraken/std/helm.md
+        - api/kraken/std/mitm.md
+        - api/kraken/std/python.md
+        - api/kraken/std/sccache.md
+        - api/kraken/std/shellcheck.md
+        - api/kraken/std/util.md
+        - "descriptors":
+          - api/kraken/std/descriptors/resource.md
   - Command-line:
+    - cli/kraken-aspect.md
     - cli/kraken-query-describe.md
     - cli/kraken-query-env.md
     - cli/kraken-query-ls.md

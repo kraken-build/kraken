@@ -8,7 +8,8 @@ from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import flatten
-from kraken.core import Project, Property, TaskStatus
+from kraken.common._fs import intersect_paths
+from kraken.core import Project, Property, TaskStatus, TestAspect
 
 from .base_task import EnvironmentAwareDispatchTask
 
@@ -27,7 +28,7 @@ class CoverageFormat(enum.Enum):
         return self.value[1]
 
 
-class PytestTask(EnvironmentAwareDispatchTask):
+class PytestTask(EnvironmentAwareDispatchTask, TestAspect.Implements):
     description = "Run unit tests using Pytest."
     python_dependencies = ["pytest"]
 
@@ -74,12 +75,12 @@ class PytestTask(EnvironmentAwareDispatchTask):
                 stacklevel=4,
             )
 
-        command = [
-            "pytest",
-            "-vv",
-            *[str(self.project.directory / path) for path in tests_dir],
-            *[str(self.project.directory / path) for path in self.include_dirs.get()],
+        paths = [
+            *[self.project.directory / path for path in tests_dir],
+            *[self.project.directory / path for path in self.include_dirs.get()],
         ]
+
+        command = ["pytest", "-vv"]
         command += flatten(["--ignore", str(self.project.directory / path)] for path in self.ignore_dirs.get())
         if self.coverage.is_filled():
             coverage_file = f"coverage{self.coverage.get().get_suffix()}"
@@ -95,9 +96,22 @@ class PytestTask(EnvironmentAwareDispatchTask):
         if self.doctest_modules.get():
             command += ["--doctest-modules"]
         command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
+
+        if opt := TestAspect.current_options(self):
+            if opt.paths:
+                paths = intersect_paths(paths, [Path(x) for x in opt.paths], left_relative_to=self.project.directory)
+                if not paths:
+                    self.TestAspect_failure_reason = "NoTests"
+                    return TaskStatus.failed("no matching test paths")
+            if opt.filter:
+                command += ["-k", " or ".join(opt.filter)]
+
+        command += map(os.fspath, paths)
         return command
 
     def handle_exit_code(self, code: int) -> TaskStatus:
+        if code == 5:
+            self.TestAspect_failure_reason = "NoTests"
         if code == 5 and self.allow_no_tests.get():
             # Pytest returns exit code 5 if no tests were run.
             return TaskStatus.succeeded()

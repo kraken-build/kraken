@@ -12,8 +12,9 @@ from kraken.common import CurrentDirectoryProjectFinder, ProjectFinder, ScriptRu
 from kraken.common.iter import bipartition
 from kraken.core.address import Address, AddressSpace, resolve_address
 from kraken.core.base import Currentable, MetadataContainer
+from kraken.core.system.aspect import Aspect
 from kraken.core.system.errors import BuildError, ProjectLoaderError, ProjectNotFoundError
-from kraken.core.system.executor import GraphExecutor, GraphExecutorObserver
+from kraken.core.system.executor import DelegatingGraphExecutorObserver, Graph, GraphExecutor, GraphExecutorObserver
 from kraken.core.system.executor.default import (
     DefaultGraphExecutor,
     DefaultPrintingExecutorObserver,
@@ -25,6 +26,7 @@ from kraken.core.system.task import Task
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
+T_Aspect = TypeVar("T_Aspect", bound=Aspect)
 
 
 class KrakenAddressSpace(AddressSpace["Project | Task"]):
@@ -77,9 +79,17 @@ class TaskResolutionException(Exception):
 class Context(MetadataContainer, Currentable["Context"]):
     """This class is the single instance where all components of a build process come together."""
 
-    #: The focus project is the one that maps to the current working directory when invoking kraken.
-    #: Kraken may be invoked in a directory that does not map to a project, in which case this is None.
     focus_project: Project | None = None
+    """
+    The focus project is the one that maps to the current working directory when invoking kraken.
+    Kraken may be invoked in a directory that does not map to a project, in which case this is None.
+    """
+
+    original_working_directory: Path
+    """
+    The original working directory that the context was created in. This is initialized to the current working
+    directory when the context is created. The Kraken CLI will change directory into the project root directory.
+    """
 
     def __init__(
         self,
@@ -97,6 +107,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         """
 
         super().__init__()
+        self.original_working_directory = Path.cwd()
         self.build_directory = build_directory
         self.project_finder = project_finder or CurrentDirectoryProjectFinder.default()
         self.executor = executor or DefaultGraphExecutor(DefaultTaskExecutor())
@@ -105,6 +116,13 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
+
+        # Aspects are associated with the task(s) they select, so only those tasks can retrieve the
+        # aspect and it's options at build time to take them into account. This is to avoid leaking an
+        # aspect into a task that was not selected (e.g. task X depends on Y, both implemene aspect A
+        # but only task X is selected -> Y should not be impacted by the aspect).
+        self._aspects: list[Aspect] = []
+        self._aspects_for_tasks: dict[Address, list[Aspect]] = {}
 
     @property
     def root_project(self) -> Project:
@@ -253,29 +271,30 @@ class Context(MetadataContainer, Currentable["Context"]):
         This method finds Kraken tasks by their address, relative to a given project. If no project is
         specified, the address is resolved relative to the root project.
 
-        :param addresses: A list of task addresses to resolve. Task addresses may contain glob patterns
-            (`*` and `**` as well as `?` at the end of an address element, see the #Address class for
-            more details).
+        Args:
+            addresses: A list of task addresses to resolve. Task addresses may contain glob patterns
+                (`*` and `**` as well as `?` at the end of an address element, see the #Address class for
+                more details).
 
-            Any address that consists of only a single non-globbing path element (such as `lint` or `test`)
-            will be prefixed by a wildcard (such that they are semantically equivalent to `**:lint` and
-            `**:test`, respectively).
+                Any address that consists of only a single non-globbing path element (such as `lint` or `test`)
+                will be prefixed by a wildcard (such that they are semantically equivalent to `**:lint` and
+                `**:test`, respectively).
 
-            In case the address specifies a container (that is, if it ends with a colon), then this will
-            resolve the default tasks or this container.
-            As an example, `:` will get the default tasks of the current project, and `:**:` will get the
-            default tasks of all sub-projects.
-            Specifying `None` is a shorthand for resolving `:` and `:**:`, that is, will resolve to the
-            default tasks of the current project and its sub-projects.
+                In case the address specifies a container (that is, if it ends with a colon), then this will
+                resolve the default tasks or this container.
+                As an example, `:` will get the default tasks of the current project, and `:**:` will get the
+                default tasks of all sub-projects.
+                Specifying `None` is a shorthand for resolving `:` and `:**:`, that is, will resolve to the
+                default tasks of the current project and its sub-projects.
 
-        :param relative_to: The Kraken project to resolve the task addresses relative to. If this is not
-            specified, the #root_project is used instead.
+            relative_to: The Kraken project to resolve the task addresses relative to. If this is not
+                specified, the #root_project is used instead.
 
-        :param set_selected: If enabled, addresses that resolve to tasks immediately will be marked as selected
-            before they are returned. Note that this does not mark tasks as selected when they are picked up by
-            via the default tasks of a project. For example, when `:*` is resolved, the default tasks of all
-            sub-projects will be returned, but they will not be marked as selected. The tasks of the root project
-            however, will be marked as selected.
+            set_selected: If enabled, addresses that resolve to tasks immediately will be marked as selected
+                before they are returned. Note that this does not mark tasks as selected when they are picked up by
+                via the default tasks of a project. For example, when `:*` is resolved, the default tasks of all
+                sub-projects will be returned, but they will not be marked as selected. The tasks of the root project
+                however, will be marked as selected.
         """
 
         if not isinstance(relative_to, Address):
@@ -410,7 +429,30 @@ class Context(MetadataContainer, Currentable["Context"]):
                 self.finalize()
             graph = self.get_build_graph(tasks)
 
-        self.executor.execute_graph(graph, self.observer)
+        build_error: BuildError | None = None
+        if self._aspects:
+            # The aspect needs a hook right after the graph execution ends, but before the other observer
+            # gets a chance to process the results. The aspects may raise their own build error if they deem
+            # the build unsuccessful for their own reasons.
+            class AspectDelegator(GraphExecutorObserver):
+                def after_execute_graph(_self, graph: Graph) -> None:
+                    assert isinstance(graph, TaskGraph)
+                    try:
+                        for aspect in self._aspects:
+                            aspect.after_execute_graph(self, graph)
+                    except BuildError as exc:
+                        nonlocal build_error
+                        build_error = exc
+
+            observer: GraphExecutorObserver = DelegatingGraphExecutorObserver(AspectDelegator(), self.observer)
+        else:
+            observer = self.observer
+
+        with self.as_current():
+            self.executor.execute_graph(graph, observer)
+
+        if build_error:
+            raise build_error
 
         if not graph.is_complete():
             raise BuildError(list(graph.tasks(failed=True)))
@@ -447,3 +489,34 @@ class Context(MetadataContainer, Currentable["Context"]):
         for listener in listeners:
             # TODO(NiklasRosenstein): Should we catch errors in listeners of letting them propagate?
             listener(ContextEvent(event_type, data))
+
+    def register_aspect(self, aspect: Aspect, for_tasks: Sequence[Task]) -> None:
+        """
+        Registers an aspect for the given tasks. This may be called more than once for an aspect, which will
+        amend the tasks associated with the aspect.
+        """
+
+        for task in for_tasks:
+            task_aspects = self._aspects_for_tasks.setdefault(task.address, [])
+            if aspect not in task_aspects:
+                task_aspects.append(aspect)
+
+        if aspect not in self._aspects:
+            self._aspects.append(aspect)
+            aspect.init(self)
+
+    def aspect(self, aspect_class: type[T_Aspect], for_task: Task | None = None) -> T_Aspect | None:
+        """
+        If an aspect of the given type is set in the context, it is returned, otherwise `None`. If *for_task* is
+        specified, the aspect will only be returned if it was associated with the task.
+        """
+
+        if for_task:
+            aspects = self._aspects_for_tasks.get(for_task.address, [])
+        else:
+            aspects = self._aspects
+
+        for aspect in aspects:
+            if isinstance(aspect, aspect_class):
+                return aspect
+        return None
