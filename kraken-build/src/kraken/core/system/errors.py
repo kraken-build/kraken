@@ -44,5 +44,5 @@ class BuildError(Exception):
                 + " failed"
             )
         if self.reason:
-            result = f"{result}\n\nreason: {self.reason}"
+            result = f"{result}\nreason: {self.reason}"
         return result

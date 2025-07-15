@@ -113,7 +113,7 @@ def intersect_paths(
     right: Sequence[Path],
     left_relative_to: Path | None = None,
     right_relative_to: Path | None = None,
-) -> Sequence[Path]:
+) -> list[Path]:
     """
     Calculates the hierarchical intersection of two sequences of paths.
 

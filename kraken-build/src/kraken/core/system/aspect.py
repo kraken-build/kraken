@@ -1,6 +1,7 @@
 import inspect
 import logging
 import os
+import shlex
 import sys
 from collections.abc import Iterable, Sequence
 from dataclasses import MISSING, dataclass, field, fields
@@ -446,8 +447,16 @@ class TestAspect(AspectBase["TestAspect.Options"]):
             One or more tokens to filter by. Tests that include either one of these tokens will be run.
         """
 
-        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
+        paths: list[Path] = field(default_factory=lambda: [Path(".")], metadata={"positional": True})
         filter: list[str] = field(default_factory=lambda: [])
+
+        def format_filters(self) -> str:
+            parts: list[str] = []
+            if self.paths:
+                parts += map(os.fspath, self.paths)
+            if self.filter:
+                parts += [f"--filter={filter}" for filter in self.filter]
+            return shlex.join(parts)
 
     class Implements:
         """
@@ -474,9 +483,10 @@ class TestAspect(AspectBase["TestAspect.Options"]):
 
         # If we're using filters, test tasks might fail when they found no matching tests. This is ok if at least
         # one test task did not fail.
-        if self.options.filter:
+        if self.options.filter or self.options.paths:
             ok_tasks = [task for task in graph.tasks(ok=True) if isinstance(task, TestAspect.Implements)]
             failed_tasks = [task for task in graph.tasks(failed=True) if isinstance(task, TestAspect.Implements)]
+
             for task in failed_tasks:
                 if task.TestAspect_failure_reason == "NoTests":
                     new_status = TaskStatus.warning("no tests selected")
@@ -491,7 +501,7 @@ class TestAspect(AspectBase["TestAspect.Options"]):
             if not ok_tasks:
                 reason = None
                 if all(t.TestAspect_failure_reason == "NoTests" for t in failed_tasks):
-                    reason = "specified --filter matched no tests"
+                    reason = f"specified filters ({self.options.format_filters()}) matched no tests"
                 raise BuildError(failed_tasks, reason=reason)
 
 
