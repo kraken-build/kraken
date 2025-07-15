@@ -1,6 +1,7 @@
 """Build documentation using [MkDocs](https://www.mkdocs.org/)."""
 
 import os
+import shlex
 import subprocess
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -109,7 +110,7 @@ class MkDocsTask(Task, RunAspect.Implements):
         else:
             cwd = self.project.directory
 
-        self.logger.info("$ %s", command)
+        self.logger.info("$ %s", shlex.join(command))
         return TaskStatus.from_exit_code(command, subprocess.call(command, cwd=cwd))
 
 
@@ -120,6 +121,7 @@ def mkdocs(
     watch_files: Sequence[Path | str] = (),
     task_prefix: str = "mkdocs",
     project: Project | None = None,
+    strict: bool = True,
 ) -> tuple[MkDocsTask, MkDocsTask]:
     project = project or Project.current()
 
@@ -130,6 +132,7 @@ def mkdocs(
     build_task.mkdocs_root = project.directory / (mkdocs_root or "")
     build_task.mkdocs_cmd = mkdocs_cmd
     build_task.watch_files = final_watch_files
+    build_task.strict = strict
 
     # The .build and .serve variants are deprecated and here only for backwards compatibility. Use
     # `krakenw invoke :{task_prefix} [--serve]` instead.
@@ -144,5 +147,6 @@ def mkdocs(
     serve_task._do_not_use_mode = "serve"
     serve_task._do_not_use_other_task_name = str(build_task.address)
     serve_task.watch_files = final_watch_files
+    serve_task.strict = False
 
     return build_task, serve_task

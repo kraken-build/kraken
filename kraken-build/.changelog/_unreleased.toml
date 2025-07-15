@@ -1,5 +1,0 @@
-[[entries]]
-id = "d7ba751e-22de-4a63-9cf8-240dd3873a02"
-type = "feature"
-description = "Add `Property.set(force)` kw-only argument to override check when property is finalized (useful for when you know what you are doing, such as setting a property value based on aspect options in `Task.prepare()`"
-author = "@NiklasRosenstein"
