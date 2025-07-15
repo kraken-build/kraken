@@ -79,9 +79,17 @@ class TaskResolutionException(Exception):
 class Context(MetadataContainer, Currentable["Context"]):
     """This class is the single instance where all components of a build process come together."""
 
-    #: The focus project is the one that maps to the current working directory when invoking kraken.
-    #: Kraken may be invoked in a directory that does not map to a project, in which case this is None.
     focus_project: Project | None = None
+    """
+    The focus project is the one that maps to the current working directory when invoking kraken.
+    Kraken may be invoked in a directory that does not map to a project, in which case this is None.
+    """
+
+    original_working_directory: Path
+    """
+    The original working directory that the context was created in. This is initialized to the current working
+    directory when the context is created. The Kraken CLI will change directory into the project root directory.
+    """
 
     def __init__(
         self,
@@ -99,6 +107,7 @@ class Context(MetadataContainer, Currentable["Context"]):
         """
 
         super().__init__()
+        self.original_working_directory = Path.cwd()
         self.build_directory = build_directory
         self.project_finder = project_finder or CurrentDirectoryProjectFinder.default()
         self.executor = executor or DefaultGraphExecutor(DefaultTaskExecutor())
@@ -493,6 +502,7 @@ class Context(MetadataContainer, Currentable["Context"]):
 
         if aspect not in self._aspects:
             self._aspects.append(aspect)
+            aspect.init(self)
 
     def aspect(self, aspect_class: type[T_Aspect], for_task: Task | None = None) -> T_Aspect | None:
         """

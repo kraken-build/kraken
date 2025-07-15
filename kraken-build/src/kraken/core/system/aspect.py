@@ -167,6 +167,9 @@ class AspectBase(Generic[T_Options]):
         aspect = cls.current(for_task)
         return aspect.options if aspect else None
 
+    def init(self, context: "Context") -> None:
+        """Called when the aspect is registered to the context."""
+
     def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:
         if self.Implements is None:
             return

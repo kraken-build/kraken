@@ -156,6 +156,7 @@ def _load_build_state(
     # For consistency, we always act as if Kraken was run from the project root directory.
     # Using the `subproject_directory`, we later filter down which tasks are selected / how relative
     # task references on the CLI are resolved.
+    original_working_directory = Path.cwd()
     os.chdir(root_directory)
 
     project_info = CurrentDirectoryProjectFinder.default().find_project(Path.cwd())
@@ -224,6 +225,7 @@ def _load_build_state(
             graph = TaskGraph(context)
 
     assert graph is not None
+    context.original_working_directory = original_working_directory
 
     # Serialize the build graph, even on failure, at the end of the build.
     if not graph_options.no_save:
