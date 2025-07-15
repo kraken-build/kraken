@@ -122,12 +122,18 @@ def intersect_paths(
 
     When an overlap is found between a pair of paths, the more specific (deeper) path of the two is added to the result.
 
-    The format of each returned path (absolute or relative) depends on the format of the *containing* path from the
+    The format of each returned path (absolute or relative) depends on the format of the *left* path from the
     original input. For example, if a path `A` from `left` contains path `B` from `right`:
 
     - The result will include path `B`.
     - Path `B` will be relative to `left_relative_to` if `A` was originally a relative path.
     - Otherwise, path `B` will be absolute.
+
+    If in the reverse case, path `B` from `right` contains path `A` from `left`:
+
+    - The result will include path `A`.
+    - Path `A` will be relative to the `left_relative_to` if `A` was originally a relative path.
+    - Otherwise, path `A` will be absolute.
 
     Args:
         left: A sequence of paths to compare against `right`.
@@ -155,8 +161,9 @@ def intersect_paths(
         ...     left=[PosixPath("/home/user/Documents/PDFs"), PosixPath("artifacts"), PosixPath("/var/lib")],
         ...     right=[PosixPath("/home/user")],
         ...     left_relative_to=PosixPath("/home/user/Downloads"),
+        ...     right_relative_to=PosixPath("/home/user"),
         ... )
-        [PosixPath('/home/user/Documents/PDFs'), PosixPath('/home/user/Downloads/artifacts')]
+        [PosixPath('/home/user/Documents/PDFs'), PosixPath('artifacts')]
 
         >>> intersect_paths(
         ...     left=[PosixPath("src")],
@@ -181,12 +188,12 @@ def intersect_paths(
         []
 
         >>> intersect_paths(
-        ...     left=[PosixPath("/project/src"), PosixPath("/project/tests/core")],
+        ...     left=[PosixPath("/project/src"), PosixPath("tests/core")],
         ...     right=[PosixPath(".")],
         ...     left_relative_to=PosixPath("/project"),
         ...     right_relative_to=PosixPath("/project"),
         ... )
-        [PosixPath('src'), PosixPath('tests/core')]
+        [PosixPath('/project/src'), PosixPath('tests/core')]
     """
 
     cwd = Path.cwd()
@@ -208,8 +215,8 @@ def intersect_paths(
                     right_path = right_path.relative_to(left_relative_to)
                 result.append(right_path)
             elif left_path.is_relative_to(right_path):
-                if not right_abs:
-                    left_path = left_path.relative_to(right_relative_to)
+                if not left_abs:
+                    left_path = left_path.relative_to(left_relative_to)
                 result.append(left_path)
 
     return result
