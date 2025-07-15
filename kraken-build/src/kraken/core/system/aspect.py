@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 T_Dataclass = TypeVar("T_Dataclass", bound="DataclassInstance")
 T_Options = TypeVar("T_Options", bound="AspectOptions")
+T_AspectWithPathsFilter_Options = TypeVar("T_AspectWithPathsFilter_Options", bound="_AspectWithPathsFilter.Options")
 
 
 @dataclass
@@ -95,6 +96,20 @@ class AspectBase(Generic[T_Options]):
     def __init_subclass__(cls, options_class: type[T_Options] | None = None, **kwargs: Any) -> None:
         if options_class is not None:
             cls.Options = cast(type[AspectOptions], options_class)
+
+        # Need this to (1) filter out the case where the class is defined in this module and (2) to prevent
+        # importing the Task class before this module is fully imported to prevent a cyclic import issue.
+        if cls.__module__ != __name__:
+            from kraken.core import Task
+
+            if issubclass(cls, Task):
+                raise RuntimeError(
+                    f"you're inheriting a Task implementation from {cls.__name__}, you probably want "
+                    f"to inherit from {cls.__name__}.Implements instead?"
+                )
+        if "Implements" not in vars(cls):
+            raise RuntimeError(f"missing {cls.__name__}.Implements class")
+
         super().__init_subclass__(**kwargs)
 
     @overload
@@ -341,13 +356,34 @@ def build_signature_from_dataclass(
 
 
 @dataclass
-class LintAspect(AspectBase["LintAspect.Options"]):
+class _AspectWithPathsFilter(AspectBase["T_AspectWithPathsFilter_Options"], Generic[T_AspectWithPathsFilter_Options]):
+    """
+    Base class for aspects that have a `paths` field in the options that take paths that should be considered
+    relative to the original working directory that Kraken is invoked from. Since kraken will change directory
+    into the project root directory, we post-process the paths to point to the original working directory which
+    is stored in [`Context.original_working_directory`][kraken.core.Context.original_working_directory].
+    """
+
+    class Implements:
+        pass
+
+    @dataclass
+    class Options(AspectOptions):
+        paths: list[Path] = field(default_factory=lambda: [Path(".")], metadata={"positional": True})
+
+    def init(self, context: "Context") -> None:
+        self.options.paths = [context.original_working_directory / path for path in self.options.paths]
+        return super().init(context)
+
+
+@dataclass
+class LintAspect(_AspectWithPathsFilter["LintAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform linting on the code in a project.
     """
 
     @dataclass
-    class Options(AspectOptions):
+    class Options(_AspectWithPathsFilter.Options):
         """
         Perform linting on the code in a project.
 
@@ -366,7 +402,6 @@ class LintAspect(AspectBase["LintAspect.Options"]):
             option and should be used with caution.
         """
 
-        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
         fix: bool = False
         unsafe_fix: bool = False
 
@@ -377,13 +412,13 @@ class LintAspect(AspectBase["LintAspect.Options"]):
 
 
 @dataclass
-class FmtAspect(AspectBase["FmtAspect.Options"]):
+class FmtAspect(_AspectWithPathsFilter["FmtAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform formatting on files.
     """
 
     @dataclass
-    class Options(AspectOptions):
+    class Options(_AspectWithPathsFilter.Options):
         """
         Perform formatting on code in the project.
 
@@ -395,7 +430,6 @@ class FmtAspect(AspectBase["FmtAspect.Options"]):
             Instead of formatting files, only whether the files _would_ be formatted, and error if there are any.
         """
 
-        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
         check: bool = False
 
     class Implements:
@@ -405,13 +439,13 @@ class FmtAspect(AspectBase["FmtAspect.Options"]):
 
 
 @dataclass
-class CheckAspect(AspectBase["CheckAspect.Options"]):
+class CheckAspect(_AspectWithPathsFilter["CheckAspect.Options"]):
     """
     An aspect that represents a superset of tasks that perform type checking on code.
     """
 
     @dataclass
-    class Options(AspectOptions):
+    class Options(_AspectWithPathsFilter.Options):
         """
         Perform type checking on the code in a project.
 
@@ -423,8 +457,6 @@ class CheckAspect(AspectBase["CheckAspect.Options"]):
             Narrow the set of files to check down to these paths. If not specified, it's equivalent of passing "."
         """
 
-        paths: list[str] = field(default_factory=lambda: ["."], metadata={"positional": True})
-
     class Implements:
         """
         Tasks should additionally inherit from this class to denote that they implement the check aspect.
@@ -432,13 +464,13 @@ class CheckAspect(AspectBase["CheckAspect.Options"]):
 
 
 @dataclass
-class TestAspect(AspectBase["TestAspect.Options"]):
+class TestAspect(_AspectWithPathsFilter["TestAspect.Options"]):
     """
     An aspect that represents a superset of tasks that execute tests on code.
     """
 
     @dataclass
-    class Options(AspectOptions):
+    class Options(_AspectWithPathsFilter.Options):
         """
         Execute tests in your code base.
 
@@ -450,7 +482,6 @@ class TestAspect(AspectBase["TestAspect.Options"]):
             One or more tokens to filter by. Tests that include either one of these tokens will be run.
         """
 
-        paths: list[Path] = field(default_factory=lambda: [Path(".")], metadata={"positional": True})
         filter: list[str] = field(default_factory=lambda: [])
 
         def format_filters(self) -> str:

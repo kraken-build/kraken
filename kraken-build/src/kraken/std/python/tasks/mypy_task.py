@@ -7,14 +7,17 @@ from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
 from kraken.common import Supplier
+from kraken.common._fs import intersect_paths
 from kraken.core import Project, Property
+from kraken.core.system.aspect import CheckAspect
+from kraken.core.system.task import TaskStatus
 
 from .base_task import EnvironmentAwareDispatchTask
 
 logger = logging.getLogger(__name__)
 
 
-class MypyTask(EnvironmentAwareDispatchTask):
+class MypyTask(EnvironmentAwareDispatchTask, CheckAspect.Implements):
     description = "Static type checking for Python code using Mypy."
     python_dependencies = ["mypy"]
 
@@ -27,7 +30,7 @@ class MypyTask(EnvironmentAwareDispatchTask):
 
     # EnvironmentAwareDispatchTask
 
-    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str]:
+    def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         use_daemon = self.use_daemon.get()
         if use_daemon and sys.platform.startswith("win32"):
             use_daemon = False
@@ -58,18 +61,26 @@ class MypyTask(EnvironmentAwareDispatchTask):
             command += ["--show-error-codes", "--namespace-packages"]  # Sane defaults. 🙏
         if self.python_version.is_filled():
             command += ["--python-version", self.python_version.get()]
-        source_dir = self.settings.source_directory
-        command += [str(source_dir)]
+
+        paths = [self.settings.source_directory]
         if self.check_tests.get():
             # We only want to add the tests directory if it is not already in the source directory. Otherwise
             # Mypy will find the test files twice and error.
             tests_dir = self.settings.get_tests_directory()
             if tests_dir:
                 try:
-                    tests_dir.relative_to(source_dir)
+                    tests_dir.relative_to(self.settings.source_directory)
                 except ValueError:
-                    command += [str(tests_dir)]
-        command += [str(directory) for directory in self.settings.lint_enforced_directories]
+                    paths.append(tests_dir)
+        paths += self.settings.lint_enforced_directories
+
+        if opts := CheckAspect.current_options(self):
+            if opts.paths:
+                paths = intersect_paths(paths, opts.paths, left_relative_to=self.project.directory)
+                if not paths:
+                    return TaskStatus.skipped("no matching paths")
+
+        command += map(os.fspath, paths)
         command += self.additional_args.get()
         return command
 
