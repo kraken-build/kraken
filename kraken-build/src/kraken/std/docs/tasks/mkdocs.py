@@ -102,8 +102,9 @@ class MkDocsTask(Task, RunAspect.Implements):
             command += ["-d", os.fspath(build_directory)]
         if strict:
             command += ["--strict"]
-        for path in watch_files:
-            command += ["-w", os.fspath(path)]
+        if mode == "serve":
+            for path in watch_files:
+                command += ["-w", os.fspath(path)]
 
         if mkdocs_root := self.mkdocs_root.get():
             cwd = self.project.directory / mkdocs_root
