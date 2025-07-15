@@ -27,3 +27,9 @@ id = "0390aa18-568c-4292-aac5-b96798881df8"
 type = "feature"
 description = "implement `LintAspect` in `RuffTask`"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "68bdd4ec-b884-411b-9dc2-7f4af5fc5075"
+type = "improvement"
+description = "Set default value for `python_lambda_zip(python_version)` to `\"3.13\"`"
+author = "@NiklasRosenstein"

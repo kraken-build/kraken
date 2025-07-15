@@ -69,7 +69,7 @@ def python_lambda_zip(
     include_data: Sequence[str | Include] = (),
     packages: Sequence[str] = (),
     requirements: str | Path | None = None,
-    python_version: str | None = None,
+    python_version: str | None = "3.13",
     platform: PythonPlatform | None = None,
     quiet: bool = False,
     symlink_result: bool = True,
@@ -96,7 +96,10 @@ def python_lambda_zip(
                   environment.
         requirements: A path to a requirements file containing Python packages
                      to install.
-        python_version: The Python version to use for the Lambda function.
+        python_version: The Python version to use for the Lambda function. This should
+                        always be set, otherwise Uv might use the Python version that
+                        the Kraken build runs with, which might be incompatible. Defaults
+                        to Python 3.13.
         platform: The target platform for the Lambda function.
         quiet: If True, suppress output from the build process.
         symlink_result: If True, symlink the resulting ZIP archive to the
