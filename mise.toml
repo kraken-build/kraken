@@ -7,15 +7,5 @@
 typos = "1.34.0"
 uv = "0.7.20"
 
-[tasks.update-docs]
-description = "Run `mksync` over doc files to inject command synopses and generate the changelog."
-run = """bash -c '
-set -x
-cd docs
-for fn in docs/cli/*.md; do uv run mksync -i $fn; done
-uv run mksync -i docs/changelog.md
-'"""
-
 [tasks.build-docs]
-depends = ["update-docs"]
 run = "krakenw run mkdocs.build --no-save -vv"
