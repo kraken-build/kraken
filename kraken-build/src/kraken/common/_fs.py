@@ -179,6 +179,14 @@ def intersect_paths(
         ...     right=[PosixPath("/path2")],
         ... )
         []
+
+        >>> intersect_paths(
+        ...     left=[PosixPath("/project/src"), PosixPath("/project/tests/core")],
+        ...     right=[PosixPath(".")],
+        ...     left_relative_to=PosixPath("/project"),
+        ...     right_relative_to=PosixPath("/project"),
+        ... )
+        [PosixPath('src'), PosixPath('tests/core')]
     """
 
     cwd = Path.cwd()
