@@ -6,8 +6,8 @@ theme:
   palette:
     primary: blue
     accent: green
-  # features:
-  #   - navigation.tabs
+  features:
+    - navigation.tabs
 
 hooks:
   - mksync-hook.py
@@ -96,6 +96,7 @@ nav:
         - "descriptors":
           - api/kraken/std/descriptors/resource.md
   - Command-line:
+    - cli/kraken-aspect.md
     - cli/kraken-query-describe.md
     - cli/kraken-query-env.md
     - cli/kraken-query-ls.md

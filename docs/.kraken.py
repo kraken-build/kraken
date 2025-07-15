@@ -12,4 +12,5 @@ mkdocs(
         "mksync",
     ],
     watch_files=["../kraken-build/src", "../kraken-wrapper/src"],
+    strict=False,
 )
