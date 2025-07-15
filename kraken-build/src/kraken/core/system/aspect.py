@@ -2,10 +2,22 @@ import inspect
 import logging
 import os
 import sys
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import MISSING, dataclass, field, fields
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    ClassVar,
+    Generic,
+    Literal,
+    Mapping,
+    TypeGuard,
+    TypeVar,
+    cast,
+    overload,
+)
 
 import attrs
 import cyclopts
@@ -13,6 +25,7 @@ from typeapi import AnnotatedTypeHint, ClassTypeHint, TypeHint
 from typing_extensions import Self
 
 from kraken.core.system.errors import BuildError
+from kraken.core.system.property import Property
 
 if TYPE_CHECKING:
     from _typeshed import DataclassInstance
@@ -504,8 +517,8 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
         Parameters
         ----------
         target:
-            A single Kraken tasks and/or output path. If a basic name is used (e.g. `main`), it will be considered
-            as a path or task (must match either).
+            A single Kraken tasks and/or output path. If a basic name is used (e.g. `main`), it will be treated as a
+            target name. Use e.g. `./main` to reference a local file called `main`.
 
         outfile:
             When selecting a task that produces a single output file, it may support altering the path it is placed
@@ -555,6 +568,124 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
                 return self.build_mode
             return fallback
 
+    @staticmethod
+    def _is_path_property_type(hint: TypeHint) -> bool:
+        """
+        A helper method to determine if the give type hint, representing the inner type of a
+        [`Property`][kraken.core.Property], represents a [`PathLike`][os.PathLike] or a sequence of such.
+
+        >>> from pathlib import Path, PosixPath, WindowsPath
+        >>> from typing import Sequence
+        >>> from typeapi import TypeHint
+        >>> BuildAspect._is_path_property_type(TypeHint(Path))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(PosixPath))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(WindowsPath))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(list[Path]))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(tuple[Path]))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(Sequence[Path]))
+        True
+        >>> BuildAspect._is_path_property_type(TypeHint(str))
+        False
+        >>> BuildAspect._is_path_property_type(TypeHint(list[str]))
+        False
+        >>> BuildAspect._is_path_property_type(TypeHint(tuple[str]))
+        False
+        """
+
+        def _unwrap(hint: TypeHint) -> TypeHint:
+            if isinstance(hint, AnnotatedTypeHint):
+                hint = TypeHint(hint.type)
+            return hint
+
+        hint = _unwrap(hint)
+        if not isinstance(hint, ClassTypeHint):
+            return False
+
+        if issubclass(hint.type, Sequence) and len(hint.args) > 0:
+            inner_type = _unwrap(TypeHint(hint.args[0]))
+            if not isinstance(inner_type, ClassTypeHint):
+                return False
+
+            return issubclass(inner_type.type, os.PathLike)
+
+        elif issubclass(hint.type, os.PathLike):
+            return True
+
+        return False
+
+    @staticmethod
+    def _is_path_property(prop: Property) -> TypeGuard[Property[os.PathLike] | Property[Sequence[os.PathLike]]]:
+        return BuildAspect._is_path_property_type(prop.item_type)
+
+    @staticmethod
+    def _search_for_task_producing(context: "Context", path: Path) -> "list[Task]":
+        path = path.resolve()
+        result = []
+
+        for project in context.iter_projects():
+            for task in project.tasks().values():
+                produces: list[os.PathLike] = []
+                for prop in task.get_properties():
+                    if not task.__schema__[prop.name].is_output:
+                        continue
+                    if not BuildAspect._is_path_property(prop):
+                        continue
+
+                    try:
+                        value = prop.get()
+                    except Property.Deferred:
+                        logger.debug(
+                            "could not check task %r property %r as it is deferred",
+                            str(task.address),
+                            prop.name,
+                        )
+                        continue
+
+                    if isinstance(value, os.PathLike):
+                        produces.append(value)
+                    elif isinstance(value, Sequence):
+                        produces.extend(value)
+                    else:
+                        logger.warning(
+                            "got unexpected value from task %r property %r, expected PathLike|Sequence[PathLike], got %r",
+                            str(task.address),
+                            prop.name,
+                            value,
+                        )
+
+                for produced_path in map(lambda x: Path(x).resolve(), produces):
+                    print(produced_path, path)
+                    if produced_path.is_relative_to(path) or produced_path == path:
+                        result.append(task)
+
+        return result
+
+    def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:
+        from kraken.core.system.task import GroupTask
+
+        # Determine if a Kraken task or output path is selected.
+        target = self.options.target
+        if "/" in target or "\\" in target:
+            # Find the task(s) that produce the specified output file.
+            tasks = self._search_for_task_producing(context, Path(target))
+        else:
+            tasks = context.resolve_tasks([target], relative_to=context.focus_project)
+
+        if not tasks:
+            raise ValueError(f"no task matched the specified target: {target}")
+        if len(tasks) > 1:
+            raise ValueError(f"more than one task matched the specified target: {target}")
+
+        if isinstance(tasks[0], GroupTask):
+            raise ValueError(f"a GroupTask matched the specified target ({target}), which is not a valid build target")
+
+        return tasks
+
 
 @dataclass
 class RunAspect(AspectBase["RunAspect.Options"]):
@@ -587,7 +718,7 @@ class RunAspect(AspectBase["RunAspect.Options"]):
         # TODO: We mgiht need to do something in the context to only reveal the aspect to tasks that
         #       are returned by this method. If the targeted task depends on another that also implements
         #       the "run" aspect, that other task should not be using the aspect.
-        tasks = context.resolve_tasks([self.options.task])
+        tasks = context.resolve_tasks([self.options.task], relative_to=context.focus_project)
         if not tasks:
             return []  # Caller will handle the error
         if len(tasks) > 1:
