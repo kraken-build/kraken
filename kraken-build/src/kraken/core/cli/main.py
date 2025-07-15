@@ -702,6 +702,12 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
                 assert False, args.query_cmd
 
     elif args.cmd in ASPECTS:
+        logger.warning(
+            "You're invoking an experimental Kraken aspect subcommand (`%s`). It might change in the future. "
+            "Use with care!",
+            args.cmd,
+        )
+
         aspect_class = ASPECTS[args.cmd]
         aspect = aspect_class(aspect_class.parse_options(args.args + remainder))
         logger.debug("Arguments for %s = %s", aspect_class.__name__, aspect.options)
