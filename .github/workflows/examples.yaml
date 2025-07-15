@@ -20,4 +20,4 @@ jobs:
     name: ${{ matrix.example-name }}
     with:
       example-name: ${{ matrix.example-name }}
-      targets: :**
+      targets: run :**
