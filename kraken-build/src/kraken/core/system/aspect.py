@@ -619,7 +619,9 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
         return False
 
     @staticmethod
-    def _is_path_property(prop: Property) -> TypeGuard[Property[os.PathLike] | Property[Sequence[os.PathLike]]]:
+    def _is_path_property(
+        prop: Property[Any],
+    ) -> TypeGuard[Property[os.PathLike[str]] | Property[Sequence[os.PathLike[str]]]]:
         return BuildAspect._is_path_property_type(prop.item_type)
 
     @staticmethod
@@ -629,7 +631,7 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
 
         for project in context.iter_projects():
             for task in project.tasks().values():
-                produces: list[os.PathLike] = []
+                produces: list[os.PathLike[str]] = []
                 for prop in task.get_properties():
                     if not task.__schema__[prop.name].is_output:
                         continue
@@ -651,7 +653,7 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
                     elif isinstance(value, Sequence):
                         produces.extend(value)
                     else:
-                        logger.warning(
+                        logger.warning(  # type: ignore[unreachable]
                             "got unexpected value from task %r property %r, expected PathLike|Sequence[PathLike], got %r",
                             str(task.address),
                             prop.name,
