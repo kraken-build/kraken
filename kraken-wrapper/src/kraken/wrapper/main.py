@@ -333,25 +333,25 @@ def load_project(directory: Path, outdated_check: bool = True) -> Project:
 
     We use the :class:`GitAwareProjectFinder` in its :func:`default <GitAwareProjectFinder.default>`
     configuration to determine the root directory of the Kraken project. This is later used to add the
-    ``-p, --project-dir`` option when invoking the project's underlying Kraken installation, as well as
+    `-p, --project-dir` option when invoking the project's underlying Kraken installation, as well as
     adding to relative task and project selectors.
 
     For example, in the following project:
 
-    .. code-block::
-
-        /
-            .git/
+    ```
+    /
+        .git/
+        .kraken.py
+        examples/           << cwd
             .kraken.py
-            examples/           << cwd
-                .kraken.py
-            src/
+        src/
+    ```
 
-    Running ``krakenw run test-examples`` will translate into ``kraken run -p .. examples:test-examples``
-    due to the :class:`GitAwareProjectFinder` finding ``/`` as the Kraken project root.
+    Running `krakenw run test-examples` will translate into `kraken run -p .. examples:test-examples`
+    due to the :class:`GitAwareProjectFinder` finding `/` as the Kraken project root.
 
-    Note that if the ``examples/`` wanted to be its own Kraken project, independent of the project at ``//``,
-    you can add a line spelling ``# ::krakenw-root`` to the ``.kraken.py`` file. In that case, the
+    Note that if the `examples/` wanted to be its own Kraken project, independent of the project at `//`,
+    you can add a line spelling `# ::krakenw-root` to the `.kraken.py` file. In that case, the
     :class:`GitAwareProjectFinder` will consider that directory the root Kraken project (assuming your CWD
     is somewhere within it).
 

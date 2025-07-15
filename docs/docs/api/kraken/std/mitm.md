@@ -1,5 +1,5 @@
 ---
-title: kraken.std.mitm
+title: mitm
 ---
 
 ::: kraken.std.mitm

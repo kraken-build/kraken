@@ -1,5 +1,5 @@
 ---
-title: kraken.build
+title: build
 ---
 
 ::: kraken.build

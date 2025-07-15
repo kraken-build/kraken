@@ -1,5 +1,5 @@
 ---
-title: kraken.std.git
+title: git
 ---
 
 ::: kraken.std.git

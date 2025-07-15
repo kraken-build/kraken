@@ -1,5 +1,5 @@
 ---
-title: kraken.std.shellcheck
+title: shellcheck
 ---
 
 ::: kraken.std.shellcheck

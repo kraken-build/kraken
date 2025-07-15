@@ -1,5 +1,5 @@
 ---
-title: kraken.std.sccache
+title: sccache
 ---
 
 ::: kraken.std.sccache

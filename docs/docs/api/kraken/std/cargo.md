@@ -1,5 +1,5 @@
 ---
-title: kraken.std.cargo
+title: cargo
 ---
 
 ::: kraken.std.cargo

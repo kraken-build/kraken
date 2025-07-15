@@ -1,5 +1,5 @@
 ---
-title: kraken.std.python
+title: python
 ---
 
 ::: kraken.std.python

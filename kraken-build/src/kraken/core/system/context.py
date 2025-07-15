@@ -271,29 +271,30 @@ class Context(MetadataContainer, Currentable["Context"]):
         This method finds Kraken tasks by their address, relative to a given project. If no project is
         specified, the address is resolved relative to the root project.
 
-        :param addresses: A list of task addresses to resolve. Task addresses may contain glob patterns
-            (`*` and `**` as well as `?` at the end of an address element, see the #Address class for
-            more details).
+        Args:
+            addresses: A list of task addresses to resolve. Task addresses may contain glob patterns
+                (`*` and `**` as well as `?` at the end of an address element, see the #Address class for
+                more details).
 
-            Any address that consists of only a single non-globbing path element (such as `lint` or `test`)
-            will be prefixed by a wildcard (such that they are semantically equivalent to `**:lint` and
-            `**:test`, respectively).
+                Any address that consists of only a single non-globbing path element (such as `lint` or `test`)
+                will be prefixed by a wildcard (such that they are semantically equivalent to `**:lint` and
+                `**:test`, respectively).
 
-            In case the address specifies a container (that is, if it ends with a colon), then this will
-            resolve the default tasks or this container.
-            As an example, `:` will get the default tasks of the current project, and `:**:` will get the
-            default tasks of all sub-projects.
-            Specifying `None` is a shorthand for resolving `:` and `:**:`, that is, will resolve to the
-            default tasks of the current project and its sub-projects.
+                In case the address specifies a container (that is, if it ends with a colon), then this will
+                resolve the default tasks or this container.
+                As an example, `:` will get the default tasks of the current project, and `:**:` will get the
+                default tasks of all sub-projects.
+                Specifying `None` is a shorthand for resolving `:` and `:**:`, that is, will resolve to the
+                default tasks of the current project and its sub-projects.
 
-        :param relative_to: The Kraken project to resolve the task addresses relative to. If this is not
-            specified, the #root_project is used instead.
+            relative_to: The Kraken project to resolve the task addresses relative to. If this is not
+                specified, the #root_project is used instead.
 
-        :param set_selected: If enabled, addresses that resolve to tasks immediately will be marked as selected
-            before they are returned. Note that this does not mark tasks as selected when they are picked up by
-            via the default tasks of a project. For example, when `:*` is resolved, the default tasks of all
-            sub-projects will be returned, but they will not be marked as selected. The tasks of the root project
-            however, will be marked as selected.
+            set_selected: If enabled, addresses that resolve to tasks immediately will be marked as selected
+                before they are returned. Note that this does not mark tasks as selected when they are picked up by
+                via the default tasks of a project. For example, when `:*` is resolved, the default tasks of all
+                sub-projects will be returned, but they will not be marked as selected. The tasks of the root project
+                however, will be marked as selected.
         """
 
         if not isinstance(relative_to, Address):

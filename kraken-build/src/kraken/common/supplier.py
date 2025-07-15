@@ -118,31 +118,32 @@ class Supplier(Generic[T], abc.ABC):
         Coercion for ``T | Supplier[T] -> Supplier[T]``. This is useful when accepting parameters for task factories
         that could either be a "hard" value or derived from properties of other tasks.
 
-        .. code-block:: python
 
-            def my_task(name: str, files: Sequence[str | Path] | Property[Sequence[Path]]) -> MyTask:
-                from kraken.build import project
-                task = project.task(name, MyTask)
-                task.files = (
-                    Supplier[Sequence[str | Path]]
-                    .of(files)
-                    .map(lambda files: [project.directory / f for f in files])
-                )
-                return task
+        ```py
+        def my_task(name: str, files: Sequence[str | Path] | Property[Sequence[Path]]) -> MyTask:
+            from kraken.build import project
+            task = project.task(name, MyTask)
+            task.files = (
+                Supplier[Sequence[str | Path]]
+                .of(files)
+                .map(lambda files: [project.directory / f for f in files])
+            )
+            return task
+        ```
 
         Note that Mypy (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
         need to explicitly define ``T`` (as also shown in the example above).
 
-        .. code-block:: python
-
-            >>> from typing import cast
-            >>> from typing_extensions import assert_type
-            >>> assert_type( Supplier.of("foo"),                             Supplier[str]       )  # OK (simple)
-            Supplier.of('foo')
-            >>> assert_type( Supplier.of(cast(str | int, "foo")),            Supplier[object]    )  # types unrefined
-            Supplier.of('foo')
-            >>> assert_type( Supplier[str | int].of(cast(str | int, "foo")), Supplier[int | str] )  # OK
-            Supplier.of('foo')
+        ```py
+        >>> from typing import cast
+        >>> from typing_extensions import assert_type
+        >>> assert_type( Supplier.of("foo"),                             Supplier[str]       )  # OK (simple)
+        Supplier.of('foo')
+        >>> assert_type( Supplier.of(cast(str | int, "foo")),            Supplier[object]    )  # types unrefined
+        Supplier.of('foo')
+        >>> assert_type( Supplier[str | int].of(cast(str | int, "foo")), Supplier[int | str] )  # OK
+        Supplier.of('foo')
+        ```
         """
 
         if isinstance(value, Supplier):
