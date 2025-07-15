@@ -1,3 +1,11 @@
+"""
+**Experimental.**
+
+Aspects provide a new way to interface with Kraken tasks. An aspects represents a common goal that is implemented by
+many tasks and can be used to selectively execute one or many similar tasks with common options that can be specified
+on the command-line.
+"""
+
 import inspect
 import logging
 import os
