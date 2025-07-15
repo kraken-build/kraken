@@ -179,19 +179,20 @@ class BuildCache:
             raise RuntimeError("Cannot commit cache before it has been finalized.")
 
         final_path = self.store_path(_force=True)
-        final_path_exists = final_path.exists()
-
         staging_path = self.staging_path()
-        if not staging_path.exists():
-            if final_path_exists:
-                return
-            raise FileNotFoundError(f"Staging path '{staging_path}' does not exist.")
 
-        if final_path.exists():
-            raise FileExistsError(f"Cache already exists at '{final_path}'.")
+        if staging_path.exists():
+            if final_path.exists():
+                raise FileExistsError(f"Cache already exists at '{final_path}'.")
+            else:
+                logger.debug("Committing cache from '%s' to '%s'", staging_path, final_path)
+                staging_path.rename(final_path)
+        else:
+            if final_path.exists():
+                logger.debug("Reusing cache at '%s'", final_path)
+            else:
+                raise FileNotFoundError(f"Staging path '{staging_path}' does not exist.")
 
-        logger.debug("Committing cache from '%s' to '%s'", staging_path, final_path)
-        staging_path.rename(final_path)
         self.committed = True
 
         for source, target in self.staged_links:
