@@ -666,7 +666,6 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
                         )
 
                 for produced_path in map(lambda x: Path(x).resolve(), produces):
-                    print(produced_path, path)
                     if produced_path.is_relative_to(path) or produced_path == path:
                         result.append(task)
 
@@ -683,13 +682,25 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
         else:
             tasks = context.resolve_tasks([target], relative_to=context.focus_project)
 
-        if not tasks:
+        # Ignore group tasks, they could be accidentally selected when specifying a target.
+        tasks = [t for t in tasks if not isinstance(t, GroupTask)]
+        implements = [t for t in tasks if isinstance(t, BuildAspect.Implements)]
+        not_implements = [t for t in tasks if not isinstance(t, BuildAspect.Implements)]
+
+        if not implements:
             raise ValueError(f"no task matched the specified target: {target}")
-        if len(tasks) > 1:
+
+        if len(implements) > 1:
             raise ValueError(f"more than one task matched the specified target: {target}")
 
-        if isinstance(tasks[0], GroupTask):
-            raise ValueError(f"a GroupTask matched the specified target ({target}), which is not a valid build target")
+        if not_implements:
+            logger.warning(
+                'Your target (%s) matched one task that implements the "build" aspect, but {} other(s) that does not. '
+                "If these tasks in the future implement the aspect, the same command will fail because the aspect "
+                "supports only a single task. Matching tasks that are ignored: %s",
+                target,
+                ", ".join(map(lambda t: str(t.address), tasks)),
+            )
 
         return tasks
 
