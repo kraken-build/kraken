@@ -134,16 +134,14 @@ class Supplier(Generic[T], abc.ABC):
         Note that Mypy (state v1.16.1) cannot properly refine types when ``T`` is a union type, meaning you often
         need to explicitly define ``T`` (as also shown in the example above).
 
-        ```py
-        >>> from typing import cast
-        >>> from typing_extensions import assert_type
-        >>> assert_type( Supplier.of("foo"),                             Supplier[str]       )  # OK (simple)
-        Supplier.of('foo')
-        >>> assert_type( Supplier.of(cast(str | int, "foo")),            Supplier[object]    )  # types unrefined
-        Supplier.of('foo')
-        >>> assert_type( Supplier[str | int].of(cast(str | int, "foo")), Supplier[int | str] )  # OK
-        Supplier.of('foo')
-        ```
+            >>> from typing import cast
+            >>> from typing_extensions import assert_type
+            >>> assert_type( Supplier.of("foo"),                             Supplier[str]       )  # OK (simple)
+            Supplier.of('foo')
+            >>> assert_type( Supplier.of(cast(str | int, "foo")),            Supplier[object]    )  # types unrefined
+            Supplier.of('foo')
+            >>> assert_type( Supplier[str | int].of(cast(str | int, "foo")), Supplier[int | str] )  # OK
+            Supplier.of('foo')
         """
 
         if isinstance(value, Supplier):
