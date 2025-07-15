@@ -96,7 +96,7 @@ class PytestTask(EnvironmentAwareDispatchTask, TestAspect.Implements):
             command += ["--doctest-modules"]
         command += shlex.split(os.getenv("PYTEST_FLAGS", ""))
 
-        if opt := TestAspect.current_options():
+        if opt := TestAspect.current_options(self):
             # TODO: handle opt.paths
             if opt.filter:
                 command += ["-k", " or ".join(opt.filter)]

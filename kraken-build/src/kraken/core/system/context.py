@@ -107,7 +107,13 @@ class Context(MetadataContainer, Currentable["Context"]):
         self._root_project: Project | None = None
         self._listeners: MutableMapping[ContextEvent.Type, list[ContextEvent.Listener]] = collections.defaultdict(list)
         self.focus_project: Project | None = None
-        self.aspects: list[Aspect] = []
+
+        # Aspects are associated with the task(s) they select, so only those tasks can retrieve the
+        # aspect and it's options at build time to take them into account. This is to avoid leaking an
+        # aspect into a task that was not selected (e.g. task X depends on Y, both implemene aspect A
+        # but only task X is selected -> Y should not be impacted by the aspect).
+        self._aspects: list[Aspect] = []
+        self._aspects_for_tasks: dict[Address, list[Aspect]] = {}
 
     @property
     def root_project(self) -> Project:
@@ -414,7 +420,7 @@ class Context(MetadataContainer, Currentable["Context"]):
             graph = self.get_build_graph(tasks)
 
         build_error: BuildError | None = None
-        if self.aspects:
+        if self._aspects:
             # The aspect needs a hook right after the graph execution ends, but before the other observer
             # gets a chance to process the results. The aspects may raise their own build error if they deem
             # the build unsuccessful for their own reasons.
@@ -422,7 +428,7 @@ class Context(MetadataContainer, Currentable["Context"]):
                 def after_execute_graph(_self, graph: Graph) -> None:
                     assert isinstance(graph, TaskGraph)
                     try:
-                        for aspect in self.aspects:
+                        for aspect in self._aspects:
                             aspect.after_execute_graph(self, graph)
                     except BuildError as exc:
                         nonlocal build_error
@@ -474,12 +480,32 @@ class Context(MetadataContainer, Currentable["Context"]):
             # TODO(NiklasRosenstein): Should we catch errors in listeners of letting them propagate?
             listener(ContextEvent(event_type, data))
 
-    def aspect(self, aspect_class: type[T_Aspect]) -> T_Aspect | None:
+    def register_aspect(self, aspect: Aspect, for_tasks: Sequence[Task]) -> None:
         """
-        If an aspect of the given type is set in the context, it is returned, otherwise `None`.
+        Registers an aspect for the given tasks. This may be called more than once for an aspect, which will
+        amend the tasks associated with the aspect.
         """
 
-        for aspect in self.aspects:
+        for task in for_tasks:
+            task_aspects = self._aspects_for_tasks.setdefault(task.address, [])
+            if aspect not in task_aspects:
+                task_aspects.append(aspect)
+
+        if aspect not in self._aspects:
+            self._aspects.append(aspect)
+
+    def aspect(self, aspect_class: type[T_Aspect], for_task: Task | None = None) -> T_Aspect | None:
+        """
+        If an aspect of the given type is set in the context, it is returned, otherwise `None`. If *for_task* is
+        specified, the aspect will only be returned if it was associated with the task.
+        """
+
+        if for_task:
+            aspects = self._aspects_for_tasks.get(for_task.address, [])
+        else:
+            aspects = self._aspects
+
+        for aspect in aspects:
             if isinstance(aspect, aspect_class):
                 return aspect
         return None

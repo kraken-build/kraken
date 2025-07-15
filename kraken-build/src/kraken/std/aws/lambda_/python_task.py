@@ -23,7 +23,7 @@ class BuildPythonLambdaZipTask(Task, BuildAspect.Implements):
     )
 
     def prepare(self) -> TaskStatus | None:
-        if opts := BuildAspect.current_options():
+        if opts := BuildAspect.current_options(self):
             if opts.outfile:
                 self.outfile.set(opts.outfile)
             if opts.symlink is not None:

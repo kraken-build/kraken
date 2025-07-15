@@ -148,22 +148,22 @@ class AspectBase(Generic[T_Options]):
         )
 
     @classmethod
-    def current(cls) -> Self | None:
+    def current(cls, for_task: "Task") -> Self | None:
         """
         Returns the current aspect as configured in the current context, if any.
         """
 
         from kraken.core.system.context import Context
 
-        return Context.current().aspect(cls)
+        return Context.current().aspect(cls, for_task)
 
     @classmethod
-    def current_options(cls) -> T_Options | None:
+    def current_options(cls, for_task: "Task") -> T_Options | None:
         """
         Just like [current], but returns the aspect's options directly.
         """
 
-        aspect = cls.current()
+        aspect = cls.current(for_task)
         return aspect.options if aspect else None
 
     def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:

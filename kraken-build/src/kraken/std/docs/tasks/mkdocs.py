@@ -81,7 +81,7 @@ class MkDocsTask(Task, RunAspect.Implements):
             port = int(os.environ.get("MKDOCS_PORT", "8000"))
             args += ["-a", f"localhost:{port}"]
 
-        if run := RunAspect.current_options():
+        if run := RunAspect.current_options(self):
             opts = parse_options(run.args, MkDocsRunOptions)
             if opts.serve:
                 mode = "serve"
