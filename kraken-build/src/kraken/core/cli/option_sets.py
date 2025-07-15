@@ -73,22 +73,22 @@ class BuildOptions:
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> BuildOptions:
-        if args.state_name:
+        if state_name := getattr(args, "state_name", None):
             logger.warning("the --state-name options are deprecated since kraken v0.45.0")
-        if args.state_dir:
+        if state_dir := getattr(args, "state_dir", None):
             logger.warning("the --state-dir option is deprecated since kraken v0.45.0")
-        if args.additional_state_dir:
+        if additional_state_dir := getattr(args, "additional_state_dir", None):
             logger.warning("the --additional-state-dir option is deprecated since kraken v0.45.0")
-        if args.no_load_project:
+        if no_load_project := getattr(args, "no_load_project", None):
             logger.warning("the --no-load-project option is deprecated since kraken v0.45.0")
 
         return cls(
             build_dir=args.build_dir,
             project_dir=args.project_dir,
-            state_name=args.state_name,
-            state_dir=args.state_dir or args.build_dir / BUILD_STATE_DIR,
-            additional_state_dirs=args.additional_state_dir or [],
-            no_load_project=args.no_load_project,
+            state_name=state_name or str(uuid.uuid4())[:7],
+            state_dir=state_dir or args.build_dir / BUILD_STATE_DIR,
+            additional_state_dirs=additional_state_dir or [],
+            no_load_project=no_load_project or False,
         )
 
 
