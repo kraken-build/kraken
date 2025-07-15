@@ -27,10 +27,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        includes:
+        include:
           - example-name: aws-lambda
-            command: build :lambda --outfile out.zip
-    name: ${{ matrix.example-name }}
+            command: build :lambda --outfile out.zip --no-symlink
+    name: ${{ matrix.example-name }} (aspect)
     with:
       example-name: ${{ matrix.example-name }}
       command: ${{ matrix.command }}
