@@ -4,6 +4,7 @@ import os
 import sys
 from collections.abc import Iterable
 from dataclasses import MISSING, dataclass, field, fields
+from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Generic, Literal, Mapping, TypeVar, cast, overload
 
 import attrs
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from kraken.core.system.task import Task
 
 logger = logging.getLogger(__name__)
+T = TypeVar("T")
 T_Dataclass = TypeVar("T_Dataclass", bound="DataclassInstance")
 T_Options = TypeVar("T_Options", bound="AspectOptions")
 
@@ -481,6 +483,80 @@ class TestAspect(AspectBase["TestAspect.Options"]):
 
 
 @dataclass
+class BuildAspect(AspectBase["BuildAspect.Options"]):
+    """
+    This aspect can be used to perform the building of an artifact (such as an executable or archive). If target
+    specified in the options can be a Kraken task or a path. If a path is specified, Kraken will search for the path
+    in any of the output properties (note that this only works for properties that are not computed and depend on
+    unpopulated properties).
+    """
+
+    class Implements:
+        pass
+
+    @dataclass
+    class Options(AspectOptions):
+        """
+        Execute a task or build a given artifact.
+
+        Support of the options depends on the selected target.
+
+        Parameters
+        ----------
+        target:
+            A single Kraken tasks and/or output path. If a basic name is used (e.g. `main`), it will be considered
+            as a path or task (must match either).
+
+        outfile:
+            When selecting a task that produces a single output file, it may support altering the path it is placed
+            in via this option. Some tasks may produce a folder instead.
+
+        release:
+            Some tasks may distinguish between debug and release builds. Using this option is equal to setting
+            `--build-mode=release`.
+
+        debug:
+            Some tasks may distinguish between debug and release builds. Using this option is equal to setting
+            `--build-mode=debug`.
+
+        build-mode:
+            An arbitrary string that the selected task can interpret to modify its build behaviour. Example values
+            are `release` and `debug`.
+        """
+
+        target: str = field(metadata={"positional": True})
+
+        outfile: Path | None = None
+
+        release: bool = False
+        debug: bool = False
+        build_mode: str | None = None
+
+        def __post_init__(self) -> None:
+            if self.build_mode and self.release:
+                raise ValueError("--build-mode and --release cannot be combined")
+            if self.build_mode and self.debug:
+                raise ValueError("--build-mode and --debug cannot be combined")
+            if self.release and self.debug:
+                raise ValueError("--release and --debug cannot be combined")
+
+        @overload
+        def get_build_mode(self, fallback: None = None) -> Literal["release", "debug"] | str | None: ...
+
+        @overload
+        def get_build_mode(self, fallback: T) -> Literal["release", "debug"] | str | T: ...
+
+        def get_build_mode(self, fallback: T | None = None) -> Literal["release", "debug"] | str | T | None:
+            if self.release:
+                return "release"
+            if self.debug:
+                return "debug"
+            if self.build_mode:
+                return self.build_mode
+            return fallback
+
+
+@dataclass
 class RunAspect(AspectBase["RunAspect.Options"]):
     """
     An aspect that can be used to run a single task, optionally appending arguments to the command the task wraps.
@@ -520,6 +596,7 @@ class RunAspect(AspectBase["RunAspect.Options"]):
 
 
 ASPECTS: dict[str, type[Aspect]] = {
+    "build": BuildAspect,
     "fmt": FmtAspect,
     "lint": LintAspect,
     "check": CheckAspect,
