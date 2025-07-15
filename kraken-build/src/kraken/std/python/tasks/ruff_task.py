@@ -6,6 +6,7 @@ from itertools import chain
 from os import fspath
 from pathlib import Path
 
+from kraken.common._fs import intersect_paths
 from kraken.core import Aspect, FmtAspect, LintAspect, Project, Property, Supplier, TaskStatus
 
 from .base_task import EnvironmentAwareDispatchTask
@@ -31,19 +32,30 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
 
     def get_execute_command_v2(self, env: MutableMapping[str, str]) -> list[str] | TaskStatus:
         ruff_args = list(self.ruff_task.get())
-        ruff_paths: list[str] = [fspath(self.settings.source_directory), *self.settings.get_tests_directory_as_args()]
+        ruff_paths: list[Path] = [self.settings.source_directory]
+        if tests_dir := self.settings.get_tests_directory():
+            ruff_paths.append(tests_dir)
+
+        print("In:", ruff_paths)
 
         if ruff_args[0] == "check" and (lint := LintAspect.current_options(self)):
             if lint.fix and "--fix" not in ruff_args:
                 ruff_args += ["--fix"]
             if lint.unsafe_fix and "--unsafe-fix" not in ruff_args:
                 ruff_args += ["--unsafe-fix"]
+            print("Lint:", lint.paths)
+            ruff_paths = intersect_paths(ruff_paths, lint.paths, left_relative_to=self.project.directory)
 
         if ruff_args[0] == "format" and (fmt := FmtAspect.current_options(self)):
             if fmt.check and "--check" not in ruff_args:
                 ruff_args += ["--check"]
+            print("Fmt:", fmt.paths)
+            ruff_paths = intersect_paths(ruff_paths, fmt.paths, left_relative_to=self.project.directory)
 
-        command = [*self.ruff_cmd.get(), *ruff_args, *ruff_paths]
+        if not ruff_paths:
+            return TaskStatus.skipped("no matching paths")
+
+        command = [*self.ruff_cmd.get(), *ruff_args, *map(fspath, ruff_paths)]
         command += [str(directory) for directory in self.settings.lint_enforced_directories]
         if self.config_file.is_filled():
             command += ["--config", str(self.config_file.get().absolute())]
