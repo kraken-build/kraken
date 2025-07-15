@@ -118,10 +118,10 @@ def _get_argument_parser(prog: str) -> argparse.ArgumentParser:
     for aspect_name, aspect_class in ASPECTS.items():
         aspect_parser = subparsers.add_parser(
             aspect_name,
-            description=aspect_class.Options.__doc__,
+            description=f"The `{aspect_name}` aspect. Use `-- --help` to see aspect-specific options.",
         )
         LoggingOptions.add_to_parser(aspect_parser)
-        BuildOptions.add_to_parser(aspect_parser)
+        BuildOptions.add_to_parser(aspect_parser, include_deprecated=False)
         RunOptions.add_to_parser(aspect_parser)
         aspect_parser.add_argument("args", nargs="*", help="Arguments for the aspect")
 

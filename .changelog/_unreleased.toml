@@ -81,3 +81,9 @@ id = "2bd69a5a-b974-4a99-aed7-0080fe1d3093"
 type = "feature"
 description = "Add `mkdocs(strict)` option (defaults to True)"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "21994d8b-c68e-443e-8ba3-9094c2d2e111"
+type = "deprecation"
+description = "Correctly mark `--state-name`, `--state-dir`, `--additional-state-dir`, `--no-load-project` options as deprecated. The Graph serialization/resumption features have already been deprecated in `v0.45.0`, these options were just missed to be marked as such."
+author = "@NiklasRosenstein"

@@ -24,7 +24,7 @@ class BuildOptions:
     state_name: str
 
     @staticmethod
-    def add_to_parser(parser: argparse.ArgumentParser) -> None:
+    def add_to_parser(parser: argparse.ArgumentParser, include_deprecated: bool = True) -> None:
         group = parser.add_argument_group("build options")
         group.add_argument(
             "-b",
@@ -46,32 +46,42 @@ class BuildOptions:
             "represented by the current working directory. (note: this option is automatically passed when using "
             "kraken-wrapper as it finds the respective project automatically).",
         )
-        group.add_argument(
-            "--state-name",
-            metavar="NAME",
-            help="specify a name for the generated state file; if not specified, a short random ID is used",
-            default=str(uuid.uuid4())[:7],
-        )
-        group.add_argument(
-            "--state-dir",
-            metavar="PATH",
-            type=Path,
-            help=f"specify the main build state directory [default: ${{--build-dir}}/{BUILD_STATE_DIR}]",
-        )
-        group.add_argument(
-            "--additional-state-dir",
-            metavar="PATH",
-            type=Path,
-            help="specify an additional state directory to load build state from. can be specified multiple times",
-        )
-        group.add_argument(
-            "--no-load-project",
-            action="store_true",
-            help="do not load the root project. this is only useful when loading an existing build state",
-        )
+        if include_deprecated:
+            group.add_argument(
+                "--state-name",
+                metavar="NAME",
+                help="deprecated since 0.45.0. specify a name for the generated state file; if not specified, a short random ID is used",
+                default=str(uuid.uuid4())[:7],
+            )
+            group.add_argument(
+                "--state-dir",
+                metavar="PATH",
+                type=Path,
+                help=f"deprecated since 0.45.0. specify the main build state directory [default: ${{--build-dir}}/{BUILD_STATE_DIR}]",
+            )
+            group.add_argument(
+                "--additional-state-dir",
+                metavar="PATH",
+                type=Path,
+                help="deprecated since 0.45.0. specify an additional state directory to load build state from. can be specified multiple times",
+            )
+            group.add_argument(
+                "--no-load-project",
+                action="store_true",
+                help="deprecated since 0.45.0. do not load the root project. this is only useful when loading an existing build state",
+            )
 
     @classmethod
     def collect(cls, args: argparse.Namespace) -> BuildOptions:
+        if args.state_name:
+            logger.warning("the --state-name options are deprecated since kraken v0.45.0")
+        if args.state_dir:
+            logger.warning("the --state-dir option is deprecated since kraken v0.45.0")
+        if args.additional_state_dir:
+            logger.warning("the --additional-state-dir option is deprecated since kraken v0.45.0")
+        if args.no_load_project:
+            logger.warning("the --no-load-project option is deprecated since kraken v0.45.0")
+
         return cls(
             build_dir=args.build_dir,
             project_dir=args.project_dir,
