@@ -36,20 +36,16 @@ class RuffTask(EnvironmentAwareDispatchTask, LintAspect.Implements, FmtAspect.Im
         if tests_dir := self.settings.get_tests_directory():
             ruff_paths.append(tests_dir)
 
-        print("In:", ruff_paths)
-
         if ruff_args[0] == "check" and (lint := LintAspect.current_options(self)):
             if lint.fix and "--fix" not in ruff_args:
                 ruff_args += ["--fix"]
             if lint.unsafe_fix and "--unsafe-fix" not in ruff_args:
                 ruff_args += ["--unsafe-fix"]
-            print("Lint:", lint.paths)
             ruff_paths = intersect_paths(ruff_paths, lint.paths, left_relative_to=self.project.directory)
 
         if ruff_args[0] == "format" and (fmt := FmtAspect.current_options(self)):
             if fmt.check and "--check" not in ruff_args:
                 ruff_args += ["--check"]
-            print("Fmt:", fmt.paths)
             ruff_paths = intersect_paths(ruff_paths, fmt.paths, left_relative_to=self.project.directory)
 
         if not ruff_paths:

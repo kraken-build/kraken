@@ -162,8 +162,8 @@ class AspectBase(Generic[T_Options]):
             parse_options(
                 args,
                 cls.Options,
-                name=name or cls.__class__.__name__,
-                help=help or cls.Options.__doc__,
+                name=name or cls.__name__,
+                help=help,
                 exit_on_error=exit_on_error,
                 exit_on_help=exit_on_help,
                 print_error=print_error,
@@ -804,3 +804,6 @@ ASPECTS: dict[str, type[Aspect]] = {
     "test": TestAspect,
     "invoke": RunAspect,  # "run" is currently shadowed by the original "kraken run" command
 }
+"""
+Maps the aspect's subcommand name for the Kraken CLI to the aspect class.
+"""
