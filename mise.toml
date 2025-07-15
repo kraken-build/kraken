@@ -8,4 +8,4 @@ typos = "1.34.0"
 uv = "0.7.20"
 
 [tasks.build-docs]
-run = "kraken invoke mkdocs --no-strict -vv"
+run = "uv run --project kraken-build kraken invoke mkdocs --no-strict -vv"
