@@ -16,6 +16,11 @@ on:
         required: false
         type: string
         default: '3.13'
+      krakenw:
+        description: 'Whether to run with krakenw'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   kraken:
@@ -36,6 +41,7 @@ jobs:
 
   krakenw:
     runs-on: ubuntu-latest
+    if: ${{ inputs.krakenw }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

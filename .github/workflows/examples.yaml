@@ -20,4 +20,18 @@ jobs:
     name: ${{ matrix.example-name }}
     with:
       example-name: ${{ matrix.example-name }}
-      targets: run :**
+      command: run :**
+
+  run-examples-with-aspects:
+    uses: ./.github/workflows/.run-example.yaml
+    strategy:
+      fail-fast: false
+      matrix:
+        includes:
+          - example-name: aws-lambda
+            command: build :lambda --outfile out.zip
+    name: ${{ matrix.example-name }}
+    with:
+      example-name: ${{ matrix.example-name }}
+      command: ${{ matrix.command }}
+      krakenw: false
