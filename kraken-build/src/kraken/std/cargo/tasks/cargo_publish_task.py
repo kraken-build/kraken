@@ -74,13 +74,12 @@ class CargoPublishTask(CargoBuildTask):
     def get_cargo_command(self, env: dict[str, str]) -> list[str]:
         super().get_cargo_command(env)
         registry = self.registry.get()
-        if registry.publish_token is None:
-            raise ValueError(f'registry {registry.alias!r} missing a "publish_token"')
         command = (
             ["cargo", "publish"]
             + (["--locked"] if self.should_add_locked_flag() else [])
             + self.additional_args.get()
-            + ["--registry", registry.alias, "--token", registry.publish_token]
+            + ["--registry", registry.alias]
+            + (["--token", registry.publish_token] if registry.publish_token else [])
             + ([] if self.verify.get() else ["--no-verify"])
         )
         package_name = self.package_name.get()
