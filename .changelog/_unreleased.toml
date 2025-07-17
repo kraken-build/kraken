@@ -1,0 +1,5 @@
+[[entries]]
+id = "f0bf0fe2-2392-4360-a60f-aba8aed02de3"
+type = "fix"
+description = "`BuildAspect.init()` to puts its `Options.outfile` relative to the original working directory"
+author = "@NiklasRosenstein"
