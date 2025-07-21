@@ -146,12 +146,17 @@ class VirtualEnvManager:
     def get_lockfile(self, requirements: RequirementSpec) -> Lockfile:
         return Lockfile(requirements=requirements, pinned={dist.name: dist.version for dist in self._venv.freeze()})
 
-    def install(self, requirements: RequirementSpec, reinstall: bool) -> None:
+    def install(self, requirements: RequirementSpec, reinstall: bool, upgrade: bool) -> None:
         """
         Ensure that the virtual environment managed by this instance conforms to the specified requirements.
 
         The environment may be re-created if it is found to be in an unrecoverable state (e.g. if the interpreter
         version constraint is no longer satisfied or the environment is entirely broken).
+
+        Args:
+            requirements: The specification for the environment.
+            reinstall: Whether to perform a fresh install.
+            upgrade: Whether to upgrade existing packages to their latest (compatible) version.
         """
 
         # Inject credentials into the requirements.
@@ -211,6 +216,7 @@ class VirtualEnvManager:
                 requirements=flatten(req.to_args(self._project_root) for req in requirements.requirements),
                 index_url=requirements.index_url,
                 extra_index_urls=requirements.extra_index_urls,
+                upgrade=upgrade,
             )
         else:
             logger.info("No requirements specified, skipping install step.")

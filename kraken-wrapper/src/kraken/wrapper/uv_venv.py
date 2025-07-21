@@ -97,6 +97,7 @@ class UvVirtualEnv:
         requirements: Iterable[str],
         index_url: str | None = None,
         extra_index_urls: Sequence[str] = (),
+        upgrade: bool = False,
     ) -> None:
         """
         Performs an exact install of the given requirements into the environment.
@@ -115,6 +116,8 @@ class UvVirtualEnv:
             command += ["--index-url", index_url]
         for url in extra_index_urls:
             command += ["--extra-index-url", url]
+        if upgrade:
+            command += ["--upgrade"]
         command += ["--"]
         command += requirements
 
