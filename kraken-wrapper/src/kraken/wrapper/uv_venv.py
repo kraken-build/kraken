@@ -97,6 +97,7 @@ class UvVirtualEnv:
         requirements: Iterable[str],
         index_url: str | None = None,
         extra_index_urls: Sequence[str] = (),
+        python_version: str | None = None,
         upgrade: bool = False,
     ) -> None:
         """
@@ -116,6 +117,8 @@ class UvVirtualEnv:
             command += ["--index-url", index_url]
         for url in extra_index_urls:
             command += ["--extra-index-url", url]
+        if python_version:
+            command += ["--python-version", python_version]
         if upgrade:
             command += ["--upgrade"]
         command += ["--"]

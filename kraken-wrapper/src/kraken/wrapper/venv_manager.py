@@ -216,6 +216,9 @@ class VirtualEnvManager:
                 requirements=flatten(req.to_args(self._project_root) for req in requirements.requirements),
                 index_url=requirements.index_url,
                 extra_index_urls=requirements.extra_index_urls,
+                # NOTE: If we don't specify a min version, Uv will install only for the current version. We currently
+                #       prefer 3.10 as the minimum if no other is set.
+                python_version=requirements.get_python_min_version() or "3.10",
                 upgrade=upgrade,
             )
         else:
