@@ -1,0 +1,5 @@
+[[entries]]
+id = "aa2cba40-ff5c-42b0-a1b8-636f522db101"
+type = "fix"
+description = "`krakenw --upgrade` now passes the `--upgrade` flag to `uv pip install`, as expected"
+author = "@NiklasRosenstein"
