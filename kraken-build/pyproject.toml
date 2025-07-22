@@ -30,7 +30,7 @@ dependencies = [
   "tomlkit>=0.13.0,<0.14.0",
   "typeapi>=2.0.0,<3.0.0",
   "typing-extensions>=4.6.0",
-  "uv>=0.7.0,<0.8.0",
+  "uv>=0.8.0,<0.9.0",
 ]
 
 [project.scripts]
