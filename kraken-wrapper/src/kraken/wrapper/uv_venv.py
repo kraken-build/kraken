@@ -197,15 +197,17 @@ class UvProjectShim:
     """
 
     def __init__(self, project_name: str = "kraken-build-env", version: str = "0.0.0") -> None:
-        self._tempdir = TemporaryDirectory()
+        self._tempdir: TemporaryDirectory[str] | None = None
         self.project_name = project_name
         self.version = version
 
     def __enter__(self) -> UvProjectShim:
+        self._tempdir = TemporaryDirectory()
         self._tempdir.__enter__()
         return self
 
     def __exit__(self, *args: Any) -> None:
+        assert self._tempdir is not None
         self._tempdir.__exit__(*args)
 
     @staticmethod
@@ -265,6 +267,8 @@ class UvProjectShim:
     def sync(self, venv: UvVirtualEnv) -> None:
         """Run `uv sync` for the project."""
 
+        assert self._tempdir is not None, "context not entered"
+
         command = ["uv", "sync", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
         logger.debug("Installing into build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
         subprocess.check_call(
@@ -276,6 +280,8 @@ class UvProjectShim:
 
     def lock(self, venv: UvVirtualEnv) -> None:
         """Run `uv lock` for the project."""
+
+        assert self._tempdir is not None, "context not entered"
 
         command = ["uv", "lock", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
         logger.debug("Locking build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
@@ -289,9 +295,11 @@ class UvProjectShim:
     def pyproject_toml(self) -> Path:
         """Return the path to the pyproject.toml file."""
 
+        assert self._tempdir is not None, "context not entered"
         return Path(self._tempdir.name).joinpath("pyproject.toml")
 
     def lockfile(self) -> Path:
         """Return the path to the Uv lockfile."""
 
+        assert self._tempdir is not None, "context not entered"
         return Path(self._tempdir.name).joinpath("uv.lock")

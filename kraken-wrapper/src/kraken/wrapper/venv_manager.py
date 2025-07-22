@@ -213,9 +213,9 @@ class VirtualEnvManager:
         if requirements.requirements:
             # We want to leverage Uv's dependency resolution mechanism, which we can't mimic with `uv pip`.
             # So instead, we generate a fake project with the requirements.
-            shim = UvProjectShim()
-            shim.write_pyproject_toml(self._project_root, requirements)
-            shim.sync(self._venv)
+            with UvProjectShim() as shim:
+                shim.write_pyproject_toml(self._project_root, requirements)
+                shim.sync(self._venv)
         else:
             logger.info("No requirements specified, skipping install step.")
 
