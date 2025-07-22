@@ -1,4 +1,4 @@
-__version__ = "0.46.2"
+__version__ = "0.46.3"
 
 from kraken.common.supplier import Supplier
 from kraken.core.address import Address
