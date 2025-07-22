@@ -7,7 +7,7 @@ packages = ["src/kraken"]
 
 [project]
 name = "kraken-wrapper"
-version = "0.46.3"
+version = "0.47.0"
 description = "krakenw ensures a consistent and reproducible environment for your project's build orchestrated by Kraken."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -17,7 +17,7 @@ authors = [
 ]
 dependencies = [
   "deprecated>=1.2.18",
-  "kraken-build==0.46.3",
+  "kraken-build==0.47.0",
   "loguru>=0.7.2,<0.8.0",
   "packaging>=25,<25.1",
   "uv>=0.8.0,<0.9.0",
