@@ -23,9 +23,8 @@ from kraken.common import (
     not_none,
     safe_rmpath,
 )
-from kraken.common._generic import flatten
 from kraken.std.util.url import inject_url_credentials
-from kraken.wrapper.uv_venv import UvVirtualEnv
+from kraken.wrapper.uv_venv import UvProjectShim, UvVirtualEnv
 
 from ._config import AuthModel
 
@@ -212,15 +211,11 @@ class VirtualEnvManager:
             self._venv.create(python=Path(original_python))
 
         if requirements.requirements:
-            self._venv.install(
-                requirements=flatten(req.to_args(self._project_root) for req in requirements.requirements),
-                index_url=requirements.index_url,
-                extra_index_urls=requirements.extra_index_urls,
-                # NOTE: If we don't specify a min version, Uv will install only for the current version. We currently
-                #       prefer 3.10 as the minimum if no other is set.
-                python_version=requirements.get_python_min_version() or "3.10",
-                upgrade=upgrade,
-            )
+            # We want to leverage Uv's dependency resolution mechanism, which we can't mimic with `uv pip`.
+            # So instead, we generate a fake project with the requirements.
+            with UvProjectShim() as shim:
+                shim.write_pyproject_toml(self._project_root, requirements)
+                shim.sync(self._venv)
         else:
             logger.info("No requirements specified, skipping install step.")
 

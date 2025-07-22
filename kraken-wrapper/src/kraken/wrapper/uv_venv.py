@@ -3,13 +3,22 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
-from os import fsdecode
+from os import fsdecode, fspath
 from pathlib import Path
-from typing import Iterable, MutableMapping, NamedTuple, Sequence
+from tempfile import TemporaryDirectory
+from typing import Any, Iterable, MutableMapping, NamedTuple, Sequence
 
+import tomli_w
 from uv.__main__ import find_uv_bin
 
 from kraken.common._fs import safe_rmpath
+from kraken.common._requirements import (
+    DEFAULT_INTERPRETER_CONSTRAINT,
+    LocalRequirement,
+    PipRequirement,
+    RequirementSpec,
+    UrlRequirement,
+)
 from kraken.common.findpython import get_python_interpreter_version
 from kraken.common.path import is_relative_to
 from kraken.common.sanitize import sanitize_http_basic_auth
@@ -179,3 +188,118 @@ class UvVirtualEnv:
         paths = environ.get("PATH", "").split(os.pathsep)
         paths = [path for path in paths if not is_relative_to(Path(path), self.path)]
         environ["PATH"] = os.pathsep.join(paths)
+
+
+class UvProjectShim:
+    """
+    Helper class that acts like a proper Python project to get Uv to generate a lock file
+    and install into a virtual environment.
+    """
+
+    def __init__(self, project_name: str = "kraken-build-env", version: str = "0.0.0") -> None:
+        self._tempdir: TemporaryDirectory[str] | None = None
+        self.project_name = project_name
+        self.version = version
+
+    def __enter__(self) -> UvProjectShim:
+        self._tempdir = TemporaryDirectory()
+        self._tempdir.__enter__()
+        return self
+
+    def __exit__(self, *args: Any) -> None:
+        assert self._tempdir is not None
+        self._tempdir.__exit__(*args)
+
+    @staticmethod
+    def generate_pyproject_toml(
+        base_dir: Path,
+        project_name: str,
+        version: str,
+        requirements: RequirementSpec,
+    ) -> dict[str, Any]:
+        """
+        Generates the payload for a `pyproject.toml`.
+
+        Args:
+            base_dir: The base directory where local, relative requirements are considered relative to.
+            project_name: The name to put into the `[project]` section.
+            version: The version to put into the `[project]` section.
+            requirements: The requirements. All fields but the `pythonpath` are taken into account.
+        """
+
+        payload = {
+            "project": {
+                "name": project_name,
+                "version": version,
+                "dependencies": (dependencies := []),
+                "requires-python": requirements.interpreter_constraint or DEFAULT_INTERPRETER_CONSTRAINT,
+            },
+            "tool": {
+                "uv": {
+                    "sources": (sources := {}),
+                    "index": (indexes := []),
+                }
+            },
+        }
+
+        for req in requirements.requirements:
+            match req:
+                case PipRequirement():
+                    dependencies.append(str(req))
+                case LocalRequirement() | UrlRequirement():
+                    dependencies.append(req.name)
+                    sources[req.name] = req.to_uv_source(base_dir)
+                case _:
+                    assert False, f"unexpected requirement type: {type(req).__name__} - {req!r}"
+
+        if requirements.index_url:
+            indexes.append({"url": requirements.index_url, "default": True})
+
+        for url in requirements.extra_index_urls:
+            indexes.append({"url": url})
+
+        return payload
+
+    def write_pyproject_toml(self, base_dir: Path, requirements: RequirementSpec) -> None:
+        payload = self.generate_pyproject_toml(base_dir, self.project_name, self.version, requirements)
+        self.pyproject_toml().write_text(tomli_w.dumps(payload))
+
+    def sync(self, venv: UvVirtualEnv) -> None:
+        """Run `uv sync` for the project."""
+
+        assert self._tempdir is not None, "context not entered"
+
+        command = ["uv", "sync", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
+        logger.debug("Installing into build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
+        subprocess.check_call(
+            command,
+            cwd=self._tempdir.name,
+            env={k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+            | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
+        )
+
+    def lock(self, venv: UvVirtualEnv) -> None:
+        """Run `uv lock` for the project."""
+
+        assert self._tempdir is not None, "context not entered"
+
+        command = ["uv", "lock", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
+        logger.debug("Locking build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
+        subprocess.check_call(
+            command,
+            cwd=self._tempdir.name,
+            env={k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+            | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
+        )
+
+    def pyproject_toml(self) -> Path:
+        """Return the path to the pyproject.toml file."""
+
+        assert self._tempdir is not None, "context not entered"
+        return Path(self._tempdir.name).joinpath("pyproject.toml")
+
+    def lockfile(self) -> Path:
+        """Return the path to the Uv lockfile."""
+
+        assert self._tempdir is not None, "context not entered"
+        return Path(self._tempdir.name).joinpath("uv.lock")

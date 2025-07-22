@@ -5,9 +5,10 @@ import hashlib
 import logging
 import re
 from collections.abc import Iterable
+from os import fspath
 from pathlib import Path
-from typing import Any
-from urllib.parse import urlparse
+from typing import Any, Literal
+from urllib.parse import parse_qs, urlparse, urlunparse
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
@@ -83,7 +84,10 @@ class LocalRequirement(Requirement):
         return f"{self.name} @ {self.path}"
 
     def to_args(self, base_dir: Path) -> list[str]:
-        return [str((base_dir / self.path if base_dir else self.path).absolute())]
+        return [fspath((base_dir / self.path).absolute())]
+
+    def to_uv_source(self, base_dir: Path) -> dict[str, Any]:
+        return {"path": fspath((base_dir / self.path).absolute()), "editable": True}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -105,6 +109,54 @@ class UrlRequirement(Requirement):
 
     def to_args(self, base_dir: Path) -> list[str]:
         return [str(self)]
+
+    def to_uv_source(self, base_dir: Path) -> dict[str, Any]:
+        result = {}
+        if (url := self.url).startswith("git+"):
+            parsed = urlparse(self.url)
+            params = parse_qs(parsed.fragment)
+
+            # Strip the Git hints from the URL.
+            parsed = parsed._replace(scheme=parsed.scheme[4:], fragment="")
+
+            if subdirectory := params.get("subdirectory"):
+                result["subdirectory"] = subdirectory[0]
+
+            if "@" in parsed.path:
+                path, ref = parsed.path.partition("@")[::2]
+                parsed = parsed._replace(path=path)
+                result[self._classify_git_ref(ref)] = ref
+
+            result["git"] = urlunparse(parsed)
+        else:
+            result["url"] = url
+        return result
+
+    @staticmethod
+    def _classify_git_ref(ref: str) -> Literal["rev", "tag", "branch"]:
+        """
+        Classify a Git reference as a tag, branch, or revision.
+        Args:
+            ref (str): The Git reference to classify.
+
+        Examples:
+            >>> UrlRequirement._classify_git_ref("v1.0.0")
+            'tag'
+            >>> UrlRequirement._classify_git_ref("abcdef1")
+            'rev'
+            >>> UrlRequirement._classify_git_ref("main")
+            'branch'
+        """
+
+        # Match Git commit SHA hashes (7 or more hexadecimal characters).
+        if re.match(r"[0-9a-f]{7,}$", ref):
+            return "rev"
+
+        # Match Git references that are likely version tags.
+        if re.match(r"((.*/v?)|v?)\d+.*\.", ref):
+            return "tag"
+
+        return "branch"
 
 
 @dataclasses.dataclass(frozen=True)
