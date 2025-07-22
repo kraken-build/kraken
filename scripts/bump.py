@@ -33,7 +33,19 @@ post_bump_hooks = [
 
 
 def git_add(*paths: str | Path) -> None:
-    subprocess.call(["git", "add", *(fspath(p) for p in paths)])
+    subprocess.check_call(["git", "add", *(fspath(p) for p in paths)])
+
+
+def git_commit(message: str) -> None:
+    subprocess.check_call(["git", "commit", "-m", message])
+
+
+def git_tag(name: str, *, force: bool = False) -> None:
+    subprocess.check_call(["git", "tag", name, *(["-f"] if force else [])])
+
+
+def git_push(*refs: str, remote: str = "origin", force: bool = False) -> None:
+    subprocess.check_call(["git", "push", remote, *refs, *(["-f"] if force else [])])
 
 
 def update_files(version: str) -> None:
@@ -82,11 +94,17 @@ def release_changelog(version: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("version")
+    parser.add_argument("--release", action="store_true", help="Commit, tag and push.")
+    parser.add_argument("--force", action="store_true", help="Force tag and push.")
     args = parser.parse_args()
 
     update_files(args.version)
     run_post_hooks()
     release_changelog(args.version)
+    if args.release:
+        git_commit(f"release v{args.version}")
+        git_tag(args.version, force=args.force)
+        git_push(args.version, force=args.force)
 
 
 if __name__ == "__main__":

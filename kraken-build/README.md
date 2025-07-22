@@ -47,19 +47,7 @@ $ krakenw run fmt lint test
 A release must be created by a maintainer that has write access to the `develop` branch.
 
 ```
-$ ./scripts/bump.py X.Y.Z
-$ git commit -m 'release X.Y.Z'
-$ git tag X.Y.Z
-$ git push origin develop X.Y.Z
+$ ./scripts/bump.py X.Y.Z --release
 ```
 
 The packages are published to PyPI from CI.
-
-```
-from kraken.common import buildscript
-buildscript(requirements=["kraken-build==0.45.2"])
-
-from kraken.std import python
-python.mypy()
-python.ruff()
-```
