@@ -1,0 +1,5 @@
+[[entries]]
+id = "d1a38ce2-67db-4e7b-bfbf-3f846390d878"
+type = "improvement"
+description = "Use Uv's own dependency resolution mechanism when installing build environments instead of `uv pip`, which cannot properly respect the interpreter constraint"
+author = "@NiklasRosenstein"
