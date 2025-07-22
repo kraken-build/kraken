@@ -723,6 +723,11 @@ class BuildAspect(AspectBase["BuildAspect.Options"]):
 
         return result
 
+    def init(self, context: "Context") -> None:
+        if self.options.outfile:
+            self.options.outfile = context.original_working_directory / self.options.outfile
+        return super().init(context)
+
     def select_tasks(self, context: "Context", graph: "TaskGraph") -> Iterable["Task"]:
         from kraken.core.system.task import GroupTask
 

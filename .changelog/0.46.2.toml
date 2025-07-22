@@ -1,0 +1,13 @@
+release-date = "2025-07-21"
+
+[[entries]]
+id = "aa2cba40-ff5c-42b0-a1b8-636f522db101"
+type = "fix"
+description = "`krakenw --upgrade` now passes the `--upgrade` flag to `uv pip install`, as expected"
+author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e4028844-450c-4c4c-b01c-cabc0b1ffcf8"
+type = "fix"
+description = "Pass `--python-version` argument to `uv pip install` to ensure the minimum interpreter constraint in the buildscript requirements is respected"
+author = "@NiklasRosenstein"

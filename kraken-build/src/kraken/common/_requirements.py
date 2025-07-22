@@ -9,6 +9,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from packaging.specifiers import SpecifierSet
+from packaging.version import Version
+
 from ._buildscript import BuildscriptMetadata
 from ._generic import NotSet, flatten
 
@@ -248,3 +251,22 @@ class RequirementSpec:
             additional_sys_paths=[x for x in self.pythonpath if x != DEFAULT_BUILD_SUPPORT_FOLDER],
             interpreter_constraint=DEFAULT_INTERPRETER_CONSTRAINT,
         )
+
+    def get_python_min_version(self) -> str | None:
+        """
+        Return the minimum version of Python that must be supported by this RequirementSpec.
+
+        This is not a perfect representation of the `interpreter_constraint`, but it is needed with the method
+        that we use for `uv pip install` nowadays.
+        """
+
+        if self.interpreter_constraint is None:
+            return None
+
+        min_version: str | None = None
+        for spec in SpecifierSet(self.interpreter_constraint):
+            if spec.operator in (">", ">="):
+                if min_version is None or Version(min_version) > Version(spec.version):
+                    min_version = spec.version
+
+        return min_version
