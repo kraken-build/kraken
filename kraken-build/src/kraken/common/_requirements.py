@@ -3,9 +3,9 @@ import argparse
 import dataclasses
 import hashlib
 import logging
-from os import fspath
 import re
 from collections.abc import Iterable
+from os import fspath
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse, urlunparse
