@@ -12,7 +12,13 @@ import tomli_w
 from uv.__main__ import find_uv_bin
 
 from kraken.common._fs import safe_rmpath
-from kraken.common._requirements import LocalRequirement, PipRequirement, RequirementSpec, UrlRequirement
+from kraken.common._requirements import (
+    DEFAULT_INTERPRETER_CONSTRAINT,
+    LocalRequirement,
+    PipRequirement,
+    RequirementSpec,
+    UrlRequirement,
+)
 from kraken.common.findpython import get_python_interpreter_version
 from kraken.common.path import is_relative_to
 from kraken.common.sanitize import sanitize_http_basic_auth
@@ -224,7 +230,7 @@ class UvProjectShim:
                 "name": project_name,
                 "version": version,
                 "dependencies": (dependencies := []),
-                "requires-python": requirements.interpreter_constraint or ">=3.10",
+                "requires-python": requirements.interpreter_constraint or DEFAULT_INTERPRETER_CONSTRAINT,
             },
             "tool": {
                 "uv": {
