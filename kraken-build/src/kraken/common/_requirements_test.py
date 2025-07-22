@@ -34,7 +34,7 @@ def test__UrlRequirement__to_uv_source() -> None:
     assert UrlRequirement(
         "kraken-build",
         "git+https://github.com/kraken-build.git@master#subdirectory=kraken-build",
-    ).to_uv_source() == {
+    ).to_uv_source(Path.cwd()) == {
         "git": "https://github.com/kraken-build.git",
         "branch": "master",
         "subdirectory": "kraken-build",
@@ -43,7 +43,7 @@ def test__UrlRequirement__to_uv_source() -> None:
     assert UrlRequirement(
         "kraken-build",
         "git+https://github.com/kraken-build.git@deadbeef#subdirectory=kraken-build",
-    ).to_uv_source() == {
+    ).to_uv_source(Path.cwd()) == {
         "git": "https://github.com/kraken-build.git",
         "rev": "deadbeef",
         "subdirectory": "kraken-build",
@@ -52,7 +52,7 @@ def test__UrlRequirement__to_uv_source() -> None:
     assert UrlRequirement(
         "kraken-build",
         "git+https://github.com/kraken-build.git@deadbeef/imabranch#subdirectory=kraken-build",
-    ).to_uv_source() == {
+    ).to_uv_source(Path.cwd()) == {
         "git": "https://github.com/kraken-build.git",
         "branch": "deadbeef/imabranch",
         "subdirectory": "kraken-build",
@@ -61,7 +61,7 @@ def test__UrlRequirement__to_uv_source() -> None:
     assert UrlRequirement(
         "kraken-build",
         "git+https://github.com/kraken-build.git@0.44.2#subdirectory=kraken-build",
-    ).to_uv_source() == {
+    ).to_uv_source(Path.cwd()) == {
         "git": "https://github.com/kraken-build.git",
         "tag": "0.44.2",
         "subdirectory": "kraken-build",
@@ -70,7 +70,7 @@ def test__UrlRequirement__to_uv_source() -> None:
     assert UrlRequirement(
         "kraken-build",
         "git+https://github.com/kraken-build.git@kraken-build/v0.44.2#subdirectory=kraken-build",
-    ).to_uv_source() == {
+    ).to_uv_source(Path.cwd()) == {
         "git": "https://github.com/kraken-build.git",
         "tag": "kraken-build/v0.44.2",
         "subdirectory": "kraken-build",
