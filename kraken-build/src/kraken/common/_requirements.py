@@ -84,10 +84,10 @@ class LocalRequirement(Requirement):
         return f"{self.name} @ {self.path}"
 
     def to_args(self, base_dir: Path) -> list[str]:
-        return [str((base_dir / self.path if base_dir else self.path).absolute())]
+        return [fspath((base_dir / self.path).absolute())]
 
-    def to_uv_source(self) -> dict[str, Any]:
-        return {"path": fspath(self.path), "editable": True}
+    def to_uv_source(self, base_dir: Path) -> dict[str, Any]:
+        return {"path": fspath((base_dir / self.path).absolute()), "editable": True}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -110,7 +110,7 @@ class UrlRequirement(Requirement):
     def to_args(self, base_dir: Path) -> list[str]:
         return [str(self)]
 
-    def to_uv_source(self) -> dict[str, Any]:
+    def to_uv_source(self, base_dir: Path) -> dict[str, Any]:
         result = {}
         if (url := self.url).startswith("git+"):
             parsed = urlparse(self.url)

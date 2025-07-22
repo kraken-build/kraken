@@ -30,13 +30,19 @@ def chdir(path: Path) -> Iterator[None]:
 
 
 def test__issue_263__local_dependency_is_considered_relative_to_project_root() -> None:
+    """
+    This test validates that a dependency from a relative path can be installed when specified in `buildscript()`
+    and that this dependency is considered relative to the project root (where the `buildscript()` call is made),
+    rather than the current working directory.
+    """
+
     with TemporaryDirectory() as tmp:
         shutil.copytree(DEPENDENCY, Path(tmp) / DEPENDENCY.name)
         shutil.copytree(EXAMPLE_PROJECT, Path(tmp) / EXAMPLE_PROJECT.name)
 
         with chdir(Path(tmp) / EXAMPLE_PROJECT.name / "subproject"):
             with pytest.raises(SystemExit) as excinfo:
-                main(["--use", "UV", "run", "-s"])
+                main(["run", "-s"])
             assert excinfo.value.code == 0
 
         # We expect that the example_project/subproject/.kraken.py creates a file.

@@ -203,7 +203,22 @@ class UvProjectShim:
         self._tempdir.__exit__(*args)
 
     @staticmethod
-    def generate_pyproject_toml(project_name: str, version: str, requirements: RequirementSpec) -> dict[str, Any]:
+    def generate_pyproject_toml(
+        base_dir: Path,
+        project_name: str,
+        version: str,
+        requirements: RequirementSpec,
+    ) -> dict[str, Any]:
+        """
+        Generates the payload for a `pyproject.toml`.
+
+        Args:
+            base_dir: The base directory where local, relative requirements are considered relative to.
+            project_name: The name to put into the `[project]` section.
+            version: The version to put into the `[project]` section.
+            requirements: The requirements. All fields but the `pythonpath` are taken into account.
+        """
+
         payload = {
             "project": {
                 "name": project_name,
@@ -225,7 +240,7 @@ class UvProjectShim:
                     dependencies.append(str(req))
                 case LocalRequirement() | UrlRequirement():
                     dependencies.append(req.name)
-                    sources[req.name] = req.to_uv_source()
+                    sources[req.name] = req.to_uv_source(base_dir)
                 case _:
                     assert False, f"unexpected req: {req!r}"
 
@@ -237,8 +252,8 @@ class UvProjectShim:
 
         return payload
 
-    def write_pyproject_toml(self, requirements: RequirementSpec) -> None:
-        payload = self.generate_pyproject_toml(self.project_name, self.version, requirements)
+    def write_pyproject_toml(self, base_dir: Path, requirements: RequirementSpec) -> None:
+        payload = self.generate_pyproject_toml(base_dir, self.project_name, self.version, requirements)
         self.pyproject_toml().write_text(tomli_w.dumps(payload))
 
     def sync(self, venv: UvVirtualEnv) -> None:
@@ -249,7 +264,8 @@ class UvProjectShim:
         subprocess.check_call(
             command,
             cwd=self._tempdir.name,
-            env=os.environ | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
+            env={k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+            | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
         )
 
     def lock(self, venv: UvVirtualEnv) -> None:
@@ -260,7 +276,8 @@ class UvProjectShim:
         subprocess.check_call(
             command,
             cwd=self._tempdir.name,
-            env=os.environ | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
+            env={k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}
+            | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)},
         )
 
     def pyproject_toml(self) -> Path:
