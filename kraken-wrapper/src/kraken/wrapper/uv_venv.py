@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
-from os import fsdecode
+from os import fsdecode, fspath
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any, Iterable, MutableMapping, NamedTuple, Sequence
@@ -244,19 +244,19 @@ class UvProjectShim:
     def sync(self, venv: UvVirtualEnv) -> None:
         """Run `uv sync` for the project."""
 
-        command = ["uv", "sync", "--project", self._tempdir.name, "--python", str(venv.python_bin)]
+        command = ["uv", "sync", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
         logger.debug("Installing into build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
         subprocess.check_call(
-            command, cwd=self._tempdir.name, env=os.environ | {"UV_PROJECT_ENVIRONMENT": str(venv.path)}
+            command, cwd=self._tempdir.name, env=os.environ | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)}
         )
 
     def lock(self, venv: UvVirtualEnv) -> None:
         """Run `uv lock` for the project."""
 
-        command = ["uv", "lock", "--project", self._tempdir.name, "--python", str(venv.python_bin)]
+        command = ["uv", "lock", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
         logger.debug("Locking build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
         subprocess.check_call(
-            command, cwd=self._tempdir.name, env=os.environ | {"UV_PROJECT_ENVIRONMENT": str(venv.path)}
+            command, cwd=self._tempdir.name, env=os.environ | {"UV_PROJECT_ENVIRONMENT": fspath(venv.path)}
         )
 
     def pyproject_toml(self) -> Path:

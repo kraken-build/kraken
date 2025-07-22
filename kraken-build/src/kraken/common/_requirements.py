@@ -3,6 +3,7 @@ import argparse
 import dataclasses
 import hashlib
 import logging
+from os import fspath
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -86,7 +87,7 @@ class LocalRequirement(Requirement):
         return [str((base_dir / self.path if base_dir else self.path).absolute())]
 
     def to_uv_source(self) -> dict[str, Any]:
-        return {"path": self.path, "editable": True}
+        return {"path": fspath(self.path), "editable": True}
 
 
 @dataclasses.dataclass(frozen=True)
