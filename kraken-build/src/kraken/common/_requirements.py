@@ -7,7 +7,7 @@ import re
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse, urlunparse
 
 from packaging.specifiers import SpecifierSet
 from packaging.version import Version
@@ -85,6 +85,9 @@ class LocalRequirement(Requirement):
     def to_args(self, base_dir: Path) -> list[str]:
         return [str((base_dir / self.path if base_dir else self.path).absolute())]
 
+    def to_uv_source(self) -> dict[str, Any]:
+        return {"path": self.path, "editable": True}
+
 
 @dataclasses.dataclass(frozen=True)
 class UrlRequirement(Requirement):
@@ -105,6 +108,36 @@ class UrlRequirement(Requirement):
 
     def to_args(self, base_dir: Path) -> list[str]:
         return [str(self)]
+
+    def to_uv_source(self) -> dict[str, Any]:
+        result = {}
+        if (url := self.url).startswith("git+"):
+            parsed = urlparse(self.url)
+            params = parse_qs(parsed.fragment)
+
+            # Strip the Git hints from the URL.
+            parsed = parsed._replace(scheme=parsed.scheme[4:], fragment="")
+
+            if subdirectory := params.get("subdirectory"):
+                result["subdirectory"] = subdirectory[0]
+
+            if "@" in parsed.path:
+                path, ref = parsed.path.partition("@")[::2]
+                parsed = parsed._replace(path=path)
+
+                # Heuristic for telling whether it's a tag, branch or rev.
+                if re.match(r"((.*/v)|v?)\d+.*\.", ref):
+                    result["tag"] = ref
+                elif re.match(r"[0-9a-f]{7,}$", ref):
+                    result["rev"] = ref
+                else:
+                    result["branch"] = ref
+
+            result["git"] = urlunparse(parsed)
+        else:
+            result["url"] = url
+
+        return result
 
 
 @dataclasses.dataclass(frozen=True)
