@@ -242,7 +242,7 @@ class UvProjectShim:
                     dependencies.append(req.name)
                     sources[req.name] = req.to_uv_source(base_dir)
                 case _:
-                    assert False, f"unexpected req: {req!r}"
+                    assert False, f"unexpected requirement type: {type(req).__name__} - {req!r}"
 
         if requirements.index_url:
             indexes.append({"url": requirements.index_url, "default": True})
