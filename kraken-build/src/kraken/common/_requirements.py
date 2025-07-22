@@ -129,7 +129,7 @@ class UrlRequirement(Requirement):
                 # Heuristic for telling whether it's a tag, branch or rev.
                 # The following regex matches Git references that are likely version tags.
                 # Examples include 'v1.0.0', '1.0.0', or paths like 'kraken-build/v0.44.2'.
-                if re.match(r"((.*/v)|v?)\d+.*\.", ref):
+                if re.match(r"((.*/v?)|v?)\d+.*\.", ref):
                     result["tag"] = ref
                 # Match Git commit SHA hashes (7 or more hexadecimal characters).
                 elif re.match(r"[0-9a-f]{7,}$", ref):
