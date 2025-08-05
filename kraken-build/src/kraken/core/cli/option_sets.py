@@ -95,22 +95,11 @@ class BuildOptions:
 @dataclasses.dataclass(frozen=True)
 class GraphOptions:
     tasks: list[str] | None
-    resume: bool
-    restart: bool
-    no_save: bool
     all: bool
 
     @staticmethod
     def add_to_parser(parser: argparse.ArgumentParser, saveable: bool = True, include_deprecated: bool = True) -> None:
         group = parser.add_argument_group("graph options")
-        if include_deprecated:
-            group.add_argument("--resume", action="store_true", help="deprecated since v0.45.0.")
-            group.add_argument(
-                "--restart",
-                choices=("all",),
-                help="load previous build state, but discard existing results (requires --resume)",
-            )
-
         group.add_argument("--all", action="store_true", help="include all tasks in the build graph")
 
         # --all may make no sense
@@ -125,30 +114,10 @@ class GraphOptions:
             default=[],
         )
 
-        if saveable and include_deprecated:
-            group.add_argument(
-                "--save", action="store_true", help="deprecated since v0.45.0. the default is to not save."
-            )
-            group.add_argument("--no-save", action="store_true", help="deprecated since v0.45.0.")
-
     @classmethod
     def collect(cls, args: argparse.Namespace) -> GraphOptions:
-        save = getattr(args, "save", False)
-        resume = getattr(args, "resume", False)
-        restart = getattr(args, "restart", False)
-
-        if save:
-            logger.warning("the --save/--no-save options are deprecated since kraken v0.45.0")
-        if resume:
-            logger.warning("the --resume option is deprecated since kraken v0.45.0")
-        if restart:
-            logger.warning("the --restart option is deprecated since kraken v0.45.0")
-
         return cls(
             tasks=getattr(args, "tasks", []) or None,
-            resume=resume,
-            restart=restart,
-            no_save=not save,
             all=getattr(args, "all", False),
         )
 

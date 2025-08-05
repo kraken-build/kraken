@@ -14,7 +14,6 @@ from cyclopts import Parameter
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
 from kraken.core.system.aspect import RunAspect, parse_options
-from kraken.core.system.task import VoidTask
 
 
 @dataclass
@@ -55,16 +54,7 @@ class MkDocsTask(Task, RunAspect.Implements):
     build_directory: Property[Path]
     watch_files: Property[Sequence[Path]] = Property.default(())
 
-    _do_not_use_other_task_name: Property[str]
-    _do_not_use_mode: Property[Literal["build", "serve"]] = Property.default("build")
-    """
-    For backwards compatibility, the task can be put into "serve" mode to always run "mkdocs serve". This
-    is deprecated since v0.46.0 and will be removed in a future version. Use `kraken invoke :mkdocs --serve`
-    instead (assuming `:mkdocs` is your [MkDocsTask]).
-    """
-
     def execute(self) -> TaskStatus | None:
-        mode = self._do_not_use_mode.get()
         strict = self.strict.get()
         build_directory = self.build_directory.get_or_else(
             lambda: (self.project.build_directory / self.name / "_site").absolute()
@@ -72,16 +62,7 @@ class MkDocsTask(Task, RunAspect.Implements):
         watch_files = self.watch_files.get()
         args = list(self.args.get())
 
-        if mode == "serve":
-            other = self._do_not_use_other_task_name.get_or("mkdocs")
-            self.logger.warning(
-                "Using `MkDocsTask.mode == 'serve'` is deprecated and will be removed in a future version. You "
-                f"should use `kraken invoke {other} --serve` instead.."
-            )
-
-            port = int(os.environ.get("MKDOCS_PORT", "8000"))
-            args += ["-a", f"localhost:{port}"]
-
+        mode: Literal["build", "serve"] = "build"
         if run := RunAspect.current_options(self):
             opts = parse_options(run.args, MkDocsRunOptions)
             if opts.serve:
@@ -123,7 +104,7 @@ def mkdocs(
     task_prefix: str = "mkdocs",
     project: Project | None = None,
     strict: bool = True,
-) -> tuple[MkDocsTask, MkDocsTask]:
+) -> MkDocsTask:
     project = project or Project.current()
 
     mkdocs_cmd = Supplier.of(["uv", "tool", "run", *chain.from_iterable(("--with", r) for r in requirements), "mkdocs"])
@@ -135,19 +116,4 @@ def mkdocs(
     build_task.watch_files = final_watch_files
     build_task.strict = strict
 
-    # The .build and .serve variants are deprecated and here only for backwards compatibility. Use
-    # `krakenw invoke :{task_prefix} [--serve]` instead.
-
-    build_alias_task = project.task(f"{task_prefix}.build", VoidTask)
-    build_alias_task.message = f"The `{task_prefix}.build` is deprecated, run `{task_prefix}` directly"
-    build_alias_task.depends_on(build_task)
-
-    serve_task = project.task(f"{task_prefix}.serve", MkDocsTask)
-    serve_task.mkdocs_root = project.directory / (mkdocs_root or "")
-    serve_task.mkdocs_cmd = mkdocs_cmd
-    serve_task._do_not_use_mode = "serve"
-    serve_task._do_not_use_other_task_name = str(build_task.address)
-    serve_task.watch_files = final_watch_files
-    serve_task.strict = False
-
-    return build_task, serve_task
+    return build_task
