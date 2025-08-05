@@ -14,7 +14,6 @@ from cyclopts import Parameter
 from kraken.common import Supplier
 from kraken.core import Project, Property, Task, TaskStatus
 from kraken.core.system.aspect import RunAspect, parse_options
-from kraken.core.system.task import VoidTask
 
 
 @dataclass
