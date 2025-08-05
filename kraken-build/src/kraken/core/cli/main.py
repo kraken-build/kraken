@@ -25,13 +25,11 @@ from kraken.common import (
     appending_to_sys_path,
     colored,
     get_terminal_width,
-    not_none,
     propagate_argparse_formatter_to_subparser,
 )
 from kraken.common.graphviz import GraphvizWriter, render_to_browser
 from kraken.common.pyenv import get_distributions
 from kraken.core.address import Address, AddressResolutionError
-from kraken.core.cli import serialize
 from kraken.core.cli.executor import ColoredDefaultPrintingExecutorObserver, status_to_text
 from kraken.core.cli.option_sets import BuildOptions, ExcludeOptions, GraphOptions, RunOptions, VizOptions
 from kraken.core.system.aspect import ASPECTS, Aspect
@@ -140,9 +138,6 @@ def _load_build_state(
     Kraken build script or loading one or more state files from their serialized form on disk.
     """
 
-    if graph_options.restart and not graph_options.resume:
-        raise ValueError("the --restart option requires the --resume flag")
-
     # Calculate the main subproject based on the project directory.
     root_directory = build_options.project_dir.absolute().resolve()
     try:
@@ -161,77 +156,38 @@ def _load_build_state(
 
     project_info = CurrentDirectoryProjectFinder.default().find_project(Path.cwd())
     if not project_info:
-        # We are OKAY with resuming a build from serialized state files even if no build script exists in the
-        # current working directory; this is a feature that is often useful for debugging purposes when you want
-        # to inspect the final state of a build, like from CI.
-        if not graph_options.resume:
-            raise ValueError(f'no Kraken build script found in the directory "{build_options.project_dir}"')
-
-    # Before we can deserialize the build state, we must add the additional paths to `sys.path` that are defined
-    # in by the script using the buildscript() function, or for backwards compatibility, in the file header as
-    # comments.
-
-    # Note that if we are simply going to execute the build script (i.e. not deserializing from state files),
-    # we can rely on the buildscript() call in the script to update `sys.path`; but if the deprecated file header
-    # is used to define the pythonpath we still need to parse it explicitly.
-
-    # When we resume a build from serialized state files, we do not execute the build script. Thus, in order
-    # to ensure we add the correct paths to `sys.path`, we need to parse the extract the build metadata again.
-    if project_info and graph_options.resume and project_info.runner.has_buildscript_call(project_info.script):
-        with BuildscriptMetadata.capture() as future:
-            project_info.runner.execute_script(project_info.script, {})
-        assert future.done()
-        requirements = RequirementSpec.from_metadata(future.result())
-        exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
+        raise ValueError(f'no Kraken build script found in the directory "{build_options.project_dir}"')
 
     context: Context | None = None
 
-    # Deserialize the build state from files in the build state directory (+ extra dirs) if that is what
-    # the user requested.
-    if graph_options.resume:
-        context, graph = serialize.load_build_state([build_options.state_dir] + build_options.additional_state_dirs)
-        if not graph:
-            raise ValueError("cannot --resume without build state")
-        if graph and graph_options.restart:
-            graph.restart()
-        assert context is not None
+    if build_options.no_load_project:
+        raise ValueError(
+            "no existing build state was loaded; typically that would load the root project "
+            "but --no-load-project was specified."
+        )
 
-    # Otherwise, we need to execute the build script.
-    else:
-        if build_options.no_load_project:
-            raise ValueError(
-                "no existing build state was loaded; typically that would load the root project "
-                "but --no-load-project was specified."
-            )
+    # Register a callback for when the buildscript calls the buildscript() method. Any requirements passed
+    # to the function are already expected to have been handled with by the Kraken wrapper, but we need to
+    # handle the additions to `sys.path` here.
+    def _buildscript_metadata_callback(metadata: BuildscriptMetadata) -> None:
+        requirements = RequirementSpec.from_metadata(metadata)
+        exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
 
-        # Register a callback for when the buildscript calls the buildscript() method. Any requirements passed
-        # to the function are already expected to have been handled with by the Kraken wrapper, but we need to
-        # handle the additions to `sys.path` here.
-        def _buildscript_metadata_callback(metadata: BuildscriptMetadata) -> None:
-            requirements = RequirementSpec.from_metadata(metadata)
-            exit_stack.enter_context(appending_to_sys_path(requirements.pythonpath))
+    context = Context(build_options.build_dir)
 
-        context = Context(build_options.build_dir)
-
-        with BuildscriptMetadata.callback(_buildscript_metadata_callback):
-            try:
-                context.load_project(Path.cwd())
-            except BaseException as exc:
-                raise BuildScriptError(
-                    "An unexpected error occurred while executing the build script. Please check "
-                    "check the earlier log messages for more details."
-                ) from exc
-            context.finalize()
-            graph = TaskGraph(context)
+    with BuildscriptMetadata.callback(_buildscript_metadata_callback):
+        try:
+            context.load_project(Path.cwd())
+        except BaseException as exc:
+            raise BuildScriptError(
+                "An unexpected error occurred while executing the build script. Please check "
+                "check the earlier log messages for more details."
+            ) from exc
+        context.finalize()
+        graph = TaskGraph(context)
 
     assert graph is not None
     context.original_working_directory = original_working_directory
-
-    # Serialize the build graph, even on failure, at the end of the build.
-    if not graph_options.no_save:
-        exit_stack.callback(
-            lambda: serialize.save_build_state(build_options.state_dir, build_options.state_name, not_none(graph))
-        )
 
     # Find the project from which we'll resolve relative task references based on the original current working
     # directory relative to the project root directory.

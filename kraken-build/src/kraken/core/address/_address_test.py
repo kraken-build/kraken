@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import dill  # type: ignore[import-untyped]
+import pickle
+
 from pytest import raises
 
 from kraken.core.address import Address
@@ -131,11 +132,10 @@ def test__Address__deserialization_is_consistent() -> None:
     hash(addr)  # Make sure that the Address._hash_key attribute is initialized
     assert addr._hash_key is not None
 
-    dumped = dill.dumps(addr)
+    dumped = pickle.dumps(addr)
 
-    # We need to do some shenanigans to simulate the `dill` package deserializing the Address
-    # object as if we were running in a new instance of the interpreter, i.e. with a different
-    # instantiation of the module loaded from disk.
+    # We need to do some shenanigans to simulate that the Address object as deserialized as if we were running in a
+    # new instance of the interpreter, i.e. with a different instantiation of the module loaded from disk.
     #
     # However, we cannot just use `reload()` as that will have a permanent effect on other tests
     # and causing them to fail as some parts of the test reference the `Address` class from the
@@ -152,7 +152,7 @@ def test__Address__deserialization_is_consistent() -> None:
 
         assert Address is not AddressV2
 
-        loaded: Address = dill.loads(dumped)
+        loaded: Address = pickle.loads(dumped)
 
     from kraken.core.address import Address as AddressSameAsV1
 
@@ -179,5 +179,5 @@ def test__Address__deserialize_resets_cached_hash_key() -> None:
     hash(addr)
     assert addr._hash_key is not None
 
-    addr = dill.loads(dill.dumps(addr))
+    addr = pickle.loads(pickle.dumps(addr))
     assert addr._hash_key is None

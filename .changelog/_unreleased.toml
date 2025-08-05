@@ -1,0 +1,5 @@
+[[entries]]
+id = "bb5bfd14-bfc6-432b-ad01-c45bb8948183"
+type = "breaking change"
+description = "Remove deprecated `--save`, `--resume` and `--restart` graph options and corresponding serialization code"
+author = "@NiklasRosenstein"
