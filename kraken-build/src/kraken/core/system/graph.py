@@ -337,34 +337,6 @@ class TaskGraph(Graph):
                 # NOTE: This will already take care of updating :attr:`_background_tasks`.
                 self.set_status(task, resolved_status, force=True)
 
-    def resume(self) -> None:
-        """Reset the result of all background tasks that are required by any pending tasks. This needs to be
-        called when a build graph is resumed in a secondary execution to ensure that background tasks are active
-        for the tasks that require them."""
-
-        reset_tasks: set[Address] = set()
-        for task in self.tasks(pending=True):
-            for pred in self.get_predecessors(task, ignore_groups=True):
-                if pred.address in self._background_tasks:
-                    self._background_tasks.discard(pred.address)
-                    self._ok_tasks.discard(pred.address)
-                    self._failed_tasks.discard(pred.address)
-                    self._results.pop(pred.address, None)
-                    reset_tasks.add(pred.address)
-
-        if reset_tasks:
-            logger.info(
-                "Reset the status of %d background task(s): %s", len(reset_tasks), " ".join(map(str, reset_tasks))
-            )
-
-    def restart(self) -> None:
-        """Discard the results of all tasks."""
-
-        self._results.clear()
-        self._ok_tasks.clear()
-        self._background_tasks.clear()
-        self._failed_tasks.clear()
-
     def tasks(
         self,
         goals: bool = False,
