@@ -1,10 +1,6 @@
 This file contains a list of all pending deprecations. A future version should take care to remove these
 deprecated elements.
 
-Deprecated in v0.46.0:
-
-    * The `mkdocs.build` and `mkdocs.serve` tasks are deprecated in favor of just `mkdocs`
-
 Deprecated in v0.37.1:
 
     * `gitignore(gitignore_io_tokens, gitignore_io_allow_http_request_backfill)` parameters
