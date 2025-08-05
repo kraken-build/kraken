@@ -672,7 +672,7 @@ def main_internal(prog: str, argv: list[str] | None, pdb_enabled: bool) -> NoRet
             run(
                 exit_stack,
                 build_options=BuildOptions.collect(args),
-                graph_options=GraphOptions([], resume=False, restart=False, no_save=True, all=False),
+                graph_options=GraphOptions([], all=False),
                 run_options=RunOptions.collect(args),
                 aspect=aspect,
             )
