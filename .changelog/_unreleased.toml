@@ -1,0 +1,5 @@
+[[entries]]
+id = "10af1349-1542-4eb8-9680-f25863c57a25"
+type = "fix"
+description = "Ignore error code 403 in additional indexes"
+author = "uluc.sengil@helsing.ai"

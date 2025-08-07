@@ -24,11 +24,13 @@ extra-index-url = [
 [[tool.uv.index]]
 name = "foo"
 url = "https://example.com/foo/simple/"
+ignore-error-codes = [403]
 
 [[tool.uv.index]]
 name = "bar"
 url = "https://example.com/bar/simple/"
 explicit = true
+ignore-error-codes = [403]
 """
 
 
@@ -152,9 +154,9 @@ def test__UvPyprojectHandler__set_package_indexes() -> None:
         ]
     )
     assert handler.raw["tool"]["uv"]["index"] == [
-        {"name": "b", "url": "https://example.com/b", "default": True},
-        {"name": "a", "url": "https://example.com/a"},
-        {"name": "c", "url": "https://example.com/c", "explicit": True},
+        {"name": "b", "url": "https://example.com/b", "default": True, "ignore-error-codes": [403]},
+        {"name": "a", "url": "https://example.com/a", "ignore-error-codes": [403]},
+        {"name": "c", "url": "https://example.com/c", "explicit": True, "ignore-error-codes": [403]},
     ]
     assert handler.raw["tool"]["uv"].get("index-url", None) is None
     assert handler.raw["tool"]["uv"].get("extra-index-url", None) is None
@@ -173,10 +175,10 @@ def test__UvPyprojectHandler__update_packages() -> None:
     assert "index-url" not in handler.raw["tool"]["uv"]
     assert "extra-index-url" not in handler.raw["tool"]["uv"]
     assert handler.raw["tool"]["uv"]["index"] == [
-        {"url": "https://example.com/simple/", "default": True},
-        {"url": "https://example.com/foo/simple/", "name": "foo"},
-        {"url": "https://example.org/simple/"},
-        {"url": "https://example.com/bar/simple/", "name": "bar", "explicit": True},
+        {"url": "https://example.com/simple/", "default": True, "ignore-error-codes": [403]},
+        {"url": "https://example.com/foo/simple/", "name": "foo", "ignore-error-codes": [403]},
+        {"url": "https://example.org/simple/", "ignore-error-codes": [403]},
+        {"url": "https://example.com/bar/simple/", "name": "bar", "explicit": True, "ignore-error-codes": [403]},
     ]
 
 
