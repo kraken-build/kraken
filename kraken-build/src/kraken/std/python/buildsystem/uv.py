@@ -94,12 +94,13 @@ class UvIndexes:
 
     def to_config(self) -> list[dict[str, Any]]:
         """Inject UV configuration for indexes into a configuration."""
-        entries: list[dict[str, str | bool]] = []
+        entries: list[dict[str, str | bool | list[int]]] = []
         for index in self.indexes:
             entry: dict[str, Any] = {}
             if index.name is not None and index.name != "":
                 entry["name"] = index.name
             entry["url"] = index.url
+            entry["ignore-error-codes"] = [403]
             if index.default:
                 entry["default"] = True
             if index.explicit:
