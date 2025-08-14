@@ -269,7 +269,16 @@ class UvProjectShim:
 
         assert self._tempdir is not None, "context not entered"
 
-        command = ["uv", "sync", "--project", self._tempdir.name, "--python", fspath(venv.python_bin)]
+        command = [
+            "uv",
+            "sync",
+            "--project",
+            self._tempdir.name,
+            "--python",
+            fspath(venv.python_bin),
+            "--fork-strategy",
+            "fewest",
+        ]
         logger.debug("Installing into build environment with uv: %s", sanitize_http_basic_auth(" ".join(command)))
         subprocess.check_call(
             command,
