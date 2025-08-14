@@ -92,7 +92,7 @@ def release_changelog(version: str) -> None:
 
 
 def create_github_release(version: str) -> None:
-    subprocess.check_call(["gh", "release", "create", f"v{version}", "--generate-notes"])
+    subprocess.check_call(["gh", "release", "create", f"{version}", "--generate-notes"])
     print(f"Created GitHub release v{version}")
 
 
