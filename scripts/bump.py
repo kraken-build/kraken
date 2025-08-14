@@ -91,6 +91,11 @@ def release_changelog(version: str) -> None:
     git_add(unreleased, released)
 
 
+def create_github_release(version: str) -> None:
+    subprocess.check_call(["gh", "release", "create", f"v{version}", "--generate-notes"])
+    print(f"Created GitHub release v{version}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("version")
@@ -105,6 +110,7 @@ def main() -> None:
         git_commit(f"release v{args.version}")
         git_tag(args.version, force=args.force)
         git_push(args.version, force=args.force)
+        create_github_release(args.version)
 
 
 if __name__ == "__main__":
