@@ -1,0 +1,5 @@
+[[entries]]
+id = "e85dfff7-19b1-4716-b527-0eebcf99668c"
+type = "improvement"
+description = "Added secret files to buildx task"
+author = "danilo.buerger@helsing.ai"
