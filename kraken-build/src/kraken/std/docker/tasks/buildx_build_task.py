@@ -23,6 +23,8 @@ class BuildxBuildTask(BaseBuildTask):
     cache_from: Property[str | None] = Property.default(None)
     cache_to: Property[str | None] = Property.default(None)
 
+    secret_files: Property[dict[str, str]] = Property.default_factory(dict)
+
     def __init__(self, name: str, project: Project) -> None:
         super().__init__(name, project)
         self.preprocess_dockerfile.set(True)
@@ -30,7 +32,15 @@ class BuildxBuildTask(BaseBuildTask):
     # BaseBuildTask overrides
 
     def _preprocess_dockerfile(self, dockerfile: Path) -> str:
-        mount_string = " ".join(f"--mount=type=secret,id={sec}" for sec in self.secrets.get().keys()) + " "
+        mount_string = (
+            " ".join(
+                [
+                    " ".join(f"--mount=type=secret,id={sec}" for sec in self.secrets.get().keys()),
+                    " ".join(f"--mount=type=secret,id={k},target={v}" for k, v in self.secret_files.get().items()),
+                ]
+            )
+            + " "
+        )
         return update_run_commands(dockerfile.read_text(), prefix=mount_string)
 
     # Task overrides
@@ -56,6 +66,7 @@ class BuildxBuildTask(BaseBuildTask):
             command += ["--platform", str(self.platform.get())]
         command += flatten(["--build-arg", f"{k}={v}"] for k, v in self.build_args.get().items())
         command += flatten(["--secret", f"id={k}"] for k in self.secrets.get())
+        command += flatten(["--secret", f"id={k},src={v}"] for k, v in self.secret_files.get().items())
         if self.cache_repo.get():
             # NOTE (@NiklasRosenstein): Buildx does not allow leading underscores, while Kaniko and Artifactory do.
             command += ["--cache-from", f"type=registry,ref={not_none(self.cache_repo.get())}"]
