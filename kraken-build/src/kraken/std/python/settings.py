@@ -25,6 +25,9 @@ class PythonSettings:
         #: An alternative URL to upload packages to.
         upload_url: str | None
 
+        #: An alternative URL to index_url to check for existing files to skip duplicate uploads
+        check_url: str | None
+
         #: Credentials to use when publishing to or reading from the index.
         credentials: tuple[str, str] | None
 
@@ -78,6 +81,7 @@ class PythonSettings:
         *,
         index_url: str | None = None,
         upload_url: str | None = None,
+        check_url: str | None = None,
         credentials: tuple[str, str] | None = None,
         is_package_source: bool = True,
         priority: PackageIndex.Priority | str = PackageIndex.Priority.supplemental,
@@ -90,6 +94,8 @@ class PythonSettings:
             If not specified, *alias* must be a known package index (`pypi` or `testpypi`).
         :param upload_url: If the upload url deviates from the registry URL. Otherwise, the upload URL will
             be the same as the *url*,
+        :param check_url: Optional index URL to check for existing files. Otherwise, the index URL will be
+            used.
         :param credentials: Optional credentials to read from the index.
         :param is_package_source: If set to `False`, the index will not be used to source packages from, but
             can be used to publish to.
@@ -126,6 +132,7 @@ class PythonSettings:
         self.package_indexes[alias] = self._PackageIndex(
             alias=alias,
             index_url=index_url,
+            check_url=check_url,
             priority=priority,
             upload_url=upload_url,
             credentials=credentials,
