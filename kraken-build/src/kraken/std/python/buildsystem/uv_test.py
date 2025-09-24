@@ -84,6 +84,7 @@ def test__UvIndexes__to_env() -> None:
                 is_package_source=False,
                 publish=True,
                 upload_url=None,
+                check_url=None,
                 credentials=("usename", "password"),
             ),
         ]
