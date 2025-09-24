@@ -45,4 +45,6 @@ If you use a custom installation, make sure these tools are available in there.
 
 ## Publishing
 
-Independent of the Python build system used, Kraken will use [`uv publish`](https://docs.astral.sh/uv/guides/package/#publishing-your-package) to publish to a Package index.
+Independent of the Python build system used, Kraken will use [`uv publish`] to publish to a Package index.
+
+[`uv publish`]: https://docs.astral.sh/uv/guides/package/#publishing-your-package
