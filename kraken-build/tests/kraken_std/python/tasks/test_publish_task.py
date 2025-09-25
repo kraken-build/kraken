@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from subprocess import CompletedProcess
 from unittest.mock import patch
 
 from kraken.core import Project
@@ -13,9 +14,15 @@ def test_publish_task_uses_uv_publish(kraken_project: Project) -> None:
     project = kraken_project
 
     # Configure the package index in the project settings.
-    pypi_url = "https://test.pypi.org/legacy"
+    pypi_upload_url = "https://test.pypi.org/legacy"
+    pypi_index_url = "https://test.pypi.org/simple"
     settings = python_settings(project)
-    settings.add_package_index(alias="testpypi", credentials=("__token__", "pass"))
+    settings.add_package_index(
+        alias="testpypi",
+        upload_url=pypi_upload_url,
+        index_url=pypi_index_url,
+        credentials=("__token__", "pass"),
+    )
 
     # Create a dummy distribution file.
     dist_dir = project.directory / "dist"
@@ -30,20 +37,29 @@ def test_publish_task_uses_uv_publish(kraken_project: Project) -> None:
         skip_existing=True,
     )
 
-    # We need to patch subprocess.call since we're not actually running uv.
-    with patch("subprocess.call") as mock_call:
-        task.execute()
+    # We need to patch subprocess.run since we're not actually running uv.
+    with patch("subprocess.run") as mock_run:
+        mock_run.return_value = CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+        result = task.execute()
 
-    # Check that `subprocess.call` was called with the `uv publish` command.
-    assert mock_call.call_count == 1
-    call_args = mock_call.call_args[0][0]
-    assert call_args[:3] == ["uv", "publish", "--publish-url"]
-    assert call_args[3] == pypi_url
+    # Check that the task succeeded and `subprocess.run` was called with the `uv publish` command.
+    assert result.is_succeeded()
+    assert mock_run.call_count == 1
+    call_args = mock_run.call_args[0][0]
+    assert call_args[:7] == [
+        "uv",
+        "publish",
+        "--default-index",
+        pypi_index_url,
+        "--publish-url",
+        "--no-progress",
+        pypi_upload_url,
+    ]
     assert str(dist_file.absolute()) in call_args
-    assert "--check-url" in call_args
+    assert "--check-url" not in call_args
 
     # Check that the credentials were passed as environment variables.
-    call_kwargs = mock_call.call_args[1]
+    call_kwargs = mock_run.call_args[1]
     assert "env" in call_kwargs
     env = call_kwargs["env"]
     assert env["UV_PUBLISH_USERNAME"] == "__token__"
