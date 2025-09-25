@@ -55,9 +55,12 @@ class PublishTask(Task):
 
         env = os.environ.copy()
         if credentials:
-            # See https://docs.astral.sh/uv/guides/package/#publishing-your-package
-            # NOTE: PyPI does not support publishing with username and password anymore,
-            #       should we log a warning if the username is not __token__?
+            if "pypi.org/" in self.index_upload_url.get() and credentials[0] != "__token__":
+                logger.warning(
+                    "Since 2024-01-01, PyPI no longer allows publishing with username and password, "
+                    " see https://blog.pypi.org/posts/2024-01-01-2fa-enforced/"
+                    " and https://docs.astral.sh/uv/guides/package/#publishing-your-package"
+                )
             env["UV_PUBLISH_USERNAME"] = credentials[0]
             env["UV_PUBLISH_PASSWORD"] = credentials[1]
 
