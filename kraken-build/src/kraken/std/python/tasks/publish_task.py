@@ -5,6 +5,8 @@ import subprocess
 from collections.abc import Iterable
 from pathlib import Path
 
+from loguru import logger
+
 from kraken.core import Project, Property, Task, TaskRelationship
 from kraken.core.system.task import TaskStatus
 
@@ -21,6 +23,7 @@ class PublishTask(Task):
     index_credentials: Property[tuple[str, str] | None] = Property.default(None)
     distributions: Property[list[Path]]
     skip_existing: Property[bool] = Property.default(False)
+    interactive: Property[bool | None] = Property.default(None)
     dependencies: list[Task]
 
     def __init__(self, name: str, project: Project) -> None:
@@ -32,6 +35,13 @@ class PublishTask(Task):
         yield from super().get_relationships()
 
     def execute(self) -> TaskStatus:
+        # Check for the deprecated property
+        if self.interactive.get() is not None:
+            logger.warning(
+                "The 'interactive' property on the python.publish task is deprecated and has no effect. "
+                "uv publish is non-interactive by default in this context.",
+                DeprecationWarning,
+            )
         credentials = self.index_credentials.get()
         command = [
             "uv",
