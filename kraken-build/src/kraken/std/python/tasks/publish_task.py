@@ -77,6 +77,7 @@ def publish(
     package_index: str,
     distributions: list[Path] | Property[list[Path]],
     skip_existing: bool = False,
+    interactive: bool | None = None,
     name: str = "python.publish",
     group: str | None = "publish",
     project: Project | None = None,
@@ -97,5 +98,6 @@ def publish(
     task.index_credentials = index.credentials
     task.distributions = distributions
     task.skip_existing = skip_existing
+    task.interactive = interactive
     task.depends_on(*(after or []))
     return task
