@@ -19,7 +19,6 @@ class PublishTask(Task):
     description = "Upload the distributions of your Python project. [index url: %(index_upload_url)s]"
     index_upload_url: Property[str]
     index_index_url: Property[str]
-    index_check_url: Property[str | None] = Property.default(None)
     index_credentials: Property[tuple[str, str] | None] = Property.default(None)
     distributions: Property[list[Path]]
     skip_existing: Property[bool] = Property.default(False)
@@ -51,8 +50,8 @@ class PublishTask(Task):
             self.index_upload_url.get(),
             *[str(x.absolute()) for x in self.distributions.get()],
         ]
-        if self.skip_existing.get():
-            command.extend(["--check-url", self.index_check_url.get() or self.index_index_url.get()])
+        if self.skip_existing:
+            command.extend(["--check-url", self.index_index_url.get()])
 
         env = os.environ.copy()
         if credentials:
@@ -94,7 +93,6 @@ def publish(
     task = project.task(name, PublishTask, group=group)
     task.index_upload_url = index.upload_url
     task.index_index_url = index.index_url
-    task.index_check_url = index.check_url
     task.index_credentials = index.credentials
     task.distributions = distributions
     task.skip_existing = skip_existing
