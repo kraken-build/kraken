@@ -49,10 +49,10 @@ def test_publish_task_uses_uv_publish(kraken_project: Project) -> None:
     assert call_args[:7] == [
         "uv",
         "publish",
+        "--no-progress",
         "--default-index",
         pypi_index_url,
         "--publish-url",
-        "--no-progress",
         pypi_upload_url,
     ]
     assert str(dist_file.absolute()) in call_args
