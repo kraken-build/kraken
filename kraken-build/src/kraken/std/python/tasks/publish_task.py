@@ -48,10 +48,10 @@ class PublishTask(Task):
             "--no-progress",  # No spinners and progress bars in stderr
             "--publish-url",
             self.index_upload_url.get(),
-            *[str(x.absolute()) for x in self.distributions.get()],
         ]
         if self.skip_existing:
             command.extend(["--check-url", self.index_index_url.get()])
+        command.extend([str(x.absolute()) for x in self.distributions.get()])
 
         env = os.environ.copy()
         if credentials:
