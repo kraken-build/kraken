@@ -46,6 +46,7 @@ class PublishTask(Task):
         command = [
             "uv",
             "publish",
+            "--no-progress",  # No spinners and progress bars in stderr
             "--publish-url",
             self.index_upload_url.get(),
             *[str(x.absolute()) for x in self.distributions.get()],
