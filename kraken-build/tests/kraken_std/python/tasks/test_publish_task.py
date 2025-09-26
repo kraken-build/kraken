@@ -46,17 +46,15 @@ def test_publish_task_uses_uv_publish(kraken_project: Project) -> None:
     assert result.is_succeeded()
     assert mock_run.call_count == 1
     call_args = mock_run.call_args[0][0]
-    assert call_args[:7] == [
+    assert call_args[:5] == [
         "uv",
         "publish",
         "--no-progress",
-        "--default-index",
-        pypi_index_url,
         "--publish-url",
         pypi_upload_url,
     ]
     assert str(dist_file.absolute()) in call_args
-    assert "--check-url" not in call_args
+    assert "--check-url" in call_args
 
     # Check that the credentials were passed as environment variables.
     call_kwargs = mock_run.call_args[1]
