@@ -1,14 +1,21 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-      "config:recommended"
-  ],
-  "rebaseWhen": "conflicted",
-  "packageRules": [
-      {
-          "groupName": "minor and patch updates",
-          "matchPackagePatterns": ["*"],
-          "matchUpdateTypes": ["minor", "patch", "pin", "digest"]
-      }
-  ]
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended"
+    ],
+    "rebaseWhen": "conflicted",
+    "packageRules": [
+        {
+            "groupName": "minor and patch updates",
+            "matchUpdateTypes": [
+                "minor",
+                "patch",
+                "pin",
+                "digest"
+            ],
+            "matchPackageNames": [
+                "*"
+            ]
+        }
+    ]
 }
