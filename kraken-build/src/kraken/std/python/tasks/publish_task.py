@@ -53,7 +53,7 @@ class PublishTask(Task):
             command.extend(["--check-url", self.index_index_url.get()])
         command.extend([str(x.absolute()) for x in self.distributions.get()])
 
-        env = os.environ.copy()
+        env = {}
         if credentials:
             if "pypi.org/" in self.index_upload_url.get() and credentials[0] != "__token__":
                 logger.warning(
