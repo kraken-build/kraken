@@ -49,7 +49,7 @@ class PublishTask(Task):
             "--publish-url",
             self.index_upload_url.get(),
         ]
-        if self.skip_existing:
+        if self.skip_existing.get():
             command.extend(["--check-url", self.index_index_url.get()])
         command.extend([str(x.absolute()) for x in self.distributions.get()])
 
