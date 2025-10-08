@@ -67,8 +67,26 @@ class PublishTask(Task):
         safe_command = command
         self.logger.info("$ %s", safe_command)
 
-        returncode = subprocess.call(command, cwd=self.project.directory, env=env)
-        return TaskStatus.from_exit_code(safe_command, returncode)
+        result = subprocess.run(
+            command,
+            cwd=self.project.directory,
+            env={**os.environ, **env},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        if all(
+            [
+                self.skip_existing.get(),
+                result.returncode != 0,
+                "Local file and index file do not match" in result.stderr,
+            ]
+        ):
+            logger.warning("Local file and index file do not match.")
+            return TaskStatus.warning("uv publish skipped because files for this version already exist in the index")
+
+        return TaskStatus.from_exit_code(safe_command, result.returncode)
 
 
 def publish(
