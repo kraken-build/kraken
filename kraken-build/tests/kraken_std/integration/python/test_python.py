@@ -13,6 +13,7 @@ from unittest.mock import patch
 import httpx
 import pytest
 import tomli
+from pytest_httpx._httpx_mock import HTTPXMock
 
 from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
