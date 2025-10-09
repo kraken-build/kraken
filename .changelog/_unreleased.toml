@@ -7,3 +7,9 @@ description = "Bump default ruff version to 0.14"
 id = "08cc2727-c8b4-4dd2-bc05-229bf7c54273"
 type = "improvement"
 description = "Allow Mitmproxy 12"
+
+[[entries]]
+id = "db082530-faa4-46f0-80a4-cabc1cd0580d"
+type = "improvement"
+description = "Add Python 3.14 support"
+author = "thomas.pellissier-tanon@helsing.ai"

@@ -10,7 +10,7 @@ name = "kraken-build"
 version = "0.48.4"
 description = "Kraken is an extensible build orchestration system."
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
+requires-python = ">=3.10,<3.15"
 license = "MIT"
 authors = [{ name = "Niklas Rosenstein", email = "rosensteinniklas@gmail.com" }]
 dependencies = [
