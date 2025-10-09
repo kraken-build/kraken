@@ -119,7 +119,7 @@ def test__python_project_install_lint_and_publish(
 
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
     # TODO: mock the `os.environ` dict instead of mutating the global one
-    os.environ["LOCAL_PACKAGE_INDEX"] = index_url  # The root URL
+    os.environ["LOCAL_PACKAGE_INDEX"] = index_url
     os.environ["LOCAL_USER"] = USER_NAME
     os.environ["LOCAL_PASSWORD"] = USER_PASS
     # Make sure Poetry installs the environment locally so it gets cleaned up
