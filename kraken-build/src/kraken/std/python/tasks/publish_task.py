@@ -114,7 +114,7 @@ class PublishTask(Task):
 
         project_name = distributions[0].name.split("-")[0]
         existing_files = self._get_existing_files_from_index(project_name)
-        self.logger.debug("Existings files: %s", existing_files)
+        self.logger.debug("Existing files: %s", existing_files)
 
         # If we can't check, proceed to execute and let uv handle it.
         if existing_files is None:
