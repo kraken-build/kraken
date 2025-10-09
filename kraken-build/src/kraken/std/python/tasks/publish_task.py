@@ -8,7 +8,6 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import httpx
-from loguru import logger
 from packaging.utils import canonicalize_name
 
 from kraken.core import Project, Property, Task, TaskRelationship
@@ -57,7 +56,7 @@ class PublishTask(Task):
 
             if response.status_code == 404:
                 # Package not found, so no files exist.
-                logger.debug(f"Project {project_name} (nromalized to {normalized_name}) not found.")
+                self.logger.debug("Project %s (nromalized to %s) not found.", project_name, normalized_name)
                 return set()
 
             response.raise_for_status()
@@ -69,7 +68,7 @@ class PublishTask(Task):
             elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
                 # NOTE: pypiserver used in tests currently only supports the HTML API
                 # See https://github.com/pypiserver/pypiserver/issues/508
-                logger.debug(f"Falling back to HTML parsing for PyPI index at {self.index_index_url.get()}")
+                self.logger.debug("Falling back to HTML parsing for PyPI index at %s", self.index_index_url.get())
 
                 class SimpleApiParser(HTMLParser):
                     def __init__(self) -> None:
@@ -89,7 +88,7 @@ class PublishTask(Task):
                 parser.feed(response.text)
                 return parser.files
             else:
-                logger.warning(
+                self.logger.warning(
                     "Unsupported Content-Type '%s' from PyPI index at %s. Cannot check for existing files.",
                     content_type,
                     self.index_index_url.get(),
@@ -97,10 +96,12 @@ class PublishTask(Task):
                 return None
 
         except httpx.RequestError as e:
-            logger.warning("Failed to connect to PyPI index at %s to check for existing files. Error: %s", url, e)
+            self.logger.warning("Failed to connect to PyPI index at %s to check for existing files. Error: %s", url, e)
             return None
         except Exception as e:
-            logger.warning("An unexpected error occurred while checking for existing files on %s. Error: %s", url, e)
+            self.logger.warning(
+                "An unexpected error occurred while checking for existing files on %s. Error: %s", url, e
+            )
             return None
 
     def prepare(self) -> TaskStatus | None:
@@ -113,7 +114,7 @@ class PublishTask(Task):
 
         project_name = distributions[0].name.split("-")[0]
         existing_files = self._get_existing_files_from_index(project_name)
-        logger.debug(f"Existings files: {existing_files}")
+        self.logger.debug("Existings files: %s", existing_files)
 
         # If we can't check, proceed to execute and let uv handle it.
         if existing_files is None:
@@ -131,10 +132,9 @@ class PublishTask(Task):
     def execute(self) -> TaskStatus:
         # Check for the deprecated property
         if self.interactive.get() is not None:
-            logger.warning(
+            self.logger.warning(
                 "The 'interactive' property on the python.publish task is deprecated and has no effect. "
-                "uv publish is non-interactive by default in this context.",
-                DeprecationWarning,
+                "uv publish is non-interactive by default in this context."
             )
         credentials = self.index_credentials.get()
         command = [
@@ -153,7 +153,7 @@ class PublishTask(Task):
         env = {}
         if credentials:
             if "pypi.org/" in self.index_upload_url.get() and credentials[0] != "__token__":
-                logger.warning(
+                self.logger.warning(
                     "Since 2024-01-01, PyPI no longer allows publishing with username and password, "
                     " see https://blog.pypi.org/posts/2024-01-01-2fa-enforced/"
                     " and https://docs.astral.sh/uv/guides/package/#publishing-your-package"
@@ -180,7 +180,7 @@ class PublishTask(Task):
                 "Local file and index file do not match" in result.stderr,
             ]
         ):
-            logger.warning("Local file and index file do not match.")
+            self.logger.warning("Local file and index file do not match.")
             return TaskStatus.warning("uv publish skipped because files for this version already exist in the index")
 
         return TaskStatus.from_exit_code(safe_command, result.returncode)
