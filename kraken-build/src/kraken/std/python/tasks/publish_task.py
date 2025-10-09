@@ -66,7 +66,7 @@ class PublishTask(Task):
             if "application/vnd.pypi.simple.v1+json" in content_type:
                 data = response.json()
                 return {file_info["filename"] for file_info in data.get("files", [])}
-            elif "text/html" in content_type:
+            elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
                 # NOTE: pypiserver used in tests currently only supports the HTML API
                 # See https://github.com/pypiserver/pypiserver/issues/508
                 logger.debug(f"Falling back to HTML parsing for PyPI index at {self.index_index_url.get()}")
