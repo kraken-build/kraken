@@ -399,3 +399,79 @@ def test__python_publish_skip_existing(
     assert len(excinfo.value.failed_tasks) == 1
     failed_task = next(iter(excinfo.value.failed_tasks))
     assert failed_task.address == publish_task_fail.address
+
+
+@pytest.mark.parametrize(
+    "response_type, content_type",
+    [
+        ("html", "text/html"),  # Alias for application/vnd.pypi.simple.v1+html
+        ("html", "application/vnd.pypi.simple.v1+html"),
+        ("json", "application/vnd.pypi.simple.v1+json"),
+    ],
+)
+def test__python_publish_skip_existing_mocked(
+    kraken_ctx: Context,
+    kraken_project: Project,
+    httpx_mock: HTTPXMock,
+    response_type: str,
+    content_type: str,
+) -> None:
+    """Test that the publish task skips existing files based on a mocked server response."""
+
+    # Copy the poetry project to the temp directory.
+    shutil.copytree(data_path("poetry-project"), kraken_project.directory, dirs_exist_ok=True)
+
+    # Build the project.
+    build_task = python.build(project=kraken_project)
+    build_graph = kraken_ctx.execute([build_task])
+    build_status = build_graph.get_status(build_task)
+    assert build_status is not None and build_status.is_succeeded()
+    distributions = list(build_task.get_outputs())
+    assert distributions is not None
+
+    # Set up the mock server.
+    project_name = "poetry-project"
+    if response_type == "html":
+        response_data = f"""
+        <!DOCTYPE html>
+        <html>
+        <body>
+            <a href="{distributions[0].name}">{distributions[0].name}</a>
+            <a href="{distributions[1].name}">{distributions[1].name}</a>
+        </body>
+        </html>
+        """
+        httpx_mock.add_response(
+            url=f"http://mock-index.com/{project_name}/",
+            html=response_data,
+            headers={"Content-Type": content_type},
+        )
+    else:  # json
+        # This is a minimal mock. For a full example, see
+        # https://packaging.python.org/en/latest/specifications/simple-repository-api/#simple-repository-json-project-detail
+        json_data = {"files": [{"filename": dist.name} for dist in distributions]}
+        httpx_mock.add_response(
+            url=f"http://mock-index.com/{project_name}/",
+            json=json_data,
+            headers={"Content-Type": content_type},
+        )
+
+    # Configure the python settings to use the mock server.
+    python.settings.python_settings(kraken_project).add_package_index(
+        alias="local",
+        index_url="http://mock-index.com/",
+        upload_url="http://mock-index.com/",
+        credentials=(USER_NAME, USER_PASS),
+    )
+
+    # Try to publish with skip_existing=True. The task should be skipped.
+    publish_task_skip = python.publish(
+        name="python.publish.skip",
+        package_index="local",
+        distributions=distributions,
+        project=kraken_project,
+        skip_existing=True,
+    )
+    skip_graph = kraken_ctx.execute([publish_task_skip])
+    skip_status = skip_graph.get_status(publish_task_skip)
+    assert skip_status is not None and skip_status.is_skipped()
