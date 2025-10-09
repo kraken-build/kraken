@@ -433,7 +433,7 @@ def test__python_publish_skip_existing_mocked(
     # Set up the mock server.
     project_name = "poetry-project"
     if response_type == "html":
-        response_data = f"""
+        html_data = f"""
         <!DOCTYPE html>
         <html>
         <body>
@@ -444,7 +444,7 @@ def test__python_publish_skip_existing_mocked(
         """
         httpx_mock.add_response(
             url=f"http://mock-index.com/{project_name}/",
-            html=response_data,
+            html=html_data,
             headers={"Content-Type": content_type},
         )
     else:  # json
