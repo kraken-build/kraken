@@ -68,7 +68,7 @@ def start_mitmweb_proxy(
     )
 
     # Wait for the proxy to come up. It will respond with a 502 code because there's no
-    # additioal information in the request to tell it what to proxy.
+    # additional information in the request to tell it what to proxy.
     try:
         http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=60 if started else 0)
     except TimeoutError:

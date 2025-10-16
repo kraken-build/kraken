@@ -226,7 +226,7 @@ class TaskGraph(Graph):
                 else:
                     set_non_strict_edge_for_removal(failed_task_path, out_task_path)
 
-        return cast("DiGraph[Address]", restricted_view(self._digraph, self._ok_tasks, removable_edges))  # type: ignore[no-untyped-call]
+        return cast("DiGraph[Address]", restricted_view(self._digraph, self._ok_tasks, removable_edges))
 
     # Public API
 
@@ -355,8 +355,7 @@ class TaskGraph(Graph):
 
         tasks = (self.get_task(addr) for addr in self._digraph)
         if goals:
-            # HACK: Cast because of https://github.com/python/typeshed/pull/12472
-            tasks = (t for t in tasks if cast(int, self._digraph.out_degree(t.address)) == 0)
+            tasks = (t for t in tasks if self._digraph.out_degree(t.address) == 0)
         if pending:
             tasks = (t for t in tasks if t.address not in self._results)
         if failed:
@@ -472,10 +471,7 @@ class TaskGraph(Graph):
 
         ready_graph = self._get_ready_graph()
         root_set = (
-            # HACK: Cast because of https://github.com/python/typeshed/pull/12472
-            node
-            for node in ready_graph.nodes
-            if cast(int, ready_graph.in_degree(node)) == 0 and node not in self._results
+            node for node in ready_graph.nodes if ready_graph.in_degree(node) == 0 and node not in self._results
         )
         tasks = [self.get_task(addr) for addr in root_set]
         if not tasks:

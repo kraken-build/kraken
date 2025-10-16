@@ -1,11 +1,11 @@
 [[entries]]
-id = "e85dfff7-19b1-4716-b527-0eebcf99668c"
-type = "improvement"
-description = "Added secret files to buildx task"
-author = "danilo.buerger@helsing.ai"
-
-[[entries]]
 id = "e85dfff7-19b1-4716-b527-0eebcf99668d"
 type = "improvement"
 description = "Dont error out when no publish token is set"
 author = "danilo.buerger@helsing.ai"
+
+[[entries]]
+id = "f320c4d3-d54a-4026-95d6-eb2a0b9c9cb7"
+type = "improvement"
+description = "Bump UV to 0.9"
+author = "thomas.pellissier-tanon@helsing.ai"
