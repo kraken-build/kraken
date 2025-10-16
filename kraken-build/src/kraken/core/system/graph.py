@@ -471,7 +471,6 @@ class TaskGraph(Graph):
 
         ready_graph = self._get_ready_graph()
         root_set = (
-            # HACK: Cast because of https://github.com/python/typeshed/pull/12472
             node
             for node in ready_graph.nodes
             if ready_graph.in_degree(node) == 0 and node not in self._results
