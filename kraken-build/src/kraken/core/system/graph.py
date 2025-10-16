@@ -471,9 +471,7 @@ class TaskGraph(Graph):
 
         ready_graph = self._get_ready_graph()
         root_set = (
-            node
-            for node in ready_graph.nodes
-            if ready_graph.in_degree(node) == 0 and node not in self._results
+            node for node in ready_graph.nodes if ready_graph.in_degree(node) == 0 and node not in self._results
         )
         tasks = [self.get_task(addr) for addr in root_set]
         if not tasks:
