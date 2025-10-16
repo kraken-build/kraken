@@ -355,7 +355,6 @@ class TaskGraph(Graph):
 
         tasks = (self.get_task(addr) for addr in self._digraph)
         if goals:
-            # HACK: Cast because of https://github.com/python/typeshed/pull/12472
             tasks = (t for t in tasks if self._digraph.out_degree(t.address) == 0)
         if pending:
             tasks = (t for t in tasks if t.address not in self._results)
