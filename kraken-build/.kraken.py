@@ -1,7 +1,7 @@
 from kraken.std import python
 
 python.install()
-python.mypy(version_spec="==1.16.1")
+python.mypy(version_spec="==1.18.2", python_version="3.12")
 python.ruff(additional_args=["--exclude", "tests/data"])
 python.pytest(
     tests_dir=["src", "tests/kraken_core"],
