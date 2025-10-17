@@ -83,7 +83,7 @@ def ruff(
     config_file: Path | Supplier[Path] | None = None,
     additional_args: Sequence[str] | Supplier[Sequence[str]] = (),
     additional_requirements: Sequence[str] = (),
-    version_spec: str | None = ">=0.5.0,<0.6.0",
+    version_spec: str | None = "~=0.14.0",
 ) -> RuffTasks:
     """Creates three tasks for formatting and linting your Python project with Ruff.
 

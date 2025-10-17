@@ -1,5 +1,9 @@
 [[entries]]
+id = "4d4950cc-3503-4dc9-a45c-5efd76875195"
+type = "improvement"
+description = "Bump default ruff version to 0.14"
+
+[[entries]]
 id = "08cc2727-c8b4-4dd2-bc05-229bf7c54273"
 type = "improvement"
 description = "Allow Mitmproxy 12"
-author = "thomas.pellissier-tanon@helsing.ai"
