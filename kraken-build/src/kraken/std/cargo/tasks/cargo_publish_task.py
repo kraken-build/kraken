@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from kraken.common import atomic_file_swap, http, not_none
+from kraken.common import atomic_file_swap, http
 from kraken.core import Project, Property, TaskStatus
 from kraken.std.cargo import CargoProject
 from kraken.std.cargo.manifest import CargoManifest
@@ -90,7 +90,9 @@ class CargoPublishTask(CargoBuildTask):
         return command
 
     def make_safe(self, args: list[str], env: dict[str, str]) -> None:
-        args[args.index(not_none(self.registry.get().publish_token))] = "[MASKED]"
+        publish_token = self.registry.get().publish_token
+        if publish_token is not None:
+            args[args.index(publish_token)] = "[MASKED]"
         super().make_safe(args, env)
 
     def __init__(self, name: str, project: Project) -> None:
