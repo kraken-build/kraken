@@ -31,7 +31,7 @@ jobs:
       - name: Install Uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.8.22"
+          version: "0.9.0"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-build
@@ -48,7 +48,7 @@ jobs:
       - name: Install Uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.8.22"
+          version: "0.9.0"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-wrapper

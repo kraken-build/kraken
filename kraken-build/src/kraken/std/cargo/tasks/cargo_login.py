@@ -27,7 +27,7 @@ class CargoLoginTask(Task):
             if p.returncode != 0:
                 if p.stderr.endswith(b"\nerror: config.json not found in registry\n"):
                     # This happens when the project's .cargo/config.toml file
-                    # contains a regitry which does not exist (anymore); since
+                    # contains a registry which does not exist (anymore); since
                     # that means it is not used, we can just skip configuring
                     # authentication on this registry
                     pass
