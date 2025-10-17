@@ -4,8 +4,8 @@
 "pipx:pdm" = "2.25.9"
 "pipx:poetry" = "2.2.1"
 "pipx:slap-cli" = "1.15.0"
-typos = "1.36.3"
-uv = "0.8.22"
+typos = "1.38.1"
+uv = "0.9.0"
 
 [tasks.build-docs]
 run = "uv run --project kraken-build kraken invoke mkdocs --no-strict -vv"

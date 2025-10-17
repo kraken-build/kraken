@@ -151,7 +151,7 @@ def test__Property__accepts_tuple() -> None:
         p1.set(["hello", 42])  # type: ignore[arg-type]
 
 
-@mark.skip(reason="we don't currently do this level of validaton")
+@mark.skip(reason="we don't currently do this level of validation")
 def test__Property__does_not_accept_tuple_with_wrong_type() -> None:
     p1 = Property[tuple[str, int]](PropertyContainer(), "foo", tuple[str, int])
     with raises(TypeError):
