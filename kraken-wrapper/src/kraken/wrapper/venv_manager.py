@@ -136,14 +136,7 @@ class VirtualEnvManager:
     def exists(self) -> bool:
         if self._metadata_store.get() is None:
             return False  # If we don't have metadata, we assume the environment does not exist.
-        if self._venv.exists():
-            if self._venv.try_version() is not None:
-                return True
-            logger.warning(
-                'Could not determine version of Python interpreter in virtual env (path="%s"), maybe it broke?',
-                self._venv.path,
-            )
-        return False
+        return self._venv.exists()
 
     def remove(self) -> None:
         self._venv.remove()
