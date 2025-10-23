@@ -27,7 +27,7 @@ dependencies = [
   "tomli-w>=1.0.0,<2.0.0",
   "tomli>=2.0.1,<3.0.0",
   "tomlkit>=0.13.0,<0.14.0",
-  "typeapi>=2.0.0,<3.0.0",
+  "typeapi>=2.3.0,<3.0.0",
   "typing-extensions>=4.6.0",
   "uv>=0.9.0,<0.10.0",
 ]
