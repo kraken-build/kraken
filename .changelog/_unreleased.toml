@@ -9,6 +9,15 @@ type = "improvement"
 description = "Allow Mitmproxy 12"
 
 [[entries]]
+id = "39dc8dc0-6466-4863-9a63-7093808a1474"
+type = "fix"
+description = "Add constraint for `cyclopts<4.0.0` to ensure Kraken Aspect commands work as expected"
+author = "@NiklasRosenstein"
+issues = [
+    "https://github.com/kraken-build/kraken/issues/400",
+]
+
+[[entries]]
 id = "db082530-faa4-46f0-80a4-cabc1cd0580d"
 type = "improvement"
 description = "Add Python 3.14 support"
