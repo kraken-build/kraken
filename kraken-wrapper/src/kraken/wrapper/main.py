@@ -262,59 +262,28 @@ def _ensure_installed(
     reinstall: bool,
     upgrade: bool,
 ) -> None:
-    exists = manager.exists()
-    install = reinstall or upgrade or not exists
-
-    operation: str
-    reason: str | None = None
-
-    if not exists:
-        operation = "Initializing"
-    elif upgrade:
-        operation = "Upgrading"
-    elif reinstall:
-        operation = "Reinstalling"
-    else:
-        operation = "Reusing"
-
-    if not install and exists:
+    if manager.exists():
         metadata = manager.get_metadata()
         if project.lockfile and metadata.requirements_hash != project.lockfile.to_pinned_requirement_spec().to_hash(
             metadata.hash_algorithm
         ):
-            install = True
-            operation = "Re-initializing"
-            reason = "outdated compared to lockfile"
+            logger.info("The build environment is outdated compared to the lockfile.")
         if not project.lockfile and metadata.requirements_hash != project.requirements.to_hash(metadata.hash_algorithm):
-            install = True
-            operation = "Re-initializing"
-            reason = "outdated compared to requirements"
+            logger.info("The build environment is outdated compared to the buildscript requirements.")
 
-    if install:
-        if not project.lockfile or upgrade:
-            source_name = "requirements"
-            source = project.requirements
-            source_file = project.requirements_path
-        else:
-            source_name = "lock file"
-            source = project.lockfile.to_pinned_requirement_spec()
-            source_file = project.lockfile_path
-
-        logger.info(
-            "%s build environment from %s (%s)%s.",
-            operation,
-            source_name,
-            os.path.relpath(source_file),
-            f" ({reason})" if reason else "",
+    if not project.lockfile or upgrade:
+        source = project.requirements
+        logger.debug(
+            'Build environment sourced from project\'s buildscript requirements (path="%s")', project.requirements_path
         )
-
-        tstart = time.perf_counter()
-        manager.install(source, reinstall, upgrade)
-        duration = time.perf_counter() - tstart
-        logger.info("Operation complete after %.3fs.", duration)
-
     else:
-        logger.info("%s build environment", operation)
+        source = project.lockfile.to_pinned_requirement_spec()
+        logger.debug('Build environment sourced from project\'s lockfile (path="%s")', project.lockfile_path)
+
+    tstart = time.perf_counter()
+    manager.install(source, reinstall, upgrade)
+    duration = time.perf_counter() - tstart
+    logger.info("Operation complete after %.3fs.", duration)
 
 
 class Project(NamedTuple):
