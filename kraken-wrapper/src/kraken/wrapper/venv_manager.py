@@ -136,7 +136,14 @@ class VirtualEnvManager:
     def exists(self) -> bool:
         if self._metadata_store.get() is None:
             return False  # If we don't have metadata, we assume the environment does not exist.
-        return self._venv.exists()
+        if self._venv.exists():
+            if self._venv.try_version() is not None:
+                return True
+            logger.warning(
+                'Could not determine version of Python interpreter in virtual env (path="%s"), maybe it broke?',
+                self._venv.path,
+            )
+        return False
 
     def remove(self) -> None:
         self._venv.remove()
@@ -184,6 +191,11 @@ class VirtualEnvManager:
         if self._venv.exists() and not self._venv.is_success_marker_set():
             logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This happens")
             logger.warning("by pressing Ctrl+C during its installation, or if you've recently upgraded kraken-wrapper.")
+            safe_rmpath(self._path)
+        elif self._venv.exists() and not self._venv.try_version():
+            logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This could")
+            logger.warning("have happened by upgrading the Python version on your system that the build environment")
+            logger.warning("was created with prior.")
             safe_rmpath(self._path)
 
         if reinstall and self._venv.exists():
