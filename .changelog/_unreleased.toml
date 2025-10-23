@@ -18,6 +18,13 @@ issues = [
 ]
 
 [[entries]]
+id = "3d3f462c-c28d-41ae-acbf-667ebf78cbca"
+type = "fix"
+description = "`krakenw` now detects broken build environment when `python -V` fails"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
+
+[[entries]]
 id = "db082530-faa4-46f0-80a4-cabc1cd0580d"
 type = "improvement"
 description = "Add Python 3.14 support"
