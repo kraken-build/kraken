@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import json
 import logging
-from collections.abc import Mapping, Sequence
 import os
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from kraken.std.util.daemon_controller import DaemonController
