@@ -39,6 +39,6 @@ author = "@NiklasRosenstein"
 [[entries]]
 id = "69acc98a-ccd9-44fc-b3b7-38ce525d5688"
 type = "improvement"
-description = "Change default Python interpreter constraint from `>=3.10` to `>=3.10,<3.14` to avoid picking up 3.15 before we could test it"
+description = "Change default Python interpreter constraint from `>=3.10` to `>=3.10,<3.15` to avoid picking up 3.15 before we could test it"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
