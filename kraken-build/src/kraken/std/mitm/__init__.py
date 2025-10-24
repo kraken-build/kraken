@@ -76,7 +76,7 @@ def start_mitmweb_proxy(
         logger.error("mitmweb did not start in time, check the log file at %s", daemon_log_file)
         if os.getenv("CI", "").lower() in ("1", "true"):
             logger.debug(
-                "Detected CI environment, inling contents of mitmweb logs:\n\n%s\n",
+                "Detected CI environment, inlinig contents of mitmweb logs:\n\n%s\n",
                 daemon_log_file.read_text() if daemon_log_file.is_file() else "<file does not exist>",
             )
         controller.stop()
