@@ -185,6 +185,11 @@ class VirtualEnvManager:
             logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This happens")
             logger.warning("by pressing Ctrl+C during its installation, or if you've recently upgraded kraken-wrapper.")
             safe_rmpath(self._path)
+        elif self._venv.exists() and not self._venv.try_version():
+            logger.warning("Your virtual build environment appears to be corrupt. It will be recreated. This could")
+            logger.warning("have happened by upgrading the Python version on your system that the build environment")
+            logger.warning("was created with prior.")
+            safe_rmpath(self._path)
 
         if reinstall and self._venv.exists():
             logger.debug("Destroying existing virtual environment at %s", self._path)

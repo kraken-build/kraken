@@ -16,3 +16,10 @@ author = "@NiklasRosenstein"
 issues = [
     "https://github.com/kraken-build/kraken/issues/400",
 ]
+
+[[entries]]
+id = "3d3f462c-c28d-41ae-acbf-667ebf78cbca"
+type = "fix"
+description = "`krakenw` now detects broken build environment when `python -V` fails"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"
