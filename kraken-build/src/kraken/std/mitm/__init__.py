@@ -74,7 +74,7 @@ def start_mitmweb_proxy(
         http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=60 if started else 0)
     except TimeoutError:
         logger.error("mitmweb did not start in time, check the log file at %s", daemon_log_file)
-        if os.getenv("CI", "").lower() in ("1", "true"):
+        if os.getenv("CI", "").lower() in ("1", "true") or True:
             logger.debug(
                 "Detected CI environment, inlinig contents of mitmweb logs:\n\n%s\n",
                 daemon_log_file.read_text() if daemon_log_file.is_file() else "<file does not exist>",
