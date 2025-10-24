@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Mapping, Sequence
+import os
 from pathlib import Path
 
 from kraken.std.util.daemon_controller import DaemonController
@@ -73,6 +74,11 @@ def start_mitmweb_proxy(
         http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=60 if started else 0)
     except TimeoutError:
         logger.error("mitmweb did not start in time, check the log file at %s", daemon_log_file)
+        if os.getenv("CI", "").lower() in ("1", "true"):
+            logger.debug(
+                "Detected CI environment, inling contents of mitmweb logs:\n\n%s\n",
+                daemon_log_file.read_text() if daemon_log_file.is_file() else "<file does not exist>",
+            )
         controller.stop()
         raise
 

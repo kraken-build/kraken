@@ -1,0 +1,5 @@
+[[entries]]
+id = "ff2668cc-97a8-4398-9e4d-e3a5e1c55ef2"
+type = "improvement"
+description = "Print mitmweb logs if it fails to start when a CI environment is detected."
+author = "@NiklasRosenstein"
