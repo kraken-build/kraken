@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
@@ -70,9 +71,18 @@ def start_mitmweb_proxy(
     # Wait for the proxy to come up. It will respond with a 502 code because there's no
     # additional information in the request to tell it what to proxy.
     try:
-        http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=60 if started else 0)
+        http_probe("GET", f"http://localhost:{mitmweb_port}", status_codes={502}, timeout=120 if started else 0)
     except TimeoutError:
-        logger.error("mitmweb did not start in time, check the log file at %s", daemon_log_file)
+        if started:
+            if os.getenv("CI", "").lower() in ("1", "true"):
+                logger.error(
+                    "mitmweb did not start in time, inlining contents of mitmweb logs:\n\n"
+                    f"{daemon_log_file.read_text() if daemon_log_file.is_file() else '<file does not exist>'}\n",
+                )
+            else:
+                logger.error(f"mitmweb did not start in time, check the log file at {daemon_log_file}")
+        else:
+            logger.error(f"Failed to reach out to existing mitmweb, check the log file at {daemon_log_file}")
         controller.stop()
         raise
 

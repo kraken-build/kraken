@@ -23,3 +23,15 @@ type = "fix"
 description = "`krakenw` now detects broken build environment when `python -V` fails"
 author = "@NiklasRosenstein"
 component = "kraken-wrapper"
+
+[[entries]]
+id = "db082530-faa4-46f0-80a4-cabc1cd0580d"
+type = "improvement"
+description = "Add Python 3.14 support"
+author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "ff2668cc-97a8-4398-9e4d-e3a5e1c55ef2"
+type = "improvement"
+description = "Print mitmweb logs if it fails to start when a CI environment is detected."
+author = "@NiklasRosenstein"
