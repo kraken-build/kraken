@@ -1,5 +1,5 @@
 [tools]
-"pipx:kraken-wrapper" = "0.48.4"
+"pipx:kraken-wrapper" = "0.49.0"
 "pipx:mksync" = "0.1.6"
 "pipx:pdm" = "2.26.0"
 "pipx:poetry" = "2.2.1"
