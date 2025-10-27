@@ -49,7 +49,7 @@ class PublishTask(Task):
         existing_files = _get_existing_files_from_index(
             project_name, self.index_index_url.get(), self.index_credentials.get()
         )
-        logger.debug("Existing files: %s", existing_files)
+        logger.debug(f"Existing files: {existing_files}")
 
         # If we can't check, proceed to execute and let uv handle it.
         if existing_files is None:
@@ -132,7 +132,7 @@ def _get_existing_files_from_index(
 
         if response.status_code == 404:
             # Package not found, so no files exist.
-            logger.debug("Project %s (nromalized to %s) not found.", project_name, normalized_name)
+            logger.debug(f"Project {project_name} (nromalized to {normalized_name}) not found.")
             return set()
 
         response.raise_for_status()
@@ -144,7 +144,7 @@ def _get_existing_files_from_index(
         elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
             # NOTE: pypiserver used in tests currently only supports the HTML API
             # See https://github.com/pypiserver/pypiserver/issues/508
-            logger.debug("Falling back to HTML parsing for PyPI index at %s", index_url)
+            logger.debug(f"Falling back to HTML parsing for PyPI index at {index_url}")
 
             class SimpleApiParser(HTMLParser):
                 def __init__(self) -> None:
@@ -165,17 +165,16 @@ def _get_existing_files_from_index(
             return parser.files
         else:
             logger.warning(
-                "Unsupported Content-Type '%s' from PyPI index at %s. Cannot check for existing files.",
-                content_type,
-                index_url,
+                f"Unsupported Content-Type '{content_type}' from PyPI index at {index_url}. "
+                "Cannot check for existing files."
             )
             return None
 
     except httpx.RequestError as e:
-        logger.warning("Failed to connect to PyPI index at %s to check for existing files. Error: %s", url, e)
+        logger.warning(f"Failed to connect to PyPI index at {url} to check for existing files. Error: {e}")
         return None
     except Exception as e:
-        logger.warning("An unexpected error occurred while checking for existing files on %s. Error: %s", url, e)
+        logger.warning(f"An unexpected error occurred while checking for existing files on {url}. Error: {e}")
         return None
 
 
