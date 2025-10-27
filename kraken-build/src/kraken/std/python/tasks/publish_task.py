@@ -108,16 +108,6 @@ class PublishTask(Task):
             check=False,
         )
 
-        if all(
-            [
-                self.skip_existing.get(),
-                result.returncode != 0,
-                "Local file and index file do not match" in result.stderr,
-            ]
-        ):
-            self.logger.warning("Local file and index file do not match.")
-            return TaskStatus.warning("uv publish skipped because files for this version already exist in the index")
-
         return TaskStatus.from_exit_code(safe_command, result.returncode)
 
 
