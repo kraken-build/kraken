@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import httpx
+from loguru import logger
 from packaging.utils import canonicalize_name
 
 from kraken.core import Project, Property, Task, TaskRelationship
@@ -36,74 +37,6 @@ class PublishTask(Task):
         yield from (TaskRelationship(task, True, False) for task in self.dependencies)
         yield from super().get_relationships()
 
-    def _get_existing_files_from_index(self, project_name: str) -> set[str] | None:
-        """Get a set of all existing files for a project from the repository index.
-
-        Returns None if the check cannot be performed.
-        """
-
-        # PEP 503: Names should be normalized.
-        # See https://packaging.python.org/en/latest/specifications/name-normalization/#name-normalization
-        normalized_name = canonicalize_name(project_name)
-        url = urllib.parse.urljoin(self.index_index_url.get(), f"/{normalized_name}/")
-        # For valid Content-Types,
-        # see https://packaging.python.org/en/latest/specifications/simple-repository-api/#content-types
-        headers = {"Accept": "application/vnd.pypi.simple.v1+json"}
-        credentials = self.index_credentials.get()
-
-        try:
-            response = httpx.get(url, auth=credentials, headers=headers, follow_redirects=True)
-
-            if response.status_code == 404:
-                # Package not found, so no files exist.
-                self.logger.debug("Project %s (nromalized to %s) not found.", project_name, normalized_name)
-                return set()
-
-            response.raise_for_status()
-
-            content_type = response.headers.get("Content-Type", "")
-            if "application/vnd.pypi.simple.v1+json" in content_type:
-                data = response.json()
-                return {file_info["filename"] for file_info in data.get("files", [])}
-            elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
-                # NOTE: pypiserver used in tests currently only supports the HTML API
-                # See https://github.com/pypiserver/pypiserver/issues/508
-                self.logger.debug("Falling back to HTML parsing for PyPI index at %s", self.index_index_url.get())
-
-                class SimpleApiParser(HTMLParser):
-                    def __init__(self) -> None:
-                        super().__init__()
-                        self.files: set[str] = set()
-
-                    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-                        if tag == "a":
-                            for attr, value in attrs:
-                                if attr == "href" and value:
-                                    # The href can be a relative URL and may contain a hash fragment.
-                                    path = urllib.parse.urlparse(value).path
-                                    filename = path.split("/")[-1]
-                                    self.files.add(urllib.parse.unquote(filename))
-
-                parser = SimpleApiParser()
-                parser.feed(response.text)
-                return parser.files
-            else:
-                self.logger.warning(
-                    "Unsupported Content-Type '%s' from PyPI index at %s. Cannot check for existing files.",
-                    content_type,
-                    self.index_index_url.get(),
-                )
-                return None
-
-        except httpx.RequestError as e:
-            self.logger.warning("Failed to connect to PyPI index at %s to check for existing files. Error: %s", url, e)
-            return None
-        except Exception as e:
-            self.logger.warning(
-                "An unexpected error occurred while checking for existing files on %s. Error: %s", url, e
-            )
-            return None
-
     def prepare(self) -> TaskStatus | None:
         if not self.skip_existing.get():
             return None
@@ -113,8 +46,10 @@ class PublishTask(Task):
             return TaskStatus.skipped("No distributions to publish.")
 
         project_name = distributions[0].name.split("-")[0]
-        existing_files = self._get_existing_files_from_index(project_name)
-        self.logger.debug("Existing files: %s", existing_files)
+        existing_files = _get_existing_files_from_index(
+            project_name, self.index_index_url.get(), self.index_credentials.get()
+        )
+        logger.debug("Existing files: %s", existing_files)
 
         # If we can't check, proceed to execute and let uv handle it.
         if existing_files is None:
@@ -184,6 +119,74 @@ class PublishTask(Task):
             return TaskStatus.warning("uv publish skipped because files for this version already exist in the index")
 
         return TaskStatus.from_exit_code(safe_command, result.returncode)
+
+
+def _get_existing_files_from_index(
+    project_name: str, index_url: str, credentials: tuple[str, str] | None
+) -> set[str] | None:
+    """Get a set of all existing files for a project from the repository index.
+
+    Returns None if the check cannot be performed.
+    """
+
+    # PEP 503: Names should be normalized.
+    # See https://packaging.python.org/en/latest/specifications/name-normalization/#name-normalization
+    normalized_name = canonicalize_name(project_name)
+    url = urllib.parse.urljoin(index_url, f"/{normalized_name}/")
+    # For valid Content-Types,
+    # see https://packaging.python.org/en/latest/specifications/simple-repository-api/#content-types
+    headers = {"Accept": "application/vnd.pypi.simple.v1+json"}
+
+    try:
+        response = httpx.get(url, auth=credentials, headers=headers, follow_redirects=True)
+
+        if response.status_code == 404:
+            # Package not found, so no files exist.
+            logger.debug("Project %s (nromalized to %s) not found.", project_name, normalized_name)
+            return set()
+
+        response.raise_for_status()
+
+        content_type = response.headers.get("Content-Type", "")
+        if "application/vnd.pypi.simple.v1+json" in content_type:
+            data = response.json()
+            return {file_info["filename"] for file_info in data.get("files", [])}
+        elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
+            # NOTE: pypiserver used in tests currently only supports the HTML API
+            # See https://github.com/pypiserver/pypiserver/issues/508
+            logger.debug("Falling back to HTML parsing for PyPI index at %s", index_url)
+
+            class SimpleApiParser(HTMLParser):
+                def __init__(self) -> None:
+                    super().__init__()
+                    self.files: set[str] = set()
+
+                def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+                    if tag == "a":
+                        for attr, value in attrs:
+                            if attr == "href" and value:
+                                # The href can be a relative URL and may contain a hash fragment.
+                                path = urllib.parse.urlparse(value).path
+                                filename = path.split("/")[-1]
+                                self.files.add(urllib.parse.unquote(filename))
+
+            parser = SimpleApiParser()
+            parser.feed(response.text)
+            return parser.files
+        else:
+            logger.warning(
+                "Unsupported Content-Type '%s' from PyPI index at %s. Cannot check for existing files.",
+                content_type,
+                index_url,
+            )
+            return None
+
+    except httpx.RequestError as e:
+        logger.warning("Failed to connect to PyPI index at %s to check for existing files. Error: %s", url, e)
+        return None
+    except Exception as e:
+        logger.warning("An unexpected error occurred while checking for existing files on %s. Error: %s", url, e)
+        return None
 
 
 def publish(
