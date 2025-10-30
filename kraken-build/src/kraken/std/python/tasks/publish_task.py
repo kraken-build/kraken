@@ -97,7 +97,7 @@ class PublishTask(Task):
             env["UV_PUBLISH_PASSWORD"] = credentials[1]
 
         safe_command = command
-        self.logger.info("$ %s", safe_command)
+        self.logger.info("$ %s", command)
 
         result = subprocess.run(
             command,
