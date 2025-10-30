@@ -49,7 +49,7 @@ class PublishTask(Task):
         existing_files = _get_existing_files_from_index(
             project_name, self.index_index_url.get(), self.index_credentials.get()
         )
-        logger.debug(f"Existing files: {existing_files}")
+        self.logger.debug("Existing files in index: %s", existing_files)
 
         # If we can't check, proceed to execute and let uv handle it.
         if existing_files is None:
