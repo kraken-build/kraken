@@ -1,0 +1,5 @@
+[[entries]]
+id = "fba9aa6f-bf55-4089-9847-e15c04eca98d"
+type = "improvement"
+description = "Change `python.publish` task to use `uv publish` instead of `twine upload`."
+author = "John-P@users.noreply.github.com"

@@ -13,6 +13,7 @@ from unittest.mock import patch
 import httpx
 import pytest
 import tomli
+from pytest_httpx._httpx_mock import HTTPXMock
 
 from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
@@ -46,7 +47,7 @@ def deactivate_venv() -> Iterator[None]:
 
 
 @pytest.fixture(scope="session")
-def pypiserver(docker_service_manager: DockerServiceManager) -> str:
+def pypiserver(docker_service_manager: DockerServiceManager) -> tuple[str, str]:
     with tempfile.TemporaryDirectory() as _tempdir:
         tempdir = Path(_tempdir)
 
@@ -63,7 +64,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
 
         container = docker_service_manager.run(
             "pypiserver/pypiserver:latest",
-            ["--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
+            ["run", "-p", "8080", "--passwords", "/.htpasswd", "-a", "update", "--hash-algo", "sha256"],
             ports=["8080"],
             volumes=[f"{htpasswd.absolute()}:/.htpasswd"],
             detach=True,
@@ -72,12 +73,13 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> str:
         # host = container.ports["8080/tcp"][0]["HostIp"]
         host = "localhost"  # The container ports HostIp is 0.0.0.0, which PDM won't trust without extra config.
         port = container.ports["8080/tcp"][0]["HostPort"]
-        index_url = f"http://{host}:{port}/simple"
+        upload_url = f"http://{host}:{port}"
+        index_url = f"{upload_url}/simple"
 
         http_probe("GET", index_url)
 
-        logger.info("Started local Pypiserver at %s", index_url)
-        return index_url
+        logger.info("Started local Pypiserver at %s", upload_url)
+        return upload_url, index_url
 
 
 @pytest.mark.parametrize(
@@ -98,9 +100,10 @@ def test__python_project_install_lint_and_publish(
     project_dir: str,
     kraken_ctx: Context,
     tempdir: Path,
-    pypiserver: str,
+    pypiserver: tuple[str, str],
 ) -> None:
     consumer_dir = project_dir + "-consumer"
+    _, index_url = pypiserver
 
     # Copy the projects to the temporary directory.
     shutil.copytree(data_path(project_dir), tempdir / project_dir)
@@ -116,7 +119,7 @@ def test__python_project_install_lint_and_publish(
 
     logger.info("Loading and executing Kraken project (%s)", tempdir / project_dir)
     # TODO: mock the `os.environ` dict instead of mutating the global one
-    os.environ["LOCAL_PACKAGE_INDEX"] = pypiserver
+    os.environ["LOCAL_PACKAGE_INDEX"] = index_url
     os.environ["LOCAL_USER"] = USER_NAME
     os.environ["LOCAL_PASSWORD"] = USER_PASS
     # Make sure Poetry installs the environment locally so it gets cleaned up
@@ -134,8 +137,8 @@ def test__python_project_install_lint_and_publish(
     kraken_ctx.execute([":apply"])
 
     # For debugging
-    package_state = httpx.get(f"{pypiserver}/{project_dir}", auth=(USER_NAME, USER_PASS), follow_redirects=True).text
-    print(f"=== {pypiserver}/{project_dir}")
+    package_state = httpx.get(f"{index_url}/{project_dir}", auth=(USER_NAME, USER_PASS), follow_redirects=True).text
+    print(f"=== {index_url}/{project_dir}")
     print(package_state)
 
     # Test that expected artifacts are emitted
@@ -320,3 +323,156 @@ def test__python_project_can_lint_lint_enforced_directories(
     assert "src/mypackage/__init__.py:6: error: Missing return statement  [return]" in output
     assert "bin/main.py:7: error: Missing return statement  [return]" in output
     assert "examples/example.py:6: error: Missing return statement  [return]" in output
+
+
+@unittest.mock.patch.dict(os.environ, {})
+def test__python_publish_skip_existing(
+    kraken_ctx: Context,
+    kraken_project: Project,
+    pypiserver: tuple[str, str],
+) -> None:
+    """Test the behaviour of the `skip_existing` flag of the publish task.
+
+    It should skip publishing files that already exist on the index.
+    """
+
+    # Copy the poetry project to the temp directory.
+    shutil.copytree(data_path("poetry-project"), kraken_project.directory, dirs_exist_ok=True)
+
+    # Configure the local pypiserver.
+    upload_url, index_url = pypiserver
+    python.settings.python_settings(kraken_project).add_package_index(
+        alias="local",
+        upload_url=upload_url,
+        index_url=index_url,
+        credentials=(USER_NAME, USER_PASS),
+    )
+
+    # Build the project.
+    build_task = python.build(project=kraken_project)
+    build_graph = kraken_ctx.execute([build_task])
+    build_status = build_graph.get_status(build_task)
+    assert build_status is not None and build_status.is_succeeded()
+    distributions = build_task.get_outputs()
+    assert distributions is not None
+
+    # Publish the distributions for the first time.
+    publish_task = python.publish(
+        name="python.publish.first",
+        package_index="local",
+        distributions=list(distributions),
+        project=kraken_project,
+    )
+    publish_graph = kraken_ctx.execute([publish_task])
+    publish_status = publish_graph.get_status(publish_task)
+    assert publish_status is not None and publish_status.is_succeeded()
+
+    # Case 1: Try to publish again with skip_existing=True. The task should be skipped.
+    publish_task_skip = python.publish(
+        name="python.publish.skip",
+        package_index="local",
+        distributions=list(distributions),
+        project=kraken_project,
+        skip_existing=True,
+    )
+    skip_graph = kraken_ctx.execute([publish_task_skip])
+    skip_status = skip_graph.get_status(publish_task_skip)
+    assert skip_status is not None and skip_status.is_skipped()
+
+    # Case 2: Try to publish again with skip_existing=False. Should fail because the files exist.
+    # We need to rebuild to ensure we have the same file objects to try and publish.
+    build_task_2 = python.build(name="python.build.2", project=kraken_project)
+    kraken_ctx.execute([build_task_2])
+    distributions_2 = build_task_2.get_outputs()
+    assert distributions_2 is not None
+
+    publish_task_fail = python.publish(
+        name="python.publish.fail",
+        package_index="local",
+        distributions=list(distributions_2),
+        project=kraken_project,
+        skip_existing=False,
+    )
+    with pytest.raises(BuildError) as excinfo:
+        kraken_ctx.execute([publish_task_fail])
+
+    # Check that the task that failed is the one we expected.
+    assert len(excinfo.value.failed_tasks) == 1
+    failed_task = next(iter(excinfo.value.failed_tasks))
+    assert failed_task.address == publish_task_fail.address
+
+
+@pytest.mark.parametrize(
+    "response_type, content_type",
+    [
+        ("html", "text/html"),  # Alias for application/vnd.pypi.simple.v1+html
+        ("html", "application/vnd.pypi.simple.v1+html"),
+        ("json", "application/vnd.pypi.simple.v1+json"),
+    ],
+)
+def test__python_publish_skip_existing_mocked(
+    kraken_ctx: Context,
+    kraken_project: Project,
+    httpx_mock: HTTPXMock,
+    response_type: str,
+    content_type: str,
+) -> None:
+    """Test that the publish task skips existing files based on a mocked server response."""
+
+    # Copy the poetry project to the temp directory.
+    shutil.copytree(data_path("poetry-project"), kraken_project.directory, dirs_exist_ok=True)
+
+    # Build the project.
+    build_task = python.build(project=kraken_project)
+    build_graph = kraken_ctx.execute([build_task])
+    build_status = build_graph.get_status(build_task)
+    assert build_status is not None and build_status.is_succeeded()
+    distributions = list(build_task.get_outputs())
+    assert distributions is not None
+
+    # Set up the mock server.
+    project_name = "poetry-project"
+    if response_type == "html":
+        html_data = f"""
+        <!DOCTYPE html>
+        <html>
+        <body>
+            <a href="{distributions[0].name}">{distributions[0].name}</a>
+            <a href="{distributions[1].name}">{distributions[1].name}</a>
+        </body>
+        </html>
+        """
+        httpx_mock.add_response(
+            url=f"http://mock-index.com/{project_name}/",
+            html=html_data,
+            headers={"Content-Type": content_type},
+        )
+    else:  # json
+        # This is a minimal mock. For a full example, see
+        # https://packaging.python.org/en/latest/specifications/simple-repository-api/#simple-repository-json-project-detail
+        json_data = {"files": [{"filename": dist.name} for dist in distributions]}
+        httpx_mock.add_response(
+            url=f"http://mock-index.com/{project_name}/",
+            json=json_data,
+            headers={"Content-Type": content_type},
+        )
+
+    # Configure the python settings to use the mock server.
+    python.settings.python_settings(kraken_project).add_package_index(
+        alias="local",
+        index_url="http://mock-index.com/",
+        upload_url="http://mock-index.com/",
+        credentials=(USER_NAME, USER_PASS),
+    )
+
+    # Try to publish with skip_existing=True. The task should be skipped.
+    publish_task_skip = python.publish(
+        name="python.publish.skip",
+        package_index="local",
+        distributions=distributions,
+        project=kraken_project,
+        skip_existing=True,
+    )
+    skip_graph = kraken_ctx.execute([publish_task_skip])
+    skip_status = skip_graph.get_status(publish_task_skip)
+    assert skip_status is not None and skip_status.is_skipped()
