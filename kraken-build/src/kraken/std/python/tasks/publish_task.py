@@ -96,7 +96,6 @@ class PublishTask(Task):
             env["UV_PUBLISH_USERNAME"] = credentials[0]
             env["UV_PUBLISH_PASSWORD"] = credentials[1]
 
-        safe_command = command
         self.logger.info("$ %s", command)
 
         result = subprocess.run(
@@ -108,7 +107,7 @@ class PublishTask(Task):
             check=False,
         )
 
-        return TaskStatus.from_exit_code(safe_command, result.returncode)
+        return TaskStatus.from_exit_code(command, result.returncode)
 
 
 def _get_existing_files_from_index(
