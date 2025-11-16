@@ -7,7 +7,6 @@ import tempfile
 import unittest.mock
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TypeVar
 from unittest.mock import patch
 
 import httpx
@@ -19,7 +18,6 @@ from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
 from kraken.core.system.errors import BuildError
 from kraken.std import python
-from kraken.std.python.buildsystem.maturin import MaturinUvProjectHandler
 from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 
@@ -33,7 +31,7 @@ USER_PASS = "password-for-integration-test"
 
 @pytest.fixture(scope="session", autouse=True)
 def deactivate_venv() -> Iterator[None]:
-    with patch.dict(os.environ), tempfile.TemporaryDirectory() as tempdir:
+    with patch.dict(os.environ):
         os.environ.pop("VIRTUAL_ENV", None)
         os.environ.pop("VIRTUAL_ENV_PROMPT", None)
         yield
@@ -213,14 +211,14 @@ def test__python_project__upgrade_relative_import_version(
 @pytest.mark.parametrize(
     "project_dir, reader, expected_python_version",
     [
-        ("rust-uv-project", MaturinUvProjectHandler, "^3.9"),
+        ("rust-uv-project", UvPyprojectHandler, "^3.9"),
         ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_pyproject_reads_correct_data(
     project_dir: str,
-    reader: UvPyprojectHandler,
+    reader: type[UvPyprojectHandler],
     expected_python_version: str,
     kraken_project: Project,
 ) -> None:
