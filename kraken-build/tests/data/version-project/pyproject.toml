@@ -7,9 +7,6 @@ name = "version-project"
 version = "0.0.0"
 description = "Project for version upgrade check within Kraken-std integration tests"
 authors = [
-    "Szymon Gula <szymon.gula@helsing.ai>",
-]
-packages = [
-    { include = "version_project", from = "src" },
+    {name = "Szymon Gula", email = "szymon.gula@helsing.ai"},
 ]
 requires-python = ">=3.10"

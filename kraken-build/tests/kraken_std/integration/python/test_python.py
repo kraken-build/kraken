@@ -115,8 +115,6 @@ def test__python_project_install_lint_and_publish(
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
     kraken_ctx.load_project(tempdir / consumer_dir)
-
-    # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
 
     # For debugging
@@ -211,7 +209,7 @@ def test__python_project__upgrade_relative_import_version(
 @pytest.mark.parametrize(
     "project_dir, reader, expected_python_version",
     [
-        ("rust-uv-project", UvPyprojectHandler, "^3.9"),
+        ("rust-uv-project", UvPyprojectHandler, ">=3.9"),
         ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
@@ -247,7 +245,7 @@ def test__python_project_coverage(
     os.environ["PYTEST_FLAGS"] = ""
 
     tempdir = kraken_project.directory
-    original_dir = data_path("slap-project")
+    original_dir = data_path("uv-project")
 
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
@@ -257,7 +255,7 @@ def test__python_project_coverage(
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
-    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "slap-project"
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "uv-project"
 
     python.settings.python_settings(project=kraken_project, build_system=local_build_system)
     python.pytest(project=kraken_project, coverage=python.CoverageFormat.XML)
@@ -448,6 +446,6 @@ def test__python_publish_skip_existing_mocked(
         project=kraken_project,
         skip_existing=True,
     )
-    skip_graph = kraken_ctx.execute([publish_task_skip])
+    skip_graph = kraken_ctx.execute([publish_task_skip], resume_from=build_graph)
     skip_status = skip_graph.get_status(publish_task_skip)
     assert skip_status is not None and skip_status.is_skipped()
