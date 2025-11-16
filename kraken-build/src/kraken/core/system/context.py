@@ -411,7 +411,9 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert graph, "TaskGraph cannot be empty"
         return graph
 
-    def execute(self, tasks: list[str | Address | Task] | TaskGraph | None = None, resume_from: TaskGraph | None = None) -> TaskGraph:
+    def execute(
+        self, tasks: list[str | Address | Task] | TaskGraph | None = None, resume_from: TaskGraph | None = None
+    ) -> TaskGraph:
         """Execute all default tasks or the tasks specified by *targets* using the default executor.
         If :meth:`finalize` was not called already it will be called by this function before the build
         graph is created, unless a build graph is passed in the first place.
