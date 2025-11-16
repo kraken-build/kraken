@@ -13,6 +13,7 @@ from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
 from kraken.std.python.pyproject import PyprojectHandler
+from src.kraken.build import project
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
@@ -157,14 +158,15 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
     """Detect the Python build system used in *project_directory*."""
 
     pyproject_toml = project_directory / "pyproject.toml"
+    uv_lock = project_directory / "uv.lock"
     if not pyproject_toml.is_file():
         return None
 
     pyproject_content = pyproject_toml.read_text()
 
-    if "[tool.uv" not in pyproject_content:
+    if not uv_lock.is_file() and "[tool.uv" not in pyproject_content:
         logger.warning(
-            "Your `pyproject.toml` does not hint at using Uv. Kraken only supports Python projects using Uv.",
+            "project=%s: Your `pyproject.toml` does not hint at using Uv. Kraken only supports Python projects using Uv.",
             project_directory,
         )
 
