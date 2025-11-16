@@ -16,11 +16,8 @@ from kraken.common.path import is_relative_to
 from kraken.common.toml import TomlFile
 
 from ...cargo.manifest import CargoMetadata
-from ..pyproject import PyprojectHandler
 from ..settings import PythonSettings
-from . import ManagedEnvironment, PythonBuildSystem
-from .pdm import PDMManagedEnvironment, PDMPythonBuildSystem
-from .poetry import PoetryManagedEnvironment, PoetryPyprojectHandler, PoetryPythonBuildSystem
+from . import PythonBuildSystem
 from .uv import UvPythonBuildSystem
 
 logger = logging.getLogger(__name__)
@@ -130,136 +127,6 @@ class _MaturinBuilder:
             shutil.rmtree(dist_dir)
 
         return dst_files
-
-
-class MaturinPoetryPyprojectHandler(PoetryPyprojectHandler):
-    def set_version(self, version: str | None) -> None:
-        PyprojectHandler.set_version(self, version)
-        PoetryPyprojectHandler.set_version(self, version)
-
-    def synchronize_project_section_to_poetry_state(self) -> None:
-        """
-        Synchronize the `[tool.poetry]` package metadata to the `[project]` section.
-
-        In the case where only the `[project]` section exists, we sync it into the other direction.
-        """
-
-        poetry_section = self._poetry_section
-        project_section = self.raw.setdefault("project", {})
-        for field_name in ("name", "version"):
-            poetry_value = poetry_section.get(field_name)
-            project_value = project_section.get(field_name)
-            if poetry_value is None:
-                poetry_section[field_name] = project_value
-            else:
-                project_section[field_name] = poetry_value
-
-
-class MaturinPoetryPythonBuildSystem(PoetryPythonBuildSystem):
-    """A maturin-backed version of the Poetry build system, that invokes the maturin build-backend.
-    Can be enabled by adding the following to the local pyproject.yaml:
-    ```toml
-    [tool.poetry.group.dev.dependencies]
-    maturin = "^1.0"
-
-    [build-system]
-    requires = ["maturin~=1.0"]
-    build-backend = "maturin"
-    ```
-    """
-
-    name = "Maturin Poetry"
-
-    def __init__(self, project_directory: Path) -> None:
-        super().__init__(project_directory)
-        self._builder = _MaturinBuilder(["poetry", "run"], self)
-
-    def disable_default_build(self) -> None:
-        self._builder.disable_default_build()
-
-    def enable_zig_build(self, targets: Collection[MaturinZigTarget]) -> None:
-        """
-        :param targets: Collection of MaturinTargets to cross-compile to using zig.
-        """
-        self._builder.enable_zig_build(targets)
-
-    def add_build_environment_variable(self, key: str, value: str) -> None:
-        self._builder.add_build_environment_variable(key, value)
-
-    # PythonBuildSystem
-
-    def get_pyproject_reader(self, pyproject: TomlFile) -> MaturinPoetryPyprojectHandler:
-        return MaturinPoetryPyprojectHandler(pyproject)
-
-    def get_managed_environment(self) -> ManagedEnvironment:
-        return MaturinPoetryManagedEnvironment(self.project_directory)
-
-    def update_pyproject(self, settings: PythonSettings, pyproject: TomlFile) -> None:
-        super().update_pyproject(settings, pyproject)
-        handler = self.get_pyproject_reader(pyproject)
-        handler.synchronize_project_section_to_poetry_state()
-
-    def build(self, output_directory: Path) -> list[Path]:
-        return self._builder.build(output_directory)
-
-
-class MaturinPoetryManagedEnvironment(PoetryManagedEnvironment):
-    def install(self, settings: PythonSettings) -> None:
-        super().install(settings)
-        command = ["poetry", "run", "maturin", "develop"]
-        logger.info("%s", command)
-        sp.check_call(command, cwd=self.project_directory)
-
-    def always_install(self) -> bool:
-        return True
-
-
-class MaturinPdmPythonBuildSystem(PDMPythonBuildSystem):
-    """A maturin-backed version of the PDM build system, that invokes the maturin build-backend.
-    Can be enabled by adding the following to the local pyproject.yaml:
-    ```toml
-    [tool.pdm.dev-dependencies]
-    build = ["maturin~=1.0", "pip~=23.0"]
-
-    [build-system]
-    requires = ["maturin~=1.0"]
-    build-backend = "maturin"
-    ```
-    """
-
-    name = "Maturin PDM"
-
-    def __init__(self, project_directory: Path) -> None:
-        super().__init__(project_directory)
-        self._builder = _MaturinBuilder(["pdm", "run"], self)
-        warnings.warn(
-            "Maturin + PDM project support is deprecated and will be removed in a future release.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-    def disable_default_build(self) -> None:
-        self._builder.disable_default_build()
-
-    def enable_zig_build(self, targets: Collection[MaturinZigTarget]) -> None:
-        """
-        :param targets: Collection of MaturinTargets to cross-compile to using zig.
-        """
-        self._builder.enable_zig_build(targets)
-
-    def add_build_environment_variable(self, key: str, value: str) -> None:
-        self._builder.add_build_environment_variable(key, value)
-
-    def get_managed_environment(self) -> ManagedEnvironment:
-        return MaturinPdmManagedEnvironment(self.project_directory)
-
-    def build(self, output_directory: Path) -> list[Path]:
-        return self._builder.build(output_directory)
-
-
-class MaturinPdmManagedEnvironment(PDMManagedEnvironment):
-    def always_install(self) -> bool:
-        return True
 
 
 class MaturinUvPythonBuildSystem(UvPythonBuildSystem):

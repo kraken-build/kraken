@@ -3,3 +3,9 @@ id = "92764a7f-617d-46e3-8898-8ffeeff41f94"
 type = "fix"
 description = "Bump PDM to 2.26.1 to fix build errors due to Hishel's refactoring"
 author = "matthieu.antoine@helsing.ai"
+
+[[entries]]
+id = "fc8e7ccd-f080-4f1d-a987-f92c4776388d"
+type = "breaking change"
+description = "Drop support for Python projects that use Poetry or PDM"
+author = "@NiklasRosenstein"
