@@ -13,7 +13,6 @@ from kraken.common.toml import TomlFile
 from kraken.core import TaskStatus
 from kraken.std.python.buildsystem.helpers import update_python_version_str_in_source_files
 from kraken.std.python.pyproject import PyprojectHandler
-from src.kraken.build import project
 
 if TYPE_CHECKING:
     from ..settings import PythonSettings
