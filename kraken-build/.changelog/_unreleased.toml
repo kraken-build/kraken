@@ -1,0 +1,5 @@
+[[entries]]
+id = "e74ac080-439c-44aa-9484-00307e9a8552"
+type = "feature"
+description = "Add `Context.execute(resume_from)` argument"
+author = "@NiklasRosenstein"
