@@ -5,5 +5,4 @@ __pycache__/
 /.vscode
 /build
 /dist
-poetry.lock
 !src/kraken/build

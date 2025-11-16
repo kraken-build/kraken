@@ -1,4 +1,8 @@
-[tool.poetry]
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
 name = "version-project"
 version = "0.0.0"
 description = "Project for version upgrade check within Kraken-std integration tests"
@@ -8,12 +12,4 @@ authors = [
 packages = [
     { include = "version_project", from = "src" },
 ]
-
-[tool.poetry.dependencies]
-python = "^3.7"
-
-[build-system]
-requires = [
-    "poetry-core>=1.0.0",
-]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.10"

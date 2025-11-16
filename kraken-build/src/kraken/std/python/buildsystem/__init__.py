@@ -1,4 +1,4 @@
-"""Abstraction of Python build systems such as Poetry and Slap."""
+"""Abstraction of Python build systems such as Uv."""
 
 from __future__ import annotations
 
@@ -50,8 +50,7 @@ class PythonBuildSystem(abc.ABC):
 
     @abc.abstractmethod
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
-        """Resolve all dependencies of the project and write the exact versions into
-        the corresponding lock file. In the case of Poetry it is poetry.lock."""
+        """Resolve all dependencies of the project and write the exact versions into the corresponding lock file."""
 
     @abc.abstractmethod
     def requires_login(self) -> bool:

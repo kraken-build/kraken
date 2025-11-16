@@ -302,8 +302,7 @@ class UvManagedEnvironment(ManagedEnvironment):
     def _get_uv_environment_path(self) -> Path | None:
         """Uses `uv run` to determines the location of the venv."""
 
-        # Ensure we de-activate any environment that might be active when Kraken is invoked. Otherwise,
-        # Poetry would fall back to that environment.
+        # Ensure we de-activate any environment that might be active when Kraken is invoked.
         environ = os.environ.copy()
         venv = get_current_venv(environ)
         if venv:

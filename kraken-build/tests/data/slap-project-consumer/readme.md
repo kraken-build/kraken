@@ -1,1 +1,0 @@
-# slap-project
