@@ -3,3 +3,9 @@ id = "92764a7f-617d-46e3-8898-8ffeeff41f94"
 type = "fix"
 description = "Bump PDM to 2.26.1 to fix build errors due to Hishel's refactoring"
 author = "matthieu.antoine@helsing.ai"
+
+[[entries]]
+id = "4bb64abf-06bd-43bc-8162-e264604f5e9a"
+type = "improvement"
+description = "Add python.ty to type check with Ty"
+author = "thomas.pellissier-tanon@helsing.ai"
