@@ -8,7 +8,7 @@ from ._buildscript import BuildscriptMetadata, BuildscriptMetadataException, bui
 from ._colored import Attribute, Color, Highlight, colored
 from ._date import datetime_to_iso8601, iso8601_to_datetime
 from ._environment import EnvironmentType
-from ._fs import atomic_file_swap, safe_rmpath
+from ._fs import atomic_file_swap, intersect_paths, safe_rmpath
 from ._generic import NotSet, flatten, not_none
 from ._importlib import appending_to_sys_path, import_class
 from ._option_sets import ColorOptions, LoggingOptions
@@ -86,4 +86,5 @@ __all__ = [
     # supplier
     "Supplier",
     "CredentialsWithHost",
+    "intersect_paths",
 ]

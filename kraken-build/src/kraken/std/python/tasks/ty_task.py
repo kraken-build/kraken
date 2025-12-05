@@ -4,8 +4,7 @@ import logging
 import os
 from collections.abc import MutableMapping, Sequence
 
-from kraken.common import Supplier
-from kraken.common._fs import intersect_paths
+from kraken.common import Supplier, intersect_paths
 from kraken.core import Project, Property
 from kraken.core.system.aspect import CheckAspect
 from kraken.core.system.task import TaskStatus

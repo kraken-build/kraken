@@ -7,8 +7,7 @@ import warnings
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
-from kraken.common import flatten
-from kraken.common._fs import intersect_paths
+from kraken.common import flatten, intersect_paths
 from kraken.core import Project, Property, TaskStatus, TestAspect
 
 from .base_task import EnvironmentAwareDispatchTask
