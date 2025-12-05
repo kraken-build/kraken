@@ -7,7 +7,7 @@ packages = ["src/kraken/"]
 
 [project]
 name = "kraken-build"
-version = "0.50.0"
+version = "0.50.1"
 description = "Kraken is an extensible build orchestration system."
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
