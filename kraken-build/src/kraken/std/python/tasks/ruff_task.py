@@ -6,7 +6,7 @@ from itertools import chain
 from os import fspath
 from pathlib import Path
 
-from kraken.common._fs import intersect_paths
+from kraken.common import intersect_paths
 from kraken.core import Aspect, FmtAspect, LintAspect, Project, Property, Supplier, TaskStatus
 
 from .base_task import EnvironmentAwareDispatchTask
