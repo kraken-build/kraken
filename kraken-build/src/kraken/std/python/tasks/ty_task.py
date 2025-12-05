@@ -10,7 +10,6 @@ from kraken.core.system.task import TaskStatus
 
 from .base_task import EnvironmentAwareDispatchTask
 
-logger = logging.getLogger(__name__)
 
 
 class TyTask(EnvironmentAwareDispatchTask, CheckAspect.Implements):
