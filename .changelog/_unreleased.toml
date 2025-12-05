@@ -3,3 +3,9 @@ id = "92764a7f-617d-46e3-8898-8ffeeff41f94"
 type = "fix"
 description = "Bump PDM to 2.26.1 to fix build errors due to Hishel's refactoring"
 author = "matthieu.antoine@helsing.ai"
+
+[[entries]]
+id = "f809b28c-cbc7-4ff6-8165-66111c517715"
+type = "docs"
+description = "Replace outdated reference to PEX in docstring"
+author = "scott@stevenson.io"
