@@ -59,7 +59,7 @@ def ty(
     version_spec: str | None = None,
 ) -> TyTask:
     """
-    :param version_spec: If specified, the Mypy tool will be installed as a PEX and does not need to be installed
+    :param version_spec: If specified, the Ty tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 
