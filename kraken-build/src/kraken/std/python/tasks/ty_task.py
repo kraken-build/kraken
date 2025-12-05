@@ -11,7 +11,6 @@ from kraken.core.system.task import TaskStatus
 from .base_task import EnvironmentAwareDispatchTask
 
 
-
 class TyTask(EnvironmentAwareDispatchTask, CheckAspect.Implements):
     description = "Static type checking for Python code using Ty."
     python_dependencies = ["ty"]

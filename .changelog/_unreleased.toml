@@ -5,6 +5,12 @@ description = "Bump PDM to 2.26.1 to fix build errors due to Hishel's refactorin
 author = "matthieu.antoine@helsing.ai"
 
 [[entries]]
+id = "f809b28c-cbc7-4ff6-8165-66111c517715"
+type = "docs"
+description = "Replace outdated reference to PEX in docstring"
+author = "scott@stevenson.io"
+
+[[entries]]
 id = "4bb64abf-06bd-43bc-8162-e264604f5e9a"
 type = "improvement"
 description = "Add python.ty to type check with Ty"
