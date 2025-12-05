@@ -24,7 +24,7 @@ class PublishTask(Task):
     index_upload_url: Property[str]
     index_index_url: Property[str]
     index_credentials: Property[tuple[str, str] | None] = Property.default(None)
-    distributions: Property[list[Path]]
+    distributions: Property[list[Path]] = Property.output()
     skip_existing: Property[bool] = Property.default(False)
     interactive: Property[bool | None] = Property.default(None)
     dependencies: list[Task]
