@@ -1,0 +1,5 @@
+[[entries]]
+id = "375cdbe9-468e-46b4-ba58-bbb8b852ed4f"
+type = "fix"
+description = "Fixed Python publish task failing with \"Property is finalized\" error when `skip_existing=True`"
+author = "John-P@users.noreply.github.com"
