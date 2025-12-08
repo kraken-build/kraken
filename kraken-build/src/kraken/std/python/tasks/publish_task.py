@@ -150,7 +150,7 @@ def _get_existing_files_from_index(
 
         content_type = response.headers.get("Content-Type", "")
         logger.debug(f"PyPI server content type: {content_type}")
-        if "application/vnd.pypi.simple.v1+json" in content_type:
+        if "application/json" in content_type or "application/vnd.pypi.simple.v1+json" in content_type:
             data = response.json()
             return {file_info["filename"] for file_info in data.get("files", [])}
         elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:
