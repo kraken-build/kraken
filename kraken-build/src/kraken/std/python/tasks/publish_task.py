@@ -124,7 +124,16 @@ def _get_existing_files_from_index(
     url = urllib.parse.urljoin(index_url, f"/{normalized_name}/")
     # For valid Content-Types,
     # see https://packaging.python.org/en/latest/specifications/simple-repository-api/#content-types
-    headers = {"Accept": "application/vnd.pypi.simple.v1+json"}
+    headers = {
+        "Accept": ",".join(
+            (
+                "application/vnd.pypi.simple.v1+json",
+                "application/vnd.pypi.simple.v1+html",
+                "application/json",
+                "text/html",
+            )
+        )
+    }
 
     try:
         response = httpx.get(url, auth=credentials, headers=headers, follow_redirects=True)
