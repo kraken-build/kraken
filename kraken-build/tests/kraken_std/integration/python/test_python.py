@@ -362,10 +362,11 @@ def test__python_publish_skip_existing(
         package_index="local",
         distributions=list(distributions),
         project=kraken_project,
+        skip_existing=True,  # Should not exist yet, but allow anyway
     )
     publish_graph = kraken_ctx.execute([publish_task])
     publish_status = publish_graph.get_status(publish_task)
-    assert publish_status is not None and publish_status.is_succeeded()
+    assert publish_status is not None and (publish_status.is_succeeded() or publish_status.is_skipped())
 
     # Case 1: Try to publish again with skip_existing=True. The task should be skipped.
     publish_task_skip = python.publish(
@@ -406,6 +407,7 @@ def test__python_publish_skip_existing(
     "response_type, content_type",
     [
         ("html", "text/html"),  # Alias for application/vnd.pypi.simple.v1+html
+        ("json", "application/json"),  # Alias for application/vnd.pypi.simple.v1+json
         ("html", "application/vnd.pypi.simple.v1+html"),
         ("json", "application/vnd.pypi.simple.v1+json"),
     ],

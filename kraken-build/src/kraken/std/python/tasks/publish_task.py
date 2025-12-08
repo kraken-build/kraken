@@ -121,23 +121,36 @@ def _get_existing_files_from_index(
     # PEP 503: Names should be normalized.
     # See https://packaging.python.org/en/latest/specifications/name-normalization/#name-normalization
     normalized_name = canonicalize_name(project_name)
-    url = urllib.parse.urljoin(index_url, f"/{normalized_name}/")
+    logger.debug(f"Index URL: {index_url}")
+    url = urllib.parse.urljoin(f"{index_url}/", f"{normalized_name}/")
+    logger.debug(f"Normalised package index URL: {url}")
     # For valid Content-Types,
     # see https://packaging.python.org/en/latest/specifications/simple-repository-api/#content-types
-    headers = {"Accept": "application/vnd.pypi.simple.v1+json"}
+    headers = {
+        "Accept": ",".join(
+            (
+                "application/vnd.pypi.simple.v1+json",
+                "application/vnd.pypi.simple.v1+html",
+                "application/json",
+                "text/html",
+            )
+        )
+    }
 
     try:
         response = httpx.get(url, auth=credentials, headers=headers, follow_redirects=True)
 
         if response.status_code == 404:
             # Package not found, so no files exist.
-            logger.debug(f"Project {project_name} (nromalized to {normalized_name}) not found.")
+            logger.debug(f"Project {project_name} (normalized to {normalized_name}) not found.")
             return set()
 
-        response.raise_for_status()
+        if response.status_code != 406:
+            response.raise_for_status()
 
         content_type = response.headers.get("Content-Type", "")
-        if "application/vnd.pypi.simple.v1+json" in content_type:
+        logger.debug(f"PyPI server content type: {content_type}")
+        if "application/json" in content_type or "application/vnd.pypi.simple.v1+json" in content_type:
             data = response.json()
             return {file_info["filename"] for file_info in data.get("files", [])}
         elif "text/html" in content_type or "application/vnd.pypi.simple.v1+html" in content_type:

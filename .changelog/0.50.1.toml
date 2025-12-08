@@ -17,3 +17,9 @@ id = "4bb64abf-06bd-43bc-8162-e264604f5e9a"
 type = "improvement"
 description = "Add python.ty to type check with Ty"
 author = "thomas.pellissier-tanon@helsing.ai"
+
+[[entries]]
+id = "d43aec5f-48b0-4946-9ab1-6739a8584acf"
+type = "fix"
+description = "Fix PyPI index check"
+author = "John-P@users.noreply.github.com"
