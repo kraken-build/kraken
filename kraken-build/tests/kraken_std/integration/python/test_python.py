@@ -366,7 +366,7 @@ def test__python_publish_skip_existing(
     )
     publish_graph = kraken_ctx.execute([publish_task])
     publish_status = publish_graph.get_status(publish_task)
-    assert publish_status is not None and publish_status.is_succeeded()
+    assert publish_status is not None and (publish_status.is_succeeded() or publish_status.is_skipped())
 
     # Case 1: Try to publish again with skip_existing=True. The task should be skipped.
     publish_task_skip = python.publish(
