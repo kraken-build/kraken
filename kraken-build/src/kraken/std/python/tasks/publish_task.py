@@ -122,7 +122,7 @@ def _get_existing_files_from_index(
     # See https://packaging.python.org/en/latest/specifications/name-normalization/#name-normalization
     normalized_name = canonicalize_name(project_name)
     logger.debug(f"Index URL: {index_url}")
-    url = urllib.parse.urljoin(f"{index_url}/", normalized_name)
+    url = urllib.parse.urljoin(f"{index_url}/", f"{normalized_name}/")
     logger.debug(f"Normalised package index URL: {url}")
     # For valid Content-Types,
     # see https://packaging.python.org/en/latest/specifications/simple-repository-api/#content-types
