@@ -131,7 +131,7 @@ def _get_existing_files_from_index(
 
         if response.status_code == 404:
             # Package not found, so no files exist.
-            logger.debug(f"Project {project_name} (nromalized to {normalized_name}) not found.")
+            logger.debug(f"Project {project_name} (normalized to {normalized_name}) not found.")
             return set()
 
         response.raise_for_status()
