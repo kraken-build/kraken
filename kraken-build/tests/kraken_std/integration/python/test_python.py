@@ -362,6 +362,7 @@ def test__python_publish_skip_existing(
         package_index="local",
         distributions=list(distributions),
         project=kraken_project,
+        skip_existing=True,  # Should not exist yet, but allow anyway
     )
     publish_graph = kraken_ctx.execute([publish_task])
     publish_status = publish_graph.get_status(publish_task)
