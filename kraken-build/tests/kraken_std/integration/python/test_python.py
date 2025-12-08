@@ -406,6 +406,7 @@ def test__python_publish_skip_existing(
     "response_type, content_type",
     [
         ("html", "text/html"),  # Alias for application/vnd.pypi.simple.v1+html
+        ("json", "application/json"),  # Alias for application/vnd.pypi.simple.v1+json
         ("html", "application/vnd.pypi.simple.v1+html"),
         ("json", "application/vnd.pypi.simple.v1+json"),
     ],
