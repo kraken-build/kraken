@@ -145,7 +145,8 @@ def _get_existing_files_from_index(
             logger.debug(f"Project {project_name} (normalized to {normalized_name}) not found.")
             return set()
 
-        response.raise_for_status()
+        if response.status_code != 406:
+            response.raise_for_status()
 
         content_type = response.headers.get("Content-Type", "")
         if "application/vnd.pypi.simple.v1+json" in content_type:
