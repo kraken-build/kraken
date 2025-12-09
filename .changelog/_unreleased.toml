@@ -9,3 +9,9 @@ id = "a1ce3786-5ead-4bf0-8765-ac2f15e9d0e6"
 type = "fix"
 description = "Remove default argument that caused deprecation warning to always be triggered"
 author = "scott@stevenson.io"
+
+[[entries]]
+id = "5d7f47a7-7ca7-4897-97cd-c777d9c4a464"
+type = "breaking change"
+description = "Remove helm charts support"
+author = "thomas.pellissier-tanon@helsing.ai"

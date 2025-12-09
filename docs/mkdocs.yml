@@ -56,7 +56,6 @@ nav:
   - Language support:
     - lang/cargo.md
     - lang/docker.md
-    - lang/helm.md
     - lang/python.md
   - API Documentation:
     - kraken:
@@ -87,7 +86,6 @@ nav:
         - api/kraken/std/dist.md
         - api/kraken/std/docs.md
         - api/kraken/std/git.md
-        - api/kraken/std/helm.md
         - api/kraken/std/mitm.md
         - api/kraken/std/python.md
         - api/kraken/std/sccache.md
