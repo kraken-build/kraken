@@ -91,7 +91,6 @@ nav:
         - api/kraken/std/mitm.md
         - api/kraken/std/python.md
         - api/kraken/std/sccache.md
-        - api/kraken/std/shellcheck.md
         - api/kraken/std/util.md
         - "descriptors":
           - api/kraken/std/descriptors/resource.md

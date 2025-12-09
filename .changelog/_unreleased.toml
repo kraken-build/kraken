@@ -9,3 +9,9 @@ id = "a1ce3786-5ead-4bf0-8765-ac2f15e9d0e6"
 type = "fix"
 description = "Remove default argument that caused deprecation warning to always be triggered"
 author = "scott@stevenson.io"
+
+[[entries]]
+id = "74f02060-cdbc-486c-99d1-817def1f5270"
+type = "breaking change"
+description = "Remove shellcheck support"
+author = "thomas.pellissier-tanon@helsing.ai"
