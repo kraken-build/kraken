@@ -6,8 +6,7 @@ import sys
 from collections.abc import MutableMapping, Sequence
 from pathlib import Path
 
-from kraken.common import Supplier
-from kraken.common._fs import intersect_paths
+from kraken.common import Supplier, intersect_paths
 from kraken.core import Project, Property
 from kraken.core.system.aspect import CheckAspect
 from kraken.core.system.task import TaskStatus
@@ -97,7 +96,7 @@ def mypy(
     version_spec: str | None = None,
 ) -> MypyTask:
     """
-    :param version_spec: If specified, the Mypy tool will be installed as a PEX and does not need to be installed
+    :param version_spec: If specified, the Mypy tool will be run via `uv tool run` and does not need to be installed
         into the Python project's virtual env.
     """
 

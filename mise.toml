@@ -1,9 +1,9 @@
 [tools]
-"pipx:kraken-wrapper" = "0.49.0"
+"pipx:kraken-wrapper" = "0.50.0"
 "pipx:mksync" = "0.1.6"
 "pipx:slap-cli" = "1.15.0"
-typos = "1.38.1"
-uv = "0.9.5"
+typos = "1.40.0"
+uv = "0.9.13"
 
 [tasks.build-docs]
 run = "uv run --project kraken-build kraken invoke mkdocs --no-strict -vv"

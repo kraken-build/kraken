@@ -3,3 +3,9 @@ id = "fc8e7ccd-f080-4f1d-a987-f92c4776388d"
 type = "breaking change"
 description = "Drop support for Python projects that use Poetry, PDM or Slap"
 author = "@NiklasRosenstein"
+
+[[entries]]
+id = "e74ac080-439c-44aa-9484-00307e9a8552"
+type = "feature"
+description = "Add `Context.execute(resume_from)` argument"
+author = "@NiklasRosenstein"

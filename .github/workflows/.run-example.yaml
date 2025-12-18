@@ -27,11 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.5"
+          version: "0.9.13"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-build
@@ -44,11 +44,11 @@ jobs:
     if: ${{ inputs.krakenw }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Uv
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.5"
+          version: "0.9.13"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-wrapper

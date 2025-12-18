@@ -51,7 +51,6 @@ class BuildOptions:
                 "--state-name",
                 metavar="NAME",
                 help="deprecated since 0.45.0. specify a name for the generated state file; if not specified, a short random ID is used",
-                default=str(uuid.uuid4())[:7],
             )
             group.add_argument(
                 "--state-dir",

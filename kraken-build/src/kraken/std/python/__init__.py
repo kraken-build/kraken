@@ -9,6 +9,7 @@ from .tasks.mypy_task import MypyTask, mypy
 from .tasks.publish_task import PublishTask, publish
 from .tasks.pytest_task import CoverageFormat, PytestTask, pytest
 from .tasks.ruff_task import RuffTask, ruff
+from .tasks.ty_task import TyTask, ty
 from .tasks.update_lockfile_task import update_lockfile_task
 from .tasks.update_pyproject_task import update_pyproject_task
 from .version import git_version_to_python_version
@@ -42,4 +43,6 @@ __all__ = [
     "RuffTask",
     "update_lockfile_task",
     "update_pyproject_task",
+    "ty",
+    "TyTask",
 ]
