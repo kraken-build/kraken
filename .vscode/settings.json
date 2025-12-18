@@ -1,4 +1,0 @@
-{
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.extraPaths": ["kraken-build/src", "kraken-common/src", "kraken-std/src", "kraken-wrapper/src"]
-}
