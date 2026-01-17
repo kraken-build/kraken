@@ -15,7 +15,8 @@
             ],
             "matchPackageNames": [
                 "*"
-            ]
+            ],
+            "automerge": true
         }
     ]
 }
