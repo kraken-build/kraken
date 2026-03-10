@@ -1,0 +1,7 @@
+release-date = "2026-03-03"
+
+[[entries]]
+id = "5ed845bb-dee7-40ec-a6da-72e175003081"
+type = "fix"
+description = "Allow Helm HTTP publishing without credentials"
+author = "thomas.pellissier-tanon@helsing.ai"
