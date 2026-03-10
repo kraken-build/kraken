@@ -106,6 +106,13 @@ def _get_candidates(
 ) -> Iterator[InterpreterCandidate]:
     """Internal. Implementation of `get_candidates()` without Pyenv shim detection."""
 
+    # If the PYTHON environment variable is set, yield it as the highest-priority candidate.
+    python_env = os.environ.get("PYTHON")
+    if python_env:
+        python_path = Path(python_env)
+        if python_path.is_file() and os.access(python_path, os.X_OK):
+            yield {"path": str(python_path)}
+
     if path_list is None:
         path_list = os.environ["PATH"].split(os.pathsep)
 
