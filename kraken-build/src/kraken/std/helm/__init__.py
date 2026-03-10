@@ -102,7 +102,7 @@ class HelmPushTask(Task):
             raise ValueError(f"{self.registry} missing host name: {self.registry.get()!r}")
 
         settings = helm_settings(self.project)
-        credentials: tuple[str, str] | None
+        credentials: tuple[str, str] | None = None
         oci_login_host: str | None
         for oci_login_host in (url.hostname, f"{url.hostname}:{url.port}"):
             if oci_login_host in settings.auth:
