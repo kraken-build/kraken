@@ -116,7 +116,7 @@ def _get_candidates(
     if path_list is None:
         path_list = os.environ["PATH"].split(os.pathsep)
 
-    commands: set[Path] = set()
+    commands_set: set[Path] = set()
     for path in map(Path, path_list):
         if not path.is_dir():
             continue
@@ -129,7 +129,13 @@ def _get_candidates(
             except PermissionError:
                 continue
             else:
-                commands.add(item)
+                commands_set.add(item)
+
+    # Sort for deterministic iteration order. Without this, set iteration
+    # order depends on PYTHONHASHSEED, which is randomised per-process,
+    # causing find_python_interpreter() to non-deterministically select
+    # different Python versions across runs.
+    commands = sorted(commands_set, key=lambda p: p.name)
 
     # py and python
     for command in commands:
