@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import itertools
 import stat
 from pathlib import Path
+from unittest.mock import patch
 
 from kraken.common.findpython import _get_candidates
 
@@ -48,16 +48,37 @@ class TestGetCandidatesDeterminism:
 
         assert _candidates_from(bin_dir) == ["python", "python3", "python3.11", "python3.12"]
 
-    def test_order_stable_across_input_permutations(self, tmp_path: Path) -> None:
-        """Candidate order must be identical regardless of directory iteration order."""
-        names = ["python3.9", "python3.10", "python3.11"]
-        results: list[list[str]] = []
-        for perm in itertools.permutations(names):
-            bin_dir = tmp_path / "bin_" / "_".join(perm)
-            bin_dir.mkdir(parents=True)
-            for name in perm:
-                _make_executable(bin_dir / name)
-            results.append(_candidates_from(bin_dir))
+    def test_malformed_binary_name_does_not_crash(self, tmp_path: Path) -> None:
+        """Binaries like 'python3.' should not crash the sort key."""
+        bin_dir = tmp_path / "bin"
+        bin_dir.mkdir()
+        for name in ["python3.", "python3.10", "python3.11"]:
+            _make_executable(bin_dir / name)
 
-        for result in results[1:]:
-            assert result == results[0], f"order changed across permutations: {results}"
+        result = _candidates_from(bin_dir)
+        assert "python3.10" in result
+        assert "python3.11" in result
+
+    def test_pyenv_versions_sorted_by_version(self, tmp_path: Path) -> None:
+        """Pyenv version directories should be yielded in version-sorted order."""
+        pyenv_root = tmp_path / "pyenv"
+        versions_dir = pyenv_root / "versions"
+        versions_dir.mkdir(parents=True)
+
+        for version in ["3.10.5", "3.9.1", "3.12.0", "3.11.3"]:
+            ver_dir = versions_dir / version
+            (ver_dir / "bin").mkdir(parents=True)
+            _make_executable(ver_dir / "bin" / "python")
+
+        # Use an empty PATH bin dir so only pyenv candidates appear
+        empty_bin = tmp_path / "empty_bin"
+        empty_bin.mkdir()
+
+        with patch.dict("os.environ", {"PYENV": str(pyenv_root)}):
+            candidates = [
+                c["exact_version"]
+                for c in _get_candidates(path_list=[str(empty_bin)], check_pyenv=True)
+                if "exact_version" in c and str(versions_dir) in c["path"]
+            ]
+
+        assert candidates == ["3.9.1", "3.10.5", "3.11.3", "3.12.0"]
