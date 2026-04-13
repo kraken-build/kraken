@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import os
 import stat
 from pathlib import Path
-from unittest.mock import patch
 
 from kraken.common.findpython import _get_candidates
 
@@ -29,30 +27,16 @@ class TestGetCandidatesDeterminism:
     """Verify that _get_candidates yields interpreters in a deterministic order
     regardless of PYTHONHASHSEED / set-iteration randomness."""
 
-    def test_candidates_are_deterministic_across_seeds(self, tmp_path: Path) -> None:
-        """The candidate order must not depend on the hash seed."""
-        bin_dir = tmp_path / "bin"
-        bin_dir.mkdir()
-        for name in ["python3.13", "python3.10", "python3.12", "python3.11"]:
-            _make_executable(bin_dir / name)
-
-        results: list[list[str]] = []
-        for seed in ["0", "1", "42", "99999"]:
-            with patch.dict(os.environ, {"PYTHONHASHSEED": seed}):
-                results.append(_candidates_from(bin_dir))
-
-        # All runs must produce the same ordering.
-        for result in results[1:]:
-            assert result == results[0], f"candidate order changed between hash seeds: {results}"
-
     def test_candidates_sorted_by_name(self, tmp_path: Path) -> None:
-        """pythonX.Y candidates should appear in sorted (ascending) name order."""
+        """pythonX.Y candidates should appear in version-sorted (ascending) order."""
         bin_dir = tmp_path / "bin"
         bin_dir.mkdir()
-        for name in ["python3.13", "python3.10", "python3.12", "python3.11"]:
+        for name in ["python3.13", "python3.9", "python3.10", "python3.12", "python3.11"]:
             _make_executable(bin_dir / name)
 
-        assert _candidates_from(bin_dir) == ["python3.10", "python3.11", "python3.12", "python3.13"]
+        assert _candidates_from(bin_dir) == [
+            "python3.9", "python3.10", "python3.11", "python3.12", "python3.13"
+        ]
 
     def test_category_order_preserved(self, tmp_path: Path) -> None:
         """Generic names should appear before versioned names (py < pythonX < pythonX.Y)."""

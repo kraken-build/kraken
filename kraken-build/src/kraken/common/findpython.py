@@ -12,6 +12,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import ClassVar, TypedDict
 
+from packaging.version import Version
 from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
@@ -135,7 +136,11 @@ def _get_candidates(
     # order depends on PYTHONHASHSEED, which is randomised per-process,
     # causing find_python_interpreter() to non-deterministically select
     # different Python versions across runs.
-    commands = sorted(commands_set, key=lambda p: p.name)
+    def _interpreter_sort_key(p: Path) -> Version:
+        m = re.match(r"(?:python|py)([\d.]+)$", p.name)
+        return Version(m.group(1)) if m else Version("0")
+
+    commands = sorted(commands_set, key=_interpreter_sort_key)
 
     # py and python
     for command in commands:
@@ -176,7 +181,11 @@ def _get_candidates(
         pyenv_versions = None
 
     if pyenv_versions and pyenv_versions.is_dir():
-        for item in pyenv_versions.iterdir():
+        pyenv_items = sorted(
+            pyenv_versions.iterdir(),
+            key=lambda p: Version(p.name) if re.match(r"\d+\.\d+\.\d+$", p.name) else Version("0"),
+        )
+        for item in pyenv_items:
             if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
                 if os.name == "nt":
                     yield {"path": str(item / "python.exe"), "exact_version": item.name}
