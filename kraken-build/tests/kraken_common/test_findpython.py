@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import itertools
 import stat
 from pathlib import Path
 
@@ -24,10 +25,10 @@ def _candidates_from(bin_dir: Path) -> list[str]:
 
 
 class TestGetCandidatesDeterminism:
-    """Verify that _get_candidates yields interpreters in a deterministic order
-    regardless of PYTHONHASHSEED / set-iteration randomness."""
+    """Verify that _get_candidates yields interpreters in a consistent,
+    version-sorted order."""
 
-    def test_candidates_sorted_by_name(self, tmp_path: Path) -> None:
+    def test_candidates_sorted_by_version(self, tmp_path: Path) -> None:
         """pythonX.Y candidates should appear in version-sorted (ascending) order."""
         bin_dir = tmp_path / "bin"
         bin_dir.mkdir()
@@ -46,3 +47,17 @@ class TestGetCandidatesDeterminism:
             _make_executable(bin_dir / name)
 
         assert _candidates_from(bin_dir) == ["python", "python3", "python3.11", "python3.12"]
+
+    def test_order_stable_across_input_permutations(self, tmp_path: Path) -> None:
+        """Candidate order must be identical regardless of directory iteration order."""
+        names = ["python3.9", "python3.10", "python3.11"]
+        results: list[list[str]] = []
+        for perm in itertools.permutations(names):
+            bin_dir = tmp_path / "bin_" / "_".join(perm)
+            bin_dir.mkdir(parents=True)
+            for name in perm:
+                _make_executable(bin_dir / name)
+            results.append(_candidates_from(bin_dir))
+
+        for result in results[1:]:
+            assert result == results[0], f"order changed across permutations: {results}"

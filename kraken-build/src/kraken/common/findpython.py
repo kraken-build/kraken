@@ -132,13 +132,12 @@ def _get_candidates(
             else:
                 commands_set.add(item)
 
-    # Sort for deterministic iteration order. Without this, set iteration
-    # order depends on PYTHONHASHSEED, which is randomised per-process,
-    # causing find_python_interpreter() to non-deterministically select
-    # different Python versions across runs.
-    def _interpreter_sort_key(p: Path) -> Version:
-        m = re.match(r"(?:python|py)([\d.]+)$", p.name)
-        return Version(m.group(1)) if m else Version("0")
+    # Sort for deterministic iteration order and correct version ordering.
+    # Without this, set iteration order depends on PYTHONHASHSEED (randomised
+    # per-process), and lexicographic sort places python3.9 after python3.10.
+    def _interpreter_sort_key(p: Path) -> tuple[Version, str]:
+        m = re.match(r"python(\d+(?:\.\d+)*)$", p.name)
+        return (Version(m.group(1)), p.name) if m else (Version("0"), p.name)
 
     commands = sorted(commands_set, key=_interpreter_sort_key)
 
@@ -181,16 +180,16 @@ def _get_candidates(
         pyenv_versions = None
 
     if pyenv_versions and pyenv_versions.is_dir():
-        pyenv_items = sorted(
-            pyenv_versions.iterdir(),
-            key=lambda p: Version(p.name) if re.match(r"\d+\.\d+\.\d+$", p.name) else Version("0"),
-        )
-        for item in pyenv_items:
-            if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
-                if os.name == "nt":
-                    yield {"path": str(item / "python.exe"), "exact_version": item.name}
-                else:
-                    yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
+        pyenv_dirs = [
+            item for item in pyenv_versions.iterdir()
+            if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir()
+        ]
+        pyenv_dirs.sort(key=lambda p: Version(p.name))
+        for item in pyenv_dirs:
+            if os.name == "nt":
+                yield {"path": str(item / "python.exe"), "exact_version": item.name}
+            else:
+                yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
 
     yield {"path": sys.executable, "exact_version": ".".join(map(str, sys.version_info[:3]))}
 
