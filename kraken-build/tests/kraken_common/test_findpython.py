@@ -80,3 +80,31 @@ class TestGetCandidatesDeterminism:
             ]
 
         assert candidates == ["3.9.1", "3.10.5", "3.11.3", "3.12.0"]
+
+    def test_same_name_across_directories_sorted_by_path(self, tmp_path: Path) -> None:
+        """Multiple 'python' binaries from different PATH directories must be
+        ordered deterministically by full path, not just by filename.
+
+        Without using str(p) as the sort tiebreaker, all these binaries would
+        share the sort key (Version("0"), "python") and their relative order
+        would depend on set iteration — which is randomised per-process via
+        PYTHONHASHSEED. This caused krakenw to pick different interpreters
+        across runs, producing oscillating lock files."""
+        # Create three directories with identically-named "python" binaries,
+        # using names that sort differently lexicographically vs by insertion.
+        dir_a = tmp_path / "aaa"
+        dir_b = tmp_path / "bbb"
+        dir_c = tmp_path / "ccc"
+        for d in [dir_a, dir_b, dir_c]:
+            d.mkdir()
+            _make_executable(d / "python")
+
+        paths = [
+            Path(c["path"])
+            for c in _get_candidates(path_list=[str(dir_c), str(dir_a), str(dir_b)], check_pyenv=False)
+            if Path(c["path"]).name == "python" and Path(c["path"]).parent in (dir_a, dir_b, dir_c)
+        ]
+
+        # Must be sorted by full path (aaa < bbb < ccc), regardless of the
+        # order the directories were listed in path_list.
+        assert paths == [dir_a / "python", dir_b / "python", dir_c / "python"]
