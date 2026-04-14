@@ -35,9 +35,7 @@ class TestGetCandidatesDeterminism:
         for name in ["python3.13", "python3.9", "python3.10", "python3.12", "python3.11"]:
             _make_executable(bin_dir / name)
 
-        assert _candidates_from(bin_dir) == [
-            "python3.9", "python3.10", "python3.11", "python3.12", "python3.13"
-        ]
+        assert _candidates_from(bin_dir) == ["python3.9", "python3.10", "python3.11", "python3.12", "python3.13"]
 
     def test_category_order_preserved(self, tmp_path: Path) -> None:
         """Generic names should appear before versioned names (py < pythonX < pythonX.Y)."""

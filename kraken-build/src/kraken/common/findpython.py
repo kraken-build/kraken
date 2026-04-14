@@ -181,8 +181,7 @@ def _get_candidates(
 
     if pyenv_versions and pyenv_versions.is_dir():
         pyenv_dirs = [
-            item for item in pyenv_versions.iterdir()
-            if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir()
+            item for item in pyenv_versions.iterdir() if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir()
         ]
         pyenv_dirs.sort(key=lambda p: Version(p.name))
         for item in pyenv_dirs:
