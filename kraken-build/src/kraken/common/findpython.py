@@ -135,9 +135,12 @@ def _get_candidates(
     # Sort for deterministic iteration order and correct version ordering.
     # Without this, set iteration order depends on PYTHONHASHSEED (randomised
     # per-process), and lexicographic sort places python3.9 after python3.10.
+    # The full path (str(p)) is used as tiebreaker to ensure deterministic
+    # ordering even when multiple binaries share the same name (e.g. several
+    # "python" or "python3" from different PATH directories).
     def _interpreter_sort_key(p: Path) -> tuple[Version, str]:
         m = re.match(r"python(\d+(?:\.\d+)*)$", p.name)
-        return (Version(m.group(1)), p.name) if m else (Version("0"), p.name)
+        return (Version(m.group(1)), str(p)) if m else (Version("0"), str(p))
 
     commands = sorted(commands_set, key=_interpreter_sort_key)
 
