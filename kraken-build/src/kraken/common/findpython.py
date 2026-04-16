@@ -12,6 +12,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from pathlib import Path
 from typing import ClassVar, TypedDict
 
+from packaging.version import Version
 from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
@@ -116,7 +117,7 @@ def _get_candidates(
     if path_list is None:
         path_list = os.environ["PATH"].split(os.pathsep)
 
-    commands: set[Path] = set()
+    commands_set: set[Path] = set()
     for path in map(Path, path_list):
         if not path.is_dir():
             continue
@@ -129,7 +130,21 @@ def _get_candidates(
             except PermissionError:
                 continue
             else:
-                commands.add(item)
+                commands_set.add(item)
+
+    # Sort for deterministic iteration order and correct version ordering.
+    # Without this, set iteration order depends on PYTHONHASHSEED (randomised
+    # per-process), and lexicographic sort places python3.9 after python3.10.
+    # The full path (str(p)) is used as tiebreaker to ensure deterministic
+    # ordering even when multiple binaries share the same name (e.g. several
+    # "python" or "python3" from different PATH directories).
+    _versioned_python_re = re.compile(r"python(\d+(?:\.\d+)*)$")
+
+    def _interpreter_sort_key(p: Path) -> tuple[Version, str]:
+        m = _versioned_python_re.match(p.name)
+        return (Version(m.group(1)), str(p)) if m else (Version("0"), str(p))
+
+    commands = sorted(commands_set, key=_interpreter_sort_key)
 
     # py and python
     for command in commands:
@@ -170,12 +185,15 @@ def _get_candidates(
         pyenv_versions = None
 
     if pyenv_versions and pyenv_versions.is_dir():
-        for item in pyenv_versions.iterdir():
-            if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir():
-                if os.name == "nt":
-                    yield {"path": str(item / "python.exe"), "exact_version": item.name}
-                else:
-                    yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
+        pyenv_dirs = [
+            item for item in pyenv_versions.iterdir() if re.match(r"\d+\.\d+\.\d+$", item.name) and item.is_dir()
+        ]
+        pyenv_dirs.sort(key=lambda p: Version(p.name))
+        for item in pyenv_dirs:
+            if os.name == "nt":
+                yield {"path": str(item / "python.exe"), "exact_version": item.name}
+            else:
+                yield {"path": str(item / "bin" / "python"), "exact_version": item.name}
 
     yield {"path": sys.executable, "exact_version": ".".join(map(str, sys.version_info[:3]))}
 
