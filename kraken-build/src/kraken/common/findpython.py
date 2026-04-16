@@ -138,8 +138,10 @@ def _get_candidates(
     # The full path (str(p)) is used as tiebreaker to ensure deterministic
     # ordering even when multiple binaries share the same name (e.g. several
     # "python" or "python3" from different PATH directories).
+    _versioned_python_re = re.compile(r"python(\d+(?:\.\d+)*)$")
+
     def _interpreter_sort_key(p: Path) -> tuple[Version, str]:
-        m = re.match(r"python(\d+(?:\.\d+)*)$", p.name)
+        m = _versioned_python_re.match(p.name)
         return (Version(m.group(1)), str(p)) if m else (Version("0"), str(p))
 
     commands = sorted(commands_set, key=_interpreter_sort_key)
