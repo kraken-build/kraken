@@ -1,7 +1,6 @@
 [tools]
 "pipx:kraken-wrapper" = "0.50.0"
 "pipx:mksync" = "0.1.6"
-"pipx:slap-cli" = "1.15.0"
 typos = "1.40.0"
 uv = "0.9.13"
 

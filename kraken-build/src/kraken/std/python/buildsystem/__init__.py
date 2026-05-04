@@ -163,7 +163,12 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
 
     pyproject_content = pyproject_toml.read_text()
 
-    if not uv_lock.is_file() and "[tool.uv" not in pyproject_content:
+    if (
+        not uv_lock.is_file()
+        and "[tool.uv" not in pyproject_content
+        and "[dependency-groups]" not in pyproject_content
+        and "uv.build" not in pyproject_content
+    ):
         logger.warning(
             "project=%s: Your `pyproject.toml` does not hint at using Uv. Kraken only supports Python projects using Uv.",
             project_directory,

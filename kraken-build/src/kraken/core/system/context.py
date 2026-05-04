@@ -22,7 +22,7 @@ from kraken.core.system.executor.default import (
 )
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
-from kraken.core.system.task import Task
+from kraken.core.system.task import Task, TaskStatusType
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -434,12 +434,18 @@ class Context(MetadataContainer, Currentable["Context"]):
             graph = self.get_build_graph(tasks)
 
         if resume_from:
+            _RESUMABLE_STATUSES = {
+                TaskStatusType.SUCCEEDED,
+                TaskStatusType.SKIPPED,
+                TaskStatusType.UP_TO_DATE,
+                TaskStatusType.WARNING,
+            }
             graph_task_addresses = {task.address for task in graph.tasks()}
             for task in resume_from.tasks():
                 if task.address not in graph_task_addresses:
                     continue
                 status = resume_from.get_status(task)
-                if status is not None:
+                if status is not None and status.type in _RESUMABLE_STATUSES:
                     graph.set_status(task, status)
 
         build_error: BuildError | None = None
