@@ -434,7 +434,10 @@ class Context(MetadataContainer, Currentable["Context"]):
             graph = self.get_build_graph(tasks)
 
         if resume_from:
+            graph_task_addresses = {task.address for task in graph.tasks()}
             for task in resume_from.tasks():
+                if task.address not in graph_task_addresses:
+                    continue
                 status = resume_from.get_status(task)
                 if status is not None:
                     graph.set_status(task, status)
