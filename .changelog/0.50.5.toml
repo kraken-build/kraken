@@ -1,0 +1,19 @@
+release-date = "2026-04-16"
+
+[[entries]]
+id = "375cdbe9-468e-46b4-ba58-bbb8b852ed4f"
+type = "fix"
+description = "Fixed Python publish task failing with \"Property is finalized\" error when `skip_existing=True`"
+author = "John-P@users.noreply.github.com"
+
+[[entries]]
+id = "a1ce3786-5ead-4bf0-8765-ac2f15e9d0e6"
+type = "fix"
+description = "Remove default argument that caused deprecation warning to always be triggered"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "5869aeae-b5a2-44c3-9a0c-d1389272da8a"
+type = "fix"
+description = "Make Python version resolution deterministic"
+author = "matthieu@matthieu-antoine.me"

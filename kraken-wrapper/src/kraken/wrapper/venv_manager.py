@@ -206,6 +206,12 @@ class VirtualEnvManager:
                 logger.debug("Using Python interpreter constraint: %s", requirements.interpreter_constraint)
                 original_python = find_python_interpreter(requirements.interpreter_constraint)
                 logger.debug("Using Python interpreter at %s", original_python)
+            elif python_env := os.environ.get("PYTHON"):
+                logger.info(
+                    "No interpreter constraint specified, using PYTHON environment variable (%s)",
+                    python_env,
+                )
+                original_python = python_env
             else:
                 logger.info(
                     "No interpreter constraint specified, using current Python interpreter (%s)",

@@ -2,9 +2,10 @@
 
 ![kraken-logo](https://i.imgur.com/Lqjy2zi.png)
 
-[![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml)
-[![PyPI version](https://badge.fury.io/py/kraken-build.svg)](https://badge.fury.io/py/kraken-build)
-[![Documentation](https://img.shields.io/badge/Documentation-blue?style=flat&logo=gitbook&logoColor=white)](https://kraken-build.github.io/kraken/)
+[![Python](https://github.com/kraken-build/kraken/actions/workflows/python.yaml/badge.svg)](https://github.com/kraken-build/kraken/actions/workflows/python.yaml)  
+[![PyPI version](https://badge.fury.io/py/kraken-build.svg)](https://badge.fury.io/py/kraken-build)  
+[![Documentation](https://img.shields.io/badge/Documentation-blue?style=flat&logo=gitbook&logoColor=white)](https://kraken-build.github.io/kraken/)  
+[![Release](https://img.shields.io/badge/Release-dispatch-blue?style=flat&logo=github)](https://github.com/kraken-build/kraken/actions/workflows/release.yaml)
 
 Kraken is a build system, but not in the traditional sense. It's focus is on the orchestration of high-level tasks,
 such as organization of your repository configuration, code generation, invoking other build systems, etc. It is not a

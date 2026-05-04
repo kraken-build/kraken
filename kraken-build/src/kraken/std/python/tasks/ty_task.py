@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from collections.abc import MutableMapping, Sequence
+from pathlib import Path
 
 from kraken.common import Supplier, intersect_paths
 from kraken.core import Project, Property
@@ -16,6 +17,7 @@ class TyTask(EnvironmentAwareDispatchTask, CheckAspect.Implements):
     python_dependencies = ["ty"]
 
     ty_cmd: Property[Sequence[str] | None] = Property.default(None)
+    config_file: Property[Path]
     additional_args: Property[Sequence[str]] = Property.default_factory(list)
     check_tests: Property[bool] = Property.default(True)
 
@@ -27,6 +29,9 @@ class TyTask(EnvironmentAwareDispatchTask, CheckAspect.Implements):
             command.extend(ty_cmd)
         command.append("ty")
         command.append("check")
+
+        if self.config_file.is_filled():
+            command += ["--config-file", str(self.config_file.get().absolute())]
 
         paths = [self.settings.source_directory]
         if self.check_tests.get():
@@ -50,12 +55,14 @@ def ty(
     *,
     name: str = "python.ty",
     project: Project | None = None,
+    config_file: Path | Supplier[Path] | None = None,
     additional_args: Sequence[str] | Supplier[Sequence[str]] = (),
     check_tests: bool = True,
     version_spec: str | None = None,
 ) -> TyTask:
     """
-    :param version_spec: If specified, the Ty tool will be run via `uv tool run` and does not need to be installed
+    :param config_file: Path to a ``ty.toml`` configuration file, to be passed to ty's ``--config-file`` flag.
+    :param version_spec: If specified, the Ty tool will be run via ``uv tool run`` and does not need to be installed
         into the Python project's virtual env.
     """
 
@@ -68,6 +75,7 @@ def ty(
 
     task = project.task(name, TyTask, group="lint")
     task.ty_cmd = ty_cmd
+    task.config_file = config_file
     task.additional_args = additional_args
     task.check_tests = check_tests
     return task

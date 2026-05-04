@@ -1,0 +1,14 @@
+release-date = "2026-03-03"
+
+[[entries]]
+id = "a3e95db6-e1f8-4e58-897c-1f73728af61f"
+type = "feature"
+description = "Add support for ty config file"
+author = "scott@stevenson.io"
+
+[[entries]]
+id = "01baa6f3-a13c-4579-95fb-28bd334e6df2"
+type = "improvement"
+description = "Add support for `PYTHON` environment variable in `krakenw`"
+author = "@NiklasRosenstein"
+component = "kraken-wrapper"

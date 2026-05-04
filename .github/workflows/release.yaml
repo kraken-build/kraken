@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.50.6)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_WORKFLOW_APP_ID }}
+          private-key: ${{ secrets.RELEASE_WORKFLOW_APP_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: jdx/mise-action@v4
+
+      - name: Bump version
+        run: uv run scripts/bump.py "${{ github.event.inputs.version }}"
+
+      - name: Commit and push branch
+        run: |
+          git commit -m "release v${{ github.event.inputs.version }}"
+          git push origin "${{ github.ref_name }}"
+
+      - name: Tag and push tag
+        run: |
+          git tag "${{ github.event.inputs.version }}"
+          git push origin "${{ github.event.inputs.version }}"
+
+      - name: Create GitHub release
+        run: gh release create "${{ github.event.inputs.version }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
