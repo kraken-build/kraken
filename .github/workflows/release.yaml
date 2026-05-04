@@ -1,0 +1,35 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g. 0.50.6)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: jdx/mise-action@v4
+
+      - name: Bump version and release
+        run: python scripts/bump.py "${{ github.event.inputs.version }}" --release
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Push branch
+        run: git push origin "${{ github.ref_name }}"
