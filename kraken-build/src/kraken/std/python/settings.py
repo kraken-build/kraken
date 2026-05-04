@@ -204,7 +204,7 @@ def python_settings(
         settings.lint_enforced_directories = dirs
 
     if always_use_managed_env is not None:
-        settings.always_use_managed_env = True
+        settings.always_use_managed_env = always_use_managed_env
 
     if skip_install_if_venv_exists is not None:
         settings.skip_install_if_venv_exists = skip_install_if_venv_exists
