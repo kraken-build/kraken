@@ -22,7 +22,7 @@ from kraken.core.system.executor.default import (
 )
 from kraken.core.system.graph import TaskGraph
 from kraken.core.system.project import Project
-from kraken.core.system.task import Task
+from kraken.core.system.task import Task, TaskStatusType
 
 logger = logging.getLogger(__name__)
 T = TypeVar("T")
@@ -411,13 +411,17 @@ class Context(MetadataContainer, Currentable["Context"]):
         assert graph, "TaskGraph cannot be empty"
         return graph
 
-    def execute(self, tasks: list[str | Address | Task] | TaskGraph | None = None) -> TaskGraph:
+    def execute(
+        self, tasks: list[str | Address | Task] | TaskGraph | None = None, resume_from: TaskGraph | None = None
+    ) -> TaskGraph:
         """Execute all default tasks or the tasks specified by *targets* using the default executor.
         If :meth:`finalize` was not called already it will be called by this function before the build
         graph is created, unless a build graph is passed in the first place.
 
         :param tasks: The list of tasks to execute, or the build graph. If none specified, all default
             tasks will be executed.
+        :param resume_from: If specified, the execution will resume from the given build graph, inheriting the
+            status of tasks that were already executed in the previous run.
         :raise BuildError: If any task fails to execute.
         """
 
@@ -428,6 +432,21 @@ class Context(MetadataContainer, Currentable["Context"]):
             if not self._finalized:
                 self.finalize()
             graph = self.get_build_graph(tasks)
+
+        if resume_from:
+            _RESUMABLE_STATUSES = {
+                TaskStatusType.SUCCEEDED,
+                TaskStatusType.SKIPPED,
+                TaskStatusType.UP_TO_DATE,
+                TaskStatusType.WARNING,
+            }
+            graph_task_addresses = {task.address for task in graph.tasks()}
+            for task in resume_from.tasks():
+                if task.address not in graph_task_addresses:
+                    continue
+                status = resume_from.get_status(task)
+                if status is not None and status.type in _RESUMABLE_STATUSES:
+                    graph.set_status(task, status)
 
         build_error: BuildError | None = None
         if self._aspects:

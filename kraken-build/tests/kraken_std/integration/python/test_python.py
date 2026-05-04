@@ -7,7 +7,6 @@ import tempfile
 import unittest.mock
 from collections.abc import Iterator
 from pathlib import Path
-from typing import TypeVar
 from unittest.mock import patch
 
 import httpx
@@ -19,9 +18,6 @@ from kraken.common.toml import TomlFile
 from kraken.core import Context, Project
 from kraken.core.system.errors import BuildError
 from kraken.std import python
-from kraken.std.python.buildsystem.maturin import MaturinPoetryPyprojectHandler
-from kraken.std.python.buildsystem.pdm import PdmPyprojectHandler
-from kraken.std.python.buildsystem.poetry import PoetryPyprojectHandler
 from kraken.std.python.buildsystem.uv import UvPyprojectHandler
 from kraken.std.util.http import http_probe
 
@@ -35,14 +31,9 @@ USER_PASS = "password-for-integration-test"
 
 @pytest.fixture(scope="session", autouse=True)
 def deactivate_venv() -> Iterator[None]:
-    with patch.dict(os.environ), tempfile.TemporaryDirectory() as tempdir:
-        pdm_config = Path(tempdir + "/.pdm.toml")
-        pdm_config.write_text(f'cache_dir = "{tempdir}/.pdm_cache"')
+    with patch.dict(os.environ):
         os.environ.pop("VIRTUAL_ENV", None)
         os.environ.pop("VIRTUAL_ENV_PROMPT", None)
-        os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "true"
-        os.environ["POETRY_CACHE_DIR"] = tempdir
-        os.environ["PDM_CONFIG_FILE"] = str(pdm_config)
         yield
 
 
@@ -70,8 +61,7 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> tuple[str, str]:
             detach=True,
         )
 
-        # host = container.ports["8080/tcp"][0]["HostIp"]
-        host = "localhost"  # The container ports HostIp is 0.0.0.0, which PDM won't trust without extra config.
+        host = "localhost"
         port = container.ports["8080/tcp"][0]["HostPort"]
         upload_url = f"http://{host}:{port}"
         index_url = f"{upload_url}/simple"
@@ -85,13 +75,8 @@ def pypiserver(docker_service_manager: DockerServiceManager) -> tuple[str, str]:
 @pytest.mark.parametrize(
     "project_dir",
     [
-        "poetry-project",
-        "slap-project",
-        "pdm-project",
         "uv-project",
-        "rust-poetry-project",
         # See https://github.com/kraken-build/kraken/issues/356
-        # "rust-pdm-project",
         # "rust-uv-project",
     ],
 )
@@ -122,8 +107,6 @@ def test__python_project_install_lint_and_publish(
     os.environ["LOCAL_PACKAGE_INDEX"] = index_url
     os.environ["LOCAL_USER"] = USER_NAME
     os.environ["LOCAL_PASSWORD"] = USER_PASS
-    # Make sure Poetry installs the environment locally so it gets cleaned up
-    os.environ["POETRY_VIRTUALENVS_IN_PROJECT"] = "1"
 
     kraken_ctx.load_project(tempdir / project_dir)
     kraken_ctx.execute([":lint", ":publish"])
@@ -132,8 +115,6 @@ def test__python_project_install_lint_and_publish(
     logger.info("Loading and executing Kraken project (%s)", tempdir / consumer_dir)
     Context.__init__(kraken_ctx, kraken_ctx.build_directory)
     kraken_ctx.load_project(tempdir / consumer_dir)
-
-    # NOTE: The Slap project doesn't need an apply because we don't write the package index into the pyproject.toml.
     kraken_ctx.execute([":apply"])
 
     # For debugging
@@ -192,7 +173,7 @@ def test__python_project_upgrade_python_version_string(
         assert f'__version__ = "{build_as_version}"' in init_file_ext.read().decode("UTF-8")
         conf_file = tar.extractfile(f"version_project-{build_as_version}/pyproject.toml")
         assert conf_file is not None, ".tar.gz file does not contain an 'pyproject.toml'"
-        assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["tool"]["poetry"]["version"]
+        assert build_as_version == tomli.loads(conf_file.read().decode("UTF-8"))["project"]["version"]
 
 
 @unittest.mock.patch.dict(os.environ, {})
@@ -225,23 +206,17 @@ def test__python_project__upgrade_relative_import_version(
         assert f"Requires-Dist: uv-project=={build_as_version}; extra == 'opt'" in metadata
 
 
-M = TypeVar("M", PdmPyprojectHandler, PoetryPyprojectHandler)
-
-
 @pytest.mark.parametrize(
     "project_dir, reader, expected_python_version",
     [
-        ("poetry-project", PoetryPyprojectHandler, "^3.7"),
-        ("slap-project", PoetryPyprojectHandler, "^3.6"),
-        ("pdm-project", PdmPyprojectHandler, ">=3.9"),
-        ("rust-poetry-project", MaturinPoetryPyprojectHandler, "^3.9"),
+        ("rust-uv-project", UvPyprojectHandler, ">=3.9"),
         ("uv-project", UvPyprojectHandler, ">=3.10"),
     ],
 )
 @unittest.mock.patch.dict(os.environ, {})
 def test__python_pyproject_reads_correct_data(
     project_dir: str,
-    reader: type[M],
+    reader: type[UvPyprojectHandler],
     expected_python_version: str,
     kraken_project: Project,
 ) -> None:
@@ -270,7 +245,7 @@ def test__python_project_coverage(
     os.environ["PYTEST_FLAGS"] = ""
 
     tempdir = kraken_project.directory
-    original_dir = data_path("slap-project")
+    original_dir = data_path("uv-project")
 
     # Copy the projects to the temporary directory.
     shutil.copytree(original_dir, tempdir, dirs_exist_ok=True)
@@ -280,7 +255,7 @@ def test__python_project_coverage(
     local_build_system = python.buildsystem.detect_build_system(tempdir)
     assert local_build_system is not None
     assert local_build_system.get_pyproject_reader(pyproject) is not None
-    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "slap-project"
+    assert local_build_system.get_pyproject_reader(pyproject).get_name() == "uv-project"
 
     python.settings.python_settings(project=kraken_project, build_system=local_build_system)
     python.pytest(project=kraken_project, coverage=python.CoverageFormat.XML)
@@ -336,8 +311,7 @@ def test__python_publish_skip_existing(
     It should skip publishing files that already exist on the index.
     """
 
-    # Copy the poetry project to the temp directory.
-    shutil.copytree(data_path("poetry-project"), kraken_project.directory, dirs_exist_ok=True)
+    shutil.copytree(data_path("uv-project"), kraken_project.directory, dirs_exist_ok=True)
 
     # Configure the local pypiserver.
     upload_url, index_url = pypiserver
@@ -421,8 +395,7 @@ def test__python_publish_skip_existing_mocked(
 ) -> None:
     """Test that the publish task skips existing files based on a mocked server response."""
 
-    # Copy the poetry project to the temp directory.
-    shutil.copytree(data_path("poetry-project"), kraken_project.directory, dirs_exist_ok=True)
+    shutil.copytree(data_path("uv-project"), kraken_project.directory, dirs_exist_ok=True)
 
     # Build the project.
     build_task = python.build(project=kraken_project)
@@ -433,7 +406,7 @@ def test__python_publish_skip_existing_mocked(
     assert distributions is not None
 
     # Set up the mock server.
-    project_name = "poetry-project"
+    project_name = "uv-project"
     if response_type == "html":
         html_data = f"""
         <!DOCTYPE html>
@@ -475,6 +448,6 @@ def test__python_publish_skip_existing_mocked(
         project=kraken_project,
         skip_existing=True,
     )
-    skip_graph = kraken_ctx.execute([publish_task_skip])
+    skip_graph = kraken_ctx.execute([publish_task_skip], resume_from=build_graph)
     skip_status = skip_graph.get_status(publish_task_skip)
     assert skip_status is not None and skip_status.is_skipped()

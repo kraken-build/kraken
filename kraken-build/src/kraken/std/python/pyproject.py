@@ -14,10 +14,9 @@ logger = logging.getLogger(__name__)
 
 class _PackageIndexPriority(str, Enum):
     """
-    Poetry has a very granular representation of priorities for indices, so we inherit that. The priority
-    should to be interpreted in the spirit of its definition in other tools.
-
-    https://python-poetry.org/docs/repositories/#project-configuration
+    Represents the priority of a package index. Used by the Uv integration to determine which index takes
+    precedence when resolving packages. The priority should be interpreted in the spirit of its definition
+    in the underlying tool.
     """
 
     # in decreasing order of priority

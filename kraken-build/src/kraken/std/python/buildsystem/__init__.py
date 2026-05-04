@@ -1,4 +1,4 @@
-"""Abstraction of Python build systems such as Poetry and Slap."""
+"""Abstraction of Python build systems such as Uv."""
 
 from __future__ import annotations
 
@@ -50,8 +50,7 @@ class PythonBuildSystem(abc.ABC):
 
     @abc.abstractmethod
     def update_lockfile(self, settings: PythonSettings, pyproject: TomlFile) -> TaskStatus:
-        """Resolve all dependencies of the project and write the exact versions into
-        the corresponding lock file. In the case of Poetry it is poetry.lock."""
+        """Resolve all dependencies of the project and write the exact versions into the corresponding lock file."""
 
     @abc.abstractmethod
     def requires_login(self) -> bool:
@@ -158,50 +157,27 @@ def detect_build_system(project_directory: Path) -> PythonBuildSystem | None:
     """Detect the Python build system used in *project_directory*."""
 
     pyproject_toml = project_directory / "pyproject.toml"
+    uv_lock = project_directory / "uv.lock"
     if not pyproject_toml.is_file():
         return None
 
     pyproject_content = pyproject_toml.read_text()
 
-    if "[tool.slap]" in pyproject_content:
-        from .slap import SlapPythonBuildSystem
-
-        return SlapPythonBuildSystem(project_directory)
-
-    if "poetry-core" in pyproject_content:
-        from .poetry import PoetryPythonBuildSystem
-
-        return PoetryPythonBuildSystem(project_directory)
-
-    if "maturin" in pyproject_content:
-        if "[tool.poetry" in pyproject_content:
-            from .maturin import MaturinPoetryPythonBuildSystem
-
-            return MaturinPoetryPythonBuildSystem(project_directory)
-        elif "[tool.pdm" in pyproject_content:
-            from .maturin import MaturinPdmPythonBuildSystem
-
-            return MaturinPdmPythonBuildSystem(project_directory)
-        else:
-            from .maturin import MaturinUvPythonBuildSystem
-
-            if "[tool.uv" not in pyproject_content:
-                logger.warning(
-                    "Got no hint as to the Python dependency system used in the project '%s', falling back to UV (experimental)",
-                    project_directory,
-                )
-            return MaturinUvPythonBuildSystem(project_directory)
-
-    if "pdm" in pyproject_content:
-        from .pdm import PDMPythonBuildSystem
-
-        return PDMPythonBuildSystem(project_directory)
-
-    if "[tool.uv" not in pyproject_content:
+    if (
+        not uv_lock.is_file()
+        and "[tool.uv" not in pyproject_content
+        and "[dependency-groups]" not in pyproject_content
+        and "uv.build" not in pyproject_content
+    ):
         logger.warning(
-            "Got no hint as to the Python build system used in the project '%s', falling back to UV (experimental)",
+            "project=%s: Your `pyproject.toml` does not hint at using Uv. Kraken only supports Python projects using Uv.",
             project_directory,
         )
+
+    if "maturin" in pyproject_content:
+        from .maturin import MaturinUvPythonBuildSystem
+
+        return MaturinUvPythonBuildSystem(project_directory)
 
     from kraken.std.python.buildsystem.uv import UvPythonBuildSystem
 

@@ -23,3 +23,9 @@ id = "d43aec5f-48b0-4946-9ab1-6739a8584acf"
 type = "fix"
 description = "Fix PyPI index check"
 author = "John-P@users.noreply.github.com"
+
+[[entries]]
+id = "375cdbe9-468e-46b4-ba58-bbb8b852ed4f"
+type = "fix"
+description = "Fixed Python publish task failing with \"Property is finalized\" error when `skip_existing=True`"
+author = "John-P@users.noreply.github.com"

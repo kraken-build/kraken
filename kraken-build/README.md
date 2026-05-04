@@ -7,9 +7,9 @@
 [![Documentation](https://img.shields.io/badge/Documentation-blue?style=flat&logo=gitbook&logoColor=white)](https://kraken-build.github.io/kraken/)  
 [![Release](https://img.shields.io/badge/Release-dispatch-blue?style=flat&logo=github)](https://github.com/kraken-build/kraken/actions/workflows/release.yaml)
 
-Kraken is a build system, but not in the traditional sense. It's focus is on the orchestration of high-level tasks,  
-such as organization of your repository configuration, code generation, invoking other build systems, etc. It is not a  
-replacement for tools like Poetry, Cargo or CMake.
+Kraken is a build system, but not in the traditional sense. It's focus is on the orchestration of high-level tasks,
+such as organization of your repository configuration, code generation, invoking other build systems, etc. It is not a
+replacement for tools like Uv, Cargo or CMake.
 
 **Requirements**
 
@@ -17,7 +17,7 @@ replacement for tools like Poetry, Cargo or CMake.
 
 ## Getting started
 
-Currently, Kraken's OSS components are not very well documented and do not provide a convenient way to get started.  
+Currently, Kraken's OSS components are not very well documented and do not provide a convenient way to get started.
 However, if you really want to try it, you can use the following steps:
 
 Install `kraken-wrapper` (e.g. with [Uv](https://docs.astral.sh/uv/)) to get access to the `krakenw` command-line tool.
@@ -28,13 +28,13 @@ Run `krakenw lock` to install `kraken-build` for your project in `build/.kraken/
 
 Run `krakenw run lint` to run the linters.
 
-> Note that you can also use the `kraken` CLI (instead of `krakenw`), however this will disregard the `buildscript()`  
+> Note that you can also use the `kraken` CLI (instead of `krakenw`), however this will disregard the `buildscript()`
 > function, will not use the lock file and will use the version of Kraken that was installed globally.
 
 ## Development
 
-This repository uses [Uv](https://docs.astral.sh/uv/), but not currently a Uv-workspace because Kraken does not support that, yet. You may  
-want to use a released version of `krakenw` instead of the live version in `kraken-wrapper/` to interact with this  
+This repository uses [Uv](https://docs.astral.sh/uv/), but not currently a Uv-workspace because Kraken does not support that, yet. You may
+want to use a released version of `krakenw` instead of the live version in `kraken-wrapper/` to interact with this
 repository. You can use [Mise](https://mise.jdx.dev/) to install all the tools you need.
 
 ```

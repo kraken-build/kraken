@@ -133,6 +133,10 @@ class UvPyprojectHandler(PyprojectHandler):
 
     # TODO: Support global `uv.toml` configuration file?
 
+    def __init__(self, raw: TomlFile, project_directory: "Path | None" = None) -> None:
+        super().__init__(raw)
+        self._project_directory = project_directory
+
     def get_package_indexes(self) -> list[PackageIndex]:
         """Maps the UV [`index`][1] table, [`index-url`][2] and [`extra-index-url`][3] options to Kraken's concept of
         package indices. Note that UV does not support the concept of "aliases" for package indices, so instead
@@ -193,8 +197,16 @@ class UvPyprojectHandler(PyprojectHandler):
         config.extend(UvIndexes.from_package_indexes(indexes).to_config())
 
     def get_packages(self) -> list[PyprojectHandler.Package]:
-        package_name = self.raw["project"]["name"]
-        return [self.Package(include=package_name.replace("-", "_").replace(".", "_"))]
+        build_backend_config = self.raw.get("tool", {}).get("uv", {}).get("build-backend", {})
+        package_name = build_backend_config.get(
+            "module-name", self.raw["project"]["name"].replace("-", "_").replace(".", "_")
+        )
+        module_root = build_backend_config.get("module-root")
+        if module_root is not None:
+            return [self.Package(include=package_name, from_=module_root)]
+        if self._project_directory is not None and (self._project_directory / "src" / package_name).is_dir():
+            return [self.Package(include=package_name, from_="src")]
+        return [self.Package(include=package_name)]
 
     def _get_sources(self) -> dict[str, dict[str, Any]]:
         return self.raw.get("tool", {}).get("uv", {}).get("sources", {})  # type: ignore [no-any-return]
@@ -257,7 +269,7 @@ class UvPythonBuildSystem(PythonBuildSystem):
         self.project_directory = project_directory
 
     def get_pyproject_reader(self, pyproject: TomlFile) -> UvPyprojectHandler:
-        return UvPyprojectHandler(pyproject)
+        return UvPyprojectHandler(pyproject, self.project_directory)
 
     def supports_managed_environments(self) -> bool:
         return True
@@ -302,8 +314,7 @@ class UvManagedEnvironment(ManagedEnvironment):
     def _get_uv_environment_path(self) -> Path | None:
         """Uses `uv run` to determines the location of the venv."""
 
-        # Ensure we de-activate any environment that might be active when Kraken is invoked. Otherwise,
-        # Poetry would fall back to that environment.
+        # Ensure we de-activate any environment that might be active when Kraken is invoked.
         environ = os.environ.copy()
         venv = get_current_venv(environ)
         if venv:

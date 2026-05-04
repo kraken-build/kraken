@@ -157,8 +157,7 @@ def python_settings(
     """Read the Python settings for the given or current project and optionally update attributes.
 
     :param project: The project to get the settings for. If not specified, the current project will be used.
-    :environment_handler: If specified, set the :attr:`PythonSettings.environment_handler`. If a string is specified,
-        the following values are currently supported: `"poetry"`.
+    :param build_system: If specified, the build system to use. Otherwise, autodetect the build system.
     :param source_directory: The source directory. Defaults to `"src"`.
     :param tests_directory: The tests directory. Automatically determined if left empty.
     :param lint_enforced_directories: Any extra directories containing Python files, e.g. bin/, scripts/, and
@@ -172,7 +171,7 @@ def python_settings(
         project.metadata.append(settings)
 
     if build_system is None and settings.build_system is None:
-        # Autodetect the environment handler.
+        # Autodetect the build system.
         build_system = detect_build_system(project.directory)
         if build_system:
             logger.info("Detected Python build system %r for %s", type(build_system).__name__, project)
@@ -180,7 +179,7 @@ def python_settings(
     if build_system is not None:
         if settings.build_system:
             logger.warning(
-                "overwriting existing PythonSettings.environment_handler=%r with %r",
+                "overwriting existing PythonSettings.build_system=%r with %r",
                 settings.build_system,
                 build_system,
             )
@@ -205,7 +204,7 @@ def python_settings(
         settings.lint_enforced_directories = dirs
 
     if always_use_managed_env is not None:
-        settings.always_use_managed_env = True
+        settings.always_use_managed_env = always_use_managed_env
 
     if skip_install_if_venv_exists is not None:
         settings.skip_install_if_venv_exists = skip_install_if_venv_exists
