@@ -1,6 +1,6 @@
 """
 Basic parser for the contents of `.gitignore` files, not to evaluate them but to modify them while keeping some
-semblence of structure evoked by comments in the file intact.
+semblance of structure evoked by comments in the file intact.
 """
 
 from __future__ import annotations
