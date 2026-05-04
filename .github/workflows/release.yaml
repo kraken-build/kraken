@@ -14,10 +14,19 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: release
     steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_WORKFLOW_APP_ID }}
+          private-key: ${{ secrets.RELEASE_WORKFLOW_APP_KEY }}
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Configure git
         run: |
@@ -29,7 +38,7 @@ jobs:
       - name: Bump version and release
         run: python scripts/bump.py "${{ github.event.inputs.version }}" --release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Push branch
         run: git push origin "${{ github.ref_name }}"
