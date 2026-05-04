@@ -35,10 +35,20 @@ jobs:
 
       - uses: jdx/mise-action@v4
 
-      - name: Bump version and release
-        run: uv run scripts/bump.py "${{ github.event.inputs.version }}" --release
+      - name: Bump version
+        run: uv run scripts/bump.py "${{ github.event.inputs.version }}"
+
+      - name: Commit and push branch
+        run: |
+          git commit -m "release v${{ github.event.inputs.version }}"
+          git push origin "${{ github.ref_name }}"
+
+      - name: Tag and push tag
+        run: |
+          git tag "${{ github.event.inputs.version }}"
+          git push origin "${{ github.event.inputs.version }}"
+
+      - name: Create GitHub release
+        run: gh release create "${{ github.event.inputs.version }}" --generate-notes
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Push branch
-        run: git push origin "${{ github.ref_name }}"
