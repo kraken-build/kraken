@@ -1,0 +1,5 @@
+[[entries]]
+id = "f015578f-97e9-4a72-9998-cce678b1aba4"
+type = "improvement"
+description = "Don't install all uv workspaces"
+author = "antoine.broyelle@helsing.ai"
