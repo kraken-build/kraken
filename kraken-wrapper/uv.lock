@@ -374,7 +374,7 @@ wheels = [
 
 [[package]]
 name = "kraken-build"
-version = "0.51.0"
+version = "0.52.0"
 source = { editable = "../kraken-build" }
 dependencies = [
     { name = "cyclopts" },
@@ -429,7 +429,7 @@ dev = [
 
 [[package]]
 name = "kraken-wrapper"
-version = "0.51.0"
+version = "0.52.0"
 source = { editable = "." }
 dependencies = [
     { name = "deprecated" },
