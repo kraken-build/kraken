@@ -47,7 +47,7 @@ class PackageIndex:
     #: The URL to find the packages at.
     index_url: str
 
-    #: The priority of the index. Not all tools support it exactly how we model it in here (e.g. like Poetry),
+    #: The priority of the index. Not all tools support it exactly how we model it in here,
     #: so the corresponding #PyprojectHandler implementation may need to do some translation.
     priority: Priority
 
