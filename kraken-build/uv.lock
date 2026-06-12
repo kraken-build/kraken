@@ -941,7 +941,7 @@ wheels = [
 
 [[package]]
 name = "kraken-build"
-version = "0.52.0"
+version = "0.52.1"
 source = { editable = "." }
 dependencies = [
     { name = "cyclopts" },
