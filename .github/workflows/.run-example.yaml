@@ -29,7 +29,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           version: "0.11.11"
           python-version: ${{ inputs.python-version }}
@@ -46,7 +46,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           version: "0.11.11"
           python-version: ${{ inputs.python-version }}
