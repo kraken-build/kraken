@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Uv
         uses: astral-sh/setup-uv@v8.2.0
         with:
@@ -44,7 +44,7 @@ jobs:
     if: ${{ inputs.krakenw }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Uv
         uses: astral-sh/setup-uv@v8.2.0
         with:
