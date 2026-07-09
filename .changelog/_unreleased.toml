@@ -1,0 +1,8 @@
+[[entries]]
+id = "bf3a15ca-a70d-442e-a8bc-2092c71ac08b"
+type = "fix"
+description = "strip trailing whitespaces from gitignore.io responses"
+author = "@tomkarw"
+issues = [
+    "https://github.com/tomkarw/kraken/issues/81",
+]
