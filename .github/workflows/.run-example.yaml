@@ -29,9 +29,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
-          version: "0.11.21"
+          version: "0.12.10"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-build
@@ -46,9 +46,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Install Uv
-        uses: astral-sh/setup-uv@v8.2.0
+        uses: astral-sh/setup-uv@v8.3.2
         with:
-          version: "0.11.21"
+          version: "0.12.10"
           python-version: ${{ inputs.python-version }}
       - name: Install Kraken
         run: uv tool install -e ./kraken-wrapper
